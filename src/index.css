@@ -1,0 +1,296 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 220 20% 8%;
+  --card: 0 0% 100%;
+  --card-foreground: 220 20% 8%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 220 20% 8%;
+  --primary: 213 94% 48%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 215 20% 96%;
+  --secondary-foreground: 220 20% 20%;
+  --muted: 215 20% 96%;
+  --muted-foreground: 215 15% 50%;
+  --accent: 213 94% 95%;
+  --accent-foreground: 213 94% 30%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 215 20% 91%;
+  --input: 215 20% 91%;
+  --ring: 213 94% 48%;
+  --radius: 0.625rem;
+
+  /* MLM brand colors */
+  --brand-50: 213 100% 97%;
+  --brand-100: 213 100% 92%;
+  --brand-200: 213 96% 84%;
+  --brand-300: 213 94% 72%;
+  --brand-400: 213 94% 60%;
+  --brand-500: 213 94% 48%;
+  --brand-600: 213 94% 40%;
+  --brand-700: 213 94% 32%;
+  --brand-800: 213 84% 24%;
+  --brand-900: 213 74% 16%;
+
+  /* Chart colors */
+  --chart-1: 213 94% 48%;
+  --chart-2: 158 64% 42%;
+  --chart-3: 37 91% 55%;
+  --chart-4: 0 84% 60%;
+  --chart-5: 270 70% 55%;
+}
+
+.dark {
+  --background: 222 47% 7%;
+  --foreground: 210 40% 98%;
+  --card: 222 40% 10%;
+  --card-foreground: 210 40% 98%;
+  --popover: 222 40% 10%;
+  --popover-foreground: 210 40% 98%;
+  --primary: 213 94% 55%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 222 35% 14%;
+  --secondary-foreground: 210 40% 88%;
+  --muted: 222 35% 14%;
+  --muted-foreground: 215 20% 55%;
+  --accent: 213 60% 18%;
+  --accent-foreground: 213 94% 70%;
+  --destructive: 0 62% 40%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 222 30% 16%;
+  --input: 222 30% 16%;
+  --ring: 213 94% 55%;
+
+  --brand-50: 213 60% 8%;
+  --brand-100: 213 60% 12%;
+  --brand-200: 213 70% 20%;
+  --brand-300: 213 80% 30%;
+  --brand-400: 213 90% 42%;
+  --brand-500: 213 94% 55%;
+  --brand-600: 213 94% 65%;
+  --brand-700: 213 94% 75%;
+  --brand-800: 213 94% 85%;
+  --brand-900: 213 94% 95%;
+
+  --chart-1: 213 94% 55%;
+  --chart-2: 158 64% 50%;
+  --chart-3: 37 91% 60%;
+  --chart-4: 0 84% 65%;
+  --chart-5: 270 70% 65%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    box-sizing: border-box;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    margin: 0;
+    min-height: 100vh;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: system-ui, sans-serif;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  button {
+    font-family: inherit;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .glass {
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .glass-dark {
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    background-color: rgba(10, 15, 30, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .gradient-brand {
+    background: linear-gradient(135deg, hsl(213 94% 48%) 0%, hsl(213 94% 60%) 100%);
+  }
+
+  .gradient-dark {
+    background: linear-gradient(135deg, hsl(222 47% 7%) 0%, hsl(222 40% 12%) 100%);
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      hsl(var(--muted)) 25%,
+      hsl(var(--border)) 50%,
+      hsl(var(--muted)) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.8); opacity: 1; }
+  100% { transform: scale(2); opacity: 0; }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease-out both;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out both;
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft 0.4s ease-out both;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground));
+}
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Grid background utility */
+.bg-grid {
+  background-image:
+    linear-gradient(to right, hsl(var(--border) / 0.4) 1px, transparent 1px),
+    linear-gradient(to bottom, hsl(var(--border) / 0.4) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+.bg-grid-sm {
+  background-image:
+    linear-gradient(to right, hsl(var(--border) / 0.3) 1px, transparent 1px),
+    linear-gradient(to bottom, hsl(var(--border) / 0.3) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Radial fade mask for grid backgrounds */
+.mask-radial {
+  -webkit-mask-image: radial-gradient(ellipse 60% 50% at 50% 0%, #000 60%, transparent 100%);
+  mask-image: radial-gradient(ellipse 60% 50% at 50% 0%, #000 60%, transparent 100%);
+}
+
+/* Glow effect */
+.glow-primary {
+  box-shadow: 0 0 40px -10px hsl(var(--primary) / 0.3);
+}
+
+/* Animated gradient text */
+.text-gradient {
+  background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.7));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Fade-in animation */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+
+/* Hide scrollbar utility */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Prevent layout shift from error messages */
+.field-error {
+  min-height: 0;
+  overflow: hidden;
+  transition: min-height 0.15s ease-out, opacity 0.15s ease-out;
+  opacity: 0;
+}
+.field-error.visible {
+  min-height: 18px;
+  opacity: 1;
+}
