@@ -515,6 +515,15 @@ export default function Sidebar() {
       </aside>
 
       {/* ─── Mobile Sidebar — Bottom Sheet ──────────────────────── */}
+      {/* Close button - fixed outside the drawer */}
+      {sidebarOpen && (
+        <button
+          onClick={() => setSidebarOpen(false)}
+          className="fixed top-4 right-4 z-[60] w-10 h-10 rounded-full bg-background border border-border shadow-lg flex items-center justify-center hover:bg-muted text-foreground transition-colors lg:hidden"
+        >
+          <X className="w-5 h-5" />
+        </button>
+      )}
       <div
         className={cn(
           'fixed bottom-0 left-0 right-0 z-50 lg:hidden transition-transform duration-300 ease-out',
@@ -528,29 +537,26 @@ export default function Sidebar() {
           </div>
 
           {/* Header */}
-          <div className="flex items-center justify-between px-4 pb-3">
-            <div className="flex items-center gap-3">
-              <UserAvatar size="md" />
-              <div className="min-w-0">
-                <p className="text-sm font-bold text-foreground truncate">{user?.full_name || name}</p>
-                <div className="flex items-center gap-1 mt-0.5">
-                  <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
-                    {roleLabel}
-                  </p>
-                  {userPlan && (
-                    <span className="flex items-center gap-0.5 text-[9px] font-semibold text-amber-600 bg-amber-500/10 px-1.5 py-0.5 rounded-full">
-                      <Crown className="w-2.5 h-2.5" />{userPlan.name}
-                    </span>
-                  )}
-                </div>
+          <div className="flex items-center gap-3 px-4 pb-3">
+            <UserAvatar size="md" />
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-bold text-foreground truncate">{user?.full_name || name}</p>
+              <div className="flex items-center gap-1 mt-0.5 flex-wrap">
+                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+                  {roleLabel}
+                </p>
+                {userPlan && (
+                  <span className="flex items-center gap-0.5 text-[9px] font-semibold text-amber-600 bg-amber-500/10 px-1.5 py-0.5 rounded-full">
+                    <Crown className="w-2.5 h-2.5" />{userPlan.name}
+                  </span>
+                )}
+                {userRank && (
+                  <span className="flex items-center gap-0.5 text-[9px] font-semibold text-primary bg-primary/10 px-1.5 py-0.5 rounded-full">
+                    <Star className="w-2.5 h-2.5" />{userRank.name}
+                  </span>
+                )}
               </div>
             </div>
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-muted text-muted-foreground transition-colors"
-            >
-              <X className="w-4 h-4" />
-            </button>
           </div>
 
           {/* Scrollable nav */}
@@ -597,14 +603,6 @@ export default function Sidebar() {
 
             {/* Quick shortcuts */}
             <div className="flex gap-2 mt-4 pt-4 border-t border-border">
-              <Link
-                to="/"
-                onClick={() => setSidebarOpen(false)}
-                className="flex-1 py-2.5 flex items-center justify-center gap-2 bg-muted/50 text-foreground rounded-xl text-sm font-medium hover:bg-muted transition-colors"
-              >
-                <Home className="w-4 h-4" />
-                Inicio
-              </Link>
               <Link
                 to="/tienda"
                 onClick={() => setSidebarOpen(false)}

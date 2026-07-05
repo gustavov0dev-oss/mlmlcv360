@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from '@/lib/router';
 import {
   X, Sun, Moon, ChevronDown, LogOut, LayoutDashboard, User,
   ShoppingBag, Package, Heart, Menu, Settings, GitBranch,
-  Crown, Zap,
+  Crown, Zap, Scale, Star,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useThemeStore } from '@/store/themeStore';
@@ -24,7 +24,7 @@ const navLinks = [
 
 function DesktopUserMenu() {
   const { user, signOut } = useAuthStore();
-  const { plans } = useConfig();
+  const { plans, ranks } = useConfig();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -43,6 +43,7 @@ function DesktopUserMenu() {
     .split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase();
 
   const userPlan = plans.find(p => p.slug === user.plan || p.id === user.plan);
+  const userRank = ranks.find(r => r.slug === user.rank || r.name?.toLowerCase() === user.rank?.toLowerCase());
 
   return (
     <div className="relative" ref={ref}>
@@ -64,7 +65,7 @@ function DesktopUserMenu() {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-60 bg-card border border-border rounded-2xl shadow-2xl overflow-hidden z-50">
+        <div className="absolute right-0 top-full mt-2 w-64 bg-card border border-border rounded-2xl shadow-2xl overflow-hidden z-50">
           <div className="p-4 bg-muted/30 border-b border-border flex items-center gap-3">
             <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center flex-shrink-0">
               {user.avatar_url ? (
@@ -76,10 +77,18 @@ function DesktopUserMenu() {
             <div className="flex-1 min-w-0">
               <div className="font-semibold text-foreground truncate text-sm">{user.full_name}</div>
               <div className="text-xs text-muted-foreground truncate">{user.email}</div>
-              {userPlan && (
-                <div className="flex items-center gap-1 mt-1">
-                  <Crown className="w-3 h-3 text-amber-500" />
-                  <span className="text-xs font-medium text-amber-600 dark:text-amber-400">{userPlan.name}</span>
+              {(userPlan || userRank) && (
+                <div className="flex items-center gap-1 mt-1 flex-wrap">
+                  {userPlan && (
+                    <span className="flex items-center gap-0.5 text-[10px] font-semibold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded-full">
+                      <Crown className="w-2.5 h-2.5" />{userPlan.name}
+                    </span>
+                  )}
+                  {userRank && (
+                    <span className="flex items-center gap-0.5 text-[10px] font-semibold text-primary bg-primary/10 px-1.5 py-0.5 rounded-full">
+                      <Star className="w-2.5 h-2.5" />{userRank.name}
+                    </span>
+                  )}
                 </div>
               )}
             </div>
@@ -102,6 +111,7 @@ function DesktopUserMenu() {
               { icon: ShoppingBag, label: 'Tienda', path: '/tienda' },
               { icon: Package, label: 'Mis Pedidos', path: '/dashboard/pedidos' },
               { icon: Heart, label: 'Favoritos', path: '/favoritos' },
+              { icon: Scale, label: 'Comparar', path: '/comparar' },
             ].map(item => (
               <button key={item.path} onClick={() => { navigate(item.path); setOpen(false); }}
                 className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl hover:bg-muted text-sm text-foreground transition-colors text-left">
@@ -126,7 +136,7 @@ export default function Navbar() {
   const navigate = useNavigate();
   const { theme, setTheme } = useThemeStore();
   const { user, signOut } = useAuthStore();
-  const { company, logoValue, logoSizes, plans } = useConfig();
+  const { company, logoValue, logoSizes, plans, ranks } = useConfig();
   const { itemCount } = useCart();
   const { mobileNavOpen, setMobileNavOpen } = useUIStore();
   const companyName = company.company_name || 'MLM 360';
@@ -156,8 +166,8 @@ export default function Navbar() {
   const loggedInQuickActions = [
     { icon: Package, label: 'Pedidos', action: () => navigate('/dashboard/pedidos') },
     { icon: Heart, label: 'Favoritos', action: () => navigate('/favoritos') },
+    { icon: Scale, label: 'Comparar', action: () => navigate('/comparar') },
     { icon: Zap, label: 'Mi Plan', action: () => navigate('/dashboard/mi-plan') },
-    { icon: GitBranch, label: 'Mi Red', action: () => navigate('/dashboard/red') },
   ];
 
   // Quick access for guests (removed duplicate Blog and Contacto)
@@ -168,8 +178,9 @@ export default function Navbar() {
 
   const quickActions = isLoggedIn ? loggedInQuickActions : guestQuickActions;
 
-  // Get user's plan info
+  // Get user's plan and rank info
   const userPlan = user ? plans.find(p => p.slug === user.plan || p.id === user.plan) : null;
+  const userRank = user ? ranks.find(r => r.slug === user.rank || r.name?.toLowerCase() === user.rank?.toLowerCase()) : null;
 
   return (
     <>
@@ -271,9 +282,9 @@ export default function Navbar() {
           mobileNavOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none',
         )}
       >
-        {/* Backdrop */}
+        {/* Backdrop with blur - starts below navbar */}
         <div
-          className="absolute inset-0 bg-black/50"
+          className="absolute top-16 left-0 right-0 bottom-0 bg-black/50 backdrop-blur-sm"
           onClick={() => setMobileNavOpen(false)}
         />
 
@@ -303,10 +314,18 @@ export default function Navbar() {
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold text-foreground">{user.full_name}</div>
                   <div className="text-sm text-muted-foreground truncate">{user.email}</div>
-                  {userPlan && (
-                    <div className="flex items-center gap-1 mt-0.5">
-                      <Crown className="w-3 h-3 text-amber-500" />
-                      <span className="text-xs font-medium text-amber-600 dark:text-amber-400">{userPlan.name}</span>
+                  {(userPlan || userRank) && (
+                    <div className="flex items-center gap-1 mt-0.5 flex-wrap">
+                      {userPlan && (
+                        <span className="flex items-center gap-0.5 text-[10px] font-semibold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded-full">
+                          <Crown className="w-2.5 h-2.5" />{userPlan.name}
+                        </span>
+                      )}
+                      {userRank && (
+                        <span className="flex items-center gap-0.5 text-[10px] font-semibold text-primary bg-primary/10 px-1.5 py-0.5 rounded-full">
+                          <Star className="w-2.5 h-2.5" />{userRank.name}
+                        </span>
+                      )}
                     </div>
                   )}
                 </div>
