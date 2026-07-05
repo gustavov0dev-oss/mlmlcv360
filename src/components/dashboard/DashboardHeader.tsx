@@ -35,6 +35,7 @@ export default function DashboardHeader() {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [focused, setFocused] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -149,9 +150,8 @@ export default function DashboardHeader() {
     setDbNotifications(prev => prev.filter(n => n.id !== id));
   };
 
-  const handleSignOut = async () => {
-    await signOut();
-    navigate('/login');
+  const handleSignOut = () => {
+    setShowLogoutConfirm(true);
   };
 
   const iconFor = (type: string) => type === 'user' ? Users : type === 'product' ? Package : ShoppingBag;
@@ -379,6 +379,35 @@ export default function DashboardHeader() {
           <Menu className="w-5 h-5" />
         </button>
       </div>
+
+      {/* Logout confirmation dialog */}
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 z-[70] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-card border border-border rounded-2xl w-full max-w-sm shadow-2xl p-6">
+            <div className="flex flex-col items-center text-center mb-5">
+              <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mb-3">
+                <LogOut className="w-6 h-6 text-red-500" />
+              </div>
+              <h3 className="text-lg font-bold text-foreground">¿Cerrar sesión?</h3>
+              <p className="text-sm text-muted-foreground mt-1">Tendrás que volver a iniciar sesión para acceder a tu panel.</p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowLogoutConfirm(false)}
+                className="flex-1 border border-border rounded-xl py-2.5 text-sm font-medium hover:bg-muted transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={async () => { await signOut(); setShowLogoutConfirm(false); navigate('/login'); }}
+                className="flex-1 bg-red-600 text-white rounded-xl py-2.5 text-sm font-semibold hover:bg-red-700 transition-colors"
+              >
+                Cerrar sesión
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

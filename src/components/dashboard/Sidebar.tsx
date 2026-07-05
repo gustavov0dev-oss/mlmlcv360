@@ -20,7 +20,7 @@ const superAdminNav: NavItem[] = [
   {
     label: 'Usuarios', icon: Users, children: [
       { label: 'Todos los usuarios', href: '/dashboard/usuarios', icon: Users },
-      { label: 'Roles y permisos', href: '/dashboard/roles', icon: UserCog },
+      { label: 'Roles y permisos', href: '/dashboard/admin/roles', icon: UserCog },
     ],
   },
   {
@@ -303,6 +303,7 @@ export default function Sidebar() {
   const database = useDatabase();
   const location = useLocation();
   const pathname = location.pathname;
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const role = (user as any)?.role || 'user';
   const navItems = getNavForRole(role);
@@ -520,7 +521,8 @@ export default function Sidebar() {
       {sidebarOpen && (
         <button
           onClick={() => setSidebarOpen(false)}
-          className="fixed top-4 right-4 z-[60] w-10 h-10 rounded-full bg-background border border-border shadow-lg flex items-center justify-center hover:bg-muted text-foreground transition-colors lg:hidden"
+          className="fixed top-4 right-4 z-[60] w-9 h-9 flex items-center justify-center text-foreground/80 hover:text-foreground transition-colors lg:hidden"
+          aria-label="Cerrar menú"
         >
           <X className="w-5 h-5" />
         </button>
@@ -615,7 +617,7 @@ export default function Sidebar() {
                 Tienda
               </Link>
               <button
-                onClick={async () => { await signOut(); setSidebarOpen(false); navigate('/login'); }}
+                onClick={() => setShowLogoutConfirm(true)}
                 className="w-12 flex items-center justify-center border border-red-400/40 text-red-500 rounded-xl hover:bg-red-500/10 transition-colors flex-shrink-0"
                 aria-label="Cerrar sesión"
               >
@@ -627,6 +629,35 @@ export default function Sidebar() {
           <div className="h-6" />
         </div>
       </div>
+
+      {/* Logout confirmation dialog */}
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 z-[70] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-card border border-border rounded-2xl w-full max-w-sm shadow-2xl p-6">
+            <div className="flex flex-col items-center text-center mb-5">
+              <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mb-3">
+                <LogOut className="w-6 h-6 text-red-500" />
+              </div>
+              <h3 className="text-lg font-bold text-foreground">¿Cerrar sesión?</h3>
+              <p className="text-sm text-muted-foreground mt-1">Tendrás que volver a iniciar sesión para acceder a tu panel.</p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowLogoutConfirm(false)}
+                className="flex-1 border border-border rounded-xl py-2.5 text-sm font-medium hover:bg-muted transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={async () => { await signOut(); setShowLogoutConfirm(false); setSidebarOpen(false); navigate('/login'); }}
+                className="flex-1 bg-red-600 text-white rounded-xl py-2.5 text-sm font-semibold hover:bg-red-700 transition-colors"
+              >
+                Cerrar sesión
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

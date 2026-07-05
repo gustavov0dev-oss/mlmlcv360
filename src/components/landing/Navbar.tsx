@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from '@/lib/router';
 import {
   X, Sun, Moon, ChevronDown, LogOut, LayoutDashboard, User,
-  ShoppingBag, Package, Heart, Menu, Settings, GitBranch,
+  ShoppingBag, Package, Heart, Menu, Settings,
   Crown, Zap, Scale, Star,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -27,6 +27,7 @@ function DesktopUserMenu() {
   const { plans, ranks } = useConfig();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -97,7 +98,7 @@ function DesktopUserMenu() {
             {[
               { icon: LayoutDashboard, label: 'Mi Panel', path: '/dashboard' },
               { icon: User, label: 'Mi Perfil', path: '/dashboard/perfil' },
-              { icon: GitBranch, label: 'Mi Red', path: '/dashboard/red' },
+              { icon: Package, label: 'Mis Pedidos', path: '/pedidos' },
               { icon: Settings, label: 'Configuracion', path: '/dashboard/configuracion' },
             ].map(item => (
               <button key={item.path} onClick={() => { navigate(item.path); setOpen(false); }}
@@ -107,23 +108,39 @@ function DesktopUserMenu() {
             ))}
           </div>
           <div className="p-1.5 border-t border-border">
-            {[
-              { icon: ShoppingBag, label: 'Tienda', path: '/tienda' },
-              { icon: Package, label: 'Mis Pedidos', path: '/dashboard/pedidos' },
-              { icon: Heart, label: 'Favoritos', path: '/favoritos' },
-              { icon: Scale, label: 'Comparar', path: '/comparar' },
-            ].map(item => (
-              <button key={item.path} onClick={() => { navigate(item.path); setOpen(false); }}
-                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl hover:bg-muted text-sm text-foreground transition-colors text-left">
-                <item.icon className="w-4 h-4 text-muted-foreground flex-shrink-0" />{item.label}
-              </button>
-            ))}
-          </div>
-          <div className="p-1.5 border-t border-border">
-            <button onClick={async () => { await signOut(); setOpen(false); }}
+            <button onClick={() => { setShowLogoutConfirm(true); setOpen(false); }}
               className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl hover:bg-red-500/10 text-sm text-red-500 transition-colors text-left">
               <LogOut className="w-4 h-4 flex-shrink-0" />Cerrar sesion
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Logout confirmation dialog */}
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 z-[70] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-card border border-border rounded-2xl w-full max-w-sm shadow-2xl p-6">
+            <div className="flex flex-col items-center text-center mb-5">
+              <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mb-3">
+                <LogOut className="w-6 h-6 text-red-500" />
+              </div>
+              <h3 className="text-lg font-bold text-foreground">¿Cerrar sesion?</h3>
+              <p className="text-sm text-muted-foreground mt-1">Tendras que volver a iniciar sesion para acceder a tu panel.</p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowLogoutConfirm(false)}
+                className="flex-1 border border-border rounded-xl py-2.5 text-sm font-medium hover:bg-muted transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={async () => { await signOut(); setShowLogoutConfirm(false); }}
+                className="flex-1 bg-red-600 text-white rounded-xl py-2.5 text-sm font-semibold hover:bg-red-700 transition-colors"
+              >
+                Cerrar sesion
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -141,6 +158,7 @@ export default function Navbar() {
   const { mobileNavOpen, setMobileNavOpen } = useUIStore();
   const companyName = company.company_name || 'MLM 360';
   const [scrolled, setScrolled] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const isDark = theme === 'dark';
   const isLoggedIn = !!user;
 
@@ -240,7 +258,7 @@ export default function Navbar() {
             <div className="ml-auto flex items-center gap-1">
               {/* Cart button - icon only with badge */}
               <button onClick={() => navigate('/carrito')}
-                className="relative w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted/60 text-foreground/70 hover:text-foreground transition-colors"
+                className="relative w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted/60 text-foreground hover:text-foreground transition-colors"
                 aria-label="Carrito">
                 <ShoppingBag className="w-5 h-5" />
                 {itemCount > 0 && (
@@ -252,7 +270,7 @@ export default function Navbar() {
 
               {/* Theme toggle */}
               <button onClick={() => setTheme(isDark ? 'light' : 'dark')}
-                className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted/60 text-foreground/70 hover:text-foreground transition-colors"
+                className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted/60 text-foreground hover:text-foreground transition-colors"
                 aria-label="Cambiar tema">
                 {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </button>
@@ -402,7 +420,7 @@ export default function Navbar() {
                   className="flex-1 py-3 flex items-center justify-center gap-2 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:bg-primary/90 transition-colors">
                   <LayoutDashboard className="w-4 h-4" />Mi Panel
                 </button>
-                <button onClick={async () => { await signOut(); setMobileNavOpen(false); }}
+                <button onClick={() => { setShowLogoutConfirm(true); setMobileNavOpen(false); }}
                   className="w-12 flex items-center justify-center border border-red-400/40 text-red-500 rounded-xl hover:bg-red-500/8 transition-colors"
                   aria-label="Cerrar sesion">
                   <LogOut className="w-4 h-4" />
@@ -412,6 +430,35 @@ export default function Navbar() {
           </div>
         </div>
       </div>
+
+      {/* Logout confirmation dialog */}
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 z-[70] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-card border border-border rounded-2xl w-full max-w-sm shadow-2xl p-6">
+            <div className="flex flex-col items-center text-center mb-5">
+              <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mb-3">
+                <LogOut className="w-6 h-6 text-red-500" />
+              </div>
+              <h3 className="text-lg font-bold text-foreground">¿Cerrar sesion?</h3>
+              <p className="text-sm text-muted-foreground mt-1">Tendras que volver a iniciar sesion para acceder a tu panel.</p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowLogoutConfirm(false)}
+                className="flex-1 border border-border rounded-xl py-2.5 text-sm font-medium hover:bg-muted transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={async () => { await signOut(); setShowLogoutConfirm(false); }}
+                className="flex-1 bg-red-600 text-white rounded-xl py-2.5 text-sm font-semibold hover:bg-red-700 transition-colors"
+              >
+                Cerrar sesion
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Spacer below fixed nav */}
       <div className="h-16" />
