@@ -145,7 +145,10 @@ class MLMService {
         childMap.set(p.sponsor_id, children);
       }
     });
+    const visited = new Set<string>();
     const dfs = (id: string, depth: number): number => {
+      if (visited.has(id)) return depth;
+      visited.add(id);
       const children = childMap.get(id) || [];
       if (children.length === 0) return depth;
       return Math.max(...children.map(c => dfs(c.id, depth + 1)));
@@ -165,9 +168,11 @@ class MLMService {
       }
     });
 
-    const annotate = (node: ProfileNode, depth: number): number => {
+    const annotate = (node: ProfileNode, depth: number, seen: Set<string> = new Set()): number => {
+      if (seen.has(node.id)) return 0;
+      seen.add(node.id);
       node.depth = depth;
-      node.subtreeSize = 1 + (node.children || []).reduce((s, c) => s + annotate(c, depth + 1), 0);
+      node.subtreeSize = 1 + (node.children || []).reduce((s, c) => s + annotate(c, depth + 1, seen), 0);
       return node.subtreeSize;
     };
 

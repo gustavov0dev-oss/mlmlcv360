@@ -53,9 +53,11 @@ function buildTree(profiles: Profile[], rootId: string): NetProfile {
     }
   });
 
-  function annotate(node: NetProfile, d: number): number {
+  function annotate(node: NetProfile, d: number, seen: Set<string> = new Set()): number {
+    if (seen.has(node.id)) return 0;
+    seen.add(node.id);
     node.depth = d;
-    node.subtreeSize = 1 + (node.children || []).reduce((s, c) => s + annotate(c, d + 1), 0);
+    node.subtreeSize = 1 + (node.children || []).reduce((s, c) => s + annotate(c, d + 1, seen), 0);
     return node.subtreeSize;
   }
   const root = map.get(rootId) || {
