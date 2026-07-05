@@ -5,7 +5,7 @@ import { useDatabase } from '@/lib/backend';
 import { cn } from '@/lib/utils';
 import { Link, useLocation, useNavigate } from '@/lib/router';
 import { useState, useEffect, useRef } from 'react';
-import { LayoutDashboard, Users, GitBranch, DollarSign, Award, ChartBar as BarChart3, Settings, ChevronDown, ChevronRight, X, UserCog, CreditCard, User, ShoppingBag, Package, Truck, Tag, ChartBar as BarChart2, ShoppingCart, FolderOpen, MessageSquare, Shield, Chrome as Home, Crown, Star, LogOut } from 'lucide-react';
+import { LayoutDashboard, Users, GitBranch, DollarSign, Award, ChartBar as BarChart3, Settings, ChevronDown, ChevronRight, UserCog, CreditCard, User, ShoppingBag, Package, Truck, Tag, ChartBar as BarChart2, ShoppingCart, FolderOpen, MessageSquare, Shield, Crown, Star, LogOut } from 'lucide-react';
 import { LogoWithText } from '@/components/Logo';
 
 interface NavItem {
@@ -361,10 +361,10 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Mobile backdrop */}
+      {/* Mobile backdrop with blur */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          className="fixed top-16 left-0 right-0 bottom-0 z-[45] bg-black/50 backdrop-blur-sm lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -430,23 +430,6 @@ export default function Sidebar() {
 
         {/* Nav items */}
         <nav className="flex-1 overflow-y-auto px-2 py-3 space-y-0.5">
-          {/* Home link - always visible at top */}
-          {sidebarCollapsed ? (
-            <Link
-              to="/"
-              className="flex items-center justify-center p-3 rounded-xl transition-colors text-sm text-muted-foreground hover:text-foreground hover:bg-muted"
-            >
-              <Home className="w-4 h-4 flex-shrink-0" />
-            </Link>
-          ) : (
-            <Link
-              to="/"
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors text-sm text-muted-foreground hover:text-foreground hover:bg-muted"
-            >
-              <Home className="w-4 h-4 flex-shrink-0" />
-              <span className="font-medium">Inicio</span>
-            </Link>
-          )}
           {navItems.map((item, i) => (
             <NavItemComponent
               key={i}
@@ -517,19 +500,9 @@ export default function Sidebar() {
       </aside>
 
       {/* ─── Mobile Sidebar — Bottom Sheet ──────────────────────── */}
-      {/* Close button - fixed outside the drawer */}
-      {sidebarOpen && (
-        <button
-          onClick={() => setSidebarOpen(false)}
-          className="fixed top-4 right-4 z-[60] w-9 h-9 flex items-center justify-center text-foreground/80 hover:text-foreground transition-colors lg:hidden"
-          aria-label="Cerrar menú"
-        >
-          <X className="w-5 h-5" />
-        </button>
-      )}
       <div
         className={cn(
-          'fixed bottom-0 left-0 right-0 z-50 lg:hidden transition-transform duration-300 ease-out',
+          'fixed bottom-0 left-0 right-0 z-[55] lg:hidden transition-transform duration-300 ease-out',
           sidebarOpen ? 'translate-y-0' : 'translate-y-full',
         )}
       >
@@ -561,6 +534,7 @@ export default function Sidebar() {
                   </div>
                 )}
               </div>
+              <ChevronDown className="w-4 h-4 text-muted-foreground -rotate-90 flex-shrink-0" />
             </div>
           </div>
 

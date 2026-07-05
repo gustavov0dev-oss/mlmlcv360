@@ -4,7 +4,7 @@ import { Link, useNavigate } from '@/lib/router';
 import {
   Bell, Search, Moon, Sun, Menu, LogOut, User, Settings,
   ChevronDown, ExternalLink, CheckCheck, Trash2, X, Users, Package, ShoppingBag,
-  LayoutDashboard, Crown, Star,
+  LayoutDashboard, Crown, Star, ChevronRight,
 } from 'lucide-react';
 import { useThemeStore } from '@/store/themeStore';
 import { useAuthStore } from '@/store/authStore';
@@ -15,6 +15,8 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { LogoWithText } from '@/components/Logo';
+
+const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.platform);
 
 interface SearchResult {
   type: 'user' | 'product' | 'order';
@@ -27,7 +29,7 @@ interface SearchResult {
 export default function DashboardHeader() {
   const { theme, setTheme } = useThemeStore();
   const { user, signOut } = useAuthStore();
-  const { setSidebarOpen } = useUIStore();
+  const { sidebarOpen, setSidebarOpen } = useUIStore();
   const { company, logoValue, logoSizes, plans, ranks } = useConfig();
   const database = useDatabase();
   const navigate = useNavigate();
@@ -93,10 +95,11 @@ export default function DashboardHeader() {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  // Ctrl+K shortcut
+  // Cmd+K (Mac) / Ctrl+K (Windows/Linux) shortcut
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      const isModifierPressed = isMac ? e.metaKey : e.ctrlKey;
+      if (isModifierPressed && e.key === 'k') {
         e.preventDefault();
         setSearchOpen(true);
         setTimeout(() => inputRef.current?.focus(), 50);
@@ -126,10 +129,10 @@ export default function DashboardHeader() {
           ).slice(0, 3).forEach((u: any) => found.push({ type: 'user', id: u.id, title: u.full_name || u.username, subtitle: u.email, href: '/dashboard/usuarios' }));
         }
       }
-      const { data: products } = await database.select<any>('products', { select: ['id', 'name', 'sku'], limit: 20 });
+      const { data: products } = await database.select<any>('products', { select: ['id', 'name', 'sku', 'slug', 'image_url'], limit: 20 });
       if (Array.isArray(products)) {
         products.filter((p: any) => p.name?.toLowerCase().includes(lower) || p.sku?.toLowerCase().includes(lower))
-          .slice(0, 3).forEach((p: any) => found.push({ type: 'product', id: p.id, title: p.name, subtitle: p.sku ? `SKU: ${p.sku}` : 'Producto', href: `/tienda/${p.id}` }));
+          .slice(0, 3).forEach((p: any) => found.push({ type: 'product', id: p.id, title: p.name, subtitle: p.sku ? `SKU: ${p.sku}` : 'Producto', href: `/tienda/${p.slug || p.id}` }));
       }
     } catch { /* silent */ }
     setResults(found.slice(0, 6));
@@ -189,13 +192,13 @@ export default function DashboardHeader() {
     <>
       <header className="h-16 border-b border-border bg-background flex items-center px-4 lg:px-6 sticky top-0 z-30 gap-3">
 
-        {/* Logo — same as landing nav */}
-        <Link to="/" className="flex-shrink-0">
+        {/* Logo — only visible on desktop (lg+) */}
+        <Link to="/" className="flex-shrink-0 hidden lg:flex">
           <LogoWithText
             value={logoValue}
             fallbackText={companyName}
             pixelSize={logoSizes.navbar || 32}
-            textClass="text-base font-bold text-foreground hidden sm:block"
+            textClass="text-base font-bold text-foreground"
           />
         </Link>
 
@@ -208,7 +211,7 @@ export default function DashboardHeader() {
               value={query}
               onChange={e => setQuery(e.target.value)}
               onFocus={() => setSearchOpen(true)}
-              placeholder="Buscar usuarios, productos..."
+              placeholder={`Buscar usuarios, productos... (${isMac ? '⌘' : 'Ctrl'}K)`}
               className="w-full pl-10 pr-4 py-2 bg-muted/50 border border-border rounded-xl text-sm text-foreground outline-none focus:border-primary focus:bg-card transition-colors"
             />
             {query && (
@@ -262,77 +265,13 @@ export default function DashboardHeader() {
         <div className="ml-auto flex items-center gap-1 flex-shrink-0">
 
           {/* Mobile search icon */}
-          <div className="relative lg:hidden">
-            <button
-              onClick={() => { setSearchOpen(v => !v); setTimeout(() => inputRef.current?.focus(), 50); }}
-              className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted text-foreground/70 hover:text-foreground transition-colors"
-              aria-label="Buscar"
-            >
-              <Search className="w-4 h-4" />
-            </button>
-
-            {/* Floating search panel */}
-            {searchOpen && (
-              <div className="absolute right-0 top-full mt-2 w-80 max-w-[calc(100vw-2rem)] bg-card border border-border rounded-2xl shadow-2xl overflow-hidden z-50">
-                <div className="flex items-center gap-2 px-3 py-2.5 border-b border-border">
-                  <Search className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                  <input
-                    ref={inputRef}
-                    type="text"
-                    value={query}
-                    onChange={e => setQuery(e.target.value)}
-                    placeholder="Buscar usuarios, productos..."
-                    className="bg-transparent text-sm outline-none flex-1 text-foreground placeholder:text-muted-foreground"
-                    autoFocus
-                  />
-                  {query && (
-                    <button onClick={() => { setQuery(''); setResults([]); }} className="text-muted-foreground hover:text-foreground transition-colors">
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  )}
-                </div>
-                {query.length >= 2 && (
-                  loadingSearch ? (
-                    <div className="py-3">
-                      {[1, 2, 3].map(i => (
-                        <div key={i} className="flex items-center gap-3 px-4 py-2.5">
-                          <Skeleton className="w-8 h-8 rounded-xl flex-shrink-0" />
-                          <div className="flex-1 space-y-1.5"><Skeleton className="h-3.5 w-3/4 rounded" /><Skeleton className="h-2.5 w-1/2 rounded" /></div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : results.length > 0 ? (
-                    <div className="py-1.5">
-                      {results.map(r => {
-                        const Icon = iconFor(r.type);
-                        return (
-                          <button key={`${r.type}-${r.id}`} onClick={() => go(r.href)}
-                            className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted/60 transition-colors text-left">
-                            <div className="w-8 h-8 rounded-xl bg-muted flex items-center justify-center flex-shrink-0">
-                              <Icon className="w-4 h-4 text-muted-foreground" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-foreground truncate">{r.title}</p>
-                              <p className="text-xs text-muted-foreground truncate">{r.subtitle}</p>
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <div className="px-4 py-6 text-center">
-                      <p className="text-sm text-muted-foreground">Sin resultados para "{query}"</p>
-                    </div>
-                  )
-                )}
-                {!query && (
-                  <div className="px-4 py-4 text-center">
-                    <p className="text-xs text-muted-foreground">Escribe para buscar...</p>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+          <button
+            onClick={() => { setSearchOpen(v => !v); setTimeout(() => inputRef.current?.focus(), 50); }}
+            className="lg:hidden w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted text-foreground/70 hover:text-foreground transition-colors"
+            aria-label="Buscar"
+          >
+            <Search className="w-4 h-4" />
+          </button>
 
           {/* Link to public site */}
           <Link to="/"
@@ -502,14 +441,79 @@ export default function DashboardHeader() {
 
           {/* Hamburger — mobile only */}
           <button
-            onClick={() => setSidebarOpen(true)}
+            onClick={() => setSidebarOpen(!sidebarOpen)}
             className="lg:hidden w-9 h-9 flex items-center justify-center text-foreground/70 hover:text-foreground transition-colors"
-            aria-label="Abrir menú"
+            aria-label={sidebarOpen ? 'Cerrar menú' : 'Abrir menú'}
           >
-            <Menu className="w-5 h-5" />
+            {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
       </header>
+
+      {/* Mobile search bar — full-width below nav */}
+      {searchOpen && (
+        <div className="lg:hidden fixed top-16 left-0 right-0 z-[45] bg-background border-b border-border shadow-lg">
+          <div className="px-4 py-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <input
+                ref={inputRef}
+                type="text"
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+                placeholder={`Buscar usuarios, productos... (${isMac ? '⌘' : 'Ctrl'}K)`}
+                className="w-full pl-10 pr-10 py-2.5 bg-muted/50 border border-border rounded-xl text-sm text-foreground outline-none focus:border-primary focus:bg-card transition-colors"
+                autoFocus
+              />
+              <button
+                onClick={() => { setSearchOpen(false); setQuery(''); setResults([]); }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            {/* Results */}
+            {query.length >= 2 && (
+              <div className="mt-2 bg-card border border-border rounded-xl overflow-hidden max-h-[60vh] overflow-y-auto">
+                {loadingSearch ? (
+                  <div className="py-3">
+                    {[1, 2, 3].map(i => (
+                      <div key={i} className="flex items-center gap-3 px-4 py-2.5">
+                        <Skeleton className="w-10 h-10 rounded-xl flex-shrink-0" />
+                        <div className="flex-1 space-y-1.5"><Skeleton className="h-3.5 w-3/4 rounded" /><Skeleton className="h-2.5 w-1/2 rounded" /></div>
+                      </div>
+                    ))}
+                  </div>
+                ) : results.length > 0 ? (
+                  <div className="py-1.5">
+                    {results.map(r => {
+                      const Icon = iconFor(r.type);
+                      return (
+                        <button key={`${r.type}-${r.id}`} onClick={() => go(r.href)}
+                          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted/60 transition-colors text-left">
+                          <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center flex-shrink-0">
+                            <Icon className="w-5 h-5 text-muted-foreground" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-foreground truncate">{r.title}</p>
+                            <p className="text-xs text-muted-foreground truncate">{r.subtitle}</p>
+                          </div>
+                          <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="px-4 py-8 text-center">
+                    <Search className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground">Sin resultados para "{query}"</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Logout confirmation dialog */}
       {showLogoutConfirm && (
