@@ -336,10 +336,10 @@ export default function Navbar() {
           'fixed top-16 left-0 right-0 bottom-0 z-[55] lg:hidden pointer-events-none',
         )}
       >
-        {/* Backdrop — subtle, no blur */}
+        {/* Backdrop — moderate blur */}
         <div
           className={cn(
-            'absolute inset-0 bg-black/40 transition-opacity duration-300 pointer-events-auto',
+            'absolute inset-0 bg-black/40 backdrop-blur-[2px] transition-opacity duration-300 pointer-events-auto',
             mobileNavOpen ? 'opacity-100' : 'opacity-0',
           )}
           onClick={() => setMobileNavOpen(false)}

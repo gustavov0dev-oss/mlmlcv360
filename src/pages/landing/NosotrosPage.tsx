@@ -25,10 +25,10 @@ const timeline = [
 
 export default function NosotrosPage() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="h-screen bg-background overflow-y-auto overflow-x-hidden">
       <Navbar />
       {/* Hero */}
-      <section className="py-24 bg-muted/30 mt-16">
+      <section className="py-24 bg-muted/30">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h1 className="text-5xl font-bold text-foreground mb-6">Somos MLM 360</h1>
             <p className="text-xl text-muted-foreground leading-relaxed">

@@ -342,6 +342,11 @@ export default function Sidebar() {
   const [roleLabel, setRoleLabel] = useState<string>(defaultLabels[role] || role.replace(/_/g, ' '));
   const [roleColor, setRoleColor] = useState<string>('');
 
+  // Determine if roleColor is a hex value or Tailwind class
+  const isHexColor = (c: string) => /^#[0-9A-Fa-f]{3,8}$/.test(c);
+  const roleColorStyle = roleColor && isHexColor(roleColor) ? { color: roleColor } : undefined;
+  const roleColorClass = roleColor && !isHexColor(roleColor) ? roleColor : '';
+
   useEffect(() => {
     let mounted = true;
     database.select<{ name: string; label: string; color: string }>('custom_roles', {
@@ -379,10 +384,10 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Mobile backdrop — subtle, no blur */}
+      {/* Mobile backdrop — moderate blur */}
       {sidebarOpen && (
         <div
-          className="fixed top-16 left-0 right-0 bottom-0 z-[45] bg-black/40 lg:hidden"
+          className="fixed top-16 left-0 right-0 bottom-0 z-[45] bg-black/40 backdrop-blur-[2px] lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -437,10 +442,23 @@ export default function Sidebar() {
           )}
         </div>
 
-        {/* Role badge — only when expanded */}
-        {!sidebarCollapsed && (
+        {/* Role badge */}
+        {sidebarCollapsed ? (
+          roleColor ? (
+            <div className="flex justify-center py-1.5 border-b border-border/50 flex-shrink-0">
+              <div
+                className="w-2 h-2 rounded-full"
+                style={roleColor && isHexColor(roleColor) ? { backgroundColor: roleColor } : undefined}
+                title={roleLabel}
+              />
+            </div>
+          ) : null
+        ) : (
           <div className="px-4 py-2 border-b border-border/50 flex-shrink-0">
-            <span className={cn('text-[10px] font-semibold uppercase tracking-wider', roleColor || 'text-muted-foreground')}>
+            <span
+              className={cn('text-[10px] font-semibold uppercase tracking-wider', roleColorClass || 'text-muted-foreground')}
+              style={roleColorStyle}
+            >
               {roleLabel}
             </span>
           </div>
@@ -487,7 +505,7 @@ export default function Sidebar() {
                   <p className="text-xs font-semibold text-foreground truncate">
                     {user?.full_name || user?.username || 'Usuario'}
                   </p>
-                  <p className={cn('text-[10px] truncate', roleColor || 'text-muted-foreground')}>{roleLabel}</p>
+                  <p className={cn('text-[10px] truncate', roleColorClass || 'text-muted-foreground')} style={roleColorStyle}>{roleLabel}</p>
                   {/* Plan + Rank badges */}
                   <div className="flex items-center gap-1 mt-0.5 flex-wrap">
                     {userPlan && (
@@ -539,7 +557,7 @@ export default function Sidebar() {
               <UserAvatar size="lg" />
               <div className="min-w-0 flex-1">
                 <p className="font-bold text-foreground truncate">{user?.full_name || name}</p>
-                <p className={cn('text-[10px] font-semibold uppercase tracking-wider mt-0.5', roleColor || 'text-muted-foreground')}>{roleLabel}</p>
+                <p className={cn('text-[10px] font-semibold uppercase tracking-wider mt-0.5', roleColorClass || 'text-muted-foreground')} style={roleColorStyle}>{roleLabel}</p>
                 {(userPlan || userRank) && (
                   <div className="flex items-center gap-1 mt-1 flex-wrap">
                     {userPlan && (

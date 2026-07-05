@@ -12,8 +12,12 @@ const ThemeContext = createContext<ThemeContextType>({
   setTheme: () => {},
 });
 
-function applyTheme(theme: Theme) {
+function applyTheme(theme: Theme, animate = false) {
   const root = document.documentElement;
+  if (animate) {
+    root.classList.add('theme-transitioning');
+    setTimeout(() => root.classList.remove('theme-transitioning'), 220);
+  }
   if (theme === 'dark') root.classList.add('dark');
   else if (theme === 'light') root.classList.remove('dark');
   else {
@@ -33,7 +37,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const setTheme = (t: Theme) => {
     setThemeState(t);
     localStorage.setItem('mlm360-theme', t);
-    applyTheme(t);
+    applyTheme(t, true);
   };
 
   return (

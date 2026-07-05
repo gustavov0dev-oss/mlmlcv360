@@ -45,9 +45,9 @@ export default function PlanesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="h-screen bg-background overflow-y-auto overflow-x-hidden">
       <Navbar />
-      <section className="py-24 mt-16">
+      <section className="py-24">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {isSelectMode && (
               <div className="mb-10 bg-primary/10 border border-primary/30 rounded-2xl p-5 flex items-start gap-4 max-w-2xl mx-auto">

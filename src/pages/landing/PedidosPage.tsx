@@ -109,7 +109,7 @@ export default function PedidosPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="h-screen bg-background overflow-y-auto overflow-x-hidden">
       <Navbar />
       <div className="pt-20 max-w-7xl mx-auto px-4 sm:px-6 py-8">
         {/* Breadcrumb */}

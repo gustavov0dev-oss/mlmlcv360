@@ -104,15 +104,19 @@
     -moz-osx-font-smoothing: grayscale;
     margin: 0;
     min-height: 100vh;
-    transition: background-color 0.15s ease-out, color 0.15s ease-out;
   }
 
-  /* Smooth theme transitions for key elements */
-  .bg-background, .bg-card, .bg-muted, .bg-popover, .bg-secondary,
-  nav, header, aside, section, main, footer,
-  [class*="bg-"], [class*="text-foreground"], [class*="text-muted"],
-  [class*="border-"] {
-    transition: background-color 0.15s ease-out, color 0.15s ease-out, border-color 0.15s ease-out;
+  /* Apply colour transitions globally only while the theme is switching */
+  html.theme-transitioning *,
+  html.theme-transitioning *::before,
+  html.theme-transitioning *::after {
+    transition:
+      background-color 0.18s ease-out,
+      color 0.18s ease-out,
+      border-color 0.18s ease-out,
+      fill 0.18s ease-out,
+      stroke 0.18s ease-out,
+      box-shadow 0.18s ease-out !important;
   }
 
   h1, h2, h3, h4, h5, h6 {

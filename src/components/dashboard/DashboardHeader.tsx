@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useDatabase } from '@/lib/backend';
-import { Link, useNavigate } from '@/lib/router';
+import { Link, useNavigate, useLocation } from '@/lib/router';
 import {
   Bell, Search, Moon, Sun, Menu, LogOut, User, Settings,
   ChevronDown, ExternalLink, CheckCheck, Trash2, X, Users, Package, ShoppingBag,
@@ -61,7 +61,10 @@ export default function DashboardHeader() {
   const { company, logoValue, logoSizes, plans, ranks } = useConfig();
   const database = useDatabase();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const isDark = theme === 'dark';
+  const role = (user as any)?.role || 'user';
+  const canAccessSettings = role === 'super_admin' || role === 'admin';
 
   // Search state
   const [searchOpen, setSearchOpen] = useState(false);
@@ -303,26 +306,30 @@ export default function DashboardHeader() {
         {/* Search — large inline on desktop, icon-collapsible on mobile */}
         <div ref={searchRef} className="relative flex-1 max-w-md mx-2 hidden lg:block">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
             <input
               type="text"
               value={query}
               onChange={e => setQuery(e.target.value)}
               onFocus={() => setSearchOpen(true)}
               placeholder="Buscar usuarios, productos..."
-              className="w-full pl-10 pr-20 py-2 bg-muted/50 border border-border rounded-xl text-sm text-foreground outline-none focus:border-border focus:bg-card transition-colors"
+              className="w-full pl-10 pr-[5.5rem] py-2 bg-muted/50 border border-border rounded-xl text-sm text-foreground outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary/40 focus:bg-card transition-colors"
             />
-            {query ? (
-              <button onClick={() => { setQuery(''); setResults([]); inputRef.current?.focus(); }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
-                <X className="w-3.5 h-3.5" />
-              </button>
-            ) : (
-              <kbd className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none inline-flex items-center gap-0.5 px-2 py-1 text-[11px] font-semibold text-muted-foreground/70 bg-muted/60 border border-border/50 rounded-md shadow-sm">
-                <span className="text-[10px]">{isMac ? '⌘' : 'Ctrl'}</span>
-                <span>K</span>
-              </kbd>
-            )}
+            {/* Fixed-width right slot — prevents layout shift */}
+            <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center">
+              {query ? (
+                <button
+                  onClick={() => { setQuery(''); setResults([]); inputRef.current?.focus(); }}
+                  className="w-6 h-6 rounded-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              ) : (
+                <kbd className="pointer-events-none inline-flex items-center px-1.5 py-0.5 text-[11px] font-mono font-bold text-muted-foreground bg-background border border-border rounded-md leading-none">
+                  {isMac ? '⌘K' : 'Ctrl+K'}
+                </kbd>
+              )}
+            </div>
           </div>
 
           {/* Results dropdown */}
@@ -490,17 +497,19 @@ export default function DashboardHeader() {
                   </div>
                 </button>
                 <div className="p-1.5">
-                  {[
-                    { icon: LayoutDashboard, label: 'Mi Panel', path: '/dashboard' },
-                    { icon: User, label: 'Mi Perfil', path: '/dashboard/perfil' },
-                    { icon: Package, label: 'Mis Pedidos', path: '/pedidos' },
-                    { icon: Settings, label: 'Configuracion', path: '/dashboard/configuracion' },
-                  ].map(item => (
-                    <button key={item.path} onClick={() => { navigate(item.path); setUserMenuOpen(false); }}
-                      className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl hover:bg-muted text-sm text-foreground transition-colors text-left">
-                      <item.icon className="w-4 h-4 text-muted-foreground flex-shrink-0" />{item.label}
-                    </button>
-                  ))}
+                  {([
+                    { icon: LayoutDashboard, label: 'Mi Panel', path: '/dashboard', show: pathname !== '/dashboard' },
+                    { icon: User, label: 'Mi Perfil', path: '/dashboard/perfil', show: pathname !== '/dashboard/perfil' },
+                    { icon: Package, label: 'Mis Pedidos', path: '/pedidos', show: true },
+                    { icon: Settings, label: 'Configuracion', path: '/dashboard/configuracion', show: canAccessSettings },
+                  ] as { icon: React.ComponentType<{ className?: string }>; label: string; path: string; show: boolean }[])
+                    .filter(item => item.show)
+                    .map(item => (
+                      <button key={item.path} onClick={() => { navigate(item.path); setUserMenuOpen(false); }}
+                        className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl hover:bg-muted text-sm text-foreground transition-colors text-left">
+                        <item.icon className="w-4 h-4 text-muted-foreground flex-shrink-0" />{item.label}
+                      </button>
+                    ))}
                 </div>
                 <div className="p-1.5 border-t border-border">
                   <button onClick={() => { setShowLogoutConfirm(true); setUserMenuOpen(false); }}
