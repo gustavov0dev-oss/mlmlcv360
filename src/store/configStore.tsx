@@ -1,11 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  ReactNode,
-  useCallback,
-} from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { useDatabase } from '@/lib/backend';
 
 export interface Plan {
@@ -68,12 +61,7 @@ const ConfigContext = createContext<ConfigState>({
   currencySymbol: 'S/',
   exchangeRate: 3.72,
   company: {},
-  tax: {
-    enabled: false,
-    rate: 18,
-    includedInPrice: true,
-    name: 'IGV',
-  },
+  tax: { enabled: false, rate: 18, includedInPrice: true, name: 'IGV' },
   loading: true,
   showUsd: false,
   setShowUsd: () => {},
@@ -82,96 +70,47 @@ const ConfigContext = createContext<ConfigState>({
 
 export function ConfigProvider({ children }: { children: ReactNode }) {
   const database = useDatabase();
-
   const [plans, setPlans] = useState<Plan[]>([]);
   const [ranks, setRanks] = useState<Rank[]>([]);
   const [currency, setCurrency] = useState('PEN');
   const [currencySymbol, setCurrencySymbol] = useState('S/');
   const [exchangeRate, setExchangeRate] = useState(3.72);
   const [company, setCompany] = useState<Record<string, string>>({});
-  const [tax, setTax] = useState<TaxConfig>({
-    enabled: false,
-    rate: 18,
-    includedInPrice: true,
-    name: 'IGV',
-  });
+  const [tax, setTax] = useState<TaxConfig>({ enabled: false, rate: 18, includedInPrice: true, name: 'IGV' });
   const [loading, setLoading] = useState(true);
   const [showUsd, setShowUsd] = useState(false);
 
   const refresh = useCallback(async () => {
-    setLoading(true);
-
     try {
-      const withTimeout = <T,>(promise: Promise<T>): Promise<T | null> =>
+      const withTimeout = <T,>(p: Promise<T>): Promise<T | null> =>
         Promise.race([
-          promise,
-          new Promise<null>((_, reject) =>
-            setTimeout(() => reject(new Error('timeout')), 5000)
-          ),
+          p,
+          new Promise<null>((_, rej) => setTimeout(() => rej(new Error('timeout')), 5000)),
         ]).catch(() => null);
 
       const [plansRes, ranksRes, configRes] = await Promise.all([
-        withTimeout(
-          database.select<Plan>('plans', {
-            order: { column: 'sort_order' },
-          })
-        ),
-        withTimeout(
-          database.select<Rank>('ranks', {
-            order: { column: 'sort_order' },
-          })
-        ),
-        withTimeout(
-          database.select<{ key: string; value: string }>('system_config')
-        ),
+        withTimeout(database.select<Plan>('plans', { order: { column: 'sort_order' } })),
+        withTimeout(database.select<Rank>('ranks', { order: { column: 'sort_order' } })),
+        withTimeout(database.select<{ key: string; value: string }>('system_config')),
       ]);
 
       if (plansRes && 'data' in plansRes && Array.isArray(plansRes.data)) {
-        setPlans(
-          plansRes.data.map((plan: Plan) => ({
-            ...plan,
-            features: Array.isArray(plan.features)
-              ? plan.features
-              : (() => {
-                  try {
-                    return JSON.parse(
-                      (plan.features as unknown as string) || '[]'
-                    );
-                  } catch {
-                    return [];
-                  }
-                })(),
-          }))
-        );
+        setPlans(plansRes.data.map((p: Plan) => ({
+          ...p,
+          features: Array.isArray(p.features) ? p.features : (() => { try { return JSON.parse(p.features as unknown as string || '[]'); } catch { return []; } })(),
+        })));
       }
-
       if (ranksRes && 'data' in ranksRes && Array.isArray(ranksRes.data)) {
         setRanks(ranksRes.data as Rank[]);
       }
-
       if (configRes && 'data' in configRes && Array.isArray(configRes.data)) {
         const map: Record<string, string> = {};
-
-        (configRes.data as { key: string; value: string }[]).forEach((row) => {
-          map[row.key] = row.value;
-        });
-
-        if (map.default_currency) {
-          setCurrency(map.default_currency);
-        }
-
-        if (map.currency_symbol) {
-          setCurrencySymbol(map.currency_symbol);
-        }
-
+        (configRes.data as { key: string; value: string }[]).forEach((r) => { map[r.key] = r.value; });
+        if (map.default_currency) setCurrency(map.default_currency);
+        if (map.currency_symbol) setCurrencySymbol(map.currency_symbol);
         const rate = parseFloat(map.exchange_rate_usd || '3.72');
-
-        if (!isNaN(rate) && rate > 0) {
-          setExchangeRate(rate);
-        }
-
+        if (!isNaN(rate) && rate > 0) setExchangeRate(rate);
         setCompany(map);
-
         setTax({
           enabled: map.igv_enabled === 'true',
           rate: parseFloat(map.igv_rate || '18') || 18,
@@ -179,20 +118,21 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
           name: map.tax_name || 'IGV',
         });
       }
-    } catch (error) {
+    } catch {
+      }
       // Non-fatal: use defaults already set in state
-      console.error('Error loading configuration:', error);
     } finally {
       setLoading(false);
     }
   }, [database]);
 
   useEffect(() => {
+    }
     refresh();
 
-    const unsubPlans = database.subscribe('plans', refresh);
-    const unsubRanks = database.subscribe('ranks', refresh);
-    const unsubConfig = database.subscribe('system_config', refresh);
+    const unsubPlans = database.subscribe('plans', () => refresh());
+    const unsubRanks = database.subscribe('ranks', () => refresh());
+    const unsubConfig = database.subscribe('system_config', () => refresh());
 
     return () => {
       unsubPlans();
@@ -202,40 +142,22 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
   }, [refresh, database]);
 
   return (
-    <ConfigContext.Provider
-      value={{
-        plans,
-        ranks,
-        currency,
-        currencySymbol,
-        exchangeRate,
-        company,
-        tax,
-        loading,
-        showUsd,
-        setShowUsd,
-        refresh,
-      }}
-    >
+    <ConfigContext.Provider value={{ plans, ranks, currency, currencySymbol, exchangeRate, company, tax, loading, showUsd, setShowUsd, refresh }}>
       {children}
     </ConfigContext.Provider>
   );
 }
 
 export function useConfig() {
+  }
+  )
   return useContext(ConfigContext);
 }
 
-export function formatPrice(
-  amount: number,
-  currency: string,
-  symbol: string,
-  rate: number
-) {
+export function formatPrice(amount: number, currency: string, symbol: string, rate: number) {
   if (currency === 'USD') {
     const usd = Math.round(amount / rate);
     return `USD ${usd}`;
   }
-
   return `${symbol} ${amount}`;
 }
