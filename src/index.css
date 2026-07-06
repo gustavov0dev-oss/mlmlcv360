@@ -4,81 +4,81 @@
 
 :root {
   --background: 0 0% 100%;
-  --foreground: 220 20% 8%;
+  --foreground: 220 20% 6%;
   --card: 0 0% 100%;
-  --card-foreground: 220 20% 8%;
+  --card-foreground: 220 20% 6%;
   --popover: 0 0% 100%;
-  --popover-foreground: 220 20% 8%;
-  --primary: 213 94% 48%;
+  --popover-foreground: 220 20% 6%;
+  --primary: 38 86% 40%;
   --primary-foreground: 0 0% 100%;
-  --secondary: 215 20% 96%;
-  --secondary-foreground: 220 20% 20%;
-  --muted: 215 20% 96%;
-  --muted-foreground: 215 15% 50%;
-  --accent: 213 94% 95%;
-  --accent-foreground: 213 94% 30%;
+  --secondary: 38 15% 95%;
+  --secondary-foreground: 38 20% 18%;
+  --muted: 38 10% 95%;
+  --muted-foreground: 38 8% 46%;
+  --accent: 43 96% 90%;
+  --accent-foreground: 38 86% 28%;
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 100%;
-  --border: 215 20% 91%;
-  --input: 215 20% 91%;
-  --ring: 213 94% 48%;
+  --border: 38 10% 88%;
+  --input: 38 10% 88%;
+  --ring: 38 86% 40%;
   --radius: 0.625rem;
 
-  /* MLM brand colors */
-  --brand-50: 213 100% 97%;
-  --brand-100: 213 100% 92%;
-  --brand-200: 213 96% 84%;
-  --brand-300: 213 94% 72%;
-  --brand-400: 213 94% 60%;
-  --brand-500: 213 94% 48%;
-  --brand-600: 213 94% 40%;
-  --brand-700: 213 94% 32%;
-  --brand-800: 213 84% 24%;
-  --brand-900: 213 74% 16%;
+  /* Club 360 gold brand */
+  --brand-50: 43 100% 97%;
+  --brand-100: 43 100% 92%;
+  --brand-200: 43 96% 82%;
+  --brand-300: 43 90% 68%;
+  --brand-400: 40 88% 52%;
+  --brand-500: 38 86% 40%;
+  --brand-600: 36 88% 34%;
+  --brand-700: 34 88% 28%;
+  --brand-800: 32 82% 22%;
+  --brand-900: 30 75% 16%;
 
   /* Chart colors */
-  --chart-1: 213 94% 48%;
+  --chart-1: 38 86% 40%;
   --chart-2: 158 64% 42%;
-  --chart-3: 37 91% 55%;
+  --chart-3: 213 94% 48%;
   --chart-4: 0 84% 60%;
   --chart-5: 270 70% 55%;
 }
 
 .dark {
-  --background: 222 47% 7%;
-  --foreground: 210 40% 98%;
-  --card: 222 40% 10%;
-  --card-foreground: 210 40% 98%;
-  --popover: 222 40% 10%;
-  --popover-foreground: 210 40% 98%;
-  --primary: 213 94% 55%;
-  --primary-foreground: 0 0% 100%;
-  --secondary: 222 35% 14%;
-  --secondary-foreground: 210 40% 88%;
-  --muted: 222 35% 14%;
-  --muted-foreground: 215 20% 55%;
-  --accent: 213 60% 18%;
-  --accent-foreground: 213 94% 70%;
+  --background: 20 10% 5%;
+  --foreground: 40 20% 96%;
+  --card: 20 8% 8%;
+  --card-foreground: 40 20% 96%;
+  --popover: 20 8% 8%;
+  --popover-foreground: 40 20% 96%;
+  --primary: 43 95% 56%;
+  --primary-foreground: 20 10% 5%;
+  --secondary: 20 8% 12%;
+  --secondary-foreground: 40 15% 85%;
+  --muted: 20 8% 12%;
+  --muted-foreground: 40 10% 52%;
+  --accent: 38 40% 16%;
+  --accent-foreground: 43 96% 72%;
   --destructive: 0 62% 40%;
   --destructive-foreground: 0 0% 100%;
-  --border: 222 30% 16%;
-  --input: 222 30% 16%;
-  --ring: 213 94% 55%;
+  --border: 20 8% 15%;
+  --input: 20 8% 15%;
+  --ring: 43 95% 56%;
 
-  --brand-50: 213 60% 8%;
-  --brand-100: 213 60% 12%;
-  --brand-200: 213 70% 20%;
-  --brand-300: 213 80% 30%;
-  --brand-400: 213 90% 42%;
-  --brand-500: 213 94% 55%;
-  --brand-600: 213 94% 65%;
-  --brand-700: 213 94% 75%;
-  --brand-800: 213 94% 85%;
-  --brand-900: 213 94% 95%;
+  --brand-50: 38 30% 8%;
+  --brand-100: 38 35% 12%;
+  --brand-200: 38 50% 20%;
+  --brand-300: 38 70% 32%;
+  --brand-400: 40 80% 44%;
+  --brand-500: 43 95% 56%;
+  --brand-600: 43 96% 66%;
+  --brand-700: 43 96% 76%;
+  --brand-800: 43 96% 86%;
+  --brand-900: 43 96% 94%;
 
-  --chart-1: 213 94% 55%;
+  --chart-1: 43 95% 56%;
   --chart-2: 158 64% 50%;
-  --chart-3: 37 91% 60%;
+  --chart-3: 213 94% 60%;
   --chart-4: 0 84% 65%;
   --chart-5: 270 70% 65%;
 }
@@ -398,7 +398,15 @@ body {
   100% { background-position: 200% 50%; }
 }
 .text-gradient-animated {
-  background: linear-gradient(90deg, hsl(var(--primary)), hsl(213 94% 60%), hsl(var(--primary)));
+  background: linear-gradient(90deg, hsl(38 86% 40%), hsl(43 95% 56%), hsl(38 86% 40%));
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradient-pan 4s linear infinite;
+}
+.dark .text-gradient-animated {
+  background: linear-gradient(90deg, hsl(43 95% 56%), hsl(43 100% 70%), hsl(43 95% 56%));
   background-size: 200% auto;
   -webkit-background-clip: text;
   background-clip: text;
@@ -428,3 +436,10 @@ body {
 /* Section padding */
 .section-py { padding-top: 6rem; padding-bottom: 6rem; }
 @media (min-width: 768px) { .section-py { padding-top: 8rem; padding-bottom: 8rem; } }
+
+/* Radial gradient background utility */
+@layer utilities {
+  .bg-gradient-radial {
+    background-image: radial-gradient(circle, var(--tw-gradient-stops));
+  }
+}
