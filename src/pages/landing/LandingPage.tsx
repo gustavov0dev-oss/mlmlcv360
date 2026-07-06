@@ -7,7 +7,6 @@ import {
   ArrowRight, Check, Star, ChevronDown, Shield, Zap, Globe, Award, DollarSign,
   TrendingUp, Users, Lock, ShoppingBag, Bell, Network, CreditCard, Sparkles,
   ChartBar as BarChart3, Wallet, ExternalLink,
-  Building2, Mountain, Waves, MapPin, Sun, Leaf,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState, useEffect, useCallback } from 'react';
@@ -26,36 +25,26 @@ const steps = [
   { n: '03', title: 'Cobra tus comisiones', desc: 'Pagos automáticos quincenales. Sin trámites, sin demoras.', icon: DollarSign },
 ];
 
-// ─── region stats ─────────────────────────────────────────────────────────────
-const regionStats = [
-  { city: 'Lima', members: '4,820+', icon: Building2 },
-  { city: 'Arequipa', members: '1,940+', icon: Mountain },
-  { city: 'Trujillo', members: '1,560+', icon: Waves },
-  { city: 'Cusco', members: '980+', icon: MapPin },
-  { city: 'Piura', members: '760+', icon: Sun },
-  { city: 'Ica', members: '480+', icon: Leaf },
-];
-
 // ─── payment brands ───────────────────────────────────────────────────────────
 const row1Brands = [
-  { name: 'Visa', style: 'font-black italic tracking-tight text-blue-800 dark:text-blue-200' },
-  { name: 'Mastercard', style: 'font-bold text-red-700 dark:text-red-300' },
-  { name: 'Yape', style: 'font-black tracking-wide text-violet-700 dark:text-violet-400' },
-  { name: 'Plin', style: 'font-black text-teal-700 dark:text-teal-400' },
-  { name: 'BCP', style: 'font-black tracking-widest text-sky-800 dark:text-sky-400' },
-  { name: 'BBVA', style: 'font-black text-blue-900 dark:text-blue-300' },
-  { name: 'Culqi', style: 'font-bold text-rose-700 dark:text-rose-400' },
-  { name: 'Izipay', style: 'font-black italic text-orange-700 dark:text-orange-400' },
+  { name: 'Visa', style: 'font-black italic tracking-tight' },
+  { name: 'Mastercard', style: 'font-bold' },
+  { name: 'Yape', style: 'font-black tracking-wide' },
+  { name: 'Plin', style: 'font-black' },
+  { name: 'BCP', style: 'font-black tracking-widest' },
+  { name: 'BBVA', style: 'font-black' },
+  { name: 'Culqi', style: 'font-bold' },
+  { name: 'Izipay', style: 'font-black italic' },
 ];
 const row2Brands = [
-  { name: 'PayPal', style: 'font-bold tracking-tight text-blue-700 dark:text-blue-300' },
-  { name: 'Interbank', style: 'font-bold text-emerald-800 dark:text-emerald-400' },
-  { name: 'Scotiabank', style: 'font-bold text-red-700 dark:text-red-400' },
-  { name: 'INDECOPI', style: 'font-black tracking-wider text-xs text-zinc-700 dark:text-zinc-300' },
-  { name: 'Diners', style: 'font-bold tracking-wide text-slate-700 dark:text-slate-300' },
-  { name: 'Niubiz', style: 'font-black text-sky-700 dark:text-sky-400' },
-  { name: 'SafetyPay', style: 'font-bold text-amber-700 dark:text-amber-400' },
-  { name: 'GlobalPay', style: 'font-bold text-indigo-700 dark:text-indigo-400' },
+  { name: 'PayPal', style: 'font-bold tracking-tight' },
+  { name: 'Interbank', style: 'font-bold' },
+  { name: 'Scotiabank', style: 'font-bold' },
+  { name: 'INDECOPI', style: 'font-black tracking-wider text-[11px]' },
+  { name: 'Diners Club', style: 'font-bold tracking-wide' },
+  { name: 'Niubiz', style: 'font-black' },
+  { name: 'SafetyPay', style: 'font-bold' },
+  { name: 'GlobalPay', style: 'font-bold' },
 ];
 
 // ─── extended testimonials ────────────────────────────────────────────────────
@@ -88,8 +77,8 @@ function SectionDivider() {
 // ─── brands marquee ───────────────────────────────────────────────────────────
 function BrandPill({ name, style }: { name: string; style: string }) {
   return (
-    <div className="shrink-0 mx-2 px-5 py-2.5 bg-card border border-border/60 rounded-full shadow-sm hover:border-border transition-colors">
-      <span className={cn('text-sm whitespace-nowrap select-none', style)}>{name}</span>
+    <div className="shrink-0 mx-2 px-5 py-2.5 bg-card border border-border/50 rounded-full">
+      <span className={cn('text-sm text-foreground/60 whitespace-nowrap select-none', style)}>{name}</span>
     </div>
   );
 }
@@ -141,19 +130,12 @@ function StoreSection() {
       <SectionDivider />
       <section className="py-16 sm:py-24">
         <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
-          <Reveal className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
-            <div>
-              <span className="text-xs font-semibold text-primary uppercase tracking-widest mb-3 block">Tienda</span>
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground tracking-tight">
-                Compra y genera <span className="text-gradient-animated">ingresos</span>
-              </h2>
-              <p className="text-muted-foreground mt-2 max-w-md text-sm sm:text-base">Cada producto activa comisiones automáticas para toda tu red.</p>
-            </div>
-            <Link to="/tienda" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-border/70 text-sm font-medium hover:border-primary/50 hover:text-primary transition-all group shrink-0 self-start sm:self-auto">
-              Ver tienda completa
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-              {itemCount > 0 && <span className="bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full">{itemCount}</span>}
-            </Link>
+          <Reveal className="mb-10">
+            <span className="text-xs font-semibold text-primary uppercase tracking-widest mb-3 block">Tienda</span>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground tracking-tight">
+              Compra y genera <span className="text-gradient-animated">ingresos</span>
+            </h2>
+            <p className="text-muted-foreground mt-2 max-w-md text-sm sm:text-base">Cada producto activa comisiones automáticas para toda tu red.</p>
           </Reveal>
 
           {categories.length > 0 && (
@@ -169,11 +151,25 @@ function StoreSection() {
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
               {Array.from({ length: 4 }).map((_, i) => <div key={i} className="bg-card rounded-xl overflow-hidden border border-border/60"><Skeleton className="aspect-square" /></div>)}
             </div>
+          ) : filtered.length === 0 ? (
+            <div className="py-16 flex flex-col items-center justify-center text-center border border-dashed border-border/50 rounded-2xl bg-muted/10">
+              <ShoppingBag className="w-10 h-10 text-muted-foreground/30 mb-3" />
+              <p className="text-sm font-medium text-muted-foreground/60">No hay productos en esta categoría</p>
+              <button onClick={() => setActiveCat('')} className="mt-3 text-xs text-primary hover:underline">Ver todos los productos</button>
+            </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
               {filtered.slice(0, 4).map(p => <ProductCard key={p.id} product={p} />)}
             </div>
           )}
+
+          <Reveal className="mt-8 text-center">
+            <Link to="/tienda" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-border/70 text-sm font-medium hover:border-primary/50 hover:text-primary transition-all group">
+              Ver tienda completa
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              {itemCount > 0 && <span className="bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full">{itemCount}</span>}
+            </Link>
+          </Reveal>
         </div>
       </section>
     </>
@@ -698,81 +694,75 @@ export default function LandingPage() {
       {/* ── TESTIMONIALS ──────────────────────────────────────────────────────*/}
       <section className="py-16 sm:py-24">
         <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 mb-10 sm:mb-14">
-          <Reveal>
-            <span className="text-xs font-semibold text-primary uppercase tracking-widest mb-3 block">Testimonios</span>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight">
-              Miles ya <span className="text-gradient-animated">ganan</span> con Cluv 360
-            </h2>
-            <p className="text-base sm:text-lg text-muted-foreground/80 mt-3 max-w-xl">Historias reales de emprendedores en toda Latinoamérica.</p>
+          <Reveal className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
+            <div>
+              <span className="text-xs font-semibold text-primary uppercase tracking-widest mb-3 block">Testimonios</span>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight">
+                Miles ya <span className="text-gradient-animated">ganan</span><br className="hidden sm:block" /> con Cluv 360
+              </h2>
+              <p className="text-base sm:text-lg text-muted-foreground/80 mt-3 max-w-lg">Historias reales de emprendedores en toda Latinoamérica.</p>
+            </div>
+            <div className="flex items-center gap-3 shrink-0">
+              <div className="flex -space-x-2">
+                {allTestimonials.slice(0,4).map((t, i) => (
+                  <img key={i} src={t.avatar} alt={t.name} className="w-8 h-8 rounded-full border-2 border-background object-cover" />
+                ))}
+              </div>
+              <div className="text-sm text-muted-foreground/70">
+                <span className="text-foreground font-semibold">4.9/5</span> · 2,300+ reseñas
+              </div>
+            </div>
           </Reveal>
         </div>
 
-        {/* bento grid */}
+        {/* photo banner with stats */}
+        <Reveal className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 mb-10 sm:mb-14">
+          <div className="relative rounded-2xl overflow-hidden">
+            <img
+              src="https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg?auto=compress&cs=tinysrgb&w=1260&h=400&fit=crop"
+              alt="Emprendedores Cluv 360"
+              className="w-full h-48 sm:h-64 object-cover object-top"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-zinc-950/85 via-zinc-950/50 to-transparent" />
+            <div className="absolute inset-0 flex items-center px-6 sm:px-10">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-10 w-full sm:w-auto">
+                {[
+                  { value: '12,540+', label: 'Afiliados activos' },
+                  { value: 'S/ 2.8M+', label: 'Comisiones pagadas' },
+                  { value: '8 países', label: 'Presencia regional' },
+                  { value: '+340%', label: 'Crecimiento anual' },
+                ].map(stat => (
+                  <div key={stat.label}>
+                    <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">{stat.value}</div>
+                    <div className="text-xs sm:text-sm text-white/60 mt-0.5">{stat.label}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </Reveal>
+
+        {/* testimonial cards grid */}
         <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 mb-10 sm:mb-14">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border border-border/50 rounded-2xl overflow-hidden">
-            {/* region stats row */}
-            {[regionStats[0], regionStats[1]].map((stat, idx) => {
-              const StatIcon = stat.icon;
-              return (
-                <div key={stat.city} className={cn('p-6 sm:p-8 flex flex-col items-center justify-center text-center border-b border-border/50', idx === 0 ? 'sm:border-r border-border/50' : 'sm:border-r border-border/50')}>
-                  <div className="w-11 h-11 rounded-2xl bg-muted/60 flex items-center justify-center mb-3">
-                    <StatIcon className="w-5 h-5 text-muted-foreground/60" />
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {allTestimonials.slice(0, 3).map((t, i) => (
+              <Reveal key={t.id} delay={i * 80}>
+                <div className="bg-card border border-border/50 rounded-2xl p-6 flex flex-col h-full card-lift">
+                  <div className="flex gap-0.5 mb-4">
+                    {Array.from({ length: 5 }).map((_, si) => <Star key={si} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />)}
                   </div>
-                  <div className="text-xl sm:text-2xl font-bold text-foreground">{stat.members}</div>
-                  <div className="text-sm text-muted-foreground/70 mt-1">afiliados en {stat.city}</div>
-                </div>
-              );
-            })}
-
-            <div className="p-6 sm:p-8 flex flex-col justify-between border-b border-border/50 row-span-1 lg:row-span-2">
-              <div className="flex gap-0.5 mb-4">{Array.from({ length: 5 }).map((_, i) => <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />)}</div>
-              <p className="text-foreground/80 leading-relaxed mb-5 flex-1 text-sm sm:text-base">"{allTestimonials[0].content}"</p>
-              <div>
-                <div className="flex gap-2 mb-3 sm:mb-4 flex-wrap">
-                  {['Comisiones auto', 'Red binaria'].map(tag => (
-                    <span key={tag} className="px-2.5 py-1 bg-primary/8 text-primary text-xs font-medium rounded-full border border-primary/15">{tag}</span>
-                  ))}
-                </div>
-                <div className="flex items-center gap-3">
-                  <img src={allTestimonials[0].avatar} alt={allTestimonials[0].name} className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover" />
-                  <div><div className="text-sm font-semibold text-foreground">{allTestimonials[0].name}</div><div className="text-xs text-muted-foreground">{allTestimonials[0].role}</div></div>
-                  <div className="ml-auto text-sm font-bold text-emerald-600 dark:text-emerald-400">{allTestimonials[0].earnings}</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6 sm:p-8 border-b border-border/50 sm:border-r sm:col-span-2 lg:col-span-2 flex flex-col justify-between">
-              <div className="flex gap-0.5 mb-4">{Array.from({ length: 5 }).map((_, i) => <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />)}</div>
-              <p className="text-foreground/80 leading-relaxed mb-5 text-sm sm:text-base">"{allTestimonials[1].content}"</p>
-              <div className="flex items-center gap-3">
-                <img src={allTestimonials[1].avatar} alt={allTestimonials[1].name} className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover" />
-                <div><div className="text-sm font-semibold text-foreground">{allTestimonials[1].name}</div><div className="text-xs text-muted-foreground">{allTestimonials[1].role}</div></div>
-                <div className="ml-auto text-sm font-bold text-emerald-600 dark:text-emerald-400">{allTestimonials[1].earnings}</div>
-              </div>
-            </div>
-
-            {[regionStats[2], regionStats[3]].map((stat, idx) => {
-              const StatIcon = stat.icon;
-              return (
-                <div key={stat.city} className={cn('p-6 sm:p-8 flex flex-col items-center justify-center text-center border-t border-border/50', idx === 0 ? 'sm:border-r border-border/50' : 'sm:border-r border-border/50')}>
-                  <div className="w-11 h-11 rounded-2xl bg-muted/60 flex items-center justify-center mb-3">
-                    <StatIcon className="w-5 h-5 text-muted-foreground/60" />
+                  <p className="text-sm text-foreground/75 leading-relaxed flex-1 mb-5">"{t.content}"</p>
+                  <div className="flex items-center gap-3 pt-4 border-t border-border/40">
+                    <img src={t.avatar} alt={t.name} className="w-9 h-9 rounded-full object-cover ring-2 ring-primary/15 shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-semibold text-foreground leading-tight truncate">{t.name}</div>
+                      <div className="text-xs text-muted-foreground">{t.role}{(t as any).city ? `, ${(t as any).city}` : ''}</div>
+                    </div>
+                    <div className="text-sm font-bold text-emerald-600 dark:text-emerald-400 shrink-0">{t.earnings}</div>
                   </div>
-                  <div className="text-xl sm:text-2xl font-bold text-foreground">{stat.members}</div>
-                  <div className="text-sm text-muted-foreground/70 mt-1">afiliados en {stat.city}</div>
                 </div>
-              );
-            })}
-
-            <div className="p-6 sm:p-8 border-t border-border/50 flex flex-col justify-between">
-              <div className="flex gap-0.5 mb-4">{Array.from({ length: 5 }).map((_, i) => <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />)}</div>
-              <p className="text-foreground/80 leading-relaxed mb-5 text-sm sm:text-base">"{allTestimonials[2].content}"</p>
-              <div className="flex items-center gap-3">
-                <img src={allTestimonials[2].avatar} alt={allTestimonials[2].name} className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover" />
-                <div><div className="text-sm font-semibold text-foreground">{allTestimonials[2].name}</div><div className="text-xs text-muted-foreground">{allTestimonials[2].role}</div></div>
-                <div className="ml-auto text-sm font-bold text-emerald-600 dark:text-emerald-400">{allTestimonials[2].earnings}</div>
-              </div>
-            </div>
+              </Reveal>
+            ))}
           </div>
         </div>
 
