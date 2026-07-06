@@ -6,7 +6,7 @@ import { testimonials, faqItems } from '@/lib/mockData';
 import {
   ArrowRight, Check, Star, ChevronDown, Shield, Zap, Globe, Award, DollarSign,
   TrendingUp, Users, Lock, ShoppingBag, Bell, Network, CreditCard, Sparkles,
-  ChartBar as BarChart3, Wallet, ExternalLink,
+  ChartBar as BarChart3, Wallet, CheckCircle2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState, useEffect, useCallback } from 'react';
@@ -23,28 +23,6 @@ const steps = [
   { n: '01', title: 'Elige tu plan', desc: 'Gratis, Pro o Elite. Sin permanencia, cambia cuando quieras.', icon: BarChart3 },
   { n: '02', title: 'Comparte tu enlace', desc: 'Tu código único conecta automáticamente a nuevos referidos.', icon: Network },
   { n: '03', title: 'Cobra tus comisiones', desc: 'Pagos automáticos quincenales. Sin trámites, sin demoras.', icon: DollarSign },
-];
-
-// ─── payment brands ───────────────────────────────────────────────────────────
-const row1Brands = [
-  { name: 'Visa', style: 'font-black italic tracking-tight' },
-  { name: 'Mastercard', style: 'font-bold' },
-  { name: 'Yape', style: 'font-black tracking-wide' },
-  { name: 'Plin', style: 'font-black' },
-  { name: 'BCP', style: 'font-black tracking-widest' },
-  { name: 'BBVA', style: 'font-black' },
-  { name: 'Culqi', style: 'font-bold' },
-  { name: 'Izipay', style: 'font-black italic' },
-];
-const row2Brands = [
-  { name: 'PayPal', style: 'font-bold tracking-tight' },
-  { name: 'Interbank', style: 'font-bold' },
-  { name: 'Scotiabank', style: 'font-bold' },
-  { name: 'INDECOPI', style: 'font-black tracking-wider text-[11px]' },
-  { name: 'Diners Club', style: 'font-bold tracking-wide' },
-  { name: 'Niubiz', style: 'font-black' },
-  { name: 'SafetyPay', style: 'font-bold' },
-  { name: 'GlobalPay', style: 'font-bold' },
 ];
 
 // ─── extended testimonials ────────────────────────────────────────────────────
@@ -70,35 +48,8 @@ const allTestimonials = [
   },
 ];
 
-function SectionDivider() {
-  return <div className="section-divider mx-auto max-w-[1100px]" />;
-}
-
-// ─── brands marquee ───────────────────────────────────────────────────────────
-function BrandPill({ name, style }: { name: string; style: string }) {
-  return (
-    <div className="shrink-0 mx-2 px-5 py-2.5 bg-card border border-border/50 rounded-full">
-      <span className={cn('text-sm text-foreground/60 whitespace-nowrap select-none', style)}>{name}</span>
-    </div>
-  );
-}
-
-function BrandsCarousel() {
-  const doubled1 = [...row1Brands, ...row1Brands];
-  const doubled2 = [...row2Brands, ...row2Brands];
-  return (
-    <div className="relative overflow-hidden py-1">
-      <div className="absolute left-0 top-0 bottom-0 w-20 sm:w-40 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
-      <div className="absolute right-0 top-0 bottom-0 w-20 sm:w-40 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
-      <div className="flex mb-3 animate-marquee-brands">
-        {doubled1.map((b, i) => <BrandPill key={`r1-${i}`} {...b} />)}
-      </div>
-      <div className="flex animate-marquee-brands-slow">
-        {doubled2.map((b, i) => <BrandPill key={`r2-${i}`} {...b} />)}
-      </div>
-    </div>
-  );
-}
+// ─── payment brands ───────────────────────────────────────────────────────────
+const brands = ['Visa', 'Mastercard', 'Yape', 'Plin', 'BCP', 'BBVA', 'Culqi', 'Izipay', 'PayPal', 'Interbank', 'Niubiz', 'SafetyPay'];
 
 // ─── store section ────────────────────────────────────────────────────────────
 function StoreSection() {
@@ -126,53 +77,52 @@ function StoreSection() {
   if (!loading && products.length === 0) return null;
 
   return (
-    <>
-      <SectionDivider />
-      <section className="py-16 sm:py-24">
-        <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
-          <Reveal className="mb-10">
-            <span className="text-xs font-semibold text-primary uppercase tracking-widest mb-3 block">Tienda</span>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground tracking-tight">
-              Compra y genera <span className="text-gradient-animated">ingresos</span>
-            </h2>
-            <p className="text-muted-foreground mt-2 max-w-md text-sm sm:text-base">Cada producto activa comisiones automáticas para toda tu red.</p>
-          </Reveal>
+    <section className="py-20 sm:py-28 bg-white dark:bg-card border-t border-border/40">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <Reveal className="mb-12">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary uppercase tracking-wider mb-4">
+            <ShoppingBag className="w-3 h-3" /> Tienda
+          </div>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight mb-3">
+            Compra y genera <span className="text-primary">ingresos</span>
+          </h2>
+          <p className="text-muted-foreground max-w-md text-base">Cada producto activa comisiones automáticas para toda tu red.</p>
+        </Reveal>
 
-          {categories.length > 0 && (
-            <div className="flex gap-2 overflow-x-auto pb-3 scrollbar-hide mb-6 -mx-4 px-4 sm:mx-0 sm:px-0">
-              <button onClick={() => setActiveCat('')} className={cn('px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all shrink-0', activeCat === '' ? 'bg-foreground text-background' : 'border border-border/60 text-muted-foreground hover:border-foreground/30 hover:text-foreground')}>Todos</button>
-              {categories.map(cat => (
-                <button key={cat.id} onClick={() => setActiveCat(activeCat === cat.id ? '' : cat.id)} className={cn('px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all shrink-0', activeCat === cat.id ? 'bg-foreground text-background' : 'border border-border/60 text-muted-foreground hover:border-foreground/30 hover:text-foreground')}>{cat.name}</button>
-              ))}
-            </div>
-          )}
+        {categories.length > 0 && (
+          <div className="flex gap-2 overflow-x-auto pb-3 scrollbar-hide mb-8">
+            <button onClick={() => setActiveCat('')} className={cn('px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all shrink-0 border', activeCat === '' ? 'bg-foreground text-background border-foreground' : 'border-border text-muted-foreground hover:border-foreground/40 hover:text-foreground')}>Todos</button>
+            {categories.map(cat => (
+              <button key={cat.id} onClick={() => setActiveCat(activeCat === cat.id ? '' : cat.id)} className={cn('px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all shrink-0 border', activeCat === cat.id ? 'bg-foreground text-background border-foreground' : 'border-border text-muted-foreground hover:border-foreground/40 hover:text-foreground')}>{cat.name}</button>
+            ))}
+          </div>
+        )}
 
-          {loading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-              {Array.from({ length: 4 }).map((_, i) => <div key={i} className="bg-card rounded-xl overflow-hidden border border-border/60"><Skeleton className="aspect-square" /></div>)}
-            </div>
-          ) : filtered.length === 0 ? (
-            <div className="py-16 flex flex-col items-center justify-center text-center border border-dashed border-border/50 rounded-2xl bg-muted/10">
-              <ShoppingBag className="w-10 h-10 text-muted-foreground/30 mb-3" />
-              <p className="text-sm font-medium text-muted-foreground/60">No hay productos en esta categoría</p>
-              <button onClick={() => setActiveCat('')} className="mt-3 text-xs text-primary hover:underline">Ver todos los productos</button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-              {filtered.slice(0, 4).map(p => <ProductCard key={p.id} product={p} />)}
-            </div>
-          )}
+        {loading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {Array.from({ length: 4 }).map((_, i) => <div key={i} className="rounded-2xl overflow-hidden border border-border"><Skeleton className="aspect-square" /></div>)}
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="py-16 flex flex-col items-center justify-center text-center border border-dashed border-border rounded-2xl">
+            <ShoppingBag className="w-10 h-10 text-muted-foreground/30 mb-3" />
+            <p className="text-sm text-muted-foreground">No hay productos en esta categoría</p>
+            <button onClick={() => setActiveCat('')} className="mt-3 text-xs text-primary hover:underline">Ver todos</button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {filtered.slice(0, 4).map(p => <ProductCard key={p.id} product={p} />)}
+          </div>
+        )}
 
-          <Reveal className="mt-8 text-center">
-            <Link to="/tienda" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-border/70 text-sm font-medium hover:border-primary/50 hover:text-primary transition-all group">
-              Ver tienda completa
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-              {itemCount > 0 && <span className="bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full">{itemCount}</span>}
-            </Link>
-          </Reveal>
-        </div>
-      </section>
-    </>
+        <Reveal className="mt-10 text-center">
+          <Link to="/tienda" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-border text-sm font-semibold text-foreground hover:bg-muted transition-colors group">
+            Ver tienda completa
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+            {itemCount > 0 && <span className="bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full">{itemCount}</span>}
+          </Link>
+        </Reveal>
+      </div>
+    </section>
   );
 }
 
@@ -180,24 +130,29 @@ function StoreSection() {
 function AppMockup() {
   const appHost = typeof window !== 'undefined' ? window.location.host : 'app.cluv360.pe';
   return (
-    <div className="relative w-full max-w-[780px] mx-auto">
-      <div className="bg-card border border-border/60 rounded-2xl shadow-[0_24px_64px_-16px_rgba(0,0,0,0.12)] dark:shadow-[0_24px_64px_-16px_rgba(0,0,0,0.5)] overflow-hidden">
-        <div className="flex items-center gap-3 px-4 sm:px-5 py-3 sm:py-3.5 border-b border-border/50 bg-muted/20">
+    <div className="relative w-full max-w-3xl mx-auto">
+      {/* Glow under mockup */}
+      <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-3/4 h-20 bg-primary/20 blur-3xl rounded-full pointer-events-none" />
+
+      <div className="bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-700 rounded-2xl shadow-[0_32px_80px_-12px_rgba(0,0,0,0.18)] dark:shadow-[0_32px_80px_-12px_rgba(0,0,0,0.6)] overflow-hidden">
+        {/* Browser chrome */}
+        <div className="flex items-center gap-3 px-5 py-3 border-b border-neutral-100 dark:border-zinc-800 bg-neutral-50/80 dark:bg-zinc-800/50 backdrop-blur-sm">
           <div className="flex gap-1.5">
             <div className="w-3 h-3 rounded-full bg-[#ff5f57]" />
             <div className="w-3 h-3 rounded-full bg-[#febc2e]" />
             <div className="w-3 h-3 rounded-full bg-[#28c840]" />
           </div>
           <div className="flex-1 flex justify-center">
-            <div className="bg-background/80 border border-border/50 rounded-lg px-3 sm:px-4 py-1 text-[11px] sm:text-xs text-muted-foreground w-44 sm:w-56 text-center backdrop-blur-sm truncate">
+            <div className="bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-700 rounded-md px-4 py-1 text-xs text-neutral-400 w-52 text-center truncate">
               {appHost}/dashboard
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-[160px_1fr] min-h-[280px] sm:min-h-[310px]">
-          <div className="border-r border-border/40 p-3 bg-muted/10 hidden sm:block">
-            <div className="text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-wider mb-3 px-2">Panel</div>
+        <div className="grid grid-cols-1 sm:grid-cols-[180px_1fr] min-h-[300px]">
+          {/* Sidebar */}
+          <div className="border-r border-neutral-100 dark:border-zinc-800 p-3 bg-neutral-50/50 dark:bg-zinc-800/30 hidden sm:block">
+            <div className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wider mb-3 px-2">Panel</div>
             {[
               { icon: BarChart3, label: 'Resumen', active: false },
               { icon: DollarSign, label: 'Comisiones', active: true },
@@ -205,45 +160,51 @@ function AppMockup() {
               { icon: Award, label: 'Rangos', active: false },
               { icon: ShoppingBag, label: 'Tienda', active: false },
             ].map(item => (
-              <div key={item.label} className={cn('flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium mb-0.5', item.active ? 'bg-primary/12 text-primary font-semibold' : 'text-muted-foreground/70')}>
+              <div key={item.label} className={cn('flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium mb-0.5 transition-colors', item.active ? 'bg-primary/10 text-primary font-semibold' : 'text-neutral-500 dark:text-zinc-400 hover:bg-neutral-100 dark:hover:bg-zinc-700/50')}>
                 <item.icon className="w-3.5 h-3.5 shrink-0" />
                 {item.label}
               </div>
             ))}
           </div>
-          <div className="p-3.5 sm:p-4 space-y-3">
-            <div className="grid grid-cols-3 gap-2 sm:gap-3">
+
+          {/* Main content */}
+          <div className="p-4 sm:p-5 space-y-4 bg-white dark:bg-zinc-900">
+            <div className="grid grid-cols-3 gap-3">
               {[
-                { label: 'Comisiones', value: 'S/ 3,240', sub: '+12% mes', c: 'text-emerald-600 dark:text-emerald-400' },
-                { label: 'Mi Red', value: '48', sub: 'afiliados', c: 'text-primary' },
-                { label: 'Rango', value: 'Platino', sub: '→ Diamante', c: 'text-amber-600 dark:text-amber-400' },
+                { label: 'Comisiones', value: 'S/ 3,240', sub: '+12% mes', c: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-900/30' },
+                { label: 'Mi Red', value: '48', sub: 'afiliados', c: 'text-primary', bg: 'bg-primary/5 border-primary/10' },
+                { label: 'Rango', value: 'Platino', sub: '→ Diamante', c: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-900/20 border-amber-100 dark:border-amber-900/30' },
               ].map(s => (
-                <div key={s.label} className="bg-muted/30 rounded-xl p-2.5 sm:p-3 border border-border/40">
-                  <div className="text-[9px] sm:text-[10px] text-muted-foreground/70 mb-1">{s.label}</div>
-                  <div className="text-xs sm:text-sm font-bold text-foreground">{s.value}</div>
-                  <div className={cn('text-[9px] sm:text-[10px] font-medium mt-0.5', s.c)}>{s.sub}</div>
+                <div key={s.label} className={cn('rounded-xl p-3 border', s.bg)}>
+                  <div className="text-[10px] text-neutral-400 mb-1 font-medium">{s.label}</div>
+                  <div className="text-sm font-bold text-foreground">{s.value}</div>
+                  <div className={cn('text-[10px] font-semibold mt-0.5', s.c)}>{s.sub}</div>
                 </div>
               ))}
             </div>
-            <div className="bg-muted/20 rounded-xl p-3 sm:p-3.5 border border-border/40">
+
+            {/* Chart */}
+            <div className="bg-neutral-50 dark:bg-zinc-800/50 rounded-xl p-3.5 border border-neutral-100 dark:border-zinc-700/50">
               <div className="flex items-center justify-between mb-3">
-                <span className="text-[9px] sm:text-[10px] text-muted-foreground/70 font-medium">Comisiones — últimas 12 semanas</span>
-                <span className="text-[9px] sm:text-[10px] font-semibold text-primary">+S/ 890</span>
+                <span className="text-[10px] text-neutral-400 font-medium">Comisiones — 12 semanas</span>
+                <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">+S/ 890</span>
               </div>
-              <div className="flex items-end gap-0.5 sm:gap-1 h-[48px] sm:h-[60px]">
+              <div className="flex items-end gap-0.5 h-14">
                 {[28, 45, 38, 62, 50, 74, 58, 82, 68, 90, 78, 100].map((h, i) => (
-                  <div key={i} className={cn('flex-1 rounded-sm', i === 11 ? 'bg-primary' : 'bg-primary/20')} style={{ height: `${h}%` }} />
+                  <div key={i} className={cn('flex-1 rounded-sm transition-all', i === 11 ? 'bg-primary' : 'bg-primary/20')} style={{ height: `${h}%` }} />
                 ))}
               </div>
             </div>
-            <div className="space-y-1.5 sm:space-y-2">
+
+            {/* Activity feed */}
+            <div className="space-y-2">
               {[
-                { icon: DollarSign, text: 'Comisión binaria — Juan P.', val: '+S/ 120', ic: 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10' },
-                { icon: Users, text: 'Nuevo afiliado en red', val: '+1 afil.', ic: 'text-primary bg-primary/10' },
+                { icon: DollarSign, text: 'Comisión binaria — Juan P.', val: '+S/ 120', cls: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20' },
+                { icon: Users, text: 'Nuevo afiliado en red', val: '+1 afil.', cls: 'text-primary bg-primary/8' },
               ].map((item, i) => (
-                <div key={i} className="flex items-center gap-2.5 sm:gap-3 p-2 sm:p-2.5 rounded-xl bg-muted/20 border border-border/40">
-                  <div className={cn('w-6 h-6 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center flex-shrink-0', item.ic)}><item.icon className="w-3 sm:w-3.5 h-3 sm:h-3.5" /></div>
-                  <span className="text-xs text-foreground flex-1 truncate">{item.text}</span>
+                <div key={i} className="flex items-center gap-3 p-2.5 rounded-lg bg-neutral-50 dark:bg-zinc-800/50 border border-neutral-100 dark:border-zinc-700/50">
+                  <div className={cn('w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0', item.cls)}><item.icon className="w-3.5 h-3.5" /></div>
+                  <span className="text-xs text-foreground flex-1 truncate font-medium">{item.text}</span>
                   <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 shrink-0">{item.val}</span>
                 </div>
               ))}
@@ -252,65 +213,29 @@ function AppMockup() {
         </div>
       </div>
 
-      <div className="absolute -top-4 sm:-top-5 -right-1 sm:-right-7 bg-card border border-primary/20 rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2.5 sm:py-3 shadow-xl shadow-primary/5">
-        <div className="flex items-center gap-2 sm:gap-2.5">
-          <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-primary/10 flex items-center justify-center">
-            <Bell className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
+      {/* Floating notification cards */}
+      <div className="absolute -top-4 sm:-top-6 -right-2 sm:-right-8 bg-white dark:bg-zinc-900 border border-primary/20 rounded-xl px-4 py-3 shadow-xl shadow-primary/10 dark:shadow-primary/5">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+            <Bell className="w-4 h-4 text-primary" />
           </div>
           <div>
-            <div className="text-[10px] sm:text-[11px] text-muted-foreground leading-tight">Comisión acreditada</div>
+            <div className="text-[10px] text-neutral-400 leading-tight">Comisión acreditada</div>
             <div className="text-sm font-bold text-primary">+S/ 320.50</div>
           </div>
         </div>
       </div>
 
-      <div className="absolute -bottom-4 sm:-bottom-5 -left-1 sm:-left-7 bg-card border border-amber-500/20 rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2.5 sm:py-3 shadow-xl shadow-amber-500/5">
-        <div className="flex items-center gap-2 sm:gap-2.5">
-          <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-amber-500/10 flex items-center justify-center">
-            <Award className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-600 dark:text-amber-400" />
+      <div className="absolute -bottom-4 sm:-bottom-6 -left-2 sm:-left-8 bg-white dark:bg-zinc-900 border border-amber-400/20 rounded-xl px-4 py-3 shadow-xl shadow-amber-500/10">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
+            <Award className="w-4 h-4 text-amber-600 dark:text-amber-400" />
           </div>
           <div>
-            <div className="text-[10px] sm:text-[11px] text-muted-foreground leading-tight">Nuevo rango</div>
+            <div className="text-[10px] text-neutral-400 leading-tight">Nuevo rango</div>
             <div className="text-sm font-bold text-amber-600 dark:text-amber-400">Diamante alcanzado</div>
           </div>
         </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── testimonial carousel ─────────────────────────────────────────────────────
-function TestimonialCard({ t }: { t: (typeof allTestimonials)[0] }) {
-  return (
-    <div className="w-[280px] sm:w-[320px] shrink-0 bg-card border border-border/60 rounded-2xl p-5 mx-2">
-      <div className="flex gap-0.5 mb-3">
-        {Array.from({ length: 5 }).map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />)}
-      </div>
-      <p className="text-sm text-foreground/75 leading-relaxed mb-4">"{t.content}"</p>
-      <div className="flex items-center gap-3 pt-3.5 border-t border-border/50">
-        <img src={t.avatar} alt={t.name} className="w-9 h-9 rounded-full object-cover ring-2 ring-primary/15" />
-        <div className="flex-1 min-w-0">
-          <div className="text-sm font-semibold text-foreground leading-tight">{t.name}</div>
-          <div className="text-xs text-muted-foreground">{t.role}{(t as any).city ? `, ${(t as any).city}` : ''}</div>
-        </div>
-        <div className="text-sm font-bold text-emerald-600 dark:text-emerald-400 shrink-0">{t.earnings}</div>
-      </div>
-    </div>
-  );
-}
-
-function TestimonialsCarousel() {
-  const row1 = [...allTestimonials, ...allTestimonials];
-  const row2 = [...allTestimonials, ...allTestimonials].reverse();
-  return (
-    <div className="relative overflow-hidden">
-      <div className="absolute left-0 top-0 bottom-0 w-12 sm:w-24 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
-      <div className="absolute right-0 top-0 bottom-0 w-12 sm:w-24 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
-      <div className="flex mb-3 animate-marquee-left">
-        {row1.map((t, i) => <TestimonialCard key={`r1-${i}`} t={t} />)}
-      </div>
-      <div className="flex animate-marquee-right">
-        {row2.map((t, i) => <TestimonialCard key={`r2-${i}`} t={t} />)}
       </div>
     </div>
   );
@@ -324,86 +249,106 @@ export default function LandingPage() {
   const { user } = useAuthStore();
 
   return (
-    <div className="min-h-screen bg-background overflow-x-hidden">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 overflow-x-hidden">
       <Navbar />
 
       {/* ── HERO ──────────────────────────────────────────────────────────────*/}
-      <section className="relative pt-20 pb-0 overflow-hidden">
-        <div className="absolute inset-0 bg-dub-grid mask-fade-top" />
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-gradient-radial from-primary/5 to-transparent blur-[120px] pointer-events-none" />
+      <section className="relative min-h-screen flex flex-col justify-center overflow-hidden pt-16">
+        {/* Grid background */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage: `linear-gradient(to right, hsl(var(--border)/0.4) 1px, transparent 1px), linear-gradient(to bottom, hsl(var(--border)/0.4) 1px, transparent 1px)`,
+            backgroundSize: '48px 48px',
+          }}
+        />
+        {/* Radial gradient mask over grid */}
+        <div className="absolute inset-0 bg-gradient-to-b from-white/0 via-white/0 to-white dark:from-zinc-950/0 dark:via-zinc-950/0 dark:to-zinc-950 pointer-events-none" />
 
-        <div className="relative z-10 max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <Reveal>
-            <a href="#planes" className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 bg-background/90 border border-border/70 rounded-full text-xs sm:text-sm text-foreground hover:border-primary/50 transition-all mb-7 sm:mb-8 group shadow-sm backdrop-blur-sm">
-              <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shrink-0" />
-              <span className="font-medium">Nuevo: Bonos de rango Corona disponibles</span>
-              <span className="text-border mx-1 hidden sm:inline">·</span>
-              <span className="text-primary group-hover:text-primary/80 font-medium items-center gap-1 shrink-0 hidden sm:flex">
-                Ver más <ExternalLink className="w-3 h-3" />
-              </span>
-            </a>
-          </Reveal>
-
-          <Reveal delay={80}>
-            <h1 className="text-gold-glow text-[2.6rem] sm:text-6xl lg:text-7xl xl:text-[5.5rem] font-bold text-foreground leading-[1.05] tracking-[-0.02em] mb-5 sm:mb-6">
-              Construye tu red.<br />
-              <span className="text-gradient-animated">Cobra automático.</span>
-            </h1>
-          </Reveal>
-
-          <Reveal delay={150}>
-            <p className="text-base sm:text-lg lg:text-xl text-muted-foreground/80 max-w-xl sm:max-w-2xl mx-auto mb-8 sm:mb-10 leading-relaxed">
-              La plataforma MLM líder en Latinoamérica. Comisiones en tiempo real, red interactiva y tienda integrada.
-            </p>
-          </Reveal>
-
-          <Reveal delay={220}>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-8 sm:mb-10">
-              <Link
-                to={user ? '/dashboard' : '/registro'}
-                className="btn-gold-shimmer w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 sm:px-8 py-3.5 bg-foreground text-background font-semibold rounded-xl hover:opacity-90 active:scale-[0.98] transition-all text-base shadow-lg"
-              >
-                {user ? 'Ir a mi Panel' : 'Empezar gratis'}
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-              <Link
-                to="/planes"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 sm:px-8 py-3.5 bg-background/80 border border-border/70 text-foreground font-medium rounded-xl hover:border-primary/50 hover:text-primary transition-all text-base backdrop-blur-sm"
-              >
-                Ver planes
-              </Link>
-            </div>
-          </Reveal>
-
-          <Reveal delay={280}>
-            <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-xs sm:text-sm text-muted-foreground/70 mb-10 sm:mb-12">
-              {[
-                { icon: Lock, text: 'SSL 256-bit', color: 'text-emerald-600 dark:text-emerald-400' },
-                { icon: Shield, text: 'INDECOPI', color: 'text-primary' },
-                { icon: Check, text: 'Sin permanencia', color: 'text-primary' },
-                { icon: CreditCard, text: 'Pago quincenal', color: 'text-amber-600 dark:text-amber-400' },
-              ].map(item => (
-                <span key={item.text} className="flex items-center gap-1.5">
-                  <item.icon className={cn('w-3 sm:w-3.5 h-3 sm:h-3.5', item.color)} />
-                  {item.text}
-                </span>
-              ))}
-            </div>
-          </Reveal>
+        {/* Aura glow center */}
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] pointer-events-none">
+          <div className="w-full h-full rounded-full bg-gradient-radial from-primary/12 via-primary/4 to-transparent blur-3xl" style={{ background: 'radial-gradient(ellipse at center, hsl(var(--primary)/0.12) 0%, hsl(var(--primary)/0.04) 40%, transparent 70%)' }} />
         </div>
 
-        <Reveal delay={340} className="relative max-w-[1100px] mx-auto px-4 sm:px-10 lg:px-16 pb-0">
-          <div className="relative">
-            <AppMockup />
-            <div className="absolute bottom-0 left-0 right-0 h-32 sm:h-40 bg-gradient-to-t from-background to-transparent pointer-events-none" />
+        {/* Side auras */}
+        <div className="absolute top-1/4 -left-32 w-72 h-72 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, hsl(var(--primary)/0.08) 0%, transparent 70%)' }} />
+        <div className="absolute top-2/3 -right-32 w-96 h-96 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, hsl(43 90% 68% / 0.1) 0%, transparent 70%)' }} />
+
+        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 lg:py-28">
+          <div className="text-center max-w-4xl mx-auto">
+
+            {/* Badge */}
+            <Reveal>
+              <a href="#planes" className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-700 rounded-full text-xs sm:text-sm font-medium text-neutral-600 dark:text-neutral-300 hover:border-primary/40 hover:text-primary transition-all mb-8 group shadow-sm">
+                <span className="w-2 h-2 rounded-full bg-primary animate-pulse shrink-0" />
+                Nuevo: Bonos de rango Corona disponibles
+                <ArrowRight className="w-3.5 h-3.5 text-primary group-hover:translate-x-0.5 transition-transform" />
+              </a>
+            </Reveal>
+
+            {/* Headline */}
+            <Reveal delay={80}>
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-[5.5rem] font-bold text-neutral-900 dark:text-white leading-[1.04] tracking-[-0.03em] mb-6">
+                Construye tu red.
+                <br />
+                <span className="text-primary">Cobra automático.</span>
+              </h1>
+            </Reveal>
+
+            {/* Subheadline */}
+            <Reveal delay={140}>
+              <p className="text-lg sm:text-xl text-neutral-500 dark:text-neutral-400 max-w-2xl mx-auto mb-10 leading-relaxed">
+                La plataforma MLM líder en Latinoamérica. Comisiones en tiempo real, red interactiva y tienda integrada.
+              </p>
+            </Reveal>
+
+            {/* CTAs */}
+            <Reveal delay={200}>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-10">
+                <Link
+                  to={user ? '/dashboard' : '/registro'}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 font-semibold rounded-xl hover:bg-neutral-700 dark:hover:bg-neutral-100 active:scale-[0.98] transition-all text-base shadow-lg shadow-neutral-900/20 dark:shadow-white/10"
+                >
+                  {user ? 'Ir a mi Panel' : 'Empezar gratis'} <ArrowRight className="w-4 h-4" />
+                </Link>
+                <Link
+                  to="/planes"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-700 text-neutral-700 dark:text-neutral-200 font-medium rounded-xl hover:border-neutral-400 dark:hover:border-zinc-500 transition-all text-base"
+                >
+                  Ver planes
+                </Link>
+              </div>
+            </Reveal>
+
+            {/* Trust badges */}
+            <Reveal delay={250}>
+              <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-sm text-neutral-400 dark:text-neutral-500 mb-16">
+                {[
+                  { icon: Lock, text: 'SSL 256-bit' },
+                  { icon: Shield, text: 'INDECOPI' },
+                  { icon: Check, text: 'Sin permanencia' },
+                  { icon: CreditCard, text: 'Pago quincenal' },
+                ].map(item => (
+                  <span key={item.text} className="flex items-center gap-1.5">
+                    <item.icon className="w-3.5 h-3.5 text-primary/70" />
+                    {item.text}
+                  </span>
+                ))}
+              </div>
+            </Reveal>
           </div>
-        </Reveal>
+
+          {/* App mockup */}
+          <Reveal delay={300} className="px-2 sm:px-8 lg:px-16">
+            <AppMockup />
+          </Reveal>
+        </div>
       </section>
 
-      {/* ── STATS ─────────────────────────────────────────────────────────────*/}
-      <section className="py-12 sm:py-16 bg-muted/20">
-        <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-8 lg:gap-12">
+      {/* ── STATS BAR ─────────────────────────────────────────────────────────*/}
+      <section className="py-14 sm:py-20 border-y border-neutral-100 dark:border-zinc-800 bg-neutral-50 dark:bg-zinc-900/50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 lg:gap-16">
             {[
               { value: '12,540+', label: 'Afiliados activos', icon: Users, color: 'text-primary' },
               { value: 'S/ 2.8M+', label: 'Comisiones pagadas', icon: DollarSign, color: 'text-emerald-600 dark:text-emerald-400' },
@@ -412,9 +357,9 @@ export default function LandingPage() {
             ].map((stat, i) => (
               <Reveal key={stat.label} delay={i * 60}>
                 <div className="text-center">
-                  <stat.icon className={cn('w-4 h-4 sm:w-5 sm:h-5 mx-auto mb-2.5 sm:mb-3', stat.color)} />
-                  <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground tracking-tight">{stat.value}</div>
-                  <div className="text-xs sm:text-sm text-muted-foreground/80 mt-1 sm:mt-1.5">{stat.label}</div>
+                  <stat.icon className={cn('w-5 h-5 mx-auto mb-3', stat.color)} />
+                  <div className="text-3xl sm:text-4xl font-bold text-neutral-900 dark:text-white tracking-tight">{stat.value}</div>
+                  <div className="text-sm text-neutral-500 dark:text-neutral-400 mt-1.5">{stat.label}</div>
                 </div>
               </Reveal>
             ))}
@@ -423,112 +368,114 @@ export default function LandingPage() {
       </section>
 
       {/* ── BRANDS MARQUEE ────────────────────────────────────────────────────*/}
-      <section className="py-8 sm:py-12 border-y border-border/40 bg-muted/10">
-        <Reveal>
-          <p className="text-center text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-widest mb-6">
-            Pagos y certificaciones aceptadas
-          </p>
-        </Reveal>
-        <BrandsCarousel />
+      <section className="py-10 sm:py-14 bg-white dark:bg-zinc-950 overflow-hidden">
+        <p className="text-center text-xs font-semibold text-neutral-400 dark:text-neutral-500 uppercase tracking-widest mb-8">
+          Pagos y certificaciones aceptadas
+        </p>
+        <div className="relative">
+          <div className="absolute left-0 top-0 bottom-0 w-20 sm:w-40 bg-gradient-to-r from-white dark:from-zinc-950 to-transparent z-10 pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-0 w-20 sm:w-40 bg-gradient-to-l from-white dark:from-zinc-950 to-transparent z-10 pointer-events-none" />
+          <div className="flex animate-marquee-brands">
+            {[...brands, ...brands].map((name, i) => (
+              <div key={i} className="shrink-0 mx-3 px-5 py-2.5 bg-neutral-50 dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-800 rounded-full">
+                <span className="text-sm font-semibold text-neutral-500 dark:text-neutral-400 whitespace-nowrap">{name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
       </section>
 
-      <SectionDivider />
-
-      {/* ── FEATURES BENTO ────────────────────────────────────────────────────*/}
-      <section className="relative py-16 sm:py-24 overflow-hidden">
-        <div className="absolute inset-0 bg-dub-grid opacity-40 mask-fade-center" />
-        <div className="relative max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
-          <Reveal className="mb-10 sm:mb-14">
-            <span className="text-xs font-semibold text-primary uppercase tracking-widest mb-3 block">Plataforma</span>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight mb-3">
-              Todo lo que necesitas<br />para <span className="text-gradient-animated">crecer</span>
+      {/* ── FEATURES GRID ─────────────────────────────────────────────────────*/}
+      <section className="relative py-20 sm:py-28 bg-white dark:bg-zinc-950">
+        <div className="absolute inset-0 pointer-events-none opacity-30 dark:opacity-20"
+          style={{ backgroundImage: `linear-gradient(to right, hsl(var(--border)/0.6) 1px, transparent 1px), linear-gradient(to bottom, hsl(var(--border)/0.6) 1px, transparent 1px)`, backgroundSize: '64px 64px' }} />
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Reveal className="mb-14">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-neutral-100 dark:bg-zinc-800 text-xs font-semibold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider mb-4">
+              Plataforma
+            </div>
+            <h2 className="text-4xl sm:text-5xl font-bold text-neutral-900 dark:text-white tracking-tight mb-4">
+              Todo lo que necesitas para <span className="text-primary">crecer</span>
             </h2>
-            <p className="text-base sm:text-lg text-muted-foreground/80 max-w-xl">Cada herramienta resuelve un problema real del negocio multinivel.</p>
+            <p className="text-lg text-neutral-500 dark:text-neutral-400 max-w-xl">Cada herramienta resuelve un problema real del negocio multinivel.</p>
           </Reveal>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
-            {/* Card 1: Comisiones — wide */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Comisiones — wide */}
             <Reveal className="md:col-span-2">
-              <div className="h-full bg-card/70 border border-border/50 rounded-2xl p-5 sm:p-7 card-lift hover:border-emerald-500/25 group backdrop-blur-sm overflow-hidden">
-                <div className="flex items-start justify-between gap-4 mb-4">
+              <div className="h-full bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-800 rounded-2xl p-6 sm:p-8 hover:border-emerald-300 dark:hover:border-emerald-700/50 group transition-colors overflow-hidden">
+                <div className="flex items-start justify-between gap-4 mb-5">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
+                    <div className="w-11 h-11 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-900/30 flex items-center justify-center shrink-0">
                       <Wallet className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                     </div>
-                    <h3 className="text-base sm:text-lg font-bold text-foreground">Comisiones automáticas</h3>
+                    <h3 className="text-lg font-bold text-neutral-900 dark:text-white">Comisiones automáticas</h3>
                   </div>
                   <div className="text-right shrink-0">
-                    <div className="text-xl font-bold text-emerald-600 dark:text-emerald-400">+S/ 3,240</div>
-                    <div className="text-xs text-muted-foreground/60">último mes</div>
+                    <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">+S/ 3,240</div>
+                    <div className="text-xs text-neutral-400">último mes</div>
                   </div>
                 </div>
-                <p className="text-sm text-muted-foreground/80 leading-relaxed mb-5">7% directa · 4% binaria · 2% unilevel. Cálculo en tiempo real, pago cada 15 días.</p>
-                {/* mini chart */}
-                <div className="flex items-end gap-1 h-14 mb-4 px-1">
+                <p className="text-sm text-neutral-500 dark:text-neutral-400 leading-relaxed mb-6">7% directa · 4% binaria · 2% unilevel. Cálculo en tiempo real, pago cada 15 días.</p>
+                <div className="flex items-end gap-1 h-16 mb-5">
                   {[28, 45, 38, 62, 50, 74, 58, 82, 68, 90, 78, 100].map((h, i) => (
-                    <div key={i} className={cn('flex-1 rounded-sm transition-all group-hover:opacity-90', i === 11 ? 'bg-emerald-500' : 'bg-emerald-500/25')} style={{ height: `${h}%` }} />
+                    <div key={i} className={cn('flex-1 rounded-sm transition-all', i === 11 ? 'bg-emerald-500' : 'bg-emerald-500/20 group-hover:bg-emerald-500/30')} style={{ height: `${h}%` }} />
                   ))}
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {['7% Directa', '4% Binaria', '2% Unilevel', 'Pago quincenal'].map(tag => (
-                    <span key={tag} className="px-2.5 py-1 bg-emerald-500/8 text-emerald-700 dark:text-emerald-400 rounded-full text-xs font-medium border border-emerald-500/15">{tag}</span>
+                    <span key={tag} className="px-3 py-1 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 rounded-full text-xs font-semibold border border-emerald-100 dark:border-emerald-900/30">{tag}</span>
                   ))}
                 </div>
               </div>
             </Reveal>
 
-            {/* Card 2: Red genealógica — narrow */}
+            {/* Red genealógica */}
             <Reveal>
-              <div className="h-full bg-card/70 border border-border/50 rounded-2xl p-5 sm:p-7 card-lift hover:border-primary/25 group backdrop-blur-sm flex flex-col">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+              <div className="h-full bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-800 rounded-2xl p-6 sm:p-8 hover:border-primary/30 group transition-colors flex flex-col">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-11 h-11 rounded-xl bg-primary/8 border border-primary/15 flex items-center justify-center shrink-0">
                     <Network className="w-5 h-5 text-primary" />
                   </div>
-                  <h3 className="text-base sm:text-lg font-bold text-foreground">Red genealógica</h3>
+                  <h3 className="text-lg font-bold text-neutral-900 dark:text-white">Red genealógica</h3>
                 </div>
-                <p className="text-sm text-muted-foreground/80 leading-relaxed mb-5 flex-1">Panel visual con árbol binario, zoom dinámico y estadísticas por nodo en tiempo real.</p>
-                {/* mini network tree */}
+                <p className="text-sm text-neutral-500 dark:text-neutral-400 leading-relaxed mb-6 flex-1">Panel visual con árbol binario, zoom dinámico y estadísticas por nodo en tiempo real.</p>
                 <div className="relative flex flex-col items-center gap-3 py-2">
-                  {/* root */}
-                  <div className="w-8 h-8 rounded-full bg-primary/15 border-2 border-primary/40 flex items-center justify-center">
-                    <div className="w-3 h-3 rounded-full bg-primary" />
+                  <div className="w-9 h-9 rounded-full bg-primary/10 border-2 border-primary/40 flex items-center justify-center">
+                    <div className="w-3.5 h-3.5 rounded-full bg-primary" />
                   </div>
-                  {/* level 1 */}
-                  <div className="flex items-center gap-6">
-                    <div className="w-7 h-7 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center"><div className="w-2.5 h-2.5 rounded-full bg-primary/60" /></div>
-                    <div className="w-7 h-7 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center"><div className="w-2.5 h-2.5 rounded-full bg-primary/60" /></div>
+                  <div className="flex items-center gap-8">
+                    {[0, 1].map(i => <div key={i} className="w-8 h-8 rounded-full bg-primary/10 border border-primary/25 flex items-center justify-center"><div className="w-2.5 h-2.5 rounded-full bg-primary/60" /></div>)}
                   </div>
-                  {/* level 2 */}
                   <div className="flex items-center gap-2">
                     {Array.from({ length: 4 }).map((_, i) => (
-                      <div key={i} className="w-5 h-5 rounded-full bg-muted border border-border/60 flex items-center justify-center"><div className="w-2 h-2 rounded-full bg-muted-foreground/30" /></div>
+                      <div key={i} className="w-6 h-6 rounded-full bg-neutral-100 dark:bg-zinc-800 border border-neutral-200 dark:border-zinc-700 flex items-center justify-center"><div className="w-2 h-2 rounded-full bg-neutral-300 dark:bg-zinc-500" /></div>
                     ))}
                   </div>
-                  <div className="text-xs text-muted-foreground/70 font-medium">48 afiliados en tu red</div>
+                  <div className="text-xs text-neutral-400 font-medium">48 afiliados en tu red</div>
                 </div>
               </div>
             </Reveal>
 
-            {/* Card 3: Sistema de rangos — narrow */}
+            {/* Sistema de rangos */}
             <Reveal>
-              <div className="h-full bg-card/70 border border-border/50 rounded-2xl p-5 sm:p-7 card-lift hover:border-amber-500/25 group backdrop-blur-sm flex flex-col">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0">
+              <div className="h-full bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-800 rounded-2xl p-6 sm:p-8 hover:border-amber-300 dark:hover:border-amber-700/50 group transition-colors flex flex-col">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-11 h-11 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-900/30 flex items-center justify-center shrink-0">
                     <Award className="w-5 h-5 text-amber-600 dark:text-amber-400" />
                   </div>
-                  <h3 className="text-base sm:text-lg font-bold text-foreground">Sistema de rangos</h3>
+                  <h3 className="text-lg font-bold text-neutral-900 dark:text-white">Sistema de rangos</h3>
                 </div>
-                <p className="text-sm text-muted-foreground/80 leading-relaxed mb-5 flex-1">Bronce → Corona. Cada nivel desbloquea bonos progresivos exclusivos.</p>
-                {/* rank ladder */}
+                <p className="text-sm text-neutral-500 dark:text-neutral-400 leading-relaxed mb-6 flex-1">Bronce → Corona. Cada nivel desbloquea bonos progresivos exclusivos.</p>
                 <div className="space-y-2">
                   {[
-                    { name: 'Bronce', color: 'bg-amber-700/20 text-amber-700 dark:text-amber-500 border-amber-700/30', w: 'w-1/3' },
-                    { name: 'Plata', color: 'bg-slate-400/15 text-slate-600 dark:text-slate-300 border-slate-400/30', w: 'w-1/2' },
-                    { name: 'Oro', color: 'bg-yellow-400/15 text-yellow-700 dark:text-yellow-400 border-yellow-400/30', w: 'w-2/3' },
-                    { name: 'Platino', color: 'bg-cyan-400/15 text-cyan-700 dark:text-cyan-400 border-cyan-400/30', w: 'w-3/4' },
-                    { name: 'Corona', color: 'bg-primary/15 text-primary border-primary/30', w: 'w-full' },
+                    { name: 'Bronce', cls: 'bg-amber-50 dark:bg-amber-900/15 text-amber-700 dark:text-amber-400 border-amber-100 dark:border-amber-900/20', w: 'w-1/3' },
+                    { name: 'Plata', cls: 'bg-slate-50 dark:bg-slate-800/30 text-slate-600 dark:text-slate-300 border-slate-100 dark:border-slate-700/30', w: 'w-1/2' },
+                    { name: 'Oro', cls: 'bg-yellow-50 dark:bg-yellow-900/15 text-yellow-700 dark:text-yellow-400 border-yellow-100 dark:border-yellow-900/20', w: 'w-2/3' },
+                    { name: 'Platino', cls: 'bg-cyan-50 dark:bg-cyan-900/15 text-cyan-700 dark:text-cyan-400 border-cyan-100 dark:border-cyan-900/20', w: 'w-4/5' },
+                    { name: 'Corona', cls: 'bg-primary/8 text-primary border-primary/15', w: 'w-full' },
                   ].map(r => (
-                    <div key={r.name} className={cn('h-6 rounded-full flex items-center px-3 border text-xs font-semibold transition-all group-hover:opacity-90', r.color, r.w)}>
+                    <div key={r.name} className={cn('h-7 rounded-full flex items-center px-3.5 border text-xs font-semibold transition-all', r.cls, r.w)}>
                       {r.name}
                     </div>
                   ))}
@@ -536,37 +483,35 @@ export default function LandingPage() {
               </div>
             </Reveal>
 
-            {/* Card 4: Tienda — wide */}
+            {/* Tienda — wide */}
             <Reveal className="md:col-span-2">
-              <div className="h-full bg-card/70 border border-border/50 rounded-2xl p-5 sm:p-7 card-lift hover:border-blue-500/25 group backdrop-blur-sm flex flex-col sm:flex-row gap-5 overflow-hidden">
+              <div className="h-full bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-800 rounded-2xl p-6 sm:p-8 hover:border-blue-300 dark:hover:border-blue-700/50 group transition-colors flex flex-col sm:flex-row gap-6 overflow-hidden">
                 <div className="flex-1 flex flex-col min-w-0">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center shrink-0">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-11 h-11 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/30 flex items-center justify-center shrink-0">
                       <ShoppingBag className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                     </div>
-                    <h3 className="text-base sm:text-lg font-bold text-foreground">Tienda integrada</h3>
+                    <h3 className="text-lg font-bold text-neutral-900 dark:text-white">Tienda integrada</h3>
                   </div>
-                  <p className="text-sm text-muted-foreground/80 leading-relaxed mb-4 flex-1">Catálogo completo. Cada compra activa comisiones automáticas en toda tu red de forma instantánea.</p>
-                  <div className="flex flex-wrap gap-2 mb-4">
+                  <p className="text-sm text-neutral-500 dark:text-neutral-400 leading-relaxed mb-5 flex-1">Catálogo completo. Cada compra activa comisiones automáticas en toda tu red de forma instantánea.</p>
+                  <div className="flex flex-wrap gap-2 mb-5">
                     {['Vitaminas', 'Bienestar', 'Nutrición', 'Cuidado personal'].map(tag => (
-                      <span key={tag} className="px-2.5 py-1 bg-blue-500/8 text-blue-700 dark:text-blue-400 rounded-full text-xs font-medium border border-blue-500/15">{tag}</span>
+                      <span key={tag} className="px-3 py-1 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 rounded-full text-xs font-semibold border border-blue-100 dark:border-blue-900/30">{tag}</span>
                     ))}
                   </div>
-                  <Link to="/tienda" className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:gap-2.5 transition-all group/link">
+                  <Link to="/tienda" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:gap-3 transition-all group/link">
                     Explorar tienda <ArrowRight className="w-4 h-4 group-hover/link:translate-x-0.5 transition-transform" />
                   </Link>
                 </div>
-                {/* mini product grid with real photos */}
-                <div className="grid grid-cols-2 gap-2 sm:w-48 shrink-0">
+                <div className="grid grid-cols-2 gap-2 sm:w-44 shrink-0">
                   {[
                     'https://images.pexels.com/photos/3762879/pexels-photo-3762879.jpeg?auto=compress&cs=tinysrgb&w=200',
                     'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=200',
                     'https://images.pexels.com/photos/3997993/pexels-photo-3997993.jpeg?auto=compress&cs=tinysrgb&w=200',
                     'https://images.pexels.com/photos/4041392/pexels-photo-4041392.jpeg?auto=compress&cs=tinysrgb&w=200',
                   ].map((src, i) => (
-                    <div key={i} className="rounded-xl aspect-square border border-border/40 overflow-hidden bg-muted/30 relative">
-                      <img src={src} alt="" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                    <div key={i} className="rounded-xl aspect-square border border-neutral-100 dark:border-zinc-800 overflow-hidden">
+                      <img src={src} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     </div>
                   ))}
                 </div>
@@ -576,54 +521,50 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <SectionDivider />
-
       {/* ── DARK PROMO ────────────────────────────────────────────────────────*/}
-      <section className="relative py-16 sm:py-24 lg:py-28 overflow-hidden bg-zinc-950 dark:bg-[#0c0a08]">
-        <div className="absolute inset-0 bg-dub-grid-dark" />
-        <div className="absolute -top-1/4 -left-1/4 w-[70%] h-[70%] rounded-full bg-primary/10 dark:bg-primary/15 blur-[120px]" />
-        <div className="absolute -bottom-1/4 -right-1/4 w-[60%] h-[60%] rounded-full bg-primary/5 dark:bg-amber-900/20 blur-[100px]" />
+      <section className="relative py-20 sm:py-28 overflow-hidden bg-neutral-950">
+        {/* Grid */}
+        <div className="absolute inset-0 pointer-events-none"
+          style={{ backgroundImage: `linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px)`, backgroundSize: '48px 48px' }} />
+        {/* Auras */}
+        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, hsl(var(--primary)/0.15) 0%, transparent 65%)' }} />
+        <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, hsl(43 90% 68% / 0.10) 0%, transparent 65%)' }} />
 
-        <div className="relative max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-10 sm:gap-12 lg:gap-16 items-center">
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             <Reveal>
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 border border-white/20 rounded-full text-xs font-medium text-white/70 mb-5 sm:mb-6 backdrop-blur-sm">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/8 border border-white/10 rounded-full text-xs font-semibold text-white/60 mb-6">
                 <Sparkles className="w-3.5 h-3.5 text-primary" />
                 Sistema multinivel inteligente
               </div>
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-[1.08] mb-4 sm:mb-5 tracking-tight">
-                Potencia tu negocio<br />
-                <span className="text-gradient-animated">al máximo nivel</span>
+              <h2 className="text-4xl sm:text-5xl font-bold text-white leading-[1.08] mb-5 tracking-tight">
+                Potencia tu negocio<br />al <span className="text-primary">máximo nivel</span>
               </h2>
-              <p className="text-sm sm:text-base lg:text-lg text-white/60 leading-relaxed mb-7 sm:mb-8 max-w-lg">
+              <p className="text-lg text-white/50 leading-relaxed mb-8 max-w-lg">
                 Mientras duermes, el sistema calcula y distribuye comisiones a toda tu red. Sin errores, sin retrasos.
               </p>
-              {/* social proof */}
-              <div className="flex items-center gap-3 mb-7 sm:mb-8">
+              <div className="flex items-center gap-3 mb-8">
                 <div className="flex -space-x-2">
                   {[
                     'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=60',
                     'https://images.pexels.com/photos/1680172/pexels-photo-1680172.jpeg?auto=compress&cs=tinysrgb&w=60',
                     'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=60',
+                    'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=60',
                   ].map((src, i) => (
-                    <img key={i} src={src} alt="" className="w-8 h-8 rounded-full border-2 border-zinc-800 object-cover" />
+                    <img key={i} src={src} alt="" className="w-8 h-8 rounded-full border-2 border-neutral-800 object-cover" />
                   ))}
                 </div>
-                <div className="text-xs text-white/50">
-                  <span className="text-white font-semibold">12,540+</span> emprendedores ya confían en Cluv 360
+                <div className="text-sm text-white/40">
+                  <span className="text-white font-semibold">12,540+</span> emprendedores confían en nosotros
                 </div>
               </div>
               <div className="flex flex-col sm:flex-row gap-3">
-                <Link
-                  to={user ? '/dashboard' : '/registro'}
-                  className="btn-gold-shimmer inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-3.5 bg-primary text-primary-foreground font-semibold rounded-xl hover:opacity-90 transition-all shadow-lg shadow-primary/20 text-base"
-                >
+                <Link to={user ? '/dashboard' : '/registro'}
+                  className="inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-white text-neutral-900 font-semibold rounded-xl hover:bg-neutral-100 transition-all shadow-lg text-base">
                   Empezar ahora <ArrowRight className="w-4 h-4" />
                 </Link>
-                <Link
-                  to="/contacto"
-                  className="inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-3.5 bg-white/10 border border-white/20 text-white font-medium rounded-xl hover:bg-white/15 transition-all backdrop-blur-sm text-base"
-                >
+                <Link to="/contacto"
+                  className="inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-white/5 border border-white/15 text-white font-medium rounded-xl hover:bg-white/10 transition-all text-base">
                   Hablar con ventas
                 </Link>
               </div>
@@ -632,22 +573,19 @@ export default function LandingPage() {
             <Reveal delay={100}>
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { icon: DollarSign, title: 'Comisiones en tiempo real', desc: 'Calculadas al instante en cada compra de tu red.', color: 'text-emerald-400', bg: 'bg-emerald-500/15 border-emerald-500/25' },
-                  { icon: Zap, title: 'Pago automático', desc: 'Transferencias quincenales sin trámite de tu parte.', color: 'text-amber-400', bg: 'bg-amber-500/15 border-amber-500/25' },
-                  { icon: Globe, title: 'Red internacional', desc: 'Tus afiliados pueden estar en toda Latinoamérica.', color: 'text-blue-400', bg: 'bg-blue-500/15 border-blue-500/25' },
-                  { icon: TrendingUp, title: 'Crecimiento probado', desc: '+340% anual. Números reales, no promesas.', color: 'text-rose-400', bg: 'bg-rose-500/15 border-rose-500/25' },
-                ].map((item, i) => {
-                  const Icon = item.icon;
-                  return (
-                    <div key={i} className={cn('border rounded-2xl p-4 sm:p-5 hover:opacity-90 transition-all', item.bg)}>
-                      <div className={cn('w-9 h-9 rounded-xl flex items-center justify-center mb-3', item.bg)}>
-                        <Icon className={cn('w-5 h-5', item.color)} />
-                      </div>
-                      <div className="text-xs sm:text-sm font-semibold text-white mb-1 sm:mb-1.5">{item.title}</div>
-                      <div className="text-xs text-white/55 leading-relaxed">{item.desc}</div>
+                  { icon: DollarSign, title: 'Comisiones en tiempo real', desc: 'Calculadas al instante en cada compra de tu red.', border: 'border-emerald-500/20', bg: 'bg-emerald-500/8', cls: 'text-emerald-400' },
+                  { icon: Zap, title: 'Pago automático', desc: 'Transferencias quincenales sin trámite de tu parte.', border: 'border-amber-500/20', bg: 'bg-amber-500/8', cls: 'text-amber-400' },
+                  { icon: Globe, title: 'Red internacional', desc: 'Tus afiliados pueden estar en toda Latinoamérica.', border: 'border-blue-500/20', bg: 'bg-blue-500/8', cls: 'text-blue-400' },
+                  { icon: TrendingUp, title: 'Crecimiento probado', desc: '+340% anual. Números reales, no promesas.', border: 'border-rose-500/20', bg: 'bg-rose-500/8', cls: 'text-rose-400' },
+                ].map((item, i) => (
+                  <div key={i} className={cn('border rounded-2xl p-5 transition-all hover:bg-white/5', item.border, item.bg)}>
+                    <div className={cn('w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center mb-4')}>
+                      <item.icon className={cn('w-5 h-5', item.cls)} />
                     </div>
-                  );
-                })}
+                    <div className="text-sm font-semibold text-white mb-1.5">{item.title}</div>
+                    <div className="text-xs text-white/45 leading-relaxed">{item.desc}</div>
+                  </div>
+                ))}
               </div>
             </Reveal>
           </div>
@@ -655,33 +593,29 @@ export default function LandingPage() {
       </section>
 
       {/* ── HOW IT WORKS ──────────────────────────────────────────────────────*/}
-      <section className="relative py-16 sm:py-24 overflow-hidden">
-        <div className="absolute inset-0 bg-dub-grid opacity-30 mask-fade-center" />
-        <div className="relative max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
-          <Reveal className="mb-10 sm:mb-14">
-            <span className="text-xs font-semibold text-primary uppercase tracking-widest mb-3 block">Proceso</span>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight">
-              De cero a <span className="text-gradient-animated">comisiones</span><br className="hidden sm:block" /> en minutos
+      <section className="py-20 sm:py-28 bg-white dark:bg-zinc-950">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Reveal className="mb-14">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-neutral-100 dark:bg-zinc-800 text-xs font-semibold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider mb-4">
+              Proceso
+            </div>
+            <h2 className="text-4xl sm:text-5xl font-bold text-neutral-900 dark:text-white tracking-tight mb-4">
+              De cero a <span className="text-primary">comisiones</span><br className="hidden sm:block" /> en minutos
             </h2>
           </Reveal>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-neutral-100 dark:bg-zinc-800 border border-neutral-100 dark:border-zinc-800 rounded-2xl overflow-hidden">
             {steps.map((step, i) => (
               <Reveal key={step.n} delay={i * 80}>
-                <div className="relative bg-card/60 border border-border/50 rounded-2xl p-6 sm:p-7 card-lift backdrop-blur-sm h-full group">
-                  <div className="flex items-start justify-between mb-5">
-                    <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
-                      <step.icon className="w-5 h-5 text-primary" />
+                <div className="relative bg-white dark:bg-zinc-950 p-8 sm:p-10 h-full group hover:bg-neutral-50 dark:hover:bg-zinc-900 transition-colors">
+                  <div className="flex items-start justify-between mb-6">
+                    <div className="w-12 h-12 rounded-xl bg-neutral-100 dark:bg-zinc-800 border border-neutral-200 dark:border-zinc-700 flex items-center justify-center shrink-0 group-hover:bg-primary/10 group-hover:border-primary/20 transition-colors">
+                      <step.icon className="w-5 h-5 text-neutral-600 dark:text-neutral-300 group-hover:text-primary transition-colors" />
                     </div>
-                    <span className="text-4xl sm:text-5xl font-black text-border/20 dark:text-border/15 select-none leading-none">{step.n}</span>
+                    <span className="text-5xl font-black text-neutral-100 dark:text-zinc-800 select-none leading-none">{step.n}</span>
                   </div>
-                  <h3 className="text-base sm:text-lg font-bold text-foreground mb-2">{step.title}</h3>
-                  <p className="text-muted-foreground/75 leading-relaxed text-sm">{step.desc}</p>
-                  {i < steps.length - 1 && (
-                    <div className="hidden sm:flex absolute top-1/2 -right-3 -translate-y-1/2 z-10 w-6 h-6 rounded-full bg-background border border-border/60 items-center justify-center">
-                      <ArrowRight className="w-3 h-3 text-muted-foreground/50" />
-                    </div>
-                  )}
+                  <h3 className="text-lg font-bold text-neutral-900 dark:text-white mb-2">{step.title}</h3>
+                  <p className="text-neutral-500 dark:text-neutral-400 leading-relaxed text-sm">{step.desc}</p>
                 </div>
               </Reveal>
             ))}
@@ -689,74 +623,43 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <SectionDivider />
-
       {/* ── TESTIMONIALS ──────────────────────────────────────────────────────*/}
-      <section className="py-16 sm:py-24">
-        <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 mb-10 sm:mb-14">
-          <Reveal className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
+      <section className="py-20 sm:py-28 bg-neutral-50 dark:bg-zinc-900/40 border-y border-neutral-100 dark:border-zinc-800">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Reveal className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-14">
             <div>
-              <span className="text-xs font-semibold text-primary uppercase tracking-widest mb-3 block">Testimonios</span>
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight">
-                Miles ya <span className="text-gradient-animated">ganan</span><br className="hidden sm:block" /> con Cluv 360
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-neutral-200 dark:bg-zinc-800 text-xs font-semibold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider mb-4">
+                Testimonios
+              </div>
+              <h2 className="text-4xl sm:text-5xl font-bold text-neutral-900 dark:text-white tracking-tight">
+                Miles ya ganan<br className="hidden sm:block" /> con Cluv 360
               </h2>
-              <p className="text-base sm:text-lg text-muted-foreground/80 mt-3 max-w-lg">Historias reales de emprendedores en toda Latinoamérica.</p>
+              <p className="text-lg text-neutral-500 dark:text-neutral-400 mt-3 max-w-lg">Historias reales de emprendedores en toda Latinoamérica.</p>
             </div>
             <div className="flex items-center gap-3 shrink-0">
-              <div className="flex -space-x-2">
-                {allTestimonials.slice(0,4).map((t, i) => (
-                  <img key={i} src={t.avatar} alt={t.name} className="w-8 h-8 rounded-full border-2 border-background object-cover" />
-                ))}
+              <div className="flex gap-0.5">
+                {Array.from({length: 5}).map((_,i) => <Star key={i} className="w-5 h-5 fill-amber-400 text-amber-400" />)}
               </div>
-              <div className="text-sm text-muted-foreground/70">
-                <span className="text-foreground font-semibold">4.9/5</span> · 2,300+ reseñas
+              <div className="text-sm text-neutral-500">
+                <span className="text-neutral-900 dark:text-white font-semibold">4.9</span>/5 · 2,300+ reseñas
               </div>
             </div>
           </Reveal>
-        </div>
 
-        {/* photo banner with stats */}
-        <Reveal className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 mb-10 sm:mb-14">
-          <div className="relative rounded-2xl overflow-hidden">
-            <img
-              src="https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg?auto=compress&cs=tinysrgb&w=1260&h=400&fit=crop"
-              alt="Emprendedores Cluv 360"
-              className="w-full h-48 sm:h-64 object-cover object-top"
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-zinc-950/85 via-zinc-950/50 to-transparent" />
-            <div className="absolute inset-0 flex items-center px-6 sm:px-10">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-10 w-full sm:w-auto">
-                {[
-                  { value: '12,540+', label: 'Afiliados activos' },
-                  { value: 'S/ 2.8M+', label: 'Comisiones pagadas' },
-                  { value: '8 países', label: 'Presencia regional' },
-                  { value: '+340%', label: 'Crecimiento anual' },
-                ].map(stat => (
-                  <div key={stat.label}>
-                    <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">{stat.value}</div>
-                    <div className="text-xs sm:text-sm text-white/60 mt-0.5">{stat.label}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </Reveal>
-
-        {/* testimonial cards grid */}
-        <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 mb-10 sm:mb-14">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {/* Bento testimonial grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
             {allTestimonials.slice(0, 3).map((t, i) => (
-              <Reveal key={t.id} delay={i * 80}>
-                <div className="bg-card border border-border/50 rounded-2xl p-6 flex flex-col h-full card-lift">
+              <Reveal key={t.id} delay={i * 70}>
+                <div className="bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-800 rounded-2xl p-6 flex flex-col h-full hover:border-neutral-300 dark:hover:border-zinc-700 transition-colors">
                   <div className="flex gap-0.5 mb-4">
-                    {Array.from({ length: 5 }).map((_, si) => <Star key={si} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />)}
+                    {Array.from({ length: 5 }).map((_, si) => <Star key={si} className="w-4 h-4 fill-amber-400 text-amber-400" />)}
                   </div>
-                  <p className="text-sm text-foreground/75 leading-relaxed flex-1 mb-5">"{t.content}"</p>
-                  <div className="flex items-center gap-3 pt-4 border-t border-border/40">
-                    <img src={t.avatar} alt={t.name} className="w-9 h-9 rounded-full object-cover ring-2 ring-primary/15 shrink-0" />
+                  <p className="text-sm text-neutral-600 dark:text-neutral-300 leading-relaxed flex-1 mb-5">"{t.content}"</p>
+                  <div className="flex items-center gap-3 pt-4 border-t border-neutral-100 dark:border-zinc-800">
+                    <img src={t.avatar} alt={t.name} className="w-10 h-10 rounded-full object-cover ring-2 ring-neutral-100 dark:ring-zinc-800 shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <div className="text-sm font-semibold text-foreground leading-tight truncate">{t.name}</div>
-                      <div className="text-xs text-muted-foreground">{t.role}{(t as any).city ? `, ${(t as any).city}` : ''}</div>
+                      <div className="text-sm font-semibold text-neutral-900 dark:text-white leading-tight truncate">{t.name}</div>
+                      <div className="text-xs text-neutral-400">{t.role}{(t as any).city ? `, ${(t as any).city}` : ''}</div>
                     </div>
                     <div className="text-sm font-bold text-emerald-600 dark:text-emerald-400 shrink-0">{t.earnings}</div>
                   </div>
@@ -764,162 +667,185 @@ export default function LandingPage() {
               </Reveal>
             ))}
           </div>
+
+          {/* Photo banner */}
+          <Reveal>
+            <div className="relative rounded-2xl overflow-hidden">
+              <img
+                src="https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg?auto=compress&cs=tinysrgb&w=1260&h=350&fit=crop"
+                alt="Emprendedores Cluv 360"
+                className="w-full h-48 sm:h-64 object-cover object-top"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-neutral-950/90 via-neutral-950/60 to-neutral-950/20" />
+              <div className="absolute inset-0 flex items-center px-8 sm:px-12">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 sm:gap-12">
+                  {[
+                    { value: '12,540+', label: 'Afiliados activos' },
+                    { value: 'S/ 2.8M+', label: 'Comisiones pagadas' },
+                    { value: '8 países', label: 'Presencia regional' },
+                    { value: '+340%', label: 'Crecimiento anual' },
+                  ].map(stat => (
+                    <div key={stat.label}>
+                      <div className="text-2xl sm:text-3xl font-bold text-white tracking-tight">{stat.value}</div>
+                      <div className="text-xs sm:text-sm text-white/50 mt-0.5">{stat.label}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </Reveal>
         </div>
-
-        <TestimonialsCarousel />
       </section>
-
-      <SectionDivider />
 
       {/* ── RANKS ─────────────────────────────────────────────────────────────*/}
       {ranks.filter(r => r.is_active !== false).length > 0 && (
-        <>
-          <section className="py-16 sm:py-24">
-            <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="grid lg:grid-cols-[1fr_1.4fr] gap-10 sm:gap-12 lg:gap-16 items-start">
-                <Reveal>
-                  <span className="text-xs font-semibold text-primary uppercase tracking-widest mb-3 block">Rangos</span>
-                  <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight mb-4">
-                    Cada nivel,<br /><span className="text-gradient-animated">más ingresos</span>
-                  </h2>
-                  <p className="text-muted-foreground/80 leading-relaxed mb-6 sm:mb-8 max-w-md text-sm sm:text-base">
-                    El sistema premia tu esfuerzo con bonos progresivos. Desde Bronce hasta el nivel máximo Corona.
-                  </p>
-                  <Link to={user ? '/dashboard/rangos' : '/registro'} className="inline-flex items-center gap-2 px-6 py-3 bg-foreground text-background font-semibold rounded-xl hover:opacity-90 transition-all">
-                    {user ? 'Ver mis rangos' : 'Ver todos los rangos'} <ArrowRight className="w-4 h-4" />
-                  </Link>
-                </Reveal>
+        <section className="py-20 sm:py-28 bg-white dark:bg-zinc-950">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid lg:grid-cols-[1fr_1.4fr] gap-12 lg:gap-20 items-start">
+              <Reveal>
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-900/30 text-xs font-semibold text-amber-700 dark:text-amber-400 uppercase tracking-wider mb-4">
+                  <Award className="w-3 h-3" /> Rangos
+                </div>
+                <h2 className="text-4xl sm:text-5xl font-bold text-neutral-900 dark:text-white tracking-tight mb-4">
+                  Cada nivel,<br /><span className="text-primary">más ingresos</span>
+                </h2>
+                <p className="text-neutral-500 dark:text-neutral-400 leading-relaxed mb-8 text-base max-w-md">
+                  El sistema premia tu esfuerzo con bonos progresivos. Desde Bronce hasta el nivel máximo Corona.
+                </p>
+                <Link to={user ? '/dashboard/rangos' : '/registro'} className="inline-flex items-center gap-2 px-6 py-3 bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 font-semibold rounded-xl hover:bg-neutral-700 dark:hover:bg-neutral-100 transition-all">
+                  {user ? 'Ver mis rangos' : 'Ver todos los rangos'} <ArrowRight className="w-4 h-4" />
+                </Link>
+              </Reveal>
 
-                <Reveal delay={80}>
-                  <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
-                    {ranks.filter(r => r.is_active !== false).slice(0, 6).map(r => (
-                      <div key={r.id} className={cn('bg-card/70 rounded-2xl p-4 sm:p-5 border transition-all card-lift text-center backdrop-blur-sm', r.border_color || 'border-border/50 hover:border-primary/25')}>
-                        <div className="w-10 h-10 rounded-xl bg-muted/60 flex items-center justify-center mx-auto mb-2">
-                          <Award className={cn('w-5 h-5', r.color || 'text-amber-500')} />
-                        </div>
-                        <div className={cn('font-bold text-xs sm:text-sm mb-1', r.color || 'text-foreground')}>{r.name}</div>
-                        <div className="text-xs text-muted-foreground/70 mb-1">Bono</div>
-                        <div className="text-sm sm:text-base font-bold text-foreground">{formatPrice(r.bonus, currency, currencySymbol, exchangeRate)}</div>
+              <Reveal delay={80}>
+                <div className="grid grid-cols-3 gap-3">
+                  {ranks.filter(r => r.is_active !== false).slice(0, 6).map(r => (
+                    <div key={r.id} className="bg-white dark:bg-zinc-900 rounded-2xl p-4 sm:p-5 border border-neutral-200 dark:border-zinc-800 hover:border-neutral-300 dark:hover:border-zinc-700 transition-colors text-center">
+                      <div className="w-10 h-10 rounded-xl bg-neutral-50 dark:bg-zinc-800 flex items-center justify-center mx-auto mb-2.5">
+                        <Award className={cn('w-5 h-5', r.color || 'text-amber-500')} />
                       </div>
-                    ))}
-                  </div>
-                </Reveal>
-              </div>
+                      <div className={cn('font-bold text-xs sm:text-sm mb-1', r.color || 'text-neutral-700 dark:text-neutral-200')}>{r.name}</div>
+                      <div className="text-xs text-neutral-400 mb-1">Bono</div>
+                      <div className="text-sm font-bold text-neutral-900 dark:text-white">{formatPrice(r.bonus, currency, currencySymbol, exchangeRate)}</div>
+                    </div>
+                  ))}
+                </div>
+              </Reveal>
             </div>
-          </section>
-          <SectionDivider />
-        </>
+          </div>
+        </section>
       )}
 
       {/* ── PLANS ─────────────────────────────────────────────────────────────*/}
       {plans.length > 0 && (
-        <>
-          <section className="py-16 sm:py-24" id="planes">
-            <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
-              <Reveal className="mb-10 sm:mb-14">
-                <span className="text-xs font-semibold text-primary uppercase tracking-widest mb-3 block">Precios</span>
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-foreground tracking-tight leading-tight mb-4">
-                  Planes flexibles<br />que crecen contigo
-                </h2>
-                <p className="text-base sm:text-lg text-muted-foreground/80 max-w-lg">Comienza gratis y escala cuando tu negocio lo necesite.</p>
-              </Reveal>
+        <section className="py-20 sm:py-28 bg-neutral-50 dark:bg-zinc-900/30 border-y border-neutral-100 dark:border-zinc-800" id="planes">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <Reveal className="mb-14">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-neutral-200 dark:bg-zinc-800 text-xs font-semibold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider mb-4">
+                Precios
+              </div>
+              <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-neutral-900 dark:text-white tracking-tight mb-4">
+                Planes flexibles<br />que crecen contigo
+              </h2>
+              <p className="text-lg text-neutral-500 dark:text-neutral-400 max-w-lg">Comienza gratis y escala cuando tu negocio lo necesite.</p>
+            </Reveal>
 
-              <Reveal delay={60}>
-                <div className={cn('grid gap-4', plans.length === 1 ? 'grid-cols-1 max-w-sm' : plans.length === 2 ? 'grid-cols-1 sm:grid-cols-2 max-w-2xl mx-auto' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3')}>
-                  {plans.map(plan => {
-                    const isFree = plan.is_free || plan.price === 0;
-                    const isCurrent = user && (user as any).plan === plan.slug;
-                    return (
-                      <div key={plan.id} className={cn(
-                        'bg-card rounded-xl p-6 flex flex-col relative transition-all card-lift',
-                        plan.is_popular
-                          ? 'border-2 border-primary ring-4 ring-primary/10'
-                          : 'border border-border hover:border-primary/30',
-                      )}>
-                        {plan.badge && (
-                          <div className={cn('absolute -top-2.5 left-4 text-xs font-bold px-3 py-1 rounded-full', plan.is_popular ? 'bg-primary text-primary-foreground' : 'bg-amber-500 text-white')}>
-                            {plan.badge}
-                          </div>
-                        )}
-                        {isCurrent && (
-                          <div className="absolute -top-2.5 right-4 text-xs font-bold px-3 py-1 rounded-full bg-emerald-500 text-white">Actual</div>
-                        )}
-                        <div className="mb-4">
-                          <h3 className="text-lg font-bold text-foreground">{plan.name}</h3>
-                          {plan.description && <p className="text-sm text-muted-foreground mt-1">{plan.description}</p>}
+            <Reveal delay={60}>
+              <div className={cn('grid gap-4', plans.length === 1 ? 'grid-cols-1 max-w-sm' : plans.length === 2 ? 'grid-cols-1 sm:grid-cols-2 max-w-2xl mx-auto' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3')}>
+                {plans.map(plan => {
+                  const isFree = plan.is_free || plan.price === 0;
+                  const isCurrent = user && (user as any).plan === plan.slug;
+                  return (
+                    <div key={plan.id} className={cn(
+                      'bg-white dark:bg-zinc-900 rounded-2xl p-7 flex flex-col relative transition-all',
+                      plan.is_popular
+                        ? 'border-2 border-neutral-900 dark:border-white ring-4 ring-neutral-900/8 dark:ring-white/8 shadow-xl'
+                        : 'border border-neutral-200 dark:border-zinc-800 hover:border-neutral-300 dark:hover:border-zinc-700',
+                    )}>
+                      {plan.badge && (
+                        <div className={cn('absolute -top-3 left-5 text-xs font-bold px-3 py-1 rounded-full', plan.is_popular ? 'bg-neutral-900 dark:bg-white text-white dark:text-neutral-900' : 'bg-primary text-primary-foreground')}>
+                          {plan.badge}
                         </div>
-                        <div className="mb-4">
-                          <span className="text-3xl font-bold text-foreground tracking-tight">{isFree ? 'Gratis' : formatPrice(plan.price, currency, currencySymbol, exchangeRate)}</span>
-                          {!isFree && <span className="text-sm text-muted-foreground font-normal">/mes</span>}
-                          {plan.trial_days > 0 && <span className="text-xs text-emerald-600 dark:text-emerald-400 block mt-1">{plan.trial_days} días de prueba</span>}
-                        </div>
-                        {isCurrent ? (
-                          <div className="py-2.5 text-center border border-emerald-500/30 rounded-lg bg-emerald-500/5 mb-5">
-                            <span className="text-sm font-medium text-emerald-600 dark:text-emerald-400">Tu plan actual</span>
-                          </div>
-                        ) : (
-                          <Link
-                            to={user ? '/dashboard/mi-plan' : `/registro?plan=${plan.slug}`}
-                            className={cn(
-                              'py-2.5 rounded-lg text-sm font-semibold text-center transition-all block mb-5',
-                              plan.is_popular
-                                ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-                                : 'border border-border hover:bg-muted text-foreground',
-                            )}
-                          >
-                            {isFree ? 'Comenzar gratis' : 'Activar plan'}
-                          </Link>
-                        )}
-                        <ul className="space-y-1.5 mt-auto">
-                          {(plan.features || []).slice(0, 5).map((f: string) => (
-                            <li key={f} className="flex items-start gap-2 text-sm text-muted-foreground">
-                              <Check className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
-                              <span>{f}</span>
-                            </li>
-                          ))}
-                        </ul>
+                      )}
+                      {isCurrent && (
+                        <div className="absolute -top-3 right-5 text-xs font-bold px-3 py-1 rounded-full bg-emerald-500 text-white">Actual</div>
+                      )}
+                      <div className="mb-5">
+                        <h3 className="text-xl font-bold text-neutral-900 dark:text-white">{plan.name}</h3>
+                        {plan.description && <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">{plan.description}</p>}
                       </div>
-                    );
-                  })}
-                </div>
-              </Reveal>
+                      <div className="mb-6 pb-6 border-b border-neutral-100 dark:border-zinc-800">
+                        <span className="text-4xl font-bold text-neutral-900 dark:text-white tracking-tight">{isFree ? 'Gratis' : formatPrice(plan.price, currency, currencySymbol, exchangeRate)}</span>
+                        {!isFree && <span className="text-sm text-neutral-400 font-normal">/mes</span>}
+                        {plan.trial_days > 0 && <div className="text-xs text-emerald-600 dark:text-emerald-400 mt-1.5 font-medium">{plan.trial_days} días de prueba gratis</div>}
+                      </div>
+                      {isCurrent ? (
+                        <div className="py-3 text-center border border-emerald-200 dark:border-emerald-800/50 rounded-xl bg-emerald-50 dark:bg-emerald-900/10 mb-6">
+                          <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">Tu plan actual</span>
+                        </div>
+                      ) : (
+                        <Link
+                          to={user ? '/dashboard/mi-plan' : `/registro?plan=${plan.slug}`}
+                          className={cn(
+                            'py-3 rounded-xl text-sm font-semibold text-center transition-all block mb-6',
+                            plan.is_popular
+                              ? 'bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-100'
+                              : 'border border-neutral-200 dark:border-zinc-700 hover:bg-neutral-50 dark:hover:bg-zinc-800 text-neutral-900 dark:text-white',
+                          )}
+                        >
+                          {isFree ? 'Comenzar gratis' : 'Activar plan'}
+                        </Link>
+                      )}
+                      <ul className="space-y-2.5 mt-auto">
+                        {(plan.features || []).slice(0, 5).map((f: string) => (
+                          <li key={f} className="flex items-start gap-2.5 text-sm text-neutral-600 dark:text-neutral-300">
+                            <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
+                            <span>{f}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  );
+                })}
+              </div>
+            </Reveal>
 
-              <Reveal delay={120}>
-                <p className="text-center text-sm text-muted-foreground/60 mt-8">
-                  <Link to="/planes" className="text-primary font-medium hover:underline">Ver comparación completa de planes →</Link>
-                </p>
-              </Reveal>
-            </div>
-          </section>
-          <SectionDivider />
-        </>
+            <Reveal delay={120}>
+              <p className="text-center text-sm text-neutral-400 mt-8">
+                <Link to="/planes" className="text-primary font-semibold hover:underline">Ver comparación completa de planes →</Link>
+              </p>
+            </Reveal>
+          </div>
+        </section>
       )}
 
       {/* ── STORE ─────────────────────────────────────────────────────────────*/}
       <StoreSection />
 
       {/* ── FAQ ───────────────────────────────────────────────────────────────*/}
-      <section className="relative py-16 sm:py-24">
-        <div className="absolute inset-0 bg-dub-grid opacity-30 mask-fade-center" />
-        <div className="relative max-w-[720px] mx-auto px-4 sm:px-6 lg:px-8">
-          <Reveal className="mb-10 sm:mb-12">
-            <span className="text-xs font-semibold text-primary uppercase tracking-widest mb-3 block">FAQ</span>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight">
-              Preguntas <span className="text-gradient-animated">frecuentes</span>
+      <section className="py-20 sm:py-28 bg-white dark:bg-zinc-950">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Reveal className="mb-14">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-neutral-100 dark:bg-zinc-800 text-xs font-semibold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider mb-4">
+              FAQ
+            </div>
+            <h2 className="text-4xl sm:text-5xl font-bold text-neutral-900 dark:text-white tracking-tight">
+              Preguntas <span className="text-primary">frecuentes</span>
             </h2>
           </Reveal>
+
           <Reveal delay={60}>
-            <div className="divide-y divide-border/40 border border-border/50 rounded-2xl overflow-hidden">
+            <div className="border border-neutral-200 dark:border-zinc-800 rounded-2xl overflow-hidden divide-y divide-neutral-100 dark:divide-zinc-800">
               {faqItems.map((faq, i) => (
-                <div key={i} className={cn('bg-card/60 transition-colors', openFaq === i && 'bg-muted/20')}>
-                  <button onClick={() => setOpenFaq(openFaq === i ? null : i)} className="w-full flex items-center justify-between px-5 sm:px-7 py-4 sm:py-5 text-left gap-4">
-                    <span className="text-sm sm:text-base font-semibold text-foreground">{faq.question}</span>
-                    <ChevronDown className={cn('w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground/60 transition-transform shrink-0', openFaq === i && 'rotate-180')} />
+                <div key={i} className={cn('bg-white dark:bg-zinc-950 transition-colors', openFaq === i && 'bg-neutral-50 dark:bg-zinc-900')}>
+                  <button onClick={() => setOpenFaq(openFaq === i ? null : i)} className="w-full flex items-center justify-between px-6 sm:px-8 py-5 text-left gap-4">
+                    <span className="text-sm sm:text-base font-semibold text-neutral-900 dark:text-white">{faq.question}</span>
+                    <ChevronDown className={cn('w-5 h-5 text-neutral-400 transition-transform duration-200 shrink-0', openFaq === i && 'rotate-180')} />
                   </button>
-                  <div className={cn('grid transition-all', openFaq === i ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0')}>
+                  <div className={cn('grid transition-all duration-200', openFaq === i ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0')}>
                     <div className="overflow-hidden">
-                      <div className="px-5 sm:px-7 pb-5 sm:pb-6">
-                        <p className="text-sm sm:text-base text-muted-foreground/80 leading-relaxed">{faq.answer}</p>
+                      <div className="px-6 sm:px-8 pb-6">
+                        <p className="text-sm sm:text-base text-neutral-500 dark:text-neutral-400 leading-relaxed">{faq.answer}</p>
                       </div>
                     </div>
                   </div>
@@ -930,44 +856,48 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── CTA ───────────────────────────────────────────────────────────────*/}
-      <section className="relative py-20 sm:py-28 lg:py-36 overflow-hidden bg-zinc-950 dark:bg-[#0b0905]">
-        <div className="absolute inset-0 bg-dub-grid-dark" />
-        <div className="absolute top-[-30%] left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full bg-primary/10 dark:bg-primary/15 blur-[100px]" />
-        <div className="absolute bottom-[-20%] left-1/2 -translate-x-1/2 w-[400px] h-[250px] rounded-full bg-primary/5 dark:bg-amber-900/20 blur-[80px]" />
+      {/* ── FINAL CTA ─────────────────────────────────────────────────────────*/}
+      <section className="relative py-24 sm:py-36 overflow-hidden bg-neutral-950">
+        {/* Grid */}
+        <div className="absolute inset-0 pointer-events-none"
+          style={{ backgroundImage: `linear-gradient(to right, rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.025) 1px, transparent 1px)`, backgroundSize: '48px 48px' }} />
+        {/* Aura */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] pointer-events-none">
+          <div className="w-full h-full" style={{ background: 'radial-gradient(ellipse at center top, hsl(var(--primary)/0.2) 0%, transparent 65%)' }} />
+        </div>
 
-        <div className="relative z-10 max-w-[700px] mx-auto px-4 sm:px-6 text-center">
+        <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 text-center">
           <Reveal>
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/8 border border-white/10 rounded-full text-xs font-medium text-white/60 mb-6 sm:mb-8 backdrop-blur-sm">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/6 border border-white/10 rounded-full text-xs font-semibold text-white/50 mb-8">
               <Zap className="w-3.5 h-3.5 text-primary" />
               Sin tarjeta de crédito
             </div>
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-white mb-3 sm:mb-4 leading-[1.05] tracking-tight">
+            <h2 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white mb-4 leading-[1.04] tracking-tight">
               Tu red no espera.
             </h2>
-            <p className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-5 text-gradient-animated">
+            <p className="text-3xl sm:text-4xl font-bold mb-5 text-primary">
               Empieza hoy mismo.
             </p>
-            <p className="text-sm sm:text-base lg:text-lg text-white/45 max-w-md sm:max-w-lg mx-auto mb-10 sm:mb-12 leading-relaxed">
-              Unete a miles de emprendedores que ya construyen libertad financiera con Cluv 360.
+            <p className="text-base sm:text-lg text-white/40 max-w-lg mx-auto mb-12 leading-relaxed">
+              Únete a miles de emprendedores que ya construyen libertad financiera con Cluv 360.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-10 sm:mb-12">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-10">
               <Link
                 to={user ? '/dashboard' : '/registro'}
-                className="btn-gold-shimmer w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 sm:px-9 py-4 bg-white text-zinc-900 font-semibold rounded-xl hover:opacity-90 active:scale-[0.98] transition-all shadow-2xl shadow-white/10 text-base"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-neutral-900 font-semibold rounded-xl hover:bg-neutral-100 active:scale-[0.98] transition-all shadow-2xl shadow-white/10 text-base"
               >
                 {user ? 'Ir a mi Panel' : 'Crear cuenta gratis'} <ArrowRight className="w-5 h-5" />
               </Link>
               <Link
                 to="/contacto"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 sm:px-9 py-4 bg-white/5 border border-white/12 text-white font-medium rounded-xl hover:bg-white/10 transition-all text-base backdrop-blur-sm"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/5 border border-white/10 text-white font-medium rounded-xl hover:bg-white/8 transition-all text-base"
               >
                 Hablar con ventas
               </Link>
             </div>
-            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 lg:gap-8 text-xs sm:text-sm text-white/35">
+            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 text-sm text-white/30">
               {['Cuenta gratuita', 'Sin permanencia', 'Pago quincenal', 'Soporte 24/7'].map(t => (
-                <span key={t} className="flex items-center gap-1.5 sm:gap-2"><Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white/45" /> {t}</span>
+                <span key={t} className="flex items-center gap-2"><Check className="w-4 h-4 text-white/40" /> {t}</span>
               ))}
             </div>
           </Reveal>
