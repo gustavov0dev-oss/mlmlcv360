@@ -25,7 +25,7 @@ const timeline = [
 
 export default function NosotrosPage() {
   return (
-    <div className="h-screen bg-background overflow-y-auto overflow-x-hidden">
+    <div className="min-h-screen bg-background">
       <Navbar />
       {/* Hero */}
       <section className="py-24 bg-muted/30">

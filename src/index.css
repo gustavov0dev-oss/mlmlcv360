@@ -243,6 +243,8 @@
 html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
+  /* Account for fixed navbar height when scrolling to anchors */
+  scroll-padding-top: 80px;
 }
 
 body {

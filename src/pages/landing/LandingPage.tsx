@@ -157,7 +157,7 @@ export default function LandingPage() {
   const { user } = useAuthStore();
 
   return (
-    <div className="h-screen bg-background overflow-y-auto overflow-x-hidden">
+    <div className="min-h-screen bg-background">
       <Navbar />
 
       {/* ── HERO ──────────────────────────────────────────────────────────── */}

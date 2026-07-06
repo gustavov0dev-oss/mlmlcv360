@@ -275,7 +275,7 @@ export default function PagoPage() {
   // ── Yape confirm screen ──
   if (paymentStep === 'confirm' && isYape && selectedGateway) {
     return (
-      <div className="h-screen bg-background overflow-y-auto">
+      <div className="min-h-screen bg-background">
         <Navbar />
         <div className="pt-20 pb-16 flex items-center justify-center px-4">
           <div className="bg-card border border-border rounded-2xl p-8 w-full max-w-md shadow-xl">
@@ -349,7 +349,7 @@ export default function PagoPage() {
   // ── Success screen ──
   if (paymentStep === 'success') {
     return (
-      <div className="h-screen bg-background overflow-y-auto">
+      <div className="min-h-screen bg-background">
         <Navbar />
         <div className="pt-20 pb-16 flex items-center justify-center px-4">
           <div className="bg-card border border-border rounded-2xl p-8 w-full max-w-md shadow-xl text-center">
@@ -388,7 +388,7 @@ export default function PagoPage() {
   // ── Loading screen ──
   if (plansLoading || gatewaysLoading) {
     return (
-      <div className="h-screen bg-background overflow-y-auto flex flex-col">
+      <div className="min-h-screen bg-background flex flex-col">
         <Navbar />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
@@ -404,7 +404,7 @@ export default function PagoPage() {
   // ── No paid plans ──
   if (!plan) {
     return (
-      <div className="h-screen bg-background overflow-y-auto flex flex-col">
+      <div className="min-h-screen bg-background flex flex-col">
         <Navbar />
         <div className="flex-1 flex items-center justify-center px-4">
           <div className="text-center max-w-sm">
@@ -425,7 +425,7 @@ export default function PagoPage() {
 
   // ── Main payment screen ──
   return (
-    <div className="h-screen bg-background overflow-y-auto flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
 
       <div className="flex-1 pt-20 pb-16">

@@ -59,7 +59,7 @@ const categoryColors: Record<string, string> = {
 
 export default function BlogPage() {
   return (
-    <div className="h-screen bg-background overflow-y-auto overflow-x-hidden">
+    <div className="min-h-screen bg-background">
       <Navbar />
       <section className="py-24">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
