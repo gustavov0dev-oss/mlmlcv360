@@ -345,10 +345,13 @@ export default function DashboardHeader() {
 
   return (
     <>
-      <header className="h-16 border-b border-border bg-background flex items-center px-4 lg:px-6 sticky top-0 z-30 gap-3">
+      <header className={cn(
+        'h-16 border-b border-border bg-background/95 backdrop-blur-md flex items-center px-3 sm:px-4 lg:px-6 sticky top-0 z-30 transition-all duration-300',
+        searchOpen && 'lg:pr-2'
+      )}>
 
         {/* Logo — mobile only (desktop sidebar already has it) */}
-        <Link to="/" className="flex-shrink-0 flex lg:hidden">
+        <Link to="/" className="flex-shrink-0 flex lg:hidden active:scale-95 transition-transform">
           <Logo value={logoValue} fallbackText={companyName} pixelSize={logoSizes.navbar || 28} />
         </Link>
 
@@ -390,12 +393,12 @@ export default function DashboardHeader() {
         </div>
 
         {/* Right controls */}
-        <div className="ml-auto flex items-center gap-1 flex-shrink-0">
+        <div className="ml-auto flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
 
           {/* Mobile search icon */}
           <button
             onClick={() => { setSearchOpen(v => !v); setSidebarOpen(false); setTimeout(() => inputRef.current?.focus(), 50); }}
-            className="lg:hidden w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted/60 text-muted-foreground hover:text-foreground transition-colors"
+            className="lg:hidden w-10 h-10 sm:w-9 sm:h-9 rounded-xl sm:rounded-full flex items-center justify-center hover:bg-muted/60 active:bg-muted text-muted-foreground active:text-foreground transition-colors"
             aria-label="Buscar"
           >
             <Search className="w-5 h-5" />
@@ -403,7 +406,7 @@ export default function DashboardHeader() {
 
           {/* Link to public site */}
           <Link to="/"
-            className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted/60 text-muted-foreground hover:text-foreground transition-colors"
+            className="w-10 h-10 sm:w-9 sm:h-9 rounded-xl sm:rounded-full flex items-center justify-center hover:bg-muted/60 active:bg-muted text-muted-foreground hover:text-foreground transition-colors hidden sm:flex"
           >
             <ExternalLink className="w-5 h-5" />
           </Link>
@@ -411,7 +414,7 @@ export default function DashboardHeader() {
           {/* Theme toggle */}
           <button
             onClick={() => setTheme(isDark ? 'light' : 'dark')}
-            className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted/60 text-muted-foreground hover:text-foreground transition-colors"
+            className="w-10 h-10 sm:w-9 sm:h-9 rounded-xl sm:rounded-full flex items-center justify-center hover:bg-muted/60 active:bg-muted text-muted-foreground hover:text-foreground transition-colors hidden sm:flex"
           >
             {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
           </button>
@@ -421,11 +424,11 @@ export default function DashboardHeader() {
             <button
               id="bell-btn"
               onClick={() => { setNotifOpen(v => !v); if (!notifOpen) fetchNotifications(); }}
-              className="relative w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted/60 text-muted-foreground hover:text-foreground transition-colors"
+              className="relative w-10 h-10 sm:w-9 sm:h-9 rounded-xl sm:rounded-full flex items-center justify-center hover:bg-muted/60 active:bg-muted text-muted-foreground hover:text-foreground transition-colors"
             >
               <Bell className="w-5 h-5" />
               {unread > 0 && (
-                <span className="absolute top-0.5 right-0.5 min-w-[16px] h-4 px-1 bg-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                <span className="absolute -top-0.5 -right-0.5 sm:top-0.5 sm:right-0.5 min-w-[18px] h-[18px] sm:min-w-[16px] sm:h-4 px-1 bg-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-sm ring-2 ring-background">
                   {unread > 9 ? '9+' : unread}
                 </span>
               )}
@@ -497,7 +500,7 @@ export default function DashboardHeader() {
           <div className="relative hidden lg:block" ref={userMenuRef}>
             <button
               onClick={() => setUserMenuOpen(v => !v)}
-              className="flex items-center gap-2 px-2 py-1.5 rounded-full border border-border/60 hover:bg-muted/50 transition-all duration-200 ml-1"
+              className="flex items-center gap-2 px-2.5 py-2 rounded-full border border-border/60 hover:bg-muted/50 active:bg-muted transition-all duration-200 ml-1"
             >
               <div className="w-7 h-7 rounded-full overflow-hidden bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center flex-shrink-0">
                 {user?.avatar_url ? (
@@ -573,7 +576,7 @@ export default function DashboardHeader() {
           {/* Hamburger — mobile only */}
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="lg:hidden w-9 h-9 flex items-center justify-center text-foreground hover:text-foreground transition-colors"
+            className="lg:hidden w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center rounded-xl sm:rounded-full hover:bg-muted/60 active:bg-muted text-foreground transition-colors"
             aria-label={sidebarOpen ? 'Cerrar menú' : 'Abrir menú'}
           >
             {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -583,29 +586,29 @@ export default function DashboardHeader() {
 
       {/* Mobile search bar — full-width below nav */}
       {searchOpen && (
-        <div className="lg:hidden fixed top-16 left-0 right-0 z-[45] bg-background border-b border-border shadow-lg">
-          <div className="px-4 py-3">
+        <div className="lg:hidden fixed top-16 left-0 right-0 bottom-0 z-[45] bg-background/98 backdrop-blur-sm">
+          <div className="px-4 py-4 safe-area-inset-top">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <input
                 ref={inputRef}
                 type="text"
                 value={query}
                 onChange={e => setQuery(e.target.value)}
                 placeholder="Buscar usuarios, productos..."
-                className="w-full pl-10 pr-10 py-2.5 bg-muted/50 border border-border rounded-xl text-sm text-foreground outline-none focus:border-border focus:bg-card transition-colors"
+                className="w-full pl-12 pr-12 py-3.5 bg-muted/50 border border-border rounded-2xl text-base text-foreground outline-none focus:border-primary/40 focus:bg-card transition-colors"
                 autoFocus
               />
               <button
                 onClick={() => { setSearchOpen(false); setQuery(''); setResults([]); }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-xl bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
             {/* Results */}
             {query.length >= 2 && (
-              <div className="mt-2 bg-card border border-border rounded-xl overflow-hidden max-h-[60vh] overflow-y-auto">
+              <div className="mt-3 bg-card border border-border rounded-2xl overflow-hidden max-h-[70vh] overflow-y-auto shadow-xl">
                 <SearchResultsList />
               </div>
             )}

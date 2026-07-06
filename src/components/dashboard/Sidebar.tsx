@@ -397,7 +397,11 @@ export default function Sidebar() {
       {/* Mobile backdrop — moderate blur */}
       {sidebarOpen && (
         <div
-          className="fixed top-16 left-0 right-0 bottom-0 z-[45] bg-black/40 backdrop-blur-[2px] lg:hidden"
+          className={cn(
+            'fixed top-16 left-0 right-0 bottom-0 z-[45] lg:hidden transition-opacity duration-300',
+            sidebarOpen ? 'opacity-100' : 'opacity-0'
+          )}
+          style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 100%)' }}
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -553,21 +557,21 @@ export default function Sidebar() {
       {/* ─── Mobile Sidebar — Bottom Sheet ──────────────────────── */}
       <div
         className={cn(
-          'fixed bottom-0 left-0 right-0 z-[55] lg:hidden transition-transform duration-300 ease-out',
+          'fixed bottom-0 left-0 right-0 z-[55] lg:hidden transition-transform duration-300 ease-out will-change-transform',
           sidebarOpen ? 'translate-y-0' : 'translate-y-full',
         )}
       >
-        <div className="bg-background rounded-t-3xl border-t border-border shadow-2xl max-w-full overflow-hidden">
+        <div className="bg-background rounded-t-3xl border-t border-border/50 shadow-2xl max-w-full overflow-hidden">
           {/* Handle */}
           <div className="flex justify-center pt-3 pb-2">
-            <div className="w-10 h-1 rounded-full bg-muted-foreground/20" />
+            <div className="w-10 h-1 rounded-full bg-muted-foreground/25" />
           </div>
 
           {/* Header — styled like landing nav user card, clickable to profile */}
           <div className="px-4 pb-3">
             <button
               onClick={() => { navigate('/dashboard/perfil'); setSidebarOpen(false); }}
-              className="w-full flex items-center gap-3 p-3 bg-gradient-to-r from-primary/8 to-muted/30 border border-border/50 rounded-2xl text-left active:scale-[0.98] transition-transform"
+              className="w-full flex items-center gap-3 p-3.5 bg-gradient-to-r from-primary/8 to-muted/30 border border-border/50 rounded-2xl text-left active:scale-[0.98] transition-transform shadow-sm"
             >
               <UserAvatar size="lg" />
               <div className="min-w-0 flex-1">
@@ -593,7 +597,7 @@ export default function Sidebar() {
           </div>
 
           {/* Scrollable nav */}
-          <div className="px-4 pb-2 overflow-y-auto max-h-[60vh] overflow-x-hidden">
+          <div className="px-4 pb-2 overflow-y-auto max-h-[55vh] overflow-x-hidden" style={{ paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom))' }}>
             {/* Grid for simple items */}
             {(() => {
               const simple = navItems.filter(item => !item.children);
@@ -609,14 +613,14 @@ export default function Sidebar() {
                         to={item.href!}
                         onClick={() => setSidebarOpen(false)}
                         className={cn(
-                          'flex flex-col items-center gap-1.5 py-3 rounded-xl transition-colors text-center',
+                          'flex flex-col items-center gap-2 py-3.5 rounded-2xl transition-all text-center active:scale-95',
                           active
-                            ? 'bg-primary/10 text-primary'
-                            : 'bg-muted/40 text-foreground hover:bg-muted/60 active:scale-95',
+                            ? 'bg-primary/12 text-primary shadow-sm'
+                            : 'bg-muted/40 text-foreground hover:bg-muted/60 active:bg-muted',
                         )}
                       >
                         <item.icon className="w-5 h-5" />
-                        <span className="text-xs font-medium leading-tight">{item.label}</span>
+                        <span className="text-xs font-semibold leading-tight">{item.label}</span>
                       </Link>
                     );
                   })}
@@ -635,18 +639,18 @@ export default function Sidebar() {
             ))}
 
             {/* Quick shortcuts */}
-            <div className="flex gap-2 mt-4 pt-4 border-t border-border">
+            <div className="flex gap-2 mt-4 pt-4 border-t border-border/60">
               <Link
                 to="/tienda"
                 onClick={() => setSidebarOpen(false)}
-                className="flex-1 py-2.5 flex items-center justify-center gap-2 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:bg-primary/90 transition-colors"
+                className="flex-1 py-3 flex items-center justify-center gap-2 bg-primary text-primary-foreground rounded-2xl text-sm font-bold hover:bg-primary/90 active:scale-[0.98] transition-all shadow-sm"
               >
                 <ShoppingBag className="w-4 h-4" />
                 Tienda
               </Link>
               <button
                 onClick={() => setShowLogoutConfirm(true)}
-                className="w-12 flex items-center justify-center border border-red-400/40 text-red-500 rounded-xl hover:bg-red-500/10 transition-colors flex-shrink-0"
+                className="w-14 flex items-center justify-center border border-red-400/40 text-red-500 rounded-2xl hover:bg-red-500/10 active:scale-95 transition-all flex-shrink-0"
                 aria-label="Cerrar sesión"
               >
                 <LogOut className="w-4 h-4" />
@@ -654,7 +658,7 @@ export default function Sidebar() {
             </div>
           </div>
 
-          <div className="h-6" />
+          <div className="h-2" />
         </div>
       </div>
 

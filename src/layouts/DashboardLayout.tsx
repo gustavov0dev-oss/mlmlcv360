@@ -111,7 +111,7 @@ export default function DashboardLayout() {
       <div className={cn('flex-1 flex flex-col min-w-0 transition-all duration-300 lg:ml-auto',
         sidebarCollapsed ? 'lg:ml-[72px]' : 'lg:ml-[260px]')}>
         <DashboardHeader />
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-background">
+        <main className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 lg:p-8 bg-background dashboard-scroll">
           <DashboardContent />
         </main>
       </div>
