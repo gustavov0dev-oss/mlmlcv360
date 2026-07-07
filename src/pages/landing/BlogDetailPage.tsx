@@ -1,117 +1,156 @@
 import { Link, useParams } from '@/lib/router';
 import Navbar from '@/components/landing/Navbar';
 import Footer from '@/components/landing/Footer';
-import { Clock, Eye, ChevronRight, Share2, Bookmark, ThumbsUp, Facebook } from 'lucide-react';
+import { Reveal } from '@/components/landing/Reveal';
+import { Clock, Eye, ChevronRight, Share2, Bookmark, ThumbsUp, Play, ArrowLeft, FileText, Video, Newspaper } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 
-const articles: Record<string, any> = {
-  'estrategias-duplicar-red-90-dias': {
-    title: 'Estrategias para duplicar tu red en 90 días',
-    category: 'Estrategia',
-    type: 'video',
+interface RelatedItem { slug: string; title: string; image: string; type: string; }
+interface Article {
+  title: string; category: string; type: 'article' | 'video' | 'news';
+  image: string; videoUrl?: string; duration?: string; views?: number; date: string;
+  author: { name: string; role: string; avatar: string };
+  content: string; related: RelatedItem[];
+}
+
+const articles: Record<string, Article> = {
+  'alcanzar-rango-diamante-6-meses': {
+    title: 'Cómo alcanzar el rango Diamante en 6 meses', category: 'Estrategia', type: 'article',
     image: 'https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=1200',
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-    duration: '12:45',
-    views: 3420,
-    date: '15 Jun 2024',
-    author: { name: 'Gustavo Ortiz', role: 'CEO', avatar: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=100' },
-    content: `
-      <p>En este artículo te compartiremos las 5 estrategias más efectivas que nuestros afiliados Diamante han utilizado para duplicar sus redes en menos de 3 meses.</p>
-      <h2>1. Seguimiento sistemático</h2>
-      <p>Tener un sistema de seguimiento automatizado más el toque personal marca la diferencia.</p>
-      <h2>2. Eventos semanales</h2>
-      <p>Los líderes Diamante realizan mínimo 2 presentaciones semanales.</p>
-      <h2>3. Mentoría uno a uno</h2>
-      <p>Dedicar tiempo a los afiliados con mayor potencial multiplica resultados.</p>
-      <h2>4. Redes sociales inteligentes</h2>
-      <p>Comparte tu historia, no solo el producto.</p>
-      <h2>5. Duplicación de procesos</h2>
-      <p>Documenta todo lo que funcione y enséñalo a tu equipo.</p>
-    `,
+    date: '15 Jun 2025', author: { name: 'Carlos Mendoza', role: 'Líder Diamante', avatar: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=100' },
+    content: `<p>Alcanzar el rango Diamante no es cuestión de suerte, sino de sistema. En este artículo te comparto el método exacto que usé para llegar ahí en 6 meses.</p><h2>1. Define tu meta mensual</h2><p>Desglosa el volumen requerido en metas semanales. Si necesitas S/ 50,000 en volumen, son S/ 12,500 por semana.</p><h2>2. Enfócate en retener, no solo en reclutar</h2><p>Un afiliado activo vale 10 veces más que uno nuevo. Dedica el 60% de tu tiempo a retención.</p><h2>3. Duplica tu sistema</h2><p>Documenta todo lo que funciona y enséñalo a tu equipo. La duplicación es la clave del crecimiento exponencial.</p><h2>4. Eventos semanales</h2><p>Realiza mínimo 2 presentaciones por semana. La consistencia vence al talento.</p><h2>5. Mentoría uno a uno</h2><p>Identifica a los 3 afiliados con mayor potencial y dedícales tiempo personalizado.</p>`,
     related: [
-      { slug: 'como-alcanzar-rango-diamante', title: 'Guía para alcanzar Diamante', image: 'https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=200' },
-      { slug: 'maximizar-comisiones-binarias', title: 'Maximiza comisiones binarias', image: 'https://images.pexels.com/photos/7688460/pexels-photo-7688460.jpeg?auto=compress&cs=tinysrgb&w=200' },
+      { slug: 'comisiones-binarias-guia-2025', title: 'Comisiones binarias: Guía 2025', image: 'https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=200', type: 'article' },
+      { slug: 'retener-afiliados-activos', title: 'Retener afiliados activos', image: 'https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=200', type: 'article' },
     ],
   },
-  'como-alcanzar-rango-diamante': {
-    title: 'Guía para alcanzar el rango Diamante',
-    category: 'Rangos',
-    type: 'article',
-    image: 'https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=1200',
-    date: '10 Jun 2024',
-    author: { name: 'María González', role: 'Dir. Comercial', avatar: 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=100' },
-    content: `
-      <p>El rango Diamante representa la cúspide del sistema MLM 360.</p>
-      <h2>Requisitos</h2>
-      <p>500+ afiliados, volumen mensual de S/ 50,000+, mantener rangos anteriores por 3 meses.</p>
-      <h2>Mentalidad</h2>
-      <p>Diamante es sobre liderazgo, no solo números.</p>
-      <h2>Estrategia de retención</h2>
-      <p>Un afiliado activo vale 10 veces más que uno nuevo.</p>
-    `,
+  'tour-completo-dashboard': {
+    title: 'Tour completo del dashboard', category: 'Tutoriales', type: 'video',
+    image: 'https://images.pexels.com/photos/3184339/pexels-photo-3184339.jpeg?auto=compress&cs=tinysrgb&w=1200',
+    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', duration: '22:15', views: 6150, date: '12 Jun 2025',
+    author: { name: 'Ana Rodríguez', role: 'Soporte', avatar: 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=100' },
+    content: `<p>En este video recorremos cada función del panel de control de Cluv360.</p><h2>Resumen general</h2><p>El dashboard muestra tus comisiones, red activa, rango actual y volumen mensual de un vistazo.</p><h2>Comisiones</h2><p>Ve cada comisión desglosada: directas, binarias, bonos de rango y residuales.</p><h2>Mi Red</h2><p>El árbol genealógico interactivo te permite ver, filtrar y exportar tu red completa.</p>`,
     related: [
-      { slug: 'estrategias-duplicar-red-90-dias', title: 'Duplica tu red en 90 días', image: 'https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=200' },
-      { slug: 'retener-afiliados-activos', title: 'Retener afiliados activos', image: 'https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=200' },
+      { slug: 'tutorial-arbol-genealogico', title: 'Tutorial: Árbol genealógico', image: 'https://images.pexels.com/photos/3182812/pexels-photo-3182812.jpeg?auto=compress&cs=tinysrgb&w=200', type: 'video' },
+      { slug: 'comisiones-binarias-guia-2025', title: 'Comisiones binarias: Guía 2025', image: 'https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=200', type: 'article' },
+    ],
+  },
+  'comisiones-binarias-guia-2025': {
+    title: 'Comisiones binarias: Guía definitiva 2025', category: 'Comisiones', type: 'article',
+    image: 'https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=1200',
+    date: '10 Jun 2025', author: { name: 'Luis García', role: 'Analista', avatar: 'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=100' },
+    content: `<p>El sistema binario de Cluv360 es uno de los más eficientes del mercado. Aquí te explico cómo funciona.</p><h2>¿Cómo funciona?</h2><p>Tienes dos patas: izquierda y derecha. El sistema paga un porcentaje del volumen de tu pata menor.</p><h2>Balance es clave</h2><p>Mantén tus dos patas lo más balanceadas posible para maximizar comisiones.</p><h2>Límite diario</h2><p>Cada rango tiene un límite de pago diario. Conoce el tuyo para optimizar.</p>`,
+    related: [
+      { slug: 'alcanzar-rango-diamante-6-meses', title: 'Alcanzar Diamante en 6 meses', image: 'https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=200', type: 'article' },
+      { slug: 'maximizar-comisiones-binarias', title: 'Maximiza comisiones binarias', image: 'https://images.pexels.com/photos/7688460/pexels-photo-7688460.jpeg?auto=compress&cs=tinysrgb&w=200', type: 'video' },
+    ],
+  },
+  '5-scripts-ventas-convierten': {
+    title: '5 scripts de ventas que convierten', category: 'Marketing', type: 'video',
+    image: 'https://images.pexels.com/photos/3182812/pexels-photo-3182812.jpeg?auto=compress&cs=tinysrgb&w=1200',
+    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', duration: '18:30', views: 5420, date: '8 Jun 2025',
+    author: { name: 'María Torres', role: 'Coach', avatar: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=100' },
+    content: `<p>Los scripts de ventas son herramientas, no camisas de fuerza. Aquí te comparto 5 que funcionan.</p><h2>1. El invitar sin presionar</h2><p>"Tengo algo que te puede interesar, ¿tienes 10 minutos esta semana?"</p><h2>2. El de la curiosidad</h2><p>"Descubrí algo que está cambiando mi vida financiera, ¿quieres que te cuente?"</p><h2>3. El del problema</h2><p>"¿Qué es lo que más te gustaría cambiar de tu situación actual?"</p>`,
+    related: [
+      { slug: 'marketing-digital-mlm', title: 'Marketing digital para MLM', image: 'https://images.pexels.com/photos/3194523/pexels-photo-3194523.jpeg?auto=compress&cs=tinysrgb&w=200', type: 'article' },
+      { slug: 'estrategias-duplicar-red-90-dias', title: 'Duplica tu red en 90 días', image: 'https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=200', type: 'video' },
+    ],
+  },
+  'sistema-rangos-bronce-corona': {
+    title: 'Sistema de rangos: del Bronce a la Corona', category: 'Rangos', type: 'article',
+    image: 'https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=1200',
+    date: '2 Jun 2025', author: { name: 'Ana Rodríguez', role: 'Soporte', avatar: 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=100' },
+    content: `<p>El sistema de rangos de Cluv360 está diseñado para recompensar el esfuerzo y el liderazgo.</p><h2>Bronce</h2><p>El punto de partida. Requiere 5 afiliados activos y S/ 2,000 en volumen mensual.</p><h2>Plata</h2><p>15 afiliados y S/ 8,000 en volumen. Desbloquea bonos de equipo.</p><h2>Oro</h2><p>50 afiliados y S/ 20,000. Acceso a bonos de liderazgo.</p><h2>Diamante</h2><p>500+ afiliados y S/ 50,000. Bono de rango completo.</p>`,
+    related: [
+      { slug: 'alcanzar-rango-diamante-6-meses', title: 'Alcanzar Diamante en 6 meses', image: 'https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=200', type: 'article' },
+      { slug: 'comisiones-binarias-guia-2025', title: 'Comisiones binarias: Guía 2025', image: 'https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=200', type: 'article' },
+    ],
+  },
+  'nueva-funcion-comisiones-instantaneas': {
+    title: 'Nueva función: Comisiones instantáneas', category: 'Noticias', type: 'news',
+    image: 'https://images.pexels.com/photos/7688460/pexels-photo-7688460.jpeg?auto=compress&cs=tinysrgb&w=1200',
+    date: '28 May 2025', author: { name: 'Equipo Cluv360', role: 'Producto', avatar: 'https://images.pexels.com/photos/3184339/pexels-photo-3184339.jpeg?auto=compress&cs=tinysrgb&w=100' },
+    content: `<p>A partir de hoy, las comisiones de tu red se acreditan en menos de 60 segundos.</p><h2>¿Qué cambió?</h2><p>Mejoramos nuestro motor de procesamiento para que cada venta se refleje en tiempo real en tu dashboard.</p><h2>¿A quién aplica?</h2><p>A todos los afiliados activos, sin importar su rango.</p><h2>¿Qué necesitas hacer?</h2><p>Nada. La función ya está activa en tu cuenta.</p>`,
+    related: [
+      { slug: 'nuevas-pasarelas-pago-peru', title: 'Integramos Yape y Plin', image: 'https://images.pexels.com/photos/4968391/pexels-photo-4968391.jpeg?auto=compress&cs=tinysrgb&w=200', type: 'news' },
+      { slug: 'comisiones-binarias-guia-2025', title: 'Comisiones binarias: Guía 2025', image: 'https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=200', type: 'article' },
+    ],
+  },
+  'marketing-digital-mlm': {
+    title: 'Marketing digital para MLM en 2025', category: 'Marketing', type: 'article',
+    image: 'https://images.pexels.com/photos/3194523/pexels-photo-3194523.jpeg?auto=compress&cs=tinysrgb&w=1200',
+    date: '1 Jun 2025', author: { name: 'Ana Ríos', role: 'Dir. Operaciones', avatar: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=100' },
+    content: `<p>El marketing digital es la palanca más poderosa para un afiliado moderno.</p><h2>Marca personal primero</h2><p>La gente no se une a empresas, se une a personas. Construye tu marca antes de vender.</p><h2>Contenido que atrae</h2><p>Comparte tu journey, no solo resultados. La autenticidad convierte más que la perfección.</p><h2>Automatiza el seguimiento</h2><p>Usa herramientas de mensajería para no perder prospectos por falta de respuesta.</p>`,
+    related: [
+      { slug: '5-scripts-ventas-convierten', title: '5 scripts de ventas', image: 'https://images.pexels.com/photos/3182812/pexels-photo-3182812.jpeg?auto=compress&cs=tinysrgb&w=200', type: 'video' },
+      { slug: 'estrategias-duplicar-red-90-dias', title: 'Duplica tu red en 90 días', image: 'https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=200', type: 'video' },
+    ],
+  },
+  'tutorial-arbol-genealogico': {
+    title: 'Tutorial: Árbol genealógico interactivo', category: 'Tutoriales', type: 'video',
+    image: 'https://images.pexels.com/photos/3182812/pexels-photo-3182812.jpeg?auto=compress&cs=tinysrgb&w=1200',
+    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', duration: '15:20', views: 5420, date: '25 May 2025',
+    author: { name: 'Carlos Torres', role: 'CTO', avatar: 'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=100' },
+    content: `<p>El árbol genealógico es la herramienta más poderosa de Cluv360. Aquí te enseño a usarlo.</p><h2>Vista general</h2><p>El árbol muestra tu red binaria completa, con colores por rango y estado de actividad.</p><h2>Filtros</h2><p>Filtra por rango, estado, fecha de ingreso y volumen.</p><h2>Zoom y navegación</h2><p>Usa los controles de zoom o el scroll del mouse para navecar por toda tu red.</p><h2>Exportación</h2><p>Exporta tu árbol en PDF o Excel para análisis offline.</p>`,
+    related: [
+      { slug: 'tour-completo-dashboard', title: 'Tour completo del dashboard', image: 'https://images.pexels.com/photos/3184339/pexels-photo-3184339.jpeg?auto=compress&cs=tinysrgb&w=200', type: 'video' },
+      { slug: 'sistema-rangos-bronce-corona', title: 'Sistema de rangos', image: 'https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=200', type: 'article' },
+    ],
+  },
+  'retener-afiliados-activos': {
+    title: 'El arte de retener afiliados activos', category: 'Estrategia', type: 'article',
+    image: 'https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=1200',
+    date: '22 May 2025', author: { name: 'Gustavo Ortiz', role: 'CEO', avatar: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=100' },
+    content: `<p>La retención es el verdadero secreto del éxito en MLM. Aquí te enseño cómo lograrla.</p><h2>Onboarding efectivo</h2><p>Los primeros 7 días son críticos. Acompaña a cada nuevo afiliado de cerca.</p><h2>Reconocimiento constante</h2><p>Celebra los logros pequeños. El reconocimiento es el combustible del MLM.</p><h2>Sistema de mentoría</h2><p>Asigna un mentor a cada nuevo afiliado. La conexión humana retiene más que el dinero.</p>`,
+    related: [
+      { slug: 'alcanzar-rango-diamante-6-meses', title: 'Alcanzar Diamante en 6 meses', image: 'https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=200', type: 'article' },
+      { slug: 'estrategias-duplicar-red-90-dias', title: 'Duplica tu red en 90 días', image: 'https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=200', type: 'video' },
+    ],
+  },
+  'nuevas-pasarelas-pago-peru': {
+    title: 'Integramos Yape y Plin como pasarelas de pago', category: 'Noticias', type: 'news',
+    image: 'https://images.pexels.com/photos/4968391/pexels-photo-4968391.jpeg?auto=compress&cs=tinysrgb&w=1200',
+    date: '18 May 2025', author: { name: 'Equipo Cluv360', role: 'Producto', avatar: 'https://images.pexels.com/photos/3184339/pexels-photo-3184339.jpeg?auto=compress&cs=tinysrgb&w=100' },
+    content: `<p>Ahora puedes recibir tus comisiones directamente en Yape y Plin.</p><h2>¿Qué significa?</h2><p>Tus comisiones se acreditan instantáneamente en tu cuenta de Yape o Plin, sin esperas.</p><h2>¿Cómo activarlo?</h2><p>Ve a Configuración > Métodos de pago y selecciona tu pasarela preferida.</p><h2>Disponibilidad</h2><p>Disponible para todos los afiliados en Perú desde hoy.</p>`,
+    related: [
+      { slug: 'nueva-funcion-comisiones-instantaneas', title: 'Comisiones instantáneas', image: 'https://images.pexels.com/photos/7688460/pexels-photo-7688460.jpeg?auto=compress&cs=tinysrgb&w=200', type: 'news' },
+      { slug: 'comisiones-binarias-guia-2025', title: 'Comisiones binarias: Guía 2025', image: 'https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=200', type: 'article' },
     ],
   },
   'maximizar-comisiones-binarias': {
-    title: 'Maximiza tus comisiones binarias',
-    category: 'Comisiones',
-    type: 'video',
+    title: 'Maximiza tus comisiones binarias', category: 'Comisiones', type: 'video',
     image: 'https://images.pexels.com/photos/7688460/pexels-photo-7688460.jpeg?auto=compress&cs=tinysrgb&w=1200',
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-    duration: '8:30',
-    views: 2180,
-    date: '5 Jun 2024',
+    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', duration: '8:30', views: 2180, date: '15 May 2025',
     author: { name: 'Carlos Torres', role: 'CTO', avatar: 'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=100' },
-    content: `<p>Aprende a optimizar el balance de tu red binaria.</p>`,
-    related: [],
+    content: `<p>Aprende a optimizar el balance de tu red binaria para maximizar comisiones.</p><h2>La regla del 60/40</h2><p>Mantén tu pata mayor al 60% y la menor al 40% para optimizar el pago.</p><h2>Monitoreo semanal</h2><p>Revisa el balance de tus patas cada semana y ajusta tu estrategia de reclutamiento.</p>`,
+    related: [
+      { slug: 'comisiones-binarias-guia-2025', title: 'Comisiones binarias: Guía 2025', image: 'https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=200', type: 'article' },
+      { slug: 'sistema-rangos-bronce-corona', title: 'Sistema de rangos', image: 'https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=200', type: 'article' },
+    ],
   },
-  'marketing-digital-mlm': {
-    title: 'Marketing digital para MLM',
-    category: 'Marketing',
-    type: 'article',
-    image: 'https://images.pexels.com/photos/3194523/pexels-photo-3194523.jpeg?auto=compress&cs=tinysrgb&w=1200',
-    date: '1 Jun 2024',
-    author: { name: 'Ana Ríos', role: 'Dir. Operaciones', avatar: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=100' },
-    content: `<p>Construye tu marca personal y atrae afiliados de calidad.</p>`,
-    related: [],
-  },
-  'tutorial-arbol-genealogico': {
-    title: 'Tutorial: Árbol genealógico',
-    category: 'Tutoriales',
-    type: 'video',
-    image: 'https://images.pexels.com/photos/3182812/pexels-photo-3182812.jpeg?auto=compress&cs=tinysrgb&w=1200',
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-    duration: '15:20',
-    views: 5420,
-    date: '28 May 2024',
-    author: { name: 'Carlos Torres', role: 'CTO', avatar: 'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=100' },
-    content: `<p>Domina filtros, zoom, búsqueda y exportación de tu red.</p>`,
-    related: [],
-  },
-  'retener-afiliados-activos': {
-    title: 'El arte de retener afiliados activos',
-    category: 'Liderazgo',
-    type: 'article',
-    image: 'https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=1200',
-    date: '22 May 2024',
+  'estrategias-duplicar-red-90-dias': {
+    title: 'Estrategias para duplicar tu red en 90 días', category: 'Estrategia', type: 'video',
+    image: 'https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=1200',
+    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', duration: '12:45', views: 3420, date: '10 May 2025',
     author: { name: 'Gustavo Ortiz', role: 'CEO', avatar: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=100' },
-    content: `<p>Técnicas de seguimiento y mentoring que multiplican la retención.</p>`,
-    related: [],
+    content: `<p>Las 5 estrategias más efectivas que nuestros afiliados Diamante han utilizado para duplicar sus redes en menos de 3 meses.</p><h2>1. Seguimiento sistemático</h2><p>Tener un sistema de seguimiento automatizado más el toque personal marca la diferencia.</p><h2>2. Eventos semanales</h2><p>Los líderes Diamante realizan mínimo 2 presentaciones semanales.</p><h2>3. Mentoría uno a uno</h2><p>Dedicar tiempo a los afiliados con mayor potencial multiplica resultados.</p><h2>4. Redes sociales inteligentes</h2><p>Comparte tu historia, no solo el producto.</p><h2>5. Duplicación de procesos</h2><p>Documenta todo lo que funcione y enséñalo a tu equipo.</p>`,
+    related: [
+      { slug: 'alcanzar-rango-diamante-6-meses', title: 'Alcanzar Diamante en 6 meses', image: 'https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=200', type: 'article' },
+      { slug: 'retener-afiliados-activos', title: 'Retener afiliados activos', image: 'https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=200', type: 'article' },
+    ],
   },
 };
 
-const defaultArticle = {
-  title: 'Artículo no encontrado',
-  category: '',
-  type: 'article',
-  image: '',
-  date: '',
-  author: { name: '', role: '', avatar: '' },
-  content: '<p>No encontrado</p>',
-  related: [],
+const defaultArticle: Article = {
+  title: 'Contenido no encontrado', category: '', type: 'article', image: '', date: '',
+  author: { name: '', role: '', avatar: '' }, content: '<p>No encontrado</p>', related: [],
+};
+
+const typeMeta = {
+  article: { label: 'Artículo', icon: FileText, badge: 'bg-primary/10 text-primary' },
+  video: { label: 'Video', icon: Video, badge: 'bg-rose-500/10 text-rose-500' },
+  news: { label: 'Noticia', icon: Newspaper, badge: 'bg-amber-500/10 text-amber-600 dark:text-amber-400' },
 };
 
 export default function BlogDetailPage() {
@@ -119,90 +158,130 @@ export default function BlogDetailPage() {
   const article = articles[slug || ''] || defaultArticle;
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
+  const TypeIcon = typeMeta[article.type].icon;
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
       <main className="flex-1">
         {/* Breadcrumb */}
-        <div className="border-b border-border">
-          <div className="max-w-6xl mx-auto px-6 py-4">
+        <div className="border-b border-border/40">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6 py-4">
             <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Link to="/" className="hover:text-foreground">Inicio</Link>
+              <Link to="/" className="hover:text-foreground transition-colors">Inicio</Link>
               <ChevronRight className="w-4 h-4" />
-              <Link to="/blog" className="hover:text-foreground">Novedades</Link>
+              <Link to="/blog" className="hover:text-foreground transition-colors">Novedades</Link>
               <ChevronRight className="w-4 h-4" />
-              <span className="text-foreground font-medium truncate max-w-[200px]">{article.title}</span>
+              <span className="text-foreground font-medium truncate max-w-[180px] sm:max-w-[260px]">{article.title}</span>
             </nav>
           </div>
         </div>
 
         {/* Article */}
-        <article className="max-w-4xl mx-auto px-6 py-10">
+        <article className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+          {/* Back link */}
+          <Link to="/blog" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6">
+            <ArrowLeft className="w-4 h-4" /> Volver a Novedades
+          </Link>
+
           {/* Header */}
-          <header className="mb-8">
+          <header className="mb-6">
             <div className="flex items-center gap-2 mb-4">
-              <span className={cn(
-                'text-xs font-bold px-2 py-1 rounded',
-                article.type === 'video' ? 'bg-red-500 text-white' : 'bg-primary/10 text-primary'
-              )}>
-                {article.type === 'video' ? 'Video' : 'Artículo'}
+              <span className={cn('inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full', typeMeta[article.type].badge)}>
+                <TypeIcon className="w-3 h-3" /> {typeMeta[article.type].label}
               </span>
-              <span className="text-xs text-muted-foreground">{article.category}</span>
+              <span className="text-xs text-muted-foreground/60">{article.category}</span>
             </div>
 
-            <h1 className="text-2xl lg:text-3xl font-bold text-foreground mb-4">{article.title}</h1>
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-4 leading-tight tracking-tight">{article.title}</h1>
 
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <div className="flex items-center gap-3 sm:gap-4 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
-                <img src={article.author.avatar} alt="" className="w-6 h-6 rounded-full" />
-                <span className="font-medium text-foreground">{article.author.name}</span>
+                <img src={article.author.avatar} alt="" className="w-7 h-7 rounded-full" />
+                <div className="leading-tight">
+                  <div className="font-medium text-foreground text-xs sm:text-sm">{article.author.name}</div>
+                  <div className="text-[10px] sm:text-xs text-muted-foreground/50">{article.author.role}</div>
+                </div>
               </div>
-              <span>{article.date}</span>
-              {article.duration && <span className="flex items-center gap-1"><Clock className="w-4 h-4" />{article.duration}</span>}
-              {article.views && <span className="flex items-center gap-1"><Eye className="w-4 h-4" />{article.views.toLocaleString()}</span>}
+              <span className="text-muted-foreground/30">·</span>
+              <span className="text-xs sm:text-sm">{article.date}</span>
+              {article.duration && <><span className="text-muted-foreground/30">·</span><span className="flex items-center gap-1 text-xs sm:text-sm"><Clock className="w-3.5 h-3.5" />{article.duration}</span></>}
+              {article.views != null && article.views > 0 && <><span className="text-muted-foreground/30 hidden sm:inline">·</span><span className="flex items-center gap-1 text-xs sm:text-sm"><Eye className="w-3.5 h-3.5" />{article.views.toLocaleString()}</span></>}
             </div>
           </header>
 
+          {/* Cover image or video */}
+          {article.type === 'video' && article.videoUrl ? (
+            <div className="aspect-video rounded-2xl overflow-hidden bg-black border border-border mb-8">
+              <iframe src={article.videoUrl} className="w-full h-full" allowFullScreen title={article.title} />
+            </div>
+          ) : article.image ? (
+            <div className="aspect-[16/9] rounded-2xl overflow-hidden border border-border mb-8">
+              <img src={article.image} alt={article.title} className="w-full h-full object-cover" />
+            </div>
+          ) : null}
+
           {/* Actions */}
-          <div className="flex items-center gap-2 mb-8 pb-6 border-b border-border">
-            <button onClick={() => setLiked(!liked)} className={cn('flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition', liked ? 'bg-primary/10 text-primary' : 'bg-muted hover:bg-muted/70')}>
+          <div className="flex items-center gap-2 mb-8 pb-6 border-b border-border/40">
+            <button onClick={() => setLiked(!liked)} className={cn('flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-all', liked ? 'bg-primary/10 text-primary' : 'bg-muted hover:bg-muted/70')}>
               <ThumbsUp className="w-4 h-4" /> Me gusta
             </button>
-            <button onClick={() => setSaved(!saved)} className={cn('flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition', saved ? 'bg-amber-500/10 text-amber-600' : 'bg-muted hover:bg-muted/70')}>
+            <button onClick={() => setSaved(!saved)} className={cn('flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-all', saved ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' : 'bg-muted hover:bg-muted/70')}>
               <Bookmark className="w-4 h-4" /> Guardar
             </button>
-            <div className="flex items-center gap-1 ml-auto">
-              <button className="w-8 h-8 rounded-lg bg-muted hover:bg-muted/70 flex items-center justify-center"><Facebook className="w-4 h-4" /></button>
-              <button className="w-8 h-8 rounded-lg bg-muted hover:bg-muted/70 flex items-center justify-center"><Share2 className="w-4 h-4" /></button>
-            </div>
+            <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm bg-muted hover:bg-muted/70 transition-all ml-auto">
+              <Share2 className="w-4 h-4" /> Compartir
+            </button>
           </div>
 
-          {/* Video */}
-          {article.type === 'video' && article.videoUrl && (
-            <div className="aspect-video rounded-xl overflow-hidden bg-card border border-border mb-8">
-              <iframe src={article.videoUrl} className="w-full h-full" allowFullScreen />
-            </div>
-          )}
-
           {/* Content */}
-          <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:text-foreground prose-p:text-muted-foreground" dangerouslySetInnerHTML={{ __html: article.content }} />
-
-          {/* Related */}
-          {article.related?.length > 0 && (
-            <div className="mt-12 pt-8 border-t border-border">
-              <h2 className="text-lg font-bold text-foreground mb-4">Relacionado</h2>
-              <div className="grid sm:grid-cols-2 gap-3">
-                {article.related.map((r: any) => (
-                  <Link key={r.slug} to={`/blog/${r.slug}`} className="flex items-center gap-3 p-3 bg-card border border-border rounded-lg hover:border-primary/30 transition">
-                    <img src={r.image} alt="" className="w-14 h-14 rounded object-cover" />
-                    <span className="text-sm font-medium text-foreground">{r.title}</span>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
+          <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:text-foreground prose-headings:font-bold prose-p:text-muted-foreground prose-p:leading-relaxed prose-h2:text-lg prose-h2:mt-6 prose-h2:mb-2" dangerouslySetInnerHTML={{ __html: article.content }} />
         </article>
+
+        {/* Related */}
+        {article.related.length > 0 && (
+          <section className="py-10 sm:py-12 bg-muted/20 border-t border-border/40">
+            <div className="max-w-3xl mx-auto px-4 sm:px-6">
+              <Reveal>
+                <h2 className="text-lg sm:text-xl font-bold text-foreground mb-5">Contenido relacionado</h2>
+                <div className="grid sm:grid-cols-2 gap-3 sm:gap-4">
+                  {article.related.map((r) => {
+                    const rel = articles[r.slug];
+                    if (!rel) return null;
+                    const RelIcon = typeMeta[rel.type].icon;
+                    return (
+                      <Link key={r.slug} to={`/blog/${r.slug}`} className="group block">
+                        <div className="bg-card border border-border/60 rounded-xl overflow-hidden hover:border-primary/30 hover:shadow-md transition-all flex flex-col sm:flex-row">
+                          <div className="relative sm:w-32 aspect-video sm:aspect-square overflow-hidden shrink-0">
+                            <img src={r.image} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                            {rel.type === 'video' && (
+                              <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                                <Play className="w-5 h-5 text-white fill-white ml-0.5" />
+                              </div>
+                            )}
+                          </div>
+                          <div className="p-3 sm:p-4 flex-1">
+                            <div className="flex items-center gap-1.5 mb-1.5">
+                              <span className={cn('inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded', typeMeta[rel.type].badge)}>
+                                <RelIcon className="w-2.5 h-2.5" />{typeMeta[rel.type].label}
+                              </span>
+                            </div>
+                            <h3 className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2">{r.title}</h3>
+                            <div className="flex items-center gap-2 mt-2 text-[11px] text-muted-foreground/50">
+                              <span>{rel.date}</span>
+                              <span>·</span>
+                              <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{rel.duration || '5 min'}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </Reveal>
+            </div>
+          </section>
+        )}
       </main>
       <Footer />
     </div>
