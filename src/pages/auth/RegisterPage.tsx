@@ -6,15 +6,16 @@ import { z } from 'zod';
 import { useBackend, useDatabase, useStorage } from '@/lib/backend';
 import { useAuthStore } from '@/store/authStore';
 import { useConfig, formatPrice } from '@/store/configStore';
+import { useThemeStore } from '@/store/themeStore';
 import { toast } from 'sonner';
-import { Eye, EyeOff, CircleCheck as CheckCircle, ArrowRight, User, Mail, Lock, Loader as Loader2, Camera } from 'lucide-react';
+import { Eye, EyeOff, CircleCheck as CheckCircle, ArrowRight, User, Mail, Lock, Loader as Loader2, Camera, Sun, Moon, ArrowLeft, Check, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { LogoWithText } from '@/components/Logo';
 
 const step1Schema = z.object({
-  full_name: z.string().min(3, 'Mínimo 3 caracteres'),
-  email: z.string().email('Correo inválido'),
-  password: z.string().min(8, 'Mínimo 8 caracteres'),
+  full_name: z.string().min(3, 'Minimo 3 caracteres'),
+  email: z.string().email('Correo invalido'),
+  password: z.string().min(8, 'Minimo 8 caracteres'),
   confirm_password: z.string(),
   referral_code: z.string().optional(),
 }).refine(d => d.password === d.confirm_password, { message: 'No coinciden', path: ['confirm_password'] });
@@ -23,7 +24,7 @@ type Step1Data = z.infer<typeof step1Schema>;
 
 function GoogleIcon() {
   return (
-    <svg className="w-4 h-4" viewBox="0 0 24 24">
+    <svg className="w-5 h-5" viewBox="0 0 24 24">
       <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
       <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
       <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
@@ -34,8 +35,8 @@ function GoogleIcon() {
 
 function translateError(msg: string): string {
   const m = msg.toLowerCase();
-  if (m.includes('already registered')) return 'Este correo ya está registrado';
-  if (m.includes('invalid email')) return 'Correo inválido';
+  if (m.includes('already registered')) return 'Este correo ya esta registrado';
+  if (m.includes('invalid email')) return 'Correo invalido';
   if (m.includes('rate limit')) return 'Demasiados intentos. Espera unos minutos.';
   return 'Error al crear cuenta. Intenta de nuevo.';
 }
@@ -46,13 +47,16 @@ export default function RegisterPage() {
   const database = useDatabase();
   const storage = useStorage();
   const { plans, currency, currencySymbol, exchangeRate, company, logoValue, loading: configLoading } = useConfig();
+  const { theme, setTheme } = useThemeStore();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const fileRef = useRef<HTMLInputElement>(null);
   const companyName = company.company_name || 'MLM 360';
+  const isDark = theme === 'dark';
 
   const [step, setStep] = useState(1);
   const [showPwd, setShowPwd] = useState(false);
+  const [showConfirmPwd, setShowConfirmPwd] = useState(false);
   const [loading, setLoading] = useState(false);
   const [validating, setValidating] = useState(false);
   const [formData, setFormData] = useState<Step1Data | null>(null);
@@ -61,11 +65,13 @@ export default function RegisterPage() {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState('');
 
+  const googleEnabled = company.google_oauth_enabled === 'true';
   const showPlans = configLoading ? false : company.register_show_plans !== 'false';
   const requirePlan = company.register_require_plan === 'true';
   const defaultPlan = company.register_default_plan || '';
   const activePlans = plans.filter(p => p.is_active).sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
   const confirmStep = showPlans ? 3 : 2;
+  const totalSteps = showPlans ? 3 : 2;
 
   useEffect(() => {
     const planSlug = searchParams.get('plan') || '';
@@ -97,7 +103,7 @@ export default function RegisterPage() {
   const handleAvatar = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 3 * 1024 * 1024) { toast.error('Máx 3MB'); return; }
+    if (file.size > 3 * 1024 * 1024) { toast.error('Max 3MB'); return; }
     setAvatarFile(file);
     setAvatarPreview(URL.createObjectURL(file));
   };
@@ -134,140 +140,363 @@ export default function RegisterPage() {
     }
     setLoading(false);
     if (!hasSession) {
-      if (!isFree && planSlug) { toast.success('¡Cuenta creada! Confirma tu correo.'); navigate(`/pago?plan=${planSlug}`); }
-      else { toast.success('¡Cuenta creada! Revisa tu correo.'); navigate('/login'); }
+      if (!isFree && planSlug) { toast.success('Cuenta creada! Confirma tu correo.'); navigate(`/pago?plan=${planSlug}`); }
+      else { toast.success('Cuenta creada! Revisa tu correo.'); navigate('/login'); }
       return;
     }
-    if (!isFree && planSlug) { toast.success('¡Cuenta creada! Completa el pago.'); navigate(`/pago?plan=${planSlug}`); }
-    else { toast.success(`¡Bienvenido a ${companyName}!`); navigate('/dashboard'); }
+    if (!isFree && planSlug) { toast.success('Cuenta creada! Completa el pago.'); navigate(`/pago?plan=${planSlug}`); }
+    else { toast.success(`Bienvenido a ${companyName}!`); navigate('/dashboard'); }
   };
 
   const pwdVal = watch('password') || '';
-  const strength = pwdVal.length === 0 ? 0 : pwdVal.length < 6 ? 1 : pwdVal.length < 8 ? 2 : pwdVal.length < 12 ? 3 : 4;
-  const strengthColors = ['', 'bg-red-500', 'bg-amber-500', 'bg-yellow-400', 'bg-green-500'];
+  const confirmPwdVal = watch('confirm_password') || '';
+
+  // Password requirements
+  const requirements = [
+    { label: '8 caracteres minimo', valid: pwdVal.length >= 8 },
+    { label: 'Una mayuscula', valid: /[A-Z]/.test(pwdVal) },
+    { label: 'Un numero', valid: /[0-9]/.test(pwdVal) },
+  ];
+
+  const metCount = requirements.filter(r => r.valid).length;
+  const strength = pwdVal.length === 0 ? 0 : metCount;
+  const strengthLabels = ['', 'Debil', 'Regular', 'Fuerte'];
 
   return (
-    <div className="min-h-screen bg-background flex">
-      {/* Left panel */}
-      <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-12 relative" style={{ background: 'hsl(222 47% 6%)' }}>
-        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'linear-gradient(hsl(213 94% 55%) 1px,transparent 1px),linear-gradient(90deg,hsl(213 94% 55%) 1px,transparent 1px)', backgroundSize: '40px 40px' }} />
-        <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-primary/15 rounded-full blur-[100px]" />
+    <div className="min-h-screen bg-background flex flex-col lg:flex-row">
+      {/* Brand panel - desktop only */}
+      <div className="hidden lg:flex lg:w-[45%] xl:w-1/2 bg-gradient-to-br from-primary/5 via-background to-primary/3 flex-col justify-between p-10 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-[0.02] dark:opacity-[0.04]" style={{
+          backgroundImage: 'radial-gradient(circle at 1px 1px, currentColor 1px, transparent 1px)',
+          backgroundSize: '24px 24px'
+        }} />
+        <div className="absolute top-20 left-10 w-64 h-64 bg-primary/20 dark:bg-primary/10 rounded-full blur-[80px]" />
+        <div className="absolute bottom-20 right-10 w-48 h-48 bg-primary/15 dark:bg-primary/5 rounded-full blur-[60px]" />
+
+        <div className="relative z-10">
+          <Link to="/" className="inline-flex items-center gap-2.5">
+            <LogoWithText value={logoValue} fallbackText={companyName} size="w-9 h-9" textClass="font-semibold text-foreground" />
+          </Link>
+        </div>
 
         <div className="relative z-10 max-w-md">
-          <Link to="/" className="inline-flex items-center gap-2 mb-8">
-            <LogoWithText value={logoValue} fallbackText={companyName} size="w-8 h-8" textClass="text-white font-bold" />
-          </Link>
-          <h1 className="text-3xl font-bold text-white mb-4">Únete a MLM 360</h1>
-          <p className="text-white/50 text-sm mb-8">Crea tu cuenta y empieza a construir tu red.</p>
+          <h1 className="text-3xl xl:text-4xl font-bold text-foreground leading-[1.1] mb-4 tracking-tight">
+            Unete a la<br />
+            <span className="text-primary">nueva era MLM.</span>
+          </h1>
+          <p className="text-muted-foreground text-sm leading-relaxed">
+            Crea tu cuenta en minutos y empieza a construir tu red con las mejores herramientas.
+          </p>
+        </div>
+
+        <div className="relative z-10 text-xs text-muted-foreground">
+          Powered by MLM 360
         </div>
       </div>
 
-      {/* Right panel */}
-      <div className="flex-1 flex flex-col">
-        <div className="flex items-center justify-between px-6 sm:px-10 py-5 border-b border-border">
+      {/* Form panel */}
+      <div className="flex-1 flex flex-col min-h-screen lg:min-h-0">
+        {/* Top bar */}
+        <div className="flex items-center justify-between px-6 lg:px-10 py-5 border-b border-border/50">
           <Link to="/" className="lg:hidden">
-            <LogoWithText value={logoValue} fallbackText={companyName} size="w-8 h-8" textClass="font-bold text-foreground" />
+            <LogoWithText value={logoValue} fallbackText={companyName} size="w-8 h-8" textClass="font-semibold text-foreground" />
           </Link>
           <div className="hidden lg:block" />
-          <span className="text-sm text-muted-foreground">
-            ¿Ya tienes cuenta? <Link to="/login" className="text-primary font-medium">Inicia sesión</Link>
-          </span>
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-muted-foreground hidden sm:block">
+              Ya tienes cuenta?{' '}
+              <Link to="/login" className="text-primary font-medium hover:opacity-80 transition-opacity">
+                Inicia sesion
+              </Link>
+            </span>
+            <button
+              onClick={() => setTheme(isDark ? 'light' : 'dark')}
+              className="w-9 h-9 rounded-xl flex items-center justify-center bg-muted/50 hover:bg-muted transition-colors text-muted-foreground"
+              aria-label="Toggle theme"
+            >
+              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </button>
+          </div>
         </div>
 
+        {/* Form content */}
         <div className="flex-1 flex items-center justify-center px-6 py-8">
-          <div className="w-full max-w-sm">
-            {/* Steps indicator */}
-            <div className="flex items-center justify-center gap-2 mb-6">
-              {[(showPlans ? 1 : 1), (showPlans ? 2 : 2), (showPlans ? 3 : 2)].slice(0, showPlans ? 3 : 2).map((s, i) => (
-                <div key={i} className="flex items-center">
-                  <div className={cn('w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold',
-                    step > s ? 'bg-green-500 text-white' : step === s ? 'bg-primary text-white' : 'bg-muted text-muted-foreground')}>
-                    {step > s ? <CheckCircle className="w-4 h-4" /> : s}
+          <div className="w-full max-w-[380px]">
+            {/* Step indicator */}
+            <div className="flex items-center justify-center gap-1.5 mb-7">
+              {Array.from({ length: totalSteps }, (_, i) => i + 1).map((s, i) => (
+                <div key={s} className="flex items-center">
+                  <div className={cn(
+                    "w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold transition-all",
+                    step > s
+                      ? "bg-primary text-primary-foreground"
+                      : step === s
+                        ? "bg-primary text-primary-foreground ring-4 ring-primary/15"
+                        : "bg-muted text-muted-foreground"
+                  )}>
+                    {step > s ? <Check className="w-3.5 h-3.5" strokeWidth={3} /> : s}
                   </div>
-                  {i < (showPlans ? 2 : 1) && <div className={cn('w-12 h-0.5', step > s ? 'bg-green-500' : 'bg-border')} />}
+                  {i < totalSteps - 1 && (
+                    <div className={cn(
+                      "w-8 h-0.5 mx-1 transition-colors",
+                      step > s ? "bg-primary" : "bg-border/50"
+                    )} />
+                  )}
                 </div>
               ))}
             </div>
 
-            {/* Step 1 */}
+            {/* Step 1: Account info */}
             {step === 1 && (
               <>
-                <div className="mb-5">
-                  <h2 className="text-lg font-bold text-foreground">Crear cuenta</h2>
-                  <p className="text-sm text-muted-foreground">Rápido y seguro.</p>
+                <div className="mb-6">
+                  <h2 className="text-xl font-bold text-foreground">Crear tu cuenta</h2>
+                  <p className="text-sm text-muted-foreground mt-1">Rapido, seguro y sin complicaciones.</p>
                 </div>
 
-                <button onClick={async () => {
-                  const ref = watch('referral_code') || searchParams.get('ref') || '';
-                  const result = await backend.auth.signInWithOAuth('google');
-                  if (result.url) { const url = new URL(result.url); if (ref) url.searchParams.set('referral_code', ref); window.location.href = url.toString(); }
-                }} className="w-full flex items-center justify-center gap-2 py-2.5 border border-border hover:bg-muted rounded-xl text-sm font-medium mb-4">
-                  <GoogleIcon /> Google
-                </button>
+                {googleEnabled && (
+                  <>
+                    <button
+                      onClick={async () => {
+                        const ref = watch('referral_code') || searchParams.get('ref') || '';
+                        const result = await backend.auth.signInWithOAuth('google');
+                        if (result.url) {
+                          const url = new URL(result.url);
+                          if (ref) url.searchParams.set('referral_code', ref);
+                          window.location.href = url.toString();
+                        }
+                      }}
+                      className="w-full flex items-center justify-center gap-2.5 py-3 rounded-xl font-medium text-sm bg-muted/40 hover:bg-muted/60 border border-border/50 transition-all mb-5"
+                    >
+                      <GoogleIcon />
+                      Continuar con Google
+                    </button>
 
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="flex-1 h-px bg-border" />
-                  <span className="text-xs text-muted-foreground">o</span>
-                  <div className="flex-1 h-px bg-border" />
-                </div>
+                    <div className="flex items-center gap-4 mb-5">
+                      <div className="flex-1 h-px bg-border/50" />
+                      <span className="text-xs text-muted-foreground font-medium">o usa tu correo</span>
+                      <div className="flex-1 h-px bg-border/50" />
+                    </div>
+                  </>
+                )}
 
-                <form onSubmit={handleSubmit(handleStep1)} className="space-y-3">
+                <form onSubmit={handleSubmit(handleStep1)} className="space-y-4">
                   {/* Avatar */}
-                  <div className="flex justify-center mb-3">
-                    <button type="button" onClick={() => fileRef.current?.click()} className="relative">
-                      {avatarPreview ? <img src={avatarPreview} className="w-14 h-14 rounded-full object-cover" /> :
-                        <div className="w-14 h-14 rounded-full bg-muted border border-dashed border-border flex items-center justify-center"><User className="w-5 h-5 text-muted-foreground" /></div>}
-                      <div className="absolute bottom-0 right-0 w-5 h-5 bg-primary text-white rounded-full flex items-center justify-center"><Camera className="w-3 h-3" /></div>
+                  <div className="flex justify-center mb-1">
+                    <button type="button" onClick={() => fileRef.current?.click()} className="relative group">
+                      {avatarPreview ? (
+                        <img src={avatarPreview} className="w-16 h-16 rounded-full object-cover ring-2 ring-primary/30" alt="Avatar" />
+                      ) : (
+                        <div className="w-16 h-16 rounded-full bg-muted/50 border border-dashed border-border flex items-center justify-center group-hover:border-primary/50 transition-colors">
+                          <User className="w-5 h-5 text-muted-foreground" />
+                        </div>
+                      )}
+                      <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 bg-primary text-primary-foreground rounded-full flex items-center justify-center shadow-sm">
+                        <Camera className="w-2.5 h-2.5" />
+                      </div>
                     </button>
                     <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatar} />
                   </div>
 
+                  {/* Name */}
                   <div>
-                    <label className="block text-xs font-medium text-muted-foreground mb-1">Nombre</label>
+                    <label className="block text-xs font-medium text-foreground mb-2">Nombre completo</label>
                     <div className="relative">
-                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <input {...register('full_name')} placeholder="Tu nombre"
-                        className={cn('w-full pl-9 pr-3 py-2 bg-muted/50 border rounded-lg text-sm outline-none', errors.full_name ? 'border-destructive' : 'border-border focus:border-primary')} />
+                      <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <input
+                        {...register('full_name')}
+                        placeholder="Tu nombre"
+                        className={cn(
+                          "w-full pl-11 pr-4 py-3 rounded-xl text-sm bg-muted/30 border transition-all outline-none",
+                          "placeholder:text-muted-foreground/60",
+                          errors.full_name
+                            ? "border-destructive focus:border-destructive"
+                            : "border-border/50 focus:border-primary focus:bg-background"
+                        )}
+                      />
                     </div>
+                    {errors.full_name && (
+                      <p className="text-xs text-destructive mt-1.5 flex items-center gap-1.5">
+                        <span className="w-1 h-1 rounded-full bg-destructive" />
+                        {errors.full_name.message}
+                      </p>
+                    )}
                   </div>
 
+                  {/* Email */}
                   <div>
-                    <label className="block text-xs font-medium text-muted-foreground mb-1">Correo</label>
+                    <label className="block text-xs font-medium text-foreground mb-2">Correo electronico</label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <input type="email" {...register('email')} placeholder="tu@correo.com"
-                        className={cn('w-full pl-9 pr-3 py-2 bg-muted/50 border rounded-lg text-sm outline-none', errors.email || dupError.email ? 'border-destructive' : 'border-border focus:border-primary')} />
+                      <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <input
+                        type="email"
+                        {...register('email')}
+                        placeholder="tu@correo.com"
+                        className={cn(
+                          "w-full pl-11 pr-10 py-3 rounded-xl text-sm bg-muted/30 border transition-all outline-none",
+                          "placeholder:text-muted-foreground/60",
+                          errors.email || dupError.email
+                            ? "border-destructive focus:border-destructive"
+                            : "border-border/50 focus:border-primary focus:bg-background"
+                        )}
+                      />
+                      {!errors.email && !dupError.email && emailVal && emailVal.includes('@') && (
+                        <CheckCircle className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary" />
+                      )}
                     </div>
+                    {(errors.email || dupError.email) && (
+                      <p className="text-xs text-destructive mt-1.5 flex items-center gap-1.5">
+                        <span className="w-1 h-1 rounded-full bg-destructive" />
+                        {errors.email?.message || dupError.email}
+                      </p>
+                    )}
                   </div>
 
+                  {/* Password */}
                   <div>
-                    <label className="block text-xs font-medium text-muted-foreground mb-1">Contraseña</label>
+                    <label className="block text-xs font-medium text-foreground mb-2">Contrasena</label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <input type={showPwd ? 'text' : 'password'} {...register('password')} placeholder="Mínimo 8 caracteres"
-                        className={cn('w-full pl-9 pr-10 py-2 bg-muted/50 border rounded-lg text-sm outline-none', errors.password ? 'border-destructive' : 'border-border focus:border-primary')} />
-                      <button type="button" onClick={() => setShowPwd(!showPwd)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                      <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <input
+                        type={showPwd ? 'text' : 'password'}
+                        {...register('password')}
+                        placeholder="Crea una contrasena"
+                        className={cn(
+                          "w-full pl-11 pr-12 py-3 rounded-xl text-sm bg-muted/30 border transition-all outline-none",
+                          "placeholder:text-muted-foreground/60",
+                          errors.password
+                            ? "border-destructive focus:border-destructive"
+                            : "border-border/50 focus:border-primary focus:bg-background"
+                        )}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPwd(!showPwd)}
+                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        aria-label={showPwd ? "Ocultar" : "Mostrar"}
+                      >
                         {showPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
                     </div>
-                    {pwdVal.length > 0 && <div className="flex gap-1 mt-1">{[1,2,3,4].map(i => <div key={i} className={cn('h-1 flex-1 rounded-full', strength >= i ? strengthColors[strength] : 'bg-muted')} />)}</div>}
+                    {errors.password && (
+                      <p className="text-xs text-destructive mt-1.5 flex items-center gap-1.5">
+                        <span className="w-1 h-1 rounded-full bg-destructive" />
+                        {errors.password.message}
+                      </p>
+                    )}
+
+                    {/* Password strength */}
+                    {pwdVal.length > 0 && (
+                      <div className="mt-3 space-y-2">
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 flex gap-1">
+                            {[1, 2, 3].map(i => (
+                              <div key={i} className={cn(
+                                "h-1 flex-1 rounded-full transition-all",
+                                strength >= i ? "bg-primary" : "bg-muted"
+                              )} />
+                            ))}
+                          </div>
+                          <span className={cn(
+                            "text-xs font-medium min-w-[50px] text-right",
+                            strength === 3 ? "text-primary" : strength === 2 ? "text-warning" : "text-destructive"
+                          )}>
+                            {strengthLabels[strength]}
+                          </span>
+                        </div>
+                        <div className="space-y-1">
+                          {requirements.map((req, i) => (
+                            <div key={i} className="flex items-center gap-2 text-xs">
+                              <div className={cn(
+                                "w-3.5 h-3.5 rounded-full flex items-center justify-center transition-all",
+                                req.valid ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+                              )}>
+                                {req.valid ? <Check className="w-2 h-2" strokeWidth={3} /> : <X className="w-2 h-2" />}
+                              </div>
+                              <span className={cn("transition-colors", req.valid ? "text-primary" : "text-muted-foreground")}>
+                                {req.label}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
+                  {/* Confirm password */}
                   <div>
-                    <label className="block text-xs font-medium text-muted-foreground mb-1">Confirmar</label>
-                    <input type={showPwd ? 'text' : 'password'} {...register('confirm_password')} placeholder="Repite"
-                      className={cn('w-full px-3 py-2 bg-muted/50 border rounded-lg text-sm outline-none', errors.confirm_password ? 'border-destructive' : 'border-border focus:border-primary')} />
+                    <label className="block text-xs font-medium text-foreground mb-2">Confirmar contrasena</label>
+                    <div className="relative">
+                      <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <input
+                        type={showConfirmPwd ? 'text' : 'password'}
+                        {...register('confirm_password')}
+                        placeholder="Repite tu contrasena"
+                        className={cn(
+                          "w-full pl-11 pr-12 py-3 rounded-xl text-sm bg-muted/30 border transition-all outline-none",
+                          "placeholder:text-muted-foreground/60",
+                          errors.confirm_password
+                            ? "border-destructive focus:border-destructive"
+                            : "border-border/50 focus:border-primary focus:bg-background"
+                        )}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPwd(!showConfirmPwd)}
+                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        aria-label={showConfirmPwd ? "Ocultar" : "Mostrar"}
+                      >
+                        {showConfirmPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                    {errors.confirm_password && (
+                      <p className="text-xs text-destructive mt-1.5 flex items-center gap-1.5">
+                        <span className="w-1 h-1 rounded-full bg-destructive" />
+                        {errors.confirm_password.message}
+                      </p>
+                    )}
+                    {!errors.confirm_password && confirmPwdVal && pwdVal === confirmPwdVal && (
+                      <p className="text-xs text-primary mt-1.5 flex items-center gap-1">
+                        <CheckCircle className="w-3 h-3" />
+                        Contrasenas coinciden
+                      </p>
+                    )}
                   </div>
 
+                  {/* Referral code */}
                   <div>
-                    <label className="block text-xs font-medium text-muted-foreground mb-1">Código referido <span className="text-muted-foreground/60">(opcional)</span></label>
-                    <input {...register('referral_code')} placeholder="Ej: GUST001"
-                      className="w-full px-3 py-2 bg-muted/50 border border-border rounded-lg text-sm outline-none focus:border-primary" />
+                    <label className="block text-xs font-medium text-foreground mb-2">
+                      Codigo de referido <span className="text-muted-foreground font-normal">(opcional)</span>
+                    </label>
+                    <input
+                      {...register('referral_code')}
+                      placeholder="Ej: GUST001"
+                      className={cn(
+                        "w-full px-4 py-3 rounded-xl text-sm bg-muted/30 border border-border/50 transition-all outline-none",
+                        "placeholder:text-muted-foreground/60",
+                        "focus:border-primary focus:bg-background"
+                      )}
+                    />
                   </div>
 
-                  <button type="submit" disabled={validating || !!dupError.email}
-                    className="w-full bg-primary text-white py-2.5 rounded-xl font-semibold text-sm hover:bg-primary/90 flex items-center justify-center gap-2 disabled:opacity-50">
-                    {validating ? <Loader2 className="w-4 h-4 animate-spin" /> : <><span>Continuar</span><ArrowRight className="w-4 h-4" /></>}
+                  <button
+                    type="submit"
+                    disabled={validating || !!dupError.email}
+                    className={cn(
+                      "w-full py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all",
+                      "bg-primary text-primary-foreground shadow-sm shadow-primary/20",
+                      "hover:opacity-90 active:scale-[0.99]",
+                      "disabled:opacity-60 disabled:cursor-not-allowed"
+                    )}
+                  >
+                    {validating ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <>
+                        <span>Continuar</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </>
+                    )}
                   </button>
                 </form>
               </>
@@ -276,64 +505,152 @@ export default function RegisterPage() {
             {/* Step 2: Plan selection */}
             {step === 2 && showPlans && formData && (
               <>
-                <div className="mb-5">
-                  <h2 className="text-lg font-bold text-foreground">Elige tu plan</h2>
-                  <p className="text-sm text-muted-foreground">{requirePlan ? 'Selecciona uno para continuar.' : 'O continúa con el gratuito.'}</p>
+                <div className="mb-6">
+                  <h2 className="text-xl font-bold text-foreground">Elige tu plan</h2>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {requirePlan ? 'Selecciona un plan para continuar.' : 'O continua con el gratuito.'}
+                  </p>
                 </div>
 
-                <div className="space-y-2 mb-5 max-h-64 overflow-y-auto">
+                <div className="space-y-2 mb-6 max-h-64 overflow-y-auto pr-1">
                   {activePlans.map(plan => {
                     const isFree = plan.is_free || Number(plan.price) === 0;
                     const isSelected = selectedPlan === plan.slug;
                     return (
-                      <button key={plan.id} type="button" onClick={() => setSelectedPlan(isSelected && !requirePlan ? '' : plan.slug)}
-                        className={cn('w-full text-left p-4 rounded-xl border-2 transition-all', isSelected ? 'border-primary bg-primary/5' : 'border-border hover:border-muted-foreground/40')}>
+                      <button
+                        key={plan.id}
+                        type="button"
+                        onClick={() => setSelectedPlan(isSelected && !requirePlan ? '' : plan.slug)}
+                        className={cn(
+                          "w-full text-left p-4 rounded-xl border-2 transition-all group",
+                          isSelected
+                            ? "border-primary bg-primary/5"
+                            : "border-border/50 hover:border-border bg-background"
+                        )}
+                      >
                         <div className="flex items-center justify-between">
                           <div>
-                            <div className="font-semibold text-foreground">{plan.name}</div>
-                            <div className="text-xs text-muted-foreground">{isFree ? 'Gratis' : formatPrice(plan.price, currency, currencySymbol, exchangeRate) + '/mes'}</div>
+                            <div className="font-semibold text-sm text-foreground">{plan.name}</div>
+                            <div className="text-xs text-muted-foreground mt-0.5">
+                              {isFree ? 'Gratis' : formatPrice(plan.price, currency, currencySymbol, exchangeRate) + '/mes'}
+                            </div>
                           </div>
-                          {isSelected && <CheckCircle className="w-5 h-5 text-primary" />}
+                          <div className={cn(
+                            "w-5 h-5 rounded-full flex items-center justify-center transition-all",
+                            isSelected ? "bg-primary text-primary-foreground" : "bg-muted border border-border group-hover:border-primary/50"
+                          )}>
+                            {isSelected && <Check className="w-3 h-3" strokeWidth={3} />}
+                          </div>
                         </div>
                       </button>
                     );
                   })}
                 </div>
 
-                <div className="flex gap-2">
-                  <button onClick={() => setStep(1)} className="flex-1 border border-border py-2 rounded-xl text-sm hover:bg-muted">Atrás</button>
-                  <button onClick={() => setStep(confirmStep)} className="flex-1 bg-primary text-white py-2 rounded-xl text-sm font-semibold hover:bg-primary/90 flex items-center justify-center gap-1">
-                    Continuar <ArrowRight className="w-4 h-4" />
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setStep(1)}
+                    className="flex-1 py-2.5 rounded-xl text-sm font-medium border border-border hover:bg-muted transition-colors flex items-center justify-center gap-1"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                    Atras
+                  </button>
+                  <button
+                    onClick={() => setStep(confirmStep)}
+                    disabled={requirePlan && !selectedPlan}
+                    className={cn(
+                      "flex-1 py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-1 transition-all",
+                      "bg-primary text-primary-foreground shadow-sm shadow-primary/20",
+                      "hover:opacity-90 active:scale-[0.99]",
+                      "disabled:opacity-50 disabled:cursor-not-allowed"
+                    )}
+                  >
+                    Continuar
+                    <ArrowRight className="w-4 h-4" />
                   </button>
                 </div>
               </>
             )}
 
-            {/* Confirm step */}
+            {/* Step 3: Confirmation */}
             {step === confirmStep && formData && (
               <>
-                <div className="text-center mb-5">
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
-                    {avatarPreview ? <img src={avatarPreview} className="w-full h-full rounded-full object-cover" /> : <CheckCircle className="w-6 h-6 text-primary" />}
+                <div className="text-center mb-6">
+                  <div className="relative inline-block mb-4">
+                    {avatarPreview ? (
+                      <img src={avatarPreview} className="w-16 h-16 rounded-full object-cover ring-2 ring-primary/30" alt="Avatar" />
+                    ) : (
+                      <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center">
+                        <User className="w-6 h-6 text-muted-foreground" />
+                      </div>
+                    )}
+                    <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center shadow-sm">
+                      <CheckCircle className="w-3 h-3" />
+                    </div>
                   </div>
-                  <h2 className="text-lg font-bold text-foreground">¡Todo listo!</h2>
+                  <h2 className="text-xl font-bold text-foreground">Todo listo</h2>
+                  <p className="text-sm text-muted-foreground mt-1">Revisa tus datos y crea tu cuenta</p>
                 </div>
 
-                <div className="bg-muted/30 rounded-xl p-4 mb-5 space-y-0 text-sm divide-y divide-border">
-                  <div className="flex justify-between py-2"><span className="text-muted-foreground">Nombre</span><span className="font-medium">{formData.full_name}</span></div>
-                  <div className="flex justify-between py-2"><span className="text-muted-foreground">Correo</span><span className="font-medium">{formData.email}</span></div>
-                  {selectedPlan && <div className="flex justify-between py-2"><span className="text-muted-foreground">Plan</span><span className="font-medium">{activePlans.find(p => p.slug === selectedPlan)?.name}</span></div>}
+                <div className="bg-muted/30 rounded-xl p-4 mb-6 space-y-0 divide-y divide-border/50 text-sm">
+                  <div className="flex justify-between py-2.5">
+                    <span className="text-muted-foreground">Nombre</span>
+                    <span className="font-medium text-foreground">{formData.full_name}</span>
+                  </div>
+                  <div className="flex justify-between py-2.5">
+                    <span className="text-muted-foreground">Correo</span>
+                    <span className="font-medium text-foreground">{formData.email}</span>
+                  </div>
+                  {selectedPlan && (
+                    <div className="flex justify-between py-2.5">
+                      <span className="text-muted-foreground">Plan</span>
+                      <span className="font-medium text-foreground">
+                        {activePlans.find(p => p.slug === selectedPlan)?.name}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
-                <div className="flex gap-2">
-                  <button onClick={() => setStep(showPlans ? 2 : 1)} className="flex-1 border border-border py-2 rounded-xl text-sm hover:bg-muted">Atrás</button>
-                  <button onClick={handleFinal} disabled={loading}
-                    className="flex-1 bg-primary text-white py-2 rounded-xl text-sm font-semibold hover:bg-primary/90 flex items-center justify-center gap-1 disabled:opacity-50">
-                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><CheckCircle className="w-4 h-4" /> Crear cuenta</>}
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setStep(showPlans ? 2 : 1)}
+                    className="flex-1 py-2.5 rounded-xl text-sm font-medium border border-border hover:bg-muted transition-colors flex items-center justify-center gap-1"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                    Atras
+                  </button>
+                  <button
+                    onClick={handleFinal}
+                    disabled={loading}
+                    className={cn(
+                      "flex-1 py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-1.5 transition-all",
+                      "bg-primary text-primary-foreground shadow-sm shadow-primary/20",
+                      "hover:opacity-90 active:scale-[0.99]",
+                      "disabled:opacity-60 disabled:cursor-not-allowed"
+                    )}
+                  >
+                    {loading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <>
+                        <CheckCircle className="w-4 h-4" />
+                        Crear cuenta
+                      </>
+                    )}
                   </button>
                 </div>
               </>
             )}
+
+            {/* Mobile footer */}
+            <div className="lg:hidden mt-8 pt-6 border-t border-border/50 text-center">
+              <span className="text-sm text-muted-foreground">
+                Ya tienes cuenta?{' '}
+                <Link to="/login" className="text-primary font-medium hover:opacity-80 transition-opacity">
+                  Inicia sesion
+                </Link>
+              </span>
+            </div>
           </div>
         </div>
       </div>
