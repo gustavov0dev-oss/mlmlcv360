@@ -82,7 +82,7 @@ function SectionDivider() {
 // ─── brands marquee ───────────────────────────────────────────────────────────
 function BrandBadge({ b }: { b: typeof paymentBrands[0] }) {
   return (
-    <div className="shrink-0 mx-2 h-11 px-6 rounded-xl bg-white border border-gray-100 shadow-sm flex items-center select-none">
+    <div className="shrink-0 mx-2 h-10 px-5 rounded-xl bg-card/80 border border-border/50 backdrop-blur-sm flex items-center select-none hover:border-border transition-colors">
       <span className={b.cls} style={{ color: b.color }}>{b.name}</span>
     </div>
   );
@@ -335,6 +335,13 @@ function TestimonialsCarousel() {
   );
 }
 
+// ─── number formatter K/M ─────────────────────────────────────────────────────
+function fmtNumber(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1).replace('.0', '')}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1).replace('.0', '')}K`;
+  return n.toString();
+}
+
 // ─── platform stats hook ───────────────────────────────────────────────────────
 function usePlatformStats() {
   const database = useDatabase();
@@ -446,20 +453,51 @@ export default function LandingPage() {
       </section>
 
       {/* ── STATS ─────────────────────────────────────────────────────────────*/}
-      <section className="py-12 sm:py-16 bg-muted/20">
+      <section className="py-12 sm:py-16 border-y border-border/40 bg-muted/10">
         <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-8 lg:gap-12">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 sm:gap-4 lg:gap-0 divide-y sm:divide-y-0 sm:divide-x divide-border/40">
             {[
-              { value: platformStats.totalAffiliates > 0 ? `${platformStats.totalAffiliates.toLocaleString()}+` : '12,540+', label: 'Afiliados activos', icon: Users, color: 'text-primary' },
-              { value: platformStats.totalProducts > 0 ? `${platformStats.totalProducts}+ productos` : '48+ productos', label: 'En catálogo', icon: ShoppingBag, color: 'text-blue-600 dark:text-blue-400' },
-              { value: `${ranks.filter(r => r.is_active !== false).length} rangos`, label: 'Sistema de rangos', icon: Award, color: 'text-amber-600 dark:text-amber-400' },
-              { value: `${plans.length} planes`, label: 'Disponibles', icon: BarChart3, color: 'text-primary' },
+              {
+                value: platformStats.totalAffiliates > 0 ? `${fmtNumber(platformStats.totalAffiliates)}+` : '12.5K+',
+                label: 'Afiliados activos',
+                sub: 'en toda Latinoamérica',
+                icon: Users,
+                color: 'text-primary',
+                iconBg: 'bg-primary/10',
+              },
+              {
+                value: platformStats.totalProducts > 0 ? `${fmtNumber(platformStats.totalProducts)}+` : '48+',
+                label: 'Productos en catálogo',
+                sub: 'con comisiones automáticas',
+                icon: ShoppingBag,
+                color: 'text-blue-600 dark:text-blue-400',
+                iconBg: 'bg-blue-500/10',
+              },
+              {
+                value: ranks.filter(r => r.is_active !== false).length > 0 ? `${ranks.filter(r => r.is_active !== false).length}` : '4',
+                label: 'Rangos disponibles',
+                sub: 'con bonos progresivos',
+                icon: Award,
+                color: 'text-amber-600 dark:text-amber-400',
+                iconBg: 'bg-amber-500/10',
+              },
+              {
+                value: plans.length > 0 ? `${plans.length}` : '3',
+                label: 'Planes flexibles',
+                sub: 'desde gratis hasta elite',
+                icon: BarChart3,
+                color: 'text-emerald-600 dark:text-emerald-400',
+                iconBg: 'bg-emerald-500/10',
+              },
             ].map((stat, i) => (
               <Reveal key={stat.label} delay={i * 60}>
-                <div className="text-center">
-                  <stat.icon className={cn('w-4 h-4 sm:w-5 sm:h-5 mx-auto mb-2.5 sm:mb-3', stat.color)} />
-                  <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground tracking-tight">{stat.value}</div>
-                  <div className="text-xs sm:text-sm text-muted-foreground/80 mt-1 sm:mt-1.5">{stat.label}</div>
+                <div className="text-center sm:px-8 py-2 sm:py-0 first:pt-0 sm:first:pt-0">
+                  <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3', stat.iconBg)}>
+                    <stat.icon className={cn('w-5 h-5', stat.color)} />
+                  </div>
+                  <div className="text-3xl sm:text-4xl font-black text-foreground tracking-tight tabular-nums">{stat.value}</div>
+                  <div className="text-sm font-semibold text-foreground/80 mt-1">{stat.label}</div>
+                  <div className="text-xs text-muted-foreground/60 mt-0.5">{stat.sub}</div>
                 </div>
               </Reveal>
             ))}
@@ -629,8 +667,12 @@ export default function LandingPage() {
       <SectionDivider />
 
       {/* ── DARK PROMO ────────────────────────────────────────────────────────*/}
-      <section className="relative py-16 sm:py-24 lg:py-28 overflow-hidden bg-zinc-950 dark:bg-[#0c0a08]">
-        <div className="absolute inset-0 bg-dub-grid-dark opacity-60 mask-fade-center" />
+      <section className="relative py-20 sm:py-28 lg:py-32 overflow-hidden bg-zinc-950 dark:bg-[#0c0a08]">
+        {/* Top fade into background */}
+        <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-background to-transparent z-10 pointer-events-none" />
+        {/* Bottom fade into background */}
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent z-10 pointer-events-none" />
+        <div className="absolute inset-0 bg-dub-grid-dark opacity-40 mask-fade-center" />
         <div className="absolute -top-1/4 -left-1/4 w-[70%] h-[70%] rounded-full bg-primary/10 dark:bg-primary/15 blur-[120px]" />
         <div className="absolute -bottom-1/4 -right-1/4 w-[60%] h-[60%] rounded-full bg-primary/5 dark:bg-amber-900/20 blur-[100px]" />
 
@@ -708,7 +750,7 @@ export default function LandingPage() {
                     <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
                       <step.icon className="w-5 h-5 text-primary" />
                     </div>
-                    <span className="text-4xl sm:text-5xl font-black text-border/20 dark:text-border/15 select-none leading-none">{step.n}</span>
+                    <span className="text-4xl sm:text-5xl font-black text-primary/30 dark:text-primary/25 select-none leading-none group-hover:text-primary/50 transition-colors">{step.n}</span>
                   </div>
                   <h3 className="text-base sm:text-lg font-bold text-foreground mb-2">{step.title}</h3>
                   <p className="text-muted-foreground/75 leading-relaxed text-sm">{step.desc}</p>
@@ -844,17 +886,50 @@ export default function LandingPage() {
                 </Reveal>
 
                 <Reveal delay={80}>
-                  <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
-                    {ranks.filter(r => r.is_active !== false).slice(0, 6).map(r => (
-                      <div key={r.id} className={cn('bg-card/70 rounded-2xl p-4 sm:p-5 border transition-all card-lift text-center backdrop-blur-sm', r.border_color || 'border-border/50 hover:border-primary/25')}>
-                        <div className="w-10 h-10 rounded-xl bg-muted/60 flex items-center justify-center mx-auto mb-2">
-                          <Award className={cn('w-5 h-5', r.color || 'text-amber-500')} />
+                  <div className="space-y-2.5">
+                    {ranks.filter(r => r.is_active !== false).slice(0, 6).map((r, idx, arr) => {
+                      const pct = Math.round(((idx + 1) / arr.length) * 100);
+                      const borderStyle = r.border_color?.startsWith('#') ? { borderColor: r.border_color } : undefined;
+                      const borderClass = r.border_color?.startsWith('#') ? '' : (r.border_color || 'border-border/40');
+                      const colorStyle = r.color?.startsWith('#') ? { color: r.color } : undefined;
+                      const colorClass = r.color?.startsWith('#') ? '' : (r.color || 'text-amber-500');
+                      const bgStyle = r.bg_color?.startsWith('#') ? { backgroundColor: r.bg_color + '20' } : undefined;
+                      return (
+                        <div
+                          key={r.id}
+                          className={cn('group relative rounded-2xl border p-4 sm:p-5 transition-all hover:scale-[1.01] cursor-default backdrop-blur-sm overflow-hidden', borderClass)}
+                          style={borderStyle}
+                        >
+                          <div className="absolute inset-0 opacity-30 transition-opacity group-hover:opacity-50" style={bgStyle} />
+                          <div className="relative flex items-center gap-4">
+                            <div
+                              className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shrink-0 bg-muted/50"
+                              style={bgStyle}
+                            >
+                              <Award className={cn('w-5 h-5 sm:w-6 sm:h-6', colorClass)} style={colorStyle} />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-baseline gap-2 flex-wrap">
+                                <span className={cn('text-sm sm:text-base font-bold', colorClass)} style={colorStyle}>{r.name}</span>
+                                {r.min_affiliates > 0 && (
+                                  <span className="text-xs text-muted-foreground/60">{r.min_affiliates} afiliados mín.</span>
+                                )}
+                              </div>
+                              <div className="mt-1.5 h-1.5 rounded-full bg-muted/40 overflow-hidden w-full">
+                                <div
+                                  className={cn('h-full rounded-full transition-all', !r.color?.startsWith('#') && (colorClass || 'bg-amber-500'))}
+                                  style={{ width: `${pct}%`, backgroundColor: r.color?.startsWith('#') ? r.color : undefined }}
+                                />
+                              </div>
+                            </div>
+                            <div className="text-right shrink-0">
+                              <div className="text-base sm:text-lg font-black text-foreground">{formatPrice(r.bonus, currency, currencySymbol, exchangeRate)}</div>
+                              <div className="text-[10px] text-muted-foreground/60 mt-0.5">bono de rango</div>
+                            </div>
+                          </div>
                         </div>
-                        <div className={cn('font-bold text-xs sm:text-sm mb-1', r.color || 'text-foreground')}>{r.name}</div>
-                        <div className="text-xs text-muted-foreground/70 mb-1">Bono</div>
-                        <div className="text-sm sm:text-base font-bold text-foreground">{formatPrice(r.bonus, currency, currencySymbol, exchangeRate)}</div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </Reveal>
               </div>
@@ -952,34 +1027,46 @@ export default function LandingPage() {
       <StoreSection />
 
       {/* ── FAQ ───────────────────────────────────────────────────────────────*/}
-      <section className="relative py-16 sm:py-24">
-        <div className="absolute inset-0 bg-dub-grid opacity-30 mask-fade-center" />
-        <div className="relative max-w-[720px] mx-auto px-4 sm:px-6 lg:px-8">
-          <Reveal className="mb-10 sm:mb-12">
-            <span className="text-xs font-semibold text-primary uppercase tracking-widest mb-3 block">FAQ</span>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight">
-              Preguntas <span className="text-gradient-animated">frecuentes</span>
-            </h2>
-          </Reveal>
-          <Reveal delay={60}>
-            <div className="divide-y divide-border/40 border border-border/50 rounded-2xl overflow-hidden">
-              {faqItems.map((faq, i) => (
-                <div key={i} className={cn('bg-card/60 transition-colors', openFaq === i && 'bg-muted/20')}>
-                  <button onClick={() => setOpenFaq(openFaq === i ? null : i)} className="w-full flex items-center justify-between px-5 sm:px-7 py-4 sm:py-5 text-left gap-4">
-                    <span className="text-sm sm:text-base font-semibold text-foreground">{faq.question}</span>
-                    <ChevronDown className={cn('w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground/60 transition-transform shrink-0', openFaq === i && 'rotate-180')} />
-                  </button>
-                  <div className={cn('grid transition-all', openFaq === i ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0')}>
-                    <div className="overflow-hidden">
-                      <div className="px-5 sm:px-7 pb-5 sm:pb-6">
-                        <p className="text-sm sm:text-base text-muted-foreground/80 leading-relaxed">{faq.answer}</p>
+      <section className="relative py-16 sm:py-24 bg-muted/10">
+        <div className="absolute inset-0 bg-dub-grid opacity-20 mask-fade-center pointer-events-none" />
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border/60 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border/60 to-transparent" />
+        <div className="relative max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-[1fr_1.6fr] gap-12 lg:gap-16 items-start">
+            <Reveal>
+              <span className="text-xs font-semibold text-primary uppercase tracking-widest mb-3 block">FAQ</span>
+              <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight mb-4">
+                Preguntas <span className="text-gradient-animated">frecuentes</span>
+              </h2>
+              <p className="text-muted-foreground/70 leading-relaxed text-sm sm:text-base mb-6">
+                Todo lo que necesitas saber antes de empezar. Si tienes más dudas, nuestro equipo está disponible 24/7.
+              </p>
+              <Link to="/contacto" className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:gap-3 transition-all group">
+                Contactar soporte <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              </Link>
+            </Reveal>
+            <Reveal delay={60}>
+              <div className="divide-y divide-border/40 border border-border/50 rounded-2xl overflow-hidden shadow-sm">
+                {faqItems.map((faq, i) => (
+                  <div key={i} className={cn('bg-card/80 transition-colors backdrop-blur-sm', openFaq === i && 'bg-card')}>
+                    <button onClick={() => setOpenFaq(openFaq === i ? null : i)} className="w-full flex items-center justify-between px-5 sm:px-6 py-4 sm:py-5 text-left gap-4">
+                      <span className={cn('text-sm sm:text-base font-medium transition-colors', openFaq === i ? 'text-foreground font-semibold' : 'text-foreground/80')}>{faq.question}</span>
+                      <div className={cn('w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-all', openFaq === i ? 'border-primary bg-primary/10 rotate-180' : 'border-border/60 bg-muted/30')}>
+                        <ChevronDown className={cn('w-3 h-3 text-muted-foreground transition-colors', openFaq === i && 'text-primary')} />
+                      </div>
+                    </button>
+                    <div className={cn('grid transition-all', openFaq === i ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0')}>
+                      <div className="overflow-hidden">
+                        <div className="px-5 sm:px-6 pb-5 sm:pb-6 pt-0">
+                          <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">{faq.answer}</p>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          </Reveal>
+                ))}
+              </div>
+            </Reveal>
+          </div>
         </div>
       </section>
 
