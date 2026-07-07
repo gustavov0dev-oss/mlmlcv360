@@ -197,10 +197,9 @@ function StoreSection() {
               {Array.from({ length: 4 }).map((_, i) => <div key={i} className="bg-card rounded-xl overflow-hidden border border-border/60"><Skeleton className="aspect-square" /></div>)}
             </div>
           ) : filtered.length === 0 ? (
-            <div className="h-48 flex flex-col items-center justify-center gap-3 rounded-2xl border border-border/40 bg-muted/20">
-              <ShoppingBag className="w-8 h-8 text-muted-foreground/30" />
-              <p className="text-sm text-muted-foreground/60">No hay productos en esta categoría</p>
-              <button onClick={() => setActiveCat('')} className="text-xs text-primary font-medium hover:underline">Ver todos los productos</button>
+            <div className="py-20 flex flex-col items-center justify-center gap-2 text-center">
+              <p className="text-sm text-muted-foreground/50">No hay productos en esta categoría</p>
+              <button onClick={() => setActiveCat('')} className="text-sm text-primary font-medium hover:underline transition-colors">Ver todos los productos</button>
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
@@ -1090,54 +1089,44 @@ export default function LandingPage() {
               </div>
             </Reveal>
             <Reveal delay={80}>
-              <div className="space-y-2">
-                {faqItems.length === 0 ? (
-                  <div className="py-16 flex flex-col items-center justify-center gap-3 text-center">
-                    <div className="w-12 h-12 rounded-2xl bg-muted/60 flex items-center justify-center">
-                      <ChevronDown className="w-5 h-5 text-muted-foreground/40" />
-                    </div>
-                    <p className="text-sm text-muted-foreground/60">No hay preguntas frecuentes configuradas aún.</p>
-                  </div>
-                ) : faqItems.map((faq, i) => (
-                  <div
-                    key={i}
-                    className={cn(
-                      'rounded-2xl border transition-all duration-200 overflow-hidden',
-                      openFaq === i
-                        ? 'border-primary/25 bg-primary/5'
-                        : 'border-border/50 bg-card/60 hover:border-border hover:bg-card/80',
-                    )}
-                  >
-                    <button
-                      onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                      className="w-full flex items-center justify-between px-5 py-4 text-left gap-4"
+              {faqItems.length === 0 ? (
+                <div className="py-20 text-center">
+                  <p className="text-sm text-muted-foreground/50">No hay preguntas configuradas aún.</p>
+                </div>
+              ) : (
+                <div>
+                  {faqItems.map((faq, i) => (
+                    <div
+                      key={i}
+                      className={cn('border-b border-border/40', i === 0 && 'border-t border-border/40')}
                     >
-                      <span className={cn(
-                        'text-sm sm:text-[15px] leading-snug transition-colors',
-                        openFaq === i ? 'font-semibold text-foreground' : 'font-medium text-foreground/85',
-                      )}>
-                        {faq.question}
-                      </span>
+                      <button
+                        onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                        className="w-full flex items-center justify-between py-5 text-left gap-4 group"
+                      >
+                        <span className={cn(
+                          'text-sm sm:text-[15px] leading-snug transition-colors',
+                          openFaq === i ? 'font-semibold text-foreground' : 'font-medium text-foreground/70 group-hover:text-foreground',
+                        )}>
+                          {faq.question}
+                        </span>
+                        <div className={cn(
+                          'w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-all duration-200',
+                          openFaq === i ? 'bg-primary/10 text-primary' : 'text-muted-foreground/40 group-hover:text-foreground/60',
+                        )}>
+                          <ChevronDown className={cn('w-3.5 h-3.5 transition-transform duration-300', openFaq === i && 'rotate-180')} />
+                        </div>
+                      </button>
                       <div className={cn(
-                        'w-7 h-7 rounded-full border flex items-center justify-center shrink-0 transition-all duration-200',
-                        openFaq === i
-                          ? 'border-primary/40 bg-primary/10 text-primary rotate-180'
-                          : 'border-border/50 bg-muted/40 text-muted-foreground',
+                        'overflow-hidden transition-all duration-300 ease-in-out',
+                        openFaq === i ? 'max-h-96 pb-5' : 'max-h-0',
                       )}>
-                        <ChevronDown className="w-3.5 h-3.5 transition-transform duration-200" />
-                      </div>
-                    </button>
-                    <div className={cn(
-                      'overflow-hidden transition-all duration-300 ease-in-out',
-                      openFaq === i ? 'max-h-96' : 'max-h-0',
-                    )}>
-                      <div className="px-5 pb-5 pt-1">
                         <p className="text-sm sm:text-[15px] text-muted-foreground leading-relaxed">{faq.answer}</p>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </Reveal>
           </div>
         </div>
@@ -1145,9 +1134,12 @@ export default function LandingPage() {
 
       {/* ── CTA ───────────────────────────────────────────────────────────────*/}
       <section className="relative py-20 sm:py-28 lg:py-36 overflow-hidden bg-zinc-950 dark:bg-[#0b0905]">
+        {/* Seamless fade — mirrors the dark promo section */}
+        <div className="absolute top-0 left-0 right-0 h-24 sm:h-32 bg-gradient-to-b from-background to-transparent z-20 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 right-0 h-24 sm:h-32 bg-gradient-to-t from-background to-transparent z-20 pointer-events-none" />
         <div className="absolute inset-0 bg-dub-grid-dark opacity-50 mask-fade-center" />
-        <div className="absolute top-[-30%] left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full bg-primary/10 dark:bg-primary/15 blur-[100px]" />
-        <div className="absolute bottom-[-20%] left-1/2 -translate-x-1/2 w-[400px] h-[250px] rounded-full bg-primary/5 dark:bg-amber-900/20 blur-[80px]" />
+        <div className="absolute top-[-30%] left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full bg-primary/8 blur-[120px]" />
+        <div className="absolute bottom-[-20%] left-1/2 -translate-x-1/2 w-[400px] h-[250px] rounded-full bg-amber-900/6 blur-[100px]" />
 
         <div className="relative z-10 max-w-[700px] mx-auto px-4 sm:px-6 text-center">
           <Reveal>
