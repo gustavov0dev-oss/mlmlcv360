@@ -385,6 +385,28 @@ function usePlatformStats() {
   return stats;
 }
 
+// ─── top categories hook ───────────────────────────────────────────────────────
+function useTopCategories() {
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const { data } = await supabase
+          .from('product_categories')
+          .select('id, name')
+          .eq('status', 'active')
+          .order('sort_order')
+          .limit(4);
+        if (data) setCategories(data);
+      } catch { /* ignore */ }
+    };
+    load();
+  }, []);
+
+  return categories;
+}
+
 // ─── main ─────────────────────────────────────────────────────────────────────
 export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -392,6 +414,7 @@ export default function LandingPage() {
   const plans = allPlans.filter(p => p.is_active);
   const { user } = useAuthStore();
   const platformStats = usePlatformStats();
+  const topCategories = useTopCategories();
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
@@ -400,6 +423,9 @@ export default function LandingPage() {
       {/* ── HERO ──────────────────────────────────────────────────────────────*/}
       <section className="relative pt-20 pb-0 overflow-hidden">
         <div className="absolute inset-0 bg-dub-grid mask-fade-top" />
+        {/* Subtle hero auras */}
+        <div className="absolute top-20 left-1/4 w-[350px] h-[350px] rounded-full bg-primary/4 blur-[100px] pointer-events-none" />
+        <div className="absolute top-32 right-1/4 w-[300px] h-[300px] rounded-full bg-amber-500/4 blur-[90px] pointer-events-none" />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-gradient-radial from-primary/5 to-transparent blur-[120px] pointer-events-none" />
 
         <div className="relative z-10 max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -564,7 +590,7 @@ export default function LandingPage() {
                     </div>
                   )}
                 </div>
-                <p className="text-sm text-muted-foreground leading-relaxed mb-5">7% directa · 4% binaria · 2% unilevel. Cálculo en tiempo real, pago cada 15 días.</p>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-5">Comisiones directas, binarias y unilevel. Cálculo en tiempo real, pago quincenal automático sin trámites.</p>
                 {/* mini chart */}
                 <div className="flex items-end gap-1 h-14 mb-4 px-1">
                   {[28, 45, 38, 62, 50, 74, 58, 82, 68, 90, 78, 100].map((h, i) => (
@@ -572,7 +598,7 @@ export default function LandingPage() {
                   ))}
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {['7% Directa', '4% Binaria', '2% Unilevel', 'Pago quincenal'].map(tag => (
+                  {['Comisión directa', 'Red binaria', 'Unilevel', 'Pago quincenal'].map(tag => (
                     <span key={tag} className="px-2.5 py-1 bg-emerald-500/8 text-emerald-700 dark:text-emerald-400 rounded-full text-xs font-medium border border-emerald-500/15">{tag}</span>
                   ))}
                 </div>
@@ -659,7 +685,7 @@ export default function LandingPage() {
                   </div>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-4 flex-1">Catálogo completo. Cada compra activa comisiones automáticas en toda tu red de forma instantánea.</p>
                   <div className="flex flex-wrap gap-2 mb-4">
-                    {['Vitaminas', 'Bienestar', 'Nutrición', 'Cuidado personal'].map(tag => (
+                    {(topCategories.length > 0 ? topCategories.map(c => c.name) : ['Vitaminas', 'Bienestar', 'Nutrición', 'Cuidado personal']).map(tag => (
                       <span key={tag} className="px-2.5 py-1 bg-blue-500/8 text-blue-700 dark:text-blue-400 rounded-full text-xs font-medium border border-blue-500/15">{tag}</span>
                     ))}
                   </div>
@@ -740,14 +766,14 @@ export default function LandingPage() {
             <Reveal delay={100}>
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { icon: DollarSign, title: 'Comisiones en tiempo real', desc: 'Calculadas al instante en cada compra de tu red.', iconCls: 'text-emerald-400', iconBg: 'bg-emerald-500/20' },
-                  { icon: Zap, title: 'Pago automático', desc: 'Transferencias quincenales sin trámite de tu parte.', iconCls: 'text-amber-400', iconBg: 'bg-amber-500/20' },
-                  { icon: Globe, title: 'Red internacional', desc: 'Tus afiliados pueden estar en toda Latinoamérica.', iconCls: 'text-sky-400', iconBg: 'bg-sky-500/20' },
-                  { icon: TrendingUp, title: 'Crecimiento probado', desc: '+340% anual. Números reales, no promesas.', iconCls: 'text-rose-400', iconBg: 'bg-rose-500/20' },
+                  { icon: DollarSign, title: 'Comisiones en tiempo real', desc: 'Calculadas al instante en cada compra de tu red.', iconCls: 'text-emerald-400', iconBg: 'bg-emerald-500/20', cardBg: 'bg-emerald-500/6 hover:bg-emerald-500/10 border-emerald-500/15' },
+                  { icon: Zap, title: 'Pago automático', desc: 'Transferencias quincenales sin trámite de tu parte.', iconCls: 'text-amber-400', iconBg: 'bg-amber-500/20', cardBg: 'bg-amber-500/6 hover:bg-amber-500/10 border-amber-500/15' },
+                  { icon: Globe, title: 'Red internacional', desc: 'Tus afiliados pueden estar en toda Latinoamérica.', iconCls: 'text-sky-400', iconBg: 'bg-sky-500/20', cardBg: 'bg-sky-500/6 hover:bg-sky-500/10 border-sky-500/15' },
+                  { icon: TrendingUp, title: 'Crecimiento probado', desc: '+340% anual. Números reales, no promesas.', iconCls: 'text-rose-400', iconBg: 'bg-rose-500/20', cardBg: 'bg-rose-500/6 hover:bg-rose-500/10 border-rose-500/15' },
                 ].map((item, i) => {
                   const Icon = item.icon;
                   return (
-                    <div key={i} className="bg-white/8 border border-white/10 rounded-2xl p-4 sm:p-5 hover:bg-white/12 transition-all backdrop-blur-sm">
+                    <div key={i} className={cn('rounded-2xl p-4 sm:p-5 transition-all backdrop-blur-sm border border-white/10', item.cardBg)}>
                       <div className={cn('w-9 h-9 rounded-xl flex items-center justify-center mb-3', item.iconBg)}>
                         <Icon className={cn('w-5 h-5', item.iconCls)} />
                       </div>
@@ -1138,8 +1164,10 @@ export default function LandingPage() {
         <div className="absolute top-0 left-0 right-0 h-24 sm:h-32 bg-gradient-to-b from-background to-transparent z-20 pointer-events-none" />
         <div className="absolute bottom-0 left-0 right-0 h-24 sm:h-32 bg-gradient-to-t from-background to-transparent z-20 pointer-events-none" />
         <div className="absolute inset-0 bg-dub-grid-dark opacity-50 mask-fade-center" />
-        <div className="absolute top-[-30%] left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full bg-primary/8 blur-[120px]" />
-        <div className="absolute bottom-[-20%] left-1/2 -translate-x-1/2 w-[400px] h-[250px] rounded-full bg-amber-900/6 blur-[100px]" />
+        {/* Visible aura effects */}
+        <div className="absolute top-[-20%] left-1/2 -translate-x-1/2 w-[700px] h-[500px] rounded-full bg-primary/12 blur-[130px]" />
+        <div className="absolute bottom-[-15%] left-1/2 -translate-x-1/2 w-[500px] h-[320px] rounded-full bg-amber-600/10 blur-[110px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full bg-primary/6 blur-[90px]" />
 
         <div className="relative z-10 max-w-[700px] mx-auto px-4 sm:px-6 text-center">
           <Reveal>
