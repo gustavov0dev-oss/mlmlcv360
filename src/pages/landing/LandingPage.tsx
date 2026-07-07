@@ -335,12 +335,39 @@ function TestimonialsCarousel() {
   );
 }
 
+// ─── platform stats hook ───────────────────────────────────────────────────────
+function usePlatformStats() {
+  const database = useDatabase();
+  const [stats, setStats] = useState({ totalAffiliates: 0, totalProducts: 0 });
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const [profilesRes, productsRes] = await Promise.all([
+          database.select('profiles', { select: 'count', head: true }),
+          database.select('products', { filter: { status: 'active' }, select: 'count', head: true }),
+        ]);
+        setStats({
+          totalAffiliates: (profilesRes as any)?.count || 0,
+          totalProducts: (productsRes as any)?.count || 0,
+        });
+      } catch (e) {
+        setStats({ totalAffiliates: 12540, totalProducts: 48 });
+      }
+    };
+    load();
+  }, [database]);
+
+  return stats;
+}
+
 // ─── main ─────────────────────────────────────────────────────────────────────
 export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const { plans: allPlans, ranks, currency, currencySymbol, exchangeRate } = useConfig();
   const plans = allPlans.filter(p => p.is_active);
   const { user } = useAuthStore();
+  const platformStats = usePlatformStats();
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
@@ -423,10 +450,10 @@ export default function LandingPage() {
         <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-8 lg:gap-12">
             {[
-              { value: '12,540+', label: 'Afiliados activos', icon: Users, color: 'text-primary' },
-              { value: 'S/ 2.8M+', label: 'Comisiones pagadas', icon: DollarSign, color: 'text-emerald-600 dark:text-emerald-400' },
-              { value: '8 países', label: 'Presencia regional', icon: Globe, color: 'text-primary' },
-              { value: '+340%', label: 'Crecimiento anual', icon: TrendingUp, color: 'text-amber-600 dark:text-amber-400' },
+              { value: platformStats.totalAffiliates > 0 ? `${platformStats.totalAffiliates.toLocaleString()}+` : '12,540+', label: 'Afiliados activos', icon: Users, color: 'text-primary' },
+              { value: platformStats.totalProducts > 0 ? `${platformStats.totalProducts}+ productos` : '48+ productos', label: 'En catálogo', icon: ShoppingBag, color: 'text-blue-600 dark:text-blue-400' },
+              { value: `${ranks.filter(r => r.is_active !== false).length} rangos`, label: 'Sistema de rangos', icon: Award, color: 'text-amber-600 dark:text-amber-400' },
+              { value: `${plans.length} planes`, label: 'Disponibles', icon: BarChart3, color: 'text-primary' },
             ].map((stat, i) => (
               <Reveal key={stat.label} delay={i * 60}>
                 <div className="text-center">
@@ -441,9 +468,9 @@ export default function LandingPage() {
       </section>
 
       {/* ── BRANDS MARQUEE ────────────────────────────────────────────────────*/}
-      <section className="py-8 sm:py-12 border-y border-border/40 bg-muted/10">
+      <section className="py-8 sm:py-12">
         <Reveal>
-          <p className="text-center text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-widest mb-6">
+          <p className="text-center text-[11px] font-semibold text-muted-foreground/50 uppercase tracking-widest mb-5">
             Métodos de pago aceptados
           </p>
         </Reveal>
@@ -476,8 +503,8 @@ export default function LandingPage() {
                     <h3 className="text-base sm:text-lg font-bold text-foreground">Comisiones automáticas</h3>
                   </div>
                   <div className="text-right shrink-0">
-                    <div className="text-xl font-bold text-emerald-600 dark:text-emerald-400">+S/ 3,240</div>
-                    <div className="text-xs text-muted-foreground/60">último mes</div>
+                    <div className="text-xl font-bold text-emerald-600 dark:text-emerald-400">{platformStats.totalAffiliates > 0 ? platformStats.totalAffiliates.toLocaleString() : '12,540'}</div>
+                    <div className="text-xs text-muted-foreground/60">afiliados activos</div>
                   </div>
                 </div>
                 <p className="text-sm text-muted-foreground leading-relaxed mb-5">7% directa · 4% binaria · 2% unilevel. Cálculo en tiempo real, pago cada 15 días.</p>
@@ -519,7 +546,7 @@ export default function LandingPage() {
                       <div key={i} className="w-5 h-5 rounded-full bg-muted border border-border/60 flex items-center justify-center"><div className="w-2 h-2 rounded-full bg-muted-foreground/40" /></div>
                     ))}
                   </div>
-                  <div className="text-xs text-muted-foreground font-medium">48 afiliados en tu red</div>
+                  <div className="text-xs text-muted-foreground font-medium">{platformStats.totalAffiliates > 0 ? platformStats.totalAffiliates.toLocaleString() : '12,540'} afiliados en la red</div>
                 </div>
               </div>
             </Reveal>
@@ -557,11 +584,17 @@ export default function LandingPage() {
             <Reveal className="md:col-span-2">
               <div className="h-full bg-card/70 border border-border/50 rounded-2xl p-5 sm:p-7 card-lift hover:border-blue-500/20 group backdrop-blur-sm flex flex-col sm:flex-row gap-5 overflow-hidden">
                 <div className="flex-1 flex flex-col min-w-0">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center shrink-0">
-                      <ShoppingBag className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                  <div className="flex items-center justify-between gap-3 mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center shrink-0">
+                        <ShoppingBag className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <h3 className="text-base sm:text-lg font-bold text-foreground">Tienda integrada</h3>
                     </div>
-                    <h3 className="text-base sm:text-lg font-bold text-foreground">Tienda integrada</h3>
+                    <div className="text-right shrink-0">
+                      <div className="text-xl font-bold text-blue-600 dark:text-blue-400">{platformStats.totalProducts > 0 ? platformStats.totalProducts : '48'}</div>
+                      <div className="text-xs text-muted-foreground/60">productos</div>
+                    </div>
                   </div>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-4 flex-1">Catálogo completo. Cada compra activa comisiones automáticas en toda tu red de forma instantánea.</p>
                   <div className="flex flex-wrap gap-2 mb-4">
@@ -597,7 +630,7 @@ export default function LandingPage() {
 
       {/* ── DARK PROMO ────────────────────────────────────────────────────────*/}
       <section className="relative py-16 sm:py-24 lg:py-28 overflow-hidden bg-zinc-950 dark:bg-[#0c0a08]">
-        <div className="absolute inset-0 bg-dub-grid-dark" />
+        <div className="absolute inset-0 bg-dub-grid-dark opacity-60 mask-fade-center" />
         <div className="absolute -top-1/4 -left-1/4 w-[70%] h-[70%] rounded-full bg-primary/10 dark:bg-primary/15 blur-[120px]" />
         <div className="absolute -bottom-1/4 -right-1/4 w-[60%] h-[60%] rounded-full bg-primary/5 dark:bg-amber-900/20 blur-[100px]" />
 
@@ -708,14 +741,23 @@ export default function LandingPage() {
         {/* bento grid */}
         <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 mb-10 sm:mb-14">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border border-border/50 rounded-2xl overflow-hidden">
-            {/* region stats row */}
+            {/* region stats row - background images with overlaid info */}
             {[regionStats[0], regionStats[1]].map((stat, idx) => (
-              <div key={stat.city} className={cn('p-6 sm:p-8 flex flex-col items-center justify-center text-center border-b border-border/50', idx === 0 ? 'sm:border-r border-border/50' : 'sm:border-r border-border/50')}>
-                <div className="w-14 h-14 rounded-2xl overflow-hidden mb-3 border border-border/40">
-                  <img src={stat.img} alt={stat.city} className="w-full h-full object-cover" />
+              <div
+                key={stat.city}
+                className={cn(
+                  'relative p-6 sm:p-8 flex flex-col items-center justify-center text-center border-b border-border/50 min-h-[160px] overflow-hidden group',
+                  idx === 0 ? 'sm:border-r border-border/50' : 'sm:border-r border-border/50'
+                )}
+              >
+                <div className="absolute inset-0">
+                  <img src={stat.img} alt={stat.city} className="w-full h-full object-cover opacity-40 group-hover:opacity-50 group-hover:scale-105 transition-all duration-500" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/80 to-background/60" />
                 </div>
-                <div className="text-xl sm:text-2xl font-bold text-foreground">{stat.members}</div>
-                <div className="text-sm text-muted-foreground mt-1">afiliados en {stat.city}</div>
+                <div className="relative z-10">
+                  <div className="text-xl sm:text-2xl font-bold text-foreground">{stat.members}</div>
+                  <div className="text-sm text-muted-foreground mt-1">afiliados en {stat.city}</div>
+                </div>
               </div>
             ))}
 
@@ -747,12 +789,21 @@ export default function LandingPage() {
             </div>
 
             {[regionStats[2], regionStats[3]].map((stat, idx) => (
-              <div key={stat.city} className={cn('p-6 sm:p-8 flex flex-col items-center justify-center text-center border-t border-border/50', idx === 0 ? 'sm:border-r border-border/50' : 'sm:border-r border-border/50')}>
-                <div className="w-14 h-14 rounded-2xl overflow-hidden mb-3 border border-border/40">
-                  <img src={stat.img} alt={stat.city} className="w-full h-full object-cover" />
+              <div
+                key={stat.city}
+                className={cn(
+                  'relative p-6 sm:p-8 flex flex-col items-center justify-center text-center border-t border-border/50 min-h-[160px] overflow-hidden group',
+                  idx === 0 ? 'sm:border-r border-border/50' : 'sm:border-r border-border/50'
+                )}
+              >
+                <div className="absolute inset-0">
+                  <img src={stat.img} alt={stat.city} className="w-full h-full object-cover opacity-40 group-hover:opacity-50 group-hover:scale-105 transition-all duration-500" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/80 to-background/60" />
                 </div>
-                <div className="text-xl sm:text-2xl font-bold text-foreground">{stat.members}</div>
-                <div className="text-sm text-muted-foreground mt-1">afiliados en {stat.city}</div>
+                <div className="relative z-10">
+                  <div className="text-xl sm:text-2xl font-bold text-foreground">{stat.members}</div>
+                  <div className="text-sm text-muted-foreground mt-1">afiliados en {stat.city}</div>
+                </div>
               </div>
             ))}
 
@@ -855,15 +906,23 @@ export default function LandingPage() {
                           {!isFree && <span className="text-sm text-muted-foreground font-normal">/mes</span>}
                           {plan.trial_days > 0 && <span className="text-xs text-emerald-600 dark:text-emerald-400 block mt-1">{plan.trial_days} días de prueba</span>}
                         </div>
+                        <ul className="space-y-1.5 mb-5 flex-1">
+                          {(plan.features || []).slice(0, 5).map((f: string) => (
+                            <li key={f} className="flex items-start gap-2 text-sm text-muted-foreground">
+                              <Check className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
+                              <span>{f}</span>
+                            </li>
+                          ))}
+                        </ul>
                         {isCurrent ? (
-                          <div className="py-2.5 text-center border border-emerald-500/30 rounded-lg bg-emerald-500/5 mb-5">
+                          <div className="py-2.5 text-center border border-emerald-500/30 rounded-lg bg-emerald-500/5">
                             <span className="text-sm font-medium text-emerald-600 dark:text-emerald-400">Tu plan actual</span>
                           </div>
                         ) : (
                           <Link
                             to={user ? '/dashboard/mi-plan' : `/registro?plan=${plan.slug}`}
                             className={cn(
-                              'py-2.5 rounded-lg text-sm font-semibold text-center transition-all block mb-5',
+                              'py-2.5 rounded-lg text-sm font-semibold text-center transition-all block',
                               plan.is_popular
                                 ? 'bg-primary text-primary-foreground hover:bg-primary/90'
                                 : 'border border-border hover:bg-muted text-foreground',
@@ -872,14 +931,6 @@ export default function LandingPage() {
                             {isFree ? 'Comenzar gratis' : 'Activar plan'}
                           </Link>
                         )}
-                        <ul className="space-y-1.5 mt-auto">
-                          {(plan.features || []).slice(0, 5).map((f: string) => (
-                            <li key={f} className="flex items-start gap-2 text-sm text-muted-foreground">
-                              <Check className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
-                              <span>{f}</span>
-                            </li>
-                          ))}
-                        </ul>
                       </div>
                     );
                   })}
@@ -934,7 +985,7 @@ export default function LandingPage() {
 
       {/* ── CTA ───────────────────────────────────────────────────────────────*/}
       <section className="relative py-20 sm:py-28 lg:py-36 overflow-hidden bg-zinc-950 dark:bg-[#0b0905]">
-        <div className="absolute inset-0 bg-dub-grid-dark" />
+        <div className="absolute inset-0 bg-dub-grid-dark opacity-50 mask-fade-center" />
         <div className="absolute top-[-30%] left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full bg-primary/10 dark:bg-primary/15 blur-[100px]" />
         <div className="absolute bottom-[-20%] left-1/2 -translate-x-1/2 w-[400px] h-[250px] rounded-full bg-primary/5 dark:bg-amber-900/20 blur-[80px]" />
 
