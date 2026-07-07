@@ -3,34 +3,45 @@ import Navbar from '@/components/landing/Navbar';
 import Footer from '@/components/landing/Footer';
 import { Reveal } from '@/components/landing/Reveal';
 import { Link } from '@/lib/router';
-import { Mail, MapPin, Send, CircleCheck as CheckCircle, ArrowRight, Clock, MessageCircle, Building2, Globe } from 'lucide-react';
+import { Mail, MapPin, Send, CircleCheck as CheckCircle, ArrowRight, Clock, MessageCircle, Building2, Globe, ChevronDown, Zap } from 'lucide-react';
 import { toast } from 'sonner';
 import { useConfig } from '@/store/configStore';
 import { cn } from '@/lib/utils';
+
+const faqs = [
+  { q: '¿Cómo creo una cuenta en Cluv360?', a: 'Ve a la página de registro, completa tus datos y recibirás acceso inmediato al dashboard. No necesitas tarjeta de crédito.' },
+  { q: '¿Cuánto tardan en acreditarse las comisiones?', a: 'Las comisiones se acreditan en menos de 60 segundos después de cada venta. Puedes verlas en tiempo real en tu dashboard.' },
+  { q: '¿Qué métodos de pago aceptan?', a: 'Aceptamos Yape, Plin, tarjetas de crédito y transferencias bancarias. Para retiros, puedes usar Yape, Plin o transferencia bancaria.' },
+  { q: '¿Puedo usar Cluv360 desde mi celular?', a: 'Sí, la plataforma es 100% responsive. Puedes gestionar tu red, ver comisiones y realizar todas las operaciones desde tu móvil.' },
+  { q: '¿Necesito experiencia previa en MLM?', a: 'No. Nuestra plataforma está diseñada para afiliados de todos los niveles. Ofrecemos tutoriales, guías y soporte personalizado.' },
+  { q: '¿Cómo contacto a soporte?', a: 'Puedes escribirnos por WhatsApp, email o mediante el formulario de esta página. Respondemos en menos de 24 horas.' },
+];
 
 export default function ContactoPage() {
   const { company } = useConfig();
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name || !form.email || !form.message) {
-      toast.error('Completa todos los campos');
+      toast.error('Completa los campos requeridos');
       return;
     }
     setLoading(true);
-    await new Promise(r => setTimeout(r, 1000));
+    await new Promise(r => setTimeout(r, 1200));
     setLoading(false);
     setSent(true);
-    toast.success('Mensaje enviado');
+    toast.success('Mensaje enviado correctamente');
   };
 
   const channels = [
-    { icon: Mail, label: 'Email', value: company.contact_email || 'hola@cluv360.pe', href: `mailto:${company.contact_email || 'hola@cluv360.pe'}`, color: 'text-primary', bg: 'bg-primary/10' },
-    { icon: MessageCircle, label: 'WhatsApp', value: company.phone || '+51 987 654 321', href: `https://wa.me/${(company.phone || '+51987654321').replace(/[^0-9]/g, '')}`, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-    { icon: MapPin, label: 'Dirección', value: company.address || 'Av. Javier Prado Este 4200, San Isidro, Lima', href: '#mapa', color: 'text-rose-500', bg: 'bg-rose-500/10' },
+    { icon: Mail, label: 'Email', value: company.contact_email || 'hola@cluv360.pe', href: `mailto:${company.contact_email || 'hola@cluv360.pe'}`, color: 'text-primary', bg: 'bg-primary/10', border: 'hover:border-primary/30' },
+    { icon: MessageCircle, label: 'WhatsApp', value: company.phone || '+51 987 654 321', href: `https://wa.me/${(company.phone || '+51987654321').replace(/[^0-9]/g, '')}`, color: 'text-emerald-500', bg: 'bg-emerald-500/10', border: 'hover:border-emerald-500/30' },
+    { icon: MapPin, label: 'Dirección', value: company.address || 'Av. Javier Prado Este 4200, San Isidro, Lima', href: '#mapa', color: 'text-rose-500', bg: 'bg-rose-500/10', border: 'hover:border-rose-500/30' },
+    { icon: Clock, label: 'Horario', value: 'Lun a Vie · 9:00 - 18:00', href: null, color: 'text-amber-500', bg: 'bg-amber-500/10', border: 'hover:border-amber-500/30' },
   ];
 
   const departments = [
@@ -43,53 +54,59 @@ export default function ContactoPage() {
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      {/* ── Hero ──────────────────────────────────────────────────────────── */}
-      <section className="relative pt-12 pb-10 sm:pt-16 sm:pb-12 overflow-hidden">
-        <div className="absolute inset-0 bg-dub-grid opacity-20 mask-fade-center" />
-        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-            <Link to="/" className="hover:text-foreground transition-colors">Inicio</Link>
-            <span className="text-muted-foreground/40">/</span>
-            <span className="text-foreground font-medium">Contacto</span>
+      {/* ── Hero ─────────────────────────────────────────────────────────── */}
+      <section className="relative pt-14 pb-10 sm:pt-20 sm:pb-14 overflow-hidden">
+        <div className="absolute inset-0 bg-dub-grid opacity-20 mask-fade-top" />
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <nav aria-label="breadcrumb" className="sr-only">
+            <Link to="/">Inicio</Link> / <span>Contacto</span>
           </nav>
 
           <Reveal>
-            <span className="text-xs font-semibold text-primary uppercase tracking-widest mb-3 block">Contacto</span>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight mb-3">
-              ¿En qué podemos ayudarte?
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/8 border border-primary/15 text-xs font-medium text-primary mb-5">
+              <Zap className="w-3.5 h-3.5" />
+              Respondemos en menos de 24h
+            </div>
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground tracking-tight mb-4 leading-[1.05]">
+              ¿En qué podemos<br className="hidden sm:block" /> <span className="text-gradient-animated">ayudarte?</span>
             </h1>
-            <p className="text-base sm:text-lg text-muted-foreground/70 max-w-xl">
-              Nuestro equipo responde en menos de 24 horas. Elige el canal que prefieras.
+            <p className="text-base sm:text-lg text-muted-foreground/70 max-w-xl leading-relaxed">
+              Nuestro equipo está disponible para resolver tus dudas, escuchar tus sugerencias y ayudarte a crecer.
             </p>
           </Reveal>
         </div>
       </section>
 
-      {/* ── Contact channels ───────────────────────────────────────────────── */}
-      <section className="pb-8">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-            {channels.map(ch => (
-              <a key={ch.label} href={ch.href} target={ch.href.startsWith('http') ? '_blank' : undefined} rel={ch.href.startsWith('http') ? 'noopener noreferrer' : undefined}
-                className="group bg-card border border-border/60 rounded-2xl p-5 hover:border-primary/30 hover:shadow-md transition-all">
-                <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center mb-3', ch.bg)}>
-                  <ch.icon className={cn('w-5 h-5', ch.color)} />
-                </div>
-                <div className="text-xs text-muted-foreground/60 mb-1">{ch.label}</div>
-                <div className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">{ch.value}</div>
-              </a>
-            ))}
+      {/* ── Contact channels ─────────────────────────────────────────────── */}
+      <section className="pb-6">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            {channels.map((ch, i) => {
+              const Wrapper = ch.href ? 'a' : 'div';
+              const props = ch.href ? { href: ch.href, target: ch.href.startsWith('http') ? '_blank' : undefined, rel: ch.href.startsWith('http') ? 'noopener noreferrer' : undefined } : {};
+              return (
+                <Reveal key={ch.label} delay={i * 50}>
+                  <Wrapper {...props as any} className={cn('group block bg-card border border-border/50 rounded-2xl p-4 sm:p-5 transition-all', ch.border, 'card-lift')}>
+                    <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center mb-3', ch.bg)}>
+                      <ch.icon className={cn('w-5 h-5', ch.color)} />
+                    </div>
+                    <div className="text-xs text-muted-foreground/60 mb-1">{ch.label}</div>
+                    <div className="text-sm font-medium text-foreground leading-snug">{ch.value}</div>
+                  </Wrapper>
+                </Reveal>
+              );
+            })}
           </div>
         </div>
       </section>
 
       {/* ── Form + Info ───────────────────────────────────────────────────── */}
-      <section className="py-10 sm:py-12">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-10 sm:py-14">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8">
             {/* Form */}
             <div className="lg:col-span-3">
-              <div className="bg-card border border-border/60 rounded-2xl p-6 sm:p-8">
+              <div className="bg-card border border-border/50 rounded-2xl p-6 sm:p-8 shadow-sm">
                 <h2 className="text-lg font-bold text-foreground mb-1">Envíanos un mensaje</h2>
                 <p className="text-sm text-muted-foreground/60 mb-6">Te responderemos lo antes posible.</p>
 
@@ -107,25 +124,25 @@ export default function ContactoPage() {
                   <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs font-medium text-muted-foreground mb-1.5">Nombre</label>
+                        <label className="block text-xs font-medium text-muted-foreground mb-1.5">Nombre <span className="text-primary">*</span></label>
                         <input type="text" value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
-                          className="w-full px-3.5 py-2.5 bg-muted/40 border border-border/60 rounded-lg text-sm outline-none focus:border-primary focus:bg-card transition-all" placeholder="Tu nombre" />
+                          className="w-full px-3.5 py-2.5 bg-muted/40 border border-border/60 rounded-lg text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 focus:bg-card transition-all" placeholder="Tu nombre" />
                       </div>
                       <div>
-                        <label className="block text-xs font-medium text-muted-foreground mb-1.5">Email</label>
+                        <label className="block text-xs font-medium text-muted-foreground mb-1.5">Email <span className="text-primary">*</span></label>
                         <input type="email" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
-                          className="w-full px-3.5 py-2.5 bg-muted/40 border border-border/60 rounded-lg text-sm outline-none focus:border-primary focus:bg-card transition-all" placeholder="tu@email.com" />
+                          className="w-full px-3.5 py-2.5 bg-muted/40 border border-border/60 rounded-lg text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 focus:bg-card transition-all" placeholder="tu@email.com" />
                       </div>
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-muted-foreground mb-1.5">Asunto</label>
                       <input type="text" value={form.subject} onChange={e => setForm(p => ({ ...p, subject: e.target.value }))}
-                        className="w-full px-3.5 py-2.5 bg-muted/40 border border-border/60 rounded-lg text-sm outline-none focus:border-primary focus:bg-card transition-all" placeholder="¿Sobre qué nos escribes?" />
+                        className="w-full px-3.5 py-2.5 bg-muted/40 border border-border/60 rounded-lg text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 focus:bg-card transition-all" placeholder="¿Sobre qué nos escribes?" />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-muted-foreground mb-1.5">Mensaje</label>
+                      <label className="block text-xs font-medium text-muted-foreground mb-1.5">Mensaje <span className="text-primary">*</span></label>
                       <textarea rows={5} value={form.message} onChange={e => setForm(p => ({ ...p, message: e.target.value }))}
-                        className="w-full px-3.5 py-2.5 bg-muted/40 border border-border/60 rounded-lg text-sm outline-none focus:border-primary focus:bg-card transition-all resize-none" placeholder="Cuéntanos en qué podemos ayudarte..." />
+                        className="w-full px-3.5 py-2.5 bg-muted/40 border border-border/60 rounded-lg text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 focus:bg-card transition-all resize-none" placeholder="Cuéntanos en qué podemos ayudarte..." />
                     </div>
                     <button type="submit" disabled={loading}
                       className="w-full bg-primary text-white py-3 rounded-lg font-semibold text-sm hover:bg-primary/90 transition-all flex items-center justify-center gap-2 disabled:opacity-50">
@@ -139,21 +156,21 @@ export default function ContactoPage() {
             {/* Info sidebar */}
             <div className="lg:col-span-2 space-y-4">
               {/* Hours */}
-              <div className="bg-card border border-border/60 rounded-2xl p-5">
-                <div className="flex items-center gap-2 mb-3">
+              <div className="bg-card border border-border/50 rounded-2xl p-5 shadow-sm">
+                <div className="flex items-center gap-2 mb-4">
                   <Clock className="w-4 h-4 text-primary" />
                   <h3 className="text-sm font-bold text-foreground">Horario de atención</h3>
                 </div>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
+                <div className="space-y-2.5 text-sm">
+                  <div className="flex justify-between items-center">
                     <span className="text-muted-foreground">Lunes a Viernes</span>
                     <span className="font-medium text-foreground">9:00 - 18:00</span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex justify-between items-center">
                     <span className="text-muted-foreground">Sábados</span>
                     <span className="font-medium text-foreground">9:00 - 13:00</span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex justify-between items-center">
                     <span className="text-muted-foreground">Domingos</span>
                     <span className="font-medium text-muted-foreground/50">Cerrado</span>
                   </div>
@@ -161,8 +178,8 @@ export default function ContactoPage() {
               </div>
 
               {/* Departments */}
-              <div className="bg-card border border-border/60 rounded-2xl p-5">
-                <h3 className="text-sm font-bold text-foreground mb-3">Departamentos</h3>
+              <div className="bg-card border border-border/50 rounded-2xl p-5 shadow-sm">
+                <h3 className="text-sm font-bold text-foreground mb-4">Departamentos</h3>
                 <div className="space-y-3">
                   {departments.map(dept => (
                     <a key={dept.label} href={`mailto:${dept.email}`} className="group flex items-start gap-3 hover:bg-muted/40 -mx-2 px-2 py-1.5 rounded-lg transition-all">
@@ -172,6 +189,7 @@ export default function ContactoPage() {
                       <div className="min-w-0">
                         <div className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">{dept.label}</div>
                         <div className="text-xs text-muted-foreground/60 truncate">{dept.email}</div>
+                        <div className="text-[11px] text-muted-foreground/40 mt-0.5">{dept.desc}</div>
                       </div>
                     </a>
                   ))}
@@ -182,9 +200,9 @@ export default function ContactoPage() {
         </div>
       </section>
 
-      {/* ── Map ────────────────────────────────────────────────────────────── */}
+      {/* ── Map ──────────────────────────────────────────────────────────── */}
       <section id="mapa" className="py-10 sm:py-12 bg-muted/20 border-y border-border/40">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <Reveal>
             <div className="text-center mb-6">
               <span className="text-xs font-semibold text-primary uppercase tracking-widest mb-2 block">Ubicación</span>
@@ -193,8 +211,8 @@ export default function ContactoPage() {
             </div>
           </Reveal>
 
-          <Reveal>
-            <div className="rounded-2xl overflow-hidden border border-border/60 shadow-lg">
+          <Reveal delay={50}>
+            <div className="rounded-2xl overflow-hidden border border-border/50 shadow-lg">
               <iframe
                 title="Ubicación Cluv360"
                 src="https://www.openstreetmap.org/export/embed.html?bbox=-77.0375%2C-12.0915%2C-77.0275%2C-12.0815&layer=mapnik&marker=-12.0865%2C-77.0325"
@@ -207,8 +225,38 @@ export default function ContactoPage() {
         </div>
       </section>
 
-      {/* ── CTA ────────────────────────────────────────────────────────────── */}
+      {/* ── FAQ ───────────────────────────────────────────────────────────── */}
       <section className="py-14 sm:py-16">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Reveal className="text-center mb-8">
+            <span className="text-xs font-semibold text-primary uppercase tracking-widest mb-2 block">FAQ</span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">Preguntas frecuentes</h2>
+            <p className="text-sm text-muted-foreground/60 mt-2">Las dudas más comunes de nuestros afiliados.</p>
+          </Reveal>
+
+          <div className="space-y-3">
+            {faqs.map((faq, i) => (
+              <Reveal key={i} delay={i * 30}>
+                <div className="bg-card border border-border/50 rounded-xl overflow-hidden">
+                  <button onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                    className="w-full flex items-center justify-between gap-4 p-4 sm:p-5 text-left hover:bg-muted/30 transition-colors">
+                    <span className="text-sm font-medium text-foreground">{faq.q}</span>
+                    <ChevronDown className={cn('w-4 h-4 text-muted-foreground shrink-0 transition-transform', openFaq === i && 'rotate-180')} />
+                  </button>
+                  <div className={cn('grid transition-all duration-300 ease-out', openFaq === i ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0')}>
+                    <div className="overflow-hidden">
+                      <p className="px-4 sm:px-5 pb-4 sm:pb-5 text-sm text-muted-foreground/70 leading-relaxed">{faq.a}</p>
+                    </div>
+                  </div>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── CTA ───────────────────────────────────────────────────────────── */}
+      <section className="py-14 sm:py-16 bg-muted/20 border-t border-border/40">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-2">¿Listo para empezar?</h2>
           <p className="text-sm text-muted-foreground mb-5">Crea tu cuenta gratuita y comienza a construir tu red hoy mismo.</p>
