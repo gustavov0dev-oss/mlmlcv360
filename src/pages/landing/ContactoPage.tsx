@@ -24,6 +24,12 @@ export default function ContactoPage() {
   const [sent, setSent] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
+  const companyName = company.company_name || 'MLM 360';
+  const companyEmail = company.company_email || 'contacto@mlm360.pe';
+  const companyPhone = company.company_phone || '+51 916 085 797';
+  const companyAddress = company.company_address || 'Av. Javier Prado Este 100, San Isidro, Lima, Perú';
+  const whatsappNumber = company.whatsapp_number || companyPhone;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name || !form.email || !form.message) {
@@ -38,16 +44,16 @@ export default function ContactoPage() {
   };
 
   const channels = [
-    { icon: Mail, label: 'Email', value: company.contact_email || 'hola@cluv360.pe', href: `mailto:${company.contact_email || 'hola@cluv360.pe'}`, color: 'text-primary', bg: 'bg-primary/10', border: 'hover:border-primary/30' },
-    { icon: MessageCircle, label: 'WhatsApp', value: company.phone || '+51 987 654 321', href: `https://wa.me/${(company.phone || '+51987654321').replace(/[^0-9]/g, '')}`, color: 'text-emerald-500', bg: 'bg-emerald-500/10', border: 'hover:border-emerald-500/30' },
-    { icon: MapPin, label: 'Dirección', value: company.address || 'Av. Javier Prado Este 4200, San Isidro, Lima', href: '#mapa', color: 'text-rose-500', bg: 'bg-rose-500/10', border: 'hover:border-rose-500/30' },
+    { icon: Mail, label: 'Email', value: companyEmail, href: `mailto:${companyEmail}`, color: 'text-primary', bg: 'bg-primary/10', border: 'hover:border-primary/30' },
+    { icon: MessageCircle, label: 'WhatsApp', value: companyPhone, href: `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}`, color: 'text-emerald-500', bg: 'bg-emerald-500/10', border: 'hover:border-emerald-500/30' },
+    { icon: MapPin, label: 'Dirección', value: companyAddress, href: '#mapa', color: 'text-rose-500', bg: 'bg-rose-500/10', border: 'hover:border-rose-500/30' },
     { icon: Clock, label: 'Horario', value: 'Lun a Vie · 9:00 - 18:00', href: null, color: 'text-amber-500', bg: 'bg-amber-500/10', border: 'hover:border-amber-500/30' },
   ];
 
   const departments = [
-    { icon: MessageCircle, label: 'Soporte general', email: 'soporte@cluv360.pe', desc: 'Dudas sobre tu cuenta, pagos y plataforma', color: 'bg-primary/10 text-primary' },
-    { icon: Building2, label: 'Ventas empresariales', email: 'ventas@cluv360.pe', desc: 'Para empresas con más de 500 afiliados', color: 'bg-amber-500/10 text-amber-600 dark:text-amber-400' },
-    { icon: Globe, label: 'Alianzas', email: 'alianzas@cluv360.pe', desc: 'Integraciones y partnerships', color: 'bg-blue-500/10 text-blue-500' },
+    { icon: MessageCircle, label: 'Soporte general', email: `soporte@${companyEmail.split('@')[1] || 'mlm360.pe'}`, desc: 'Dudas sobre tu cuenta, pagos y plataforma', color: 'bg-primary/10 text-primary' },
+    { icon: Building2, label: 'Ventas empresariales', email: `ventas@${companyEmail.split('@')[1] || 'mlm360.pe'}`, desc: 'Para empresas con más de 500 afiliados', color: 'bg-amber-500/10 text-amber-600 dark:text-amber-400' },
+    { icon: Globe, label: 'Alianzas', email: `alianzas@${companyEmail.split('@')[1] || 'mlm360.pe'}`, desc: 'Integraciones y partnerships', color: 'bg-blue-500/10 text-blue-500' },
   ];
 
   return (
@@ -57,7 +63,7 @@ export default function ContactoPage() {
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
       <section className="relative pt-14 pb-10 sm:pt-20 sm:pb-14 overflow-hidden">
         <div className="absolute inset-0 bg-dub-grid opacity-20 mask-fade-top" />
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="relative max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
           <nav aria-label="breadcrumb" className="sr-only">
             <Link to="/">Inicio</Link> / <span>Contacto</span>
           </nav>
@@ -79,7 +85,7 @@ export default function ContactoPage() {
 
       {/* ── Contact channels ─────────────────────────────────────────────── */}
       <section className="pb-6">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {channels.map((ch, i) => {
               const Wrapper = ch.href ? 'a' : 'div';
@@ -102,7 +108,7 @@ export default function ContactoPage() {
 
       {/* ── Form + Info ───────────────────────────────────────────────────── */}
       <section className="py-10 sm:py-14">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8">
             {/* Form */}
             <div className="lg:col-span-3">
@@ -155,7 +161,6 @@ export default function ContactoPage() {
 
             {/* Info sidebar */}
             <div className="lg:col-span-2 space-y-4">
-              {/* Hours */}
               <div className="bg-card border border-border/50 rounded-2xl p-5 shadow-sm">
                 <div className="flex items-center gap-2 mb-4">
                   <Clock className="w-4 h-4 text-primary" />
@@ -177,7 +182,6 @@ export default function ContactoPage() {
                 </div>
               </div>
 
-              {/* Departments */}
               <div className="bg-card border border-border/50 rounded-2xl p-5 shadow-sm">
                 <h3 className="text-sm font-bold text-foreground mb-4">Departamentos</h3>
                 <div className="space-y-3">
@@ -202,19 +206,18 @@ export default function ContactoPage() {
 
       {/* ── Map ──────────────────────────────────────────────────────────── */}
       <section id="mapa" className="py-10 sm:py-12 bg-muted/20 border-y border-border/40">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
           <Reveal>
             <div className="text-center mb-6">
               <span className="text-xs font-semibold text-primary uppercase tracking-widest mb-2 block">Ubicación</span>
               <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-1">Visítanos</h2>
-              <p className="text-sm text-muted-foreground/60">{company.address || 'Av. Javier Prado Este 4200, San Isidro, Lima, Perú'}</p>
+              <p className="text-sm text-muted-foreground/60">{companyAddress}</p>
             </div>
           </Reveal>
-
           <Reveal delay={50}>
             <div className="rounded-2xl overflow-hidden border border-border/50 shadow-lg">
               <iframe
-                title="Ubicación Cluv360"
+                title={`Ubicación ${companyName}`}
                 src="https://www.openstreetmap.org/export/embed.html?bbox=-77.0375%2C-12.0915%2C-77.0275%2C-12.0815&layer=mapnik&marker=-12.0865%2C-77.0325"
                 className="w-full h-[300px] sm:h-[400px]"
                 loading="lazy"

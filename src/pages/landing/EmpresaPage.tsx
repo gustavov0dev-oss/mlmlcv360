@@ -2,16 +2,9 @@ import Navbar from '@/components/landing/Navbar';
 import Footer from '@/components/landing/Footer';
 import { Reveal } from '@/components/landing/Reveal';
 import { Link } from '@/lib/router';
-import { ArrowRight, Target, Eye, Shield, Users, TrendingUp, Award, Globe, Zap, HandHeart, BadgeCheck, Lock, Cpu, Cloud, Database, Wallet, Network, ShoppingBag, ChartBar as BarChart3, Bell, Sparkles, CircleCheck as CheckCircle } from 'lucide-react';
 import { useConfig } from '@/store/configStore';
+import { ArrowRight, Target, Eye, Shield, Users, Award, Zap, HandHeart, BadgeCheck, Lock, Cpu, Cloud, Database, Wallet, Network, ShoppingBag, ChartBar as BarChart3, Bell, Sparkles, CircleCheck as CheckCircle, TrendingUp, Globe, Crown, Diamond, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-const stats = [
-  { value: '10K+', label: 'Afiliados activos', icon: Users },
-  { value: '6', label: 'Rangos con bonos', icon: Award },
-  { value: '4', label: 'Países LATAM', icon: Globe },
-  { value: '<60s', label: 'Comisiones', icon: TrendingUp },
-];
 
 const values = [
   { icon: Shield, title: 'Transparencia', desc: 'Cada comisión, volumen y rango es rastreable en tiempo real. Nada oculto, nada manual.', color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
@@ -48,7 +41,7 @@ const benefits = [
 
 const techStack = [
   { icon: Cpu, label: 'React + TypeScript', desc: 'Frontend moderno y tipado' },
-  { icon: Database, label: 'PostgreSQL (Supabase)', desc: 'Base de datos escalable' },
+  { icon: Database, label: 'PostgreSQL + Supabase', desc: 'Base de datos escalable' },
   { icon: Cloud, label: 'Edge Functions', desc: 'Procesamiento en tiempo real' },
   { icon: Lock, label: 'Row Level Security', desc: 'Seguridad a nivel de base de datos' },
 ];
@@ -67,8 +60,21 @@ const milestones = [
   { year: '2025', title: 'Expansión LATAM', desc: 'Iniciamos operaciones en Colombia, Ecuador y Bolivia.' },
 ];
 
+const rankIcons: Record<string, typeof Crown> = { Bronce: Star, Plata: Star, Oro: Star, Platino: Star, Diamante: Diamond, Corona: Crown };
+
 export default function EmpresaPage() {
-  const { company } = useConfig();
+  const { company, ranks, plans, currencySymbol } = useConfig();
+
+  const activeRanks = ranks.filter(r => r.is_active);
+  const activePlans = plans.filter(p => p.is_active);
+  const companyName = company.company_name || 'MLM 360';
+  const companyEmail = company.company_email || 'contacto@mlm360.pe';
+  const companyPhone = company.company_phone || '+51 916 085 797';
+  const companyAddress = company.company_address || 'Av. Javier Prado Este 100, San Isidro, Lima, Perú';
+  const companyRuc = company.company_ruc || '73983766';
+  const commissionDirect = company.commission_direct || '7';
+  const commissionBinary = company.commission_binary || '4';
+  const commissionUnilevel = company.commission_unilevel || '2';
 
   return (
     <div className="min-h-screen bg-background">
@@ -77,7 +83,7 @@ export default function EmpresaPage() {
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
       <section className="relative pt-14 pb-12 sm:pt-20 sm:pb-16 overflow-hidden">
         <div className="absolute inset-0 bg-dub-grid opacity-20 mask-fade-top" />
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="relative max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
           <nav aria-label="breadcrumb" className="sr-only">
             <Link to="/">Inicio</Link> / <span>Empresa</span>
           </nav>
@@ -85,13 +91,13 @@ export default function EmpresaPage() {
           <Reveal>
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/8 border border-primary/15 text-xs font-medium text-primary mb-5">
               <Sparkles className="w-3.5 h-3.5" />
-              Sobre Cluv360
+              Sobre {companyName}
             </div>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground tracking-tight mb-4 leading-[1.05] max-w-3xl">
               Profesionalizamos el MLM<br className="hidden sm:block" /> en <span className="text-gradient-animated">Latinoamérica</span>
             </h1>
             <p className="text-base sm:text-lg text-muted-foreground/70 max-w-xl leading-relaxed">
-              Cluv360 es la plataforma todo-en-uno para redes de afiliados: comisiones automáticas, árbol genealógico interactivo, tienda integrada y rangos con bonos.
+              {companyName} es la plataforma todo-en-uno para redes de afiliados: comisiones automáticas, árbol genealógico interactivo, tienda integrada y rangos con bonos.
             </p>
           </Reveal>
         </div>
@@ -99,9 +105,14 @@ export default function EmpresaPage() {
 
       {/* ── Stats ────────────────────────────────────────────────────────── */}
       <section className="py-8 border-y border-border/40 bg-muted/20">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            {stats.map((s, i) => (
+            {[
+              { value: `${activeRanks.length}`, label: 'Rangos activos', icon: Award },
+              { value: `${activePlans.length}`, label: 'Planes disponibles', icon: TrendingUp },
+              { value: `${commissionDirect}%`, label: 'Comisión directa', icon: Wallet },
+              { value: '<60s', label: 'Acreditación', icon: Zap },
+            ].map((s, i) => (
               <Reveal key={s.label} delay={i * 50}>
                 <div className="text-center">
                   <div className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-primary/10 mb-2">
@@ -118,7 +129,7 @@ export default function EmpresaPage() {
 
       {/* ── Quiénes somos ────────────────────────────────────────────────── */}
       <section className="py-14 sm:py-16">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             <Reveal>
               <div>
@@ -126,17 +137,17 @@ export default function EmpresaPage() {
                 <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-4 leading-tight">Una plataforma construida por y para afiliados</h2>
                 <div className="space-y-3 text-sm sm:text-base text-muted-foreground/70 leading-relaxed">
                   <p>Somos un equipo de líderes MLM, ingenieros y diseñadores que vimos la necesidad de una plataforma profesional en Latinoamérica. Una que no solo calcule comisiones, sino que empodere a cada afiliado con herramientas reales.</p>
-                  <p>Cluv360 nació para eliminar lo que más frustra a los afiliados: comisiones manuales, reportes desfasados y sistemas opacos. Hoy, miles de afiliados en 4 países gestionan su red con transparencia total.</p>
+                  <p>{companyName} nació para eliminar lo que más frustra a los afiliados: comisiones manuales, reportes desfasados y sistemas opacos. Hoy, miles de afiliados gestionan su red con transparencia total.</p>
                 </div>
               </div>
             </Reveal>
             <Reveal delay={100}>
               <div className="grid grid-cols-2 gap-3 sm:gap-4">
                 {[
-                  { icon: Users, label: '10K+ afiliados', val: 'Activos en la plataforma', color: 'bg-primary/10 text-primary' },
-                  { icon: Globe, label: '4 países', val: 'Perú, Colombia, Ecuador, Bolivia', color: 'bg-blue-500/10 text-blue-500' },
-                  { icon: Wallet, label: '<60s', val: 'Tiempo de acreditación', color: 'bg-emerald-500/10 text-emerald-500' },
-                  { icon: Award, label: '6 rangos', val: 'Del Bronce a la Corona', color: 'bg-amber-500/10 text-amber-500' },
+                  { icon: Users, label: 'Plataforma', val: '100% responsive', color: 'bg-primary/10 text-primary' },
+                  { icon: Globe, label: 'Operación', val: 'Perú y LATAM', color: 'bg-blue-500/10 text-blue-500' },
+                  { icon: Wallet, label: 'Comisión directa', val: `${commissionDirect}%`, color: 'bg-emerald-500/10 text-emerald-500' },
+                  { icon: Award, label: 'Rangos', val: `${activeRanks.length} niveles`, color: 'bg-amber-500/10 text-amber-500' },
                 ].map((item, i) => (
                   <div key={i} className="bg-card border border-border/50 rounded-2xl p-4 sm:p-5 card-lift">
                     <div className={cn('w-9 h-9 rounded-xl flex items-center justify-center mb-3', item.color)}>
@@ -154,7 +165,7 @@ export default function EmpresaPage() {
 
       {/* ── Mission / Vision ─────────────────────────────────────────────── */}
       <section className="py-14 sm:py-16 bg-muted/20 border-y border-border/40">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             <Reveal>
               <div className="bg-card border border-border/50 rounded-2xl p-6 sm:p-8 h-full card-lift">
@@ -184,7 +195,7 @@ export default function EmpresaPage() {
 
       {/* ── Qué ofrece Cluv360 ───────────────────────────────────────────── */}
       <section className="py-14 sm:py-16">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
           <Reveal className="text-center mb-10">
             <span className="text-xs font-semibold text-primary uppercase tracking-widest mb-2 block">Qué ofrecemos</span>
             <h2 className="text-2xl sm:text-3xl font-bold text-foreground">Todo lo que necesitas en un solo lugar</h2>
@@ -207,9 +218,41 @@ export default function EmpresaPage() {
         </div>
       </section>
 
-      {/* ── Benefits ─────────────────────────────────────────────────────── */}
+      {/* ── Rangos reales (from DB) ───────────────────────────────────────── */}
       <section className="py-14 sm:py-16 bg-muted/20 border-y border-border/40">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
+          <Reveal className="text-center mb-10">
+            <span className="text-xs font-semibold text-primary uppercase tracking-widest mb-2 block">Sistema de rangos</span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">Del Bronce a la Corona</h2>
+            <p className="text-sm text-muted-foreground/60 mt-2 max-w-lg mx-auto">Cada rango desbloquea bonos exclusivos. Estos son los rangos configurados en la plataforma.</p>
+          </Reveal>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            {activeRanks.map((rank, i) => {
+              const RankIcon = rankIcons[rank.name] || Star;
+              return (
+                <Reveal key={rank.id} delay={i * 40}>
+                  <div className="bg-card border border-border/50 rounded-2xl p-4 text-center card-lift h-full flex flex-col">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
+                      <RankIcon className={cn('w-5 h-5', rank.color || 'text-primary')} />
+                    </div>
+                    <div className="text-sm font-bold text-foreground">{rank.name}</div>
+                    <div className="text-xs text-muted-foreground/50 mt-0.5 mb-2">{rank.min_affiliates} afiliados</div>
+                    <div className="mt-auto pt-2 border-t border-border/30">
+                      <div className="text-xs text-muted-foreground/50">Bono</div>
+                      <div className="text-sm font-bold text-primary">{currencySymbol} {Number(rank.bonus).toLocaleString()}</div>
+                    </div>
+                  </div>
+                </Reveal>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Benefits ─────────────────────────────────────────────────────── */}
+      <section className="py-14 sm:py-16">
+        <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
           <Reveal className="text-center mb-10">
             <span className="text-xs font-semibold text-primary uppercase tracking-widest mb-2 block">Beneficios</span>
             <h2 className="text-2xl sm:text-3xl font-bold text-foreground">Diseñado para afiliados y negocios</h2>
@@ -235,9 +278,39 @@ export default function EmpresaPage() {
         </div>
       </section>
 
+      {/* ── Comisiones reales (from DB) ───────────────────────────────────── */}
+      <section className="py-14 sm:py-16 bg-muted/20 border-y border-border/40">
+        <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
+          <Reveal className="text-center mb-10">
+            <span className="text-xs font-semibold text-primary uppercase tracking-widest mb-2 block">Comisiones</span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">Sistema de comisiones configurado</h2>
+            <p className="text-sm text-muted-foreground/60 mt-2 max-w-lg mx-auto">Tres tipos de comisión activos en la plataforma, acreditados en tiempo real.</p>
+          </Reveal>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {[
+              { label: 'Comisión directa', value: `${commissionDirect}%`, desc: 'Por cada venta de tu red directa', icon: Wallet, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+              { label: 'Comisión binaria', value: `${commissionBinary}%`, desc: 'Sobre el volumen de tu pata menor', icon: Network, color: 'text-primary', bg: 'bg-primary/10' },
+              { label: 'Comisión unilevel', value: `${commissionUnilevel}%`, desc: 'Por niveles de profundidad', icon: TrendingUp, color: 'text-amber-500', bg: 'bg-amber-500/10' },
+            ].map((item, i) => (
+              <Reveal key={item.label} delay={i * 60}>
+                <div className="bg-card border border-border/50 rounded-2xl p-6 text-center card-lift">
+                  <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4', item.bg)}>
+                    <item.icon className={cn('w-6 h-6', item.color)} />
+                  </div>
+                  <div className="text-3xl font-bold text-foreground mb-1">{item.value}</div>
+                  <div className="text-sm font-medium text-foreground">{item.label}</div>
+                  <div className="text-xs text-muted-foreground/50 mt-1">{item.desc}</div>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ── Values ───────────────────────────────────────────────────────── */}
       <section className="py-14 sm:py-16">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
           <Reveal className="text-center mb-10">
             <span className="text-xs font-semibold text-primary uppercase tracking-widest mb-2 block">Valores</span>
             <h2 className="text-2xl sm:text-3xl font-bold text-foreground">Lo que nos define</h2>
@@ -261,7 +334,7 @@ export default function EmpresaPage() {
 
       {/* ── Technology ────────────────────────────────────────────────────── */}
       <section className="py-14 sm:py-16 bg-muted/20 border-y border-border/40">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
           <Reveal className="text-center mb-10">
             <span className="text-xs font-semibold text-primary uppercase tracking-widest mb-2 block">Tecnología</span>
             <h2 className="text-2xl sm:text-3xl font-bold text-foreground">Construido con tecnología de punta</h2>
@@ -286,7 +359,7 @@ export default function EmpresaPage() {
 
       {/* ── Security ──────────────────────────────────────────────────────── */}
       <section className="py-14 sm:py-16">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
           <Reveal className="text-center mb-10">
             <span className="text-xs font-semibold text-primary uppercase tracking-widest mb-2 block">Seguridad y confianza</span>
             <h2 className="text-2xl sm:text-3xl font-bold text-foreground">Tus datos y tu dinero, protegidos</h2>
@@ -353,15 +426,23 @@ export default function EmpresaPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                 <div>
                   <span className="text-muted-foreground text-xs uppercase tracking-wide block mb-1">Razón social</span>
-                  <div className="font-medium text-foreground">{company.razon_social || 'MLM 360 S.A.C.'}</div>
+                  <div className="font-medium text-foreground">{companyName}</div>
                 </div>
                 <div>
                   <span className="text-muted-foreground text-xs uppercase tracking-wide block mb-1">RUC</span>
-                  <div className="font-medium text-foreground">{company.ruc || '20603456789'}</div>
+                  <div className="font-medium text-foreground">{companyRuc}</div>
                 </div>
                 <div className="sm:col-span-2">
                   <span className="text-muted-foreground text-xs uppercase tracking-wide block mb-1">Dirección</span>
-                  <div className="font-medium text-foreground">{company.address || 'Av. Javier Prado Este 4200, San Isidro, Lima, Perú'}</div>
+                  <div className="font-medium text-foreground">{companyAddress}</div>
+                </div>
+                <div>
+                  <span className="text-muted-foreground text-xs uppercase tracking-wide block mb-1">Email</span>
+                  <div className="font-medium text-foreground">{companyEmail}</div>
+                </div>
+                <div>
+                  <span className="text-muted-foreground text-xs uppercase tracking-wide block mb-1">Teléfono</span>
+                  <div className="font-medium text-foreground">{companyPhone}</div>
                 </div>
               </div>
             </div>

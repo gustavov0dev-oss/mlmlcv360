@@ -52,7 +52,6 @@ const typeMeta: Record<ContentType, { label: string; icon: typeof Video; badge: 
   news: { label: 'Noticia', icon: Newspaper, badge: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20', glow: 'group-hover:border-amber-500/40' },
 };
 
-/* ── Skeleton card ──────────────────────────────────────────────────────── */
 function SkeletonCard() {
   return (
     <div className="bg-card border border-border/40 rounded-2xl overflow-hidden">
@@ -70,27 +69,18 @@ function SkeletonCard() {
   );
 }
 
-/* ── Content card ───────────────────────────────────────────────────────── */
-function ContentCard({ item, large = false }: { item: ContentItem; large?: boolean }) {
+function ContentCard({ item }: { item: ContentItem }) {
   const meta = typeMeta[item.type];
   return (
     <Link to={`/blog/${item.slug}`} className="group block h-full">
-      <article className={cn(
-        'bg-card border border-border/50 rounded-2xl overflow-hidden card-lift h-full flex flex-col',
-        meta.glow,
-      )}>
-        {/* Thumbnail */}
-        <div className={cn('relative overflow-hidden', large ? 'aspect-[16/9]' : 'aspect-video')}>
+      <article className={cn('bg-card border border-border/50 rounded-2xl overflow-hidden card-lift h-full flex flex-col', meta.glow)}>
+        <div className="relative aspect-video overflow-hidden">
           <img src={item.image} alt={item.title} loading="lazy"
             className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500 ease-out" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60" />
-
-          {/* Type badge */}
           <span className={cn('absolute top-3 left-3 inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold border backdrop-blur-md', meta.badge)}>
             <meta.icon className="w-3 h-3" /> {meta.label}
           </span>
-
-          {/* Video play overlay */}
           {item.type === 'video' && (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="w-12 h-12 rounded-full bg-white/15 backdrop-blur-md flex items-center justify-center group-hover:scale-110 group-hover:bg-white/25 transition-all duration-300">
@@ -98,32 +88,17 @@ function ContentCard({ item, large = false }: { item: ContentItem; large?: boole
               </div>
             </div>
           )}
-
-          {/* Duration badge for videos */}
           {item.duration && (
-            <span className="absolute bottom-3 right-3 px-2 py-0.5 rounded-md bg-black/70 backdrop-blur-sm text-[10px] font-medium text-white">
-              {item.duration}
-            </span>
+            <span className="absolute bottom-3 right-3 px-2 py-0.5 rounded-md bg-black/70 backdrop-blur-sm text-[10px] font-medium text-white">{item.duration}</span>
           )}
         </div>
-
-        {/* Body */}
         <div className="p-4 sm:p-5 flex-1 flex flex-col">
           <div className="flex items-center gap-2 mb-2">
             <span className="text-[10px] font-bold text-primary uppercase tracking-wider">{item.category}</span>
             {item.featured && <Sparkles className="w-3 h-3 text-amber-500" />}
           </div>
-
-          <h3 className={cn(
-            'font-bold text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-snug',
-            large ? 'text-lg sm:text-xl' : 'text-sm sm:text-base',
-          )}>
-            {item.title}
-          </h3>
-
+          <h3 className="font-bold text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-snug text-sm sm:text-base">{item.title}</h3>
           <p className="text-xs sm:text-sm text-muted-foreground/60 line-clamp-2 mt-1.5 mb-4">{item.excerpt}</p>
-
-          {/* Footer */}
           <div className="flex items-center justify-between mt-auto pt-3 border-t border-border/30">
             <div className="flex items-center gap-2 min-w-0">
               <img src={item.authorAvatar} alt="" className="w-6 h-6 rounded-full shrink-0" />
@@ -141,7 +116,6 @@ function ContentCard({ item, large = false }: { item: ContentItem; large?: boole
   );
 }
 
-/* ── Featured hero card ─────────────────────────────────────────────────── */
 function FeaturedCard({ item }: { item: ContentItem }) {
   const meta = typeMeta[item.type];
   return (
@@ -188,7 +162,6 @@ export default function BlogPage() {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
 
-  // Simulate skeleton loading on initial mount and filter changes
   useEffect(() => {
     setLoading(true);
     const t = setTimeout(() => setLoading(false), 400);
@@ -228,8 +201,7 @@ export default function BlogPage() {
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
       <section className="relative pt-14 pb-10 sm:pt-20 sm:pb-14 overflow-hidden">
         <div className="absolute inset-0 bg-dub-grid opacity-20 mask-fade-top" />
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* SEO breadcrumb — visually hidden */}
+        <div className="relative max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
           <nav aria-label="breadcrumb" className="sr-only">
             <Link to="/">Inicio</Link> / <span>Novedades</span>
           </nav>
@@ -252,7 +224,7 @@ export default function BlogPage() {
       {/* ── Featured ────────────────────────────────────────────────────── */}
       {showFeatured && (
         <section className="pb-6">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
             <Reveal>
               <div className="flex items-center gap-2 mb-4">
                 <Sparkles className="w-4 h-4 text-amber-500" />
@@ -260,9 +232,7 @@ export default function BlogPage() {
               </div>
             </Reveal>
             <Reveal delay={50}>
-              <div className="grid grid-cols-1 gap-4">
-                <FeaturedCard item={featured[0]} />
-              </div>
+              <FeaturedCard item={featured[0]} />
             </Reveal>
             {featured.length > 1 && (
               <Reveal delay={100}>
@@ -277,9 +247,8 @@ export default function BlogPage() {
 
       {/* ── Filters ──────────────────────────────────────────────────────── */}
       <section className="sticky top-[60px] z-30 py-3 border-y border-border/40 bg-background/80 backdrop-blur-xl">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            {/* Tabs */}
             <div className="flex items-center gap-1 p-1 bg-muted rounded-xl overflow-x-auto scrollbar-hide">
               {tabs.map(tab => (
                 <button key={tab.value} onClick={() => handleTabChange(tab.value)}
@@ -291,16 +260,12 @@ export default function BlogPage() {
                 </button>
               ))}
             </div>
-
-            {/* Search */}
             <div className="relative w-full sm:w-60">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input type="text" value={search} onChange={e => handleSearch(e.target.value)} placeholder="Buscar contenido..."
                 className="w-full pl-9 pr-4 py-2 bg-card border border-border/60 rounded-lg text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all" />
             </div>
           </div>
-
-          {/* Category pills */}
           <div className="flex flex-wrap items-center gap-2 mt-3">
             <button onClick={() => handleCategoryChange('Todas')}
               className={cn('px-3 py-1.5 rounded-full text-xs font-medium transition-all',
@@ -320,7 +285,7 @@ export default function BlogPage() {
 
       {/* ── Content grid ─────────────────────────────────────────────────── */}
       <section className="py-10 sm:py-12">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
               {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
@@ -344,7 +309,6 @@ export default function BlogPage() {
                 ))}
               </div>
 
-              {/* Pagination */}
               {totalPages > 1 && (
                 <div className="flex items-center justify-center gap-1.5 mt-10">
                   <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}
