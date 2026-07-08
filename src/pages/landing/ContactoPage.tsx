@@ -44,16 +44,16 @@ export default function ContactoPage() {
   };
 
   const channels = [
-    { icon: Mail, label: 'Email', value: companyEmail, href: `mailto:${companyEmail}`, color: 'text-primary', bg: 'bg-primary/10', border: 'hover:border-primary/30' },
-    { icon: MessageCircle, label: 'WhatsApp', value: companyPhone, href: `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}`, color: 'text-emerald-500', bg: 'bg-emerald-500/10', border: 'hover:border-emerald-500/30' },
-    { icon: MapPin, label: 'Dirección', value: companyAddress, href: '#mapa', color: 'text-rose-500', bg: 'bg-rose-500/10', border: 'hover:border-rose-500/30' },
-    { icon: Clock, label: 'Horario', value: 'Lun a Vie · 9:00 - 18:00', href: null, color: 'text-amber-500', bg: 'bg-amber-500/10', border: 'hover:border-amber-500/30' },
+    { icon: Mail, label: 'Email', value: companyEmail, href: `mailto:${companyEmail}` },
+    { icon: MessageCircle, label: 'WhatsApp', value: companyPhone, href: `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}` },
+    { icon: MapPin, label: 'Dirección', value: companyAddress, href: '#mapa' },
+    { icon: Clock, label: 'Horario', value: 'Lun a Vie · 9:00 - 18:00', href: null },
   ];
 
   const departments = [
-    { icon: MessageCircle, label: 'Soporte general', email: `soporte@${companyEmail.split('@')[1] || 'mlm360.pe'}`, desc: 'Dudas sobre tu cuenta, pagos y plataforma', color: 'bg-primary/10 text-primary' },
-    { icon: Building2, label: 'Ventas empresariales', email: `ventas@${companyEmail.split('@')[1] || 'mlm360.pe'}`, desc: 'Para empresas con más de 500 afiliados', color: 'bg-amber-500/10 text-amber-600 dark:text-amber-400' },
-    { icon: Globe, label: 'Alianzas', email: `alianzas@${companyEmail.split('@')[1] || 'mlm360.pe'}`, desc: 'Integraciones y partnerships', color: 'bg-blue-500/10 text-blue-500' },
+    { icon: MessageCircle, label: 'Soporte general', email: `soporte@${companyEmail.split('@')[1] || 'mlm360.pe'}`, desc: 'Dudas sobre tu cuenta, pagos y plataforma' },
+    { icon: Building2, label: 'Ventas empresariales', email: `ventas@${companyEmail.split('@')[1] || 'mlm360.pe'}`, desc: 'Para empresas con más de 500 afiliados' },
+    { icon: Globe, label: 'Alianzas', email: `alianzas@${companyEmail.split('@')[1] || 'mlm360.pe'}`, desc: 'Integraciones y partnerships' },
   ];
 
   return (
@@ -92,9 +92,9 @@ export default function ContactoPage() {
               const props = ch.href ? { href: ch.href, target: ch.href.startsWith('http') ? '_blank' : undefined, rel: ch.href.startsWith('http') ? 'noopener noreferrer' : undefined } : {};
               return (
                 <Reveal key={ch.label} delay={i * 50}>
-                  <Wrapper {...props as any} className={cn('group block bg-card border border-border/50 rounded-2xl p-4 sm:p-5 transition-all', ch.border, 'card-lift')}>
-                    <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center mb-3', ch.bg)}>
-                      <ch.icon className={cn('w-5 h-5', ch.color)} />
+                  <Wrapper {...props as any} className={cn('group block bg-card border border-border/50 rounded-2xl p-4 sm:p-5 transition-all hover:border-primary/30 card-lift')}>
+                    <div className="w-10 h-10 rounded-xl icon-primary flex items-center justify-center mb-3">
+                      <ch.icon className="w-5 h-5" />
                     </div>
                     <div className="text-xs text-muted-foreground/60 mb-1">{ch.label}</div>
                     <div className="text-sm font-medium text-foreground leading-snug">{ch.value}</div>
@@ -118,8 +118,8 @@ export default function ContactoPage() {
 
                 {sent ? (
                   <div className="text-center py-12">
-                    <div className="w-14 h-14 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto mb-4">
-                      <CheckCircle className="w-7 h-7 text-emerald-500" />
+                    <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                      <CheckCircle className="w-7 h-7 text-primary" />
                     </div>
                     <h3 className="font-bold text-foreground mb-2">Mensaje enviado</h3>
                     <p className="text-sm text-muted-foreground mb-5">Te responderemos en menos de 24 horas.</p>
@@ -187,7 +187,7 @@ export default function ContactoPage() {
                 <div className="space-y-3">
                   {departments.map(dept => (
                     <a key={dept.label} href={`mailto:${dept.email}`} className="group flex items-start gap-3 hover:bg-muted/40 -mx-2 px-2 py-1.5 rounded-lg transition-all">
-                      <div className={cn('w-8 h-8 rounded-lg flex items-center justify-center shrink-0', dept.color)}>
+                      <div className="w-8 h-8 rounded-lg icon-primary flex items-center justify-center shrink-0">
                         <dept.icon className="w-4 h-4" />
                       </div>
                       <div className="min-w-0">

@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
 import { Link } from '@/lib/router';
 import { Skeleton } from '@/components/ui/skeleton';
 
-const COLORS = ['#1d4ed8', '#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe'];
+const PIE_COLORS = ['hsl(38 85% 42%)', 'hsl(38 85% 55%)', 'hsl(38 85% 65%)', 'hsl(38 85% 72%)', 'hsl(38 85% 80%)'];
 
 function StatCard({ label, value, change, icon: Icon, color }: {
   label: string; value: string; change?: string; icon: any; color: string;
@@ -241,10 +241,10 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <StatCard label="Comisiones totales" value={`S/ ${stats.totalCommissions.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`} change="+18%" icon={DollarSign} color="text-green-500 bg-green-500/10" />
-        <StatCard label="Pendientes" value={`S/ ${stats.pendingCommissions.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`} icon={TrendingUp} color="text-yellow-500 bg-yellow-500/10" />
-        <StatCard label="Afiliados totales" value={String(stats.totalReferrals)} change={`+${stats.activeReferrals}`} icon={Users} color="text-blue-500 bg-blue-500/10" />
-        <StatCard label="Rango actual" value={userRankObj?.name || user?.rank || 'Bronce'} icon={Award} color={[userRankObj?.color, userRankObj?.bg_color].filter(Boolean).join(' ') || 'text-purple-500 bg-purple-500/10'} />
+        <StatCard label="Comisiones totales" value={`S/ ${stats.totalCommissions.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`} change="+18%" icon={DollarSign} color="icon-primary" />
+        <StatCard label="Pendientes" value={`S/ ${stats.pendingCommissions.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`} icon={TrendingUp} color="icon-muted" />
+        <StatCard label="Afiliados totales" value={String(stats.totalReferrals)} change={`+${stats.activeReferrals}`} icon={Users} color="icon-primary" />
+        <StatCard label="Rango actual" value={userRankObj?.name || user?.rank || 'Bronce'} icon={Award} color="icon-primary" />
       </div>
 
       <ReferralCard />
@@ -264,15 +264,15 @@ export default function DashboardPage() {
             <AreaChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorComm" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#1d4ed8" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#1d4ed8" stopOpacity={0} />
+                  <stop offset="5%" stopColor="hsl(38 85% 42%)" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="hsl(38 85% 42%)" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
               <XAxis dataKey="name" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
               <Tooltip content={<CustomTooltip />} />
-              <Area type="monotone" dataKey="comisiones" name="Comisiones" stroke="#1d4ed8" strokeWidth={2} fill="url(#colorComm)" />
+              <Area type="monotone" dataKey="comisiones" name="Comisiones" stroke="hsl(38 85% 42%)" strokeWidth={2} fill="url(#colorComm)" />
             </AreaChart>
           </ResponsiveContainer>
         </div>
@@ -284,7 +284,7 @@ export default function DashboardPage() {
             <ResponsiveContainer width="100%" height={200}>
               <PieChart>
                 <Pie data={rankDistribution} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={45} outerRadius={75} paddingAngle={3}>
-                  {rankDistribution.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                  {rankDistribution.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
                 </Pie>
                 <Tooltip content={<CustomTooltip />} />
               </PieChart>
@@ -295,7 +295,7 @@ export default function DashboardPage() {
           <div className="flex flex-wrap gap-2 mt-3">
             {rankDistribution.map((r, i) => (
               <div key={r.name} className="flex items-center gap-1.5 text-xs">
-                <div className="w-2.5 h-2.5 rounded-full" style={{ background: COLORS[i % COLORS.length] }} />
+                <div className="w-2.5 h-2.5 rounded-full" style={{ background: PIE_COLORS[i % PIE_COLORS.length] }} />
                 <span className="text-muted-foreground capitalize">{r.name}</span>
                 <span className="font-semibold text-foreground">{r.value}</span>
               </div>

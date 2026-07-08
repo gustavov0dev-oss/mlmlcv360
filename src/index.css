@@ -1068,16 +1068,31 @@ button:focus-visible {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   ICON CONTAINERS — Modern solid app-icon style
+   ICON CONTAINERS — Liquid glass, theme-aware
+   All icons use the brand primary palette for perfect cohesion
    ═══════════════════════════════════════════════════════════════════════════════ */
 
-.icon-blue    { background-color: #2563eb; color: #fff; }
-.icon-emerald { background-color: #059669; color: #fff; }
-.icon-amber   { background-color: #d97706; color: #fff; }
-.icon-rose    { background-color: #e11d48; color: #fff; }
-.icon-sky     { background-color: #0284c7; color: #fff; }
-.icon-brand   { background-color: hsl(var(--primary)); color: hsl(var(--primary-foreground)); }
-.icon-muted   { background-color: hsl(var(--muted)); color: hsl(var(--muted-foreground)); }
+/* Primary tinted — for main feature icons */
+.icon-primary {
+  background-color: hsl(var(--primary) / 0.1);
+  color: hsl(var(--primary));
+  border: 1px solid hsl(var(--primary) / 0.15);
+}
+
+/* Muted — for secondary/utility icons */
+.icon-muted {
+  background-color: hsl(var(--muted) / 0.6);
+  color: hsl(var(--muted-foreground));
+  border: 1px solid hsl(var(--border) / 0.5);
+}
+
+/* Legacy aliases — all map to icon-primary for cohesion */
+.icon-brand   { background-color: hsl(var(--primary) / 0.1); color: hsl(var(--primary)); border: 1px solid hsl(var(--primary) / 0.15); }
+.icon-blue    { background-color: hsl(var(--primary) / 0.1); color: hsl(var(--primary)); border: 1px solid hsl(var(--primary) / 0.15); }
+.icon-emerald { background-color: hsl(var(--primary) / 0.1); color: hsl(var(--primary)); border: 1px solid hsl(var(--primary) / 0.15); }
+.icon-amber   { background-color: hsl(var(--primary) / 0.1); color: hsl(var(--primary)); border: 1px solid hsl(var(--primary) / 0.15); }
+.icon-rose    { background-color: hsl(var(--primary) / 0.1); color: hsl(var(--primary)); border: 1px solid hsl(var(--primary) / 0.15); }
+.icon-sky     { background-color: hsl(var(--primary) / 0.1); color: hsl(var(--primary)); border: 1px solid hsl(var(--primary) / 0.15); }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
    MOBILE REVEAL — Lighter animation to prevent jank on low-end devices

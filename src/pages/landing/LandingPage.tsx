@@ -250,9 +250,9 @@ function AppMockup() {
           <div className="p-3.5 sm:p-4 space-y-3">
             <div className="grid grid-cols-3 gap-2 sm:gap-3">
               {[
-                { label: 'Comisiones', value: 'S/ 3,240', sub: '+12% mes', c: 'text-emerald-600 dark:text-emerald-400' },
+                { label: 'Comisiones', value: 'S/ 3,240', sub: '+12% mes', c: 'text-primary' },
                 { label: 'Mi Red', value: '48', sub: 'afiliados', c: 'text-primary' },
-                { label: 'Rango', value: 'Platino', sub: '→ Diamante', c: 'text-amber-600 dark:text-amber-400' },
+                { label: 'Rango', value: 'Platino', sub: '→ Diamante', c: 'text-primary' },
               ].map(s => (
                 <div key={s.label} className="bg-muted/30 rounded-xl p-2.5 sm:p-3 border border-border/40">
                   <div className="text-[9px] sm:text-[10px] text-muted-foreground/70 mb-1">{s.label}</div>
@@ -274,13 +274,13 @@ function AppMockup() {
             </div>
             <div className="space-y-1.5 sm:space-y-2">
               {[
-                { icon: DollarSign, text: 'Comisión directa acreditada', val: '+S/ 120', ic: 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10' },
-                { icon: TrendingUp, text: 'Bono de rango desbloqueado', val: '+S/ 80', ic: 'text-amber-600 dark:text-amber-400 bg-amber-500/10' },
+                { icon: DollarSign, text: 'Comisión directa acreditada', val: '+S/ 120' },
+                { icon: TrendingUp, text: 'Bono de rango desbloqueado', val: '+S/ 80' },
               ].map((item, i) => (
                 <div key={i} className="flex items-center gap-2.5 sm:gap-3 p-2 sm:p-2.5 rounded-xl bg-muted/20 border border-border/40">
-                  <div className={cn('w-6 h-6 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center flex-shrink-0', item.ic)}><item.icon className="w-3 sm:w-3.5 h-3 sm:h-3.5" /></div>
+                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center flex-shrink-0 bg-primary/10 text-primary"><item.icon className="w-3 sm:w-3.5 h-3 sm:h-3.5" /></div>
                   <span className="text-xs text-foreground flex-1 truncate">{item.text}</span>
-                  <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 shrink-0">{item.val}</span>
+                  <span className="text-xs font-semibold text-primary shrink-0">{item.val}</span>
                 </div>
               ))}
             </div>
@@ -300,14 +300,14 @@ function AppMockup() {
         </div>
       </div>
 
-      <div className="absolute -bottom-4 sm:-bottom-5 -left-1 sm:-left-7 bg-card border border-amber-500/20 rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2.5 sm:py-3 shadow-xl shadow-amber-500/5">
+      <div className="absolute -bottom-4 sm:-bottom-5 -left-1 sm:-left-7 bg-card border border-border/60 rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2.5 sm:py-3 shadow-xl shadow-black/5">
         <div className="flex items-center gap-2 sm:gap-2.5">
-          <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-amber-500/10 flex items-center justify-center">
-            <Award className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-600 dark:text-amber-400" />
+          <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-primary/10 flex items-center justify-center">
+            <Award className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
           </div>
           <div>
             <div className="text-[10px] sm:text-[11px] text-muted-foreground leading-tight">Nuevo rango</div>
-            <div className="text-sm font-bold text-amber-600 dark:text-amber-400">Diamante alcanzado</div>
+            <div className="text-sm font-bold text-primary">Diamante alcanzado</div>
           </div>
         </div>
       </div>
@@ -329,7 +329,7 @@ function TestimonialCard({ t }: { t: (typeof allTestimonials)[0] }) {
           <div className="text-sm font-semibold text-foreground leading-tight">{t.name}</div>
           <div className="text-xs text-muted-foreground">{t.role}{(t as any).city ? `, ${(t as any).city}` : ''}</div>
         </div>
-        <div className="text-sm font-bold text-emerald-600 dark:text-emerald-400 shrink-0">{t.earnings}</div>
+        <div className="text-sm font-bold text-primary shrink-0">{t.earnings}</div>
       </div>
     </div>
   );
@@ -475,9 +475,9 @@ export default function LandingPage() {
           <Reveal delay={280}>
             <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-xs sm:text-sm text-muted-foreground/70 mb-10 sm:mb-12">
               {[
-                { icon: Lock, text: 'SSL 256-bit', color: 'text-emerald-600 dark:text-emerald-400' },
+                { icon: Lock, text: 'SSL 256-bit', color: 'text-primary' },
                 { icon: Check, text: 'Sin permanencia', color: 'text-primary' },
-                { icon: CreditCard, text: 'Pago quincenal', color: 'text-amber-600 dark:text-amber-400' },
+                { icon: CreditCard, text: 'Pago quincenal', color: 'text-primary' },
               ].map(item => (
                 <span key={item.text} className="flex items-center gap-1.5">
                   <item.icon className={cn('w-3 sm:w-3.5 h-3 sm:h-3.5', item.color)} />
@@ -506,38 +506,30 @@ export default function LandingPage() {
                 label: 'Afiliados activos',
                 sub: 'en toda Latinoamérica',
                 icon: Users,
-                color: 'text-white',
-                iconBg: 'icon-brand rounded-xl',
               },
               {
                 value: !platformStats.loaded ? '—' : platformStats.totalProducts > 0 ? `${fmtNumber(platformStats.totalProducts)}+` : '0',
                 label: 'Productos en catálogo',
                 sub: 'con comisiones automáticas',
                 icon: ShoppingBag,
-                color: 'text-white',
-                iconBg: 'icon-blue rounded-xl',
               },
               {
                 value: ranks.filter(r => r.is_active !== false).length > 0 ? `${ranks.filter(r => r.is_active !== false).length}` : '—',
                 label: 'Rangos disponibles',
                 sub: 'con bonos progresivos',
                 icon: Award,
-                color: 'text-white',
-                iconBg: 'icon-amber rounded-xl',
               },
               {
                 value: plans.length > 0 ? `${plans.length}` : '—',
                 label: 'Planes flexibles',
                 sub: 'desde gratis hasta elite',
                 icon: BarChart3,
-                color: 'text-white',
-                iconBg: 'icon-emerald rounded-xl',
               },
             ].map((stat, i) => (
               <Reveal key={stat.label} delay={i * 60}>
                 <div className="text-center sm:px-8 py-2 sm:py-0 first:pt-0 sm:first:pt-0">
-                  <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3', stat.iconBg)}>
-                    <stat.icon className={cn('w-5 h-5', stat.color)} />
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3 icon-primary">
+                    <stat.icon className="w-5 h-5" />
                   </div>
                   <div className="text-3xl sm:text-4xl font-black text-foreground tracking-tight tabular-nums">{stat.value}</div>
                   <div className="text-sm font-semibold text-foreground/80 mt-1">{stat.label}</div>
@@ -576,17 +568,17 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
             {/* Card 1: Comisiones — wide */}
             <Reveal className="md:col-span-2">
-              <div className="h-full bg-card/70 border border-border/50 rounded-2xl p-5 sm:p-7 card-lift hover:border-emerald-500/20 group backdrop-blur-sm overflow-hidden">
+              <div className="h-full bg-card/70 border border-border/50 rounded-2xl p-5 sm:p-7 card-lift hover:border-primary/20 group backdrop-blur-sm overflow-hidden">
                 <div className="flex items-start justify-between gap-4 mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl icon-emerald flex items-center justify-center shrink-0">
-                      <Wallet className="w-5 h-5 text-white" />
+                    <div className="w-10 h-10 rounded-xl icon-primary flex items-center justify-center shrink-0">
+                      <Wallet className="w-5 h-5" />
                     </div>
                     <h3 className="text-base sm:text-lg font-bold text-foreground">Comisiones automáticas</h3>
                   </div>
                   {platformStats.totalAffiliates > 0 && (
                     <div className="text-right shrink-0">
-                      <div className="text-xl font-bold text-emerald-600 dark:text-emerald-400">{fmtNumber(platformStats.totalAffiliates)}</div>
+                      <div className="text-xl font-bold text-primary">{fmtNumber(platformStats.totalAffiliates)}</div>
                       <div className="text-xs text-muted-foreground/60">afiliados activos</div>
                     </div>
                   )}
@@ -595,12 +587,12 @@ export default function LandingPage() {
                 {/* mini chart */}
                 <div className="flex items-end gap-1 h-14 mb-4 px-1">
                   {[28, 45, 38, 62, 50, 74, 58, 82, 68, 90, 78, 100].map((h, i) => (
-                    <div key={i} className={cn('flex-1 rounded-sm transition-all group-hover:opacity-90', i === 11 ? 'bg-emerald-500' : 'bg-emerald-500/20')} style={{ height: `${h}%` }} />
+                    <div key={i} className={cn('flex-1 rounded-sm transition-all group-hover:opacity-90', i === 11 ? 'bg-primary' : 'bg-primary/20')} style={{ height: `${h}%` }} />
                   ))}
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {['Comisión directa', 'Red binaria', 'Unilevel', 'Pago quincenal'].map(tag => (
-                    <span key={tag} className="px-2.5 py-1 bg-emerald-500/8 text-emerald-700 dark:text-emerald-400 rounded-full text-xs font-medium border border-emerald-500/15">{tag}</span>
+                    <span key={tag} className="px-2.5 py-1 bg-primary/8 text-primary rounded-full text-xs font-medium border border-primary/15">{tag}</span>
                   ))}
                 </div>
               </div>
@@ -610,8 +602,8 @@ export default function LandingPage() {
             <Reveal>
               <div className="h-full bg-card/70 border border-border/50 rounded-2xl p-5 sm:p-7 card-lift hover:border-primary/20 group backdrop-blur-sm flex flex-col">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-xl icon-brand flex items-center justify-center shrink-0">
-                    <Network className="w-5 h-5 text-white" />
+                  <div className="w-10 h-10 rounded-xl icon-primary flex items-center justify-center shrink-0">
+                    <Network className="w-5 h-5" />
                   </div>
                   <h3 className="text-base sm:text-lg font-bold text-foreground">Red genealógica</h3>
                 </div>
@@ -639,10 +631,10 @@ export default function LandingPage() {
 
             {/* Card 3: Sistema de rangos — narrow */}
             <Reveal>
-              <div className="h-full bg-card/70 border border-border/50 rounded-2xl p-5 sm:p-7 card-lift hover:border-amber-500/20 group backdrop-blur-sm flex flex-col">
+              <div className="h-full bg-card/70 border border-border/50 rounded-2xl p-5 sm:p-7 card-lift hover:border-primary/20 group backdrop-blur-sm flex flex-col">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-xl icon-amber flex items-center justify-center shrink-0">
-                    <Award className="w-5 h-5 text-white" />
+                  <div className="w-10 h-10 rounded-xl icon-primary flex items-center justify-center shrink-0">
+                    <Award className="w-5 h-5" />
                   </div>
                   <h3 className="text-base sm:text-lg font-bold text-foreground">Sistema de rangos</h3>
                 </div>
@@ -656,8 +648,8 @@ export default function LandingPage() {
                     const pct = Math.round(((idx + 1) / arr.length) * 100);
                     return (
                       <div key={r.name} className="flex items-center gap-2">
-                        <div className="h-5 rounded-full bg-amber-500/20 border border-amber-500/20 flex items-center px-2.5 transition-all" style={{ width: `${pct}%` }}>
-                          <span className="text-[10px] font-semibold text-amber-700 dark:text-amber-400 truncate">{r.name}</span>
+                        <div className="h-5 rounded-full bg-primary/15 border border-primary/20 flex items-center px-2.5 transition-all" style={{ width: `${pct}%` }}>
+                          <span className="text-[10px] font-semibold text-primary truncate">{r.name}</span>
                         </div>
                       </div>
                     );
@@ -668,18 +660,18 @@ export default function LandingPage() {
 
             {/* Card 4: Tienda — wide */}
             <Reveal className="md:col-span-2">
-              <div className="h-full bg-card/70 border border-border/50 rounded-2xl p-5 sm:p-7 card-lift hover:border-blue-500/20 group backdrop-blur-sm flex flex-col sm:flex-row gap-5 overflow-hidden">
+              <div className="h-full bg-card/70 border border-border/50 rounded-2xl p-5 sm:p-7 card-lift hover:border-primary/20 group backdrop-blur-sm flex flex-col sm:flex-row gap-5 overflow-hidden">
                 <div className="flex-1 flex flex-col min-w-0">
                   <div className="flex items-center justify-between gap-3 mb-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl icon-blue flex items-center justify-center shrink-0">
-                        <ShoppingBag className="w-5 h-5 text-white" />
+                      <div className="w-10 h-10 rounded-xl icon-primary flex items-center justify-center shrink-0">
+                        <ShoppingBag className="w-5 h-5" />
                       </div>
                       <h3 className="text-base sm:text-lg font-bold text-foreground">Tienda integrada</h3>
                     </div>
                     {platformStats.totalProducts > 0 && (
                       <div className="text-right shrink-0">
-                        <div className="text-xl font-bold text-blue-600 dark:text-blue-400">{fmtNumber(platformStats.totalProducts)}</div>
+                        <div className="text-xl font-bold text-primary">{fmtNumber(platformStats.totalProducts)}</div>
                         <div className="text-xs text-muted-foreground/60">productos</div>
                       </div>
                     )}
@@ -687,7 +679,7 @@ export default function LandingPage() {
                   <p className="text-sm text-muted-foreground leading-relaxed mb-4 flex-1">Catálogo completo. Cada compra activa comisiones automáticas en toda tu red de forma instantánea.</p>
                   <div className="flex flex-wrap gap-2 mb-4">
                     {(topCategories.length > 0 ? topCategories.map(c => c.name) : ['Vitaminas', 'Bienestar', 'Nutrición', 'Cuidado personal']).map(tag => (
-                      <span key={tag} className="px-2.5 py-1 bg-blue-500/8 text-blue-700 dark:text-blue-400 rounded-full text-xs font-medium border border-blue-500/15">{tag}</span>
+                      <span key={tag} className="px-2.5 py-1 bg-primary/8 text-primary rounded-full text-xs font-medium border border-primary/15">{tag}</span>
                     ))}
                   </div>
                   <Link to="/tienda" className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:gap-2.5 transition-all group/link">
@@ -767,16 +759,16 @@ export default function LandingPage() {
             <Reveal delay={100}>
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { icon: DollarSign, title: 'Comisiones en tiempo real', desc: 'Calculadas al instante en cada compra de tu red.', iconCls: 'text-white', iconBg: 'icon-emerald', cardBg: 'bg-emerald-500/8 hover:bg-emerald-500/12 border border-emerald-500/20 dark:bg-emerald-500/6 dark:hover:bg-emerald-500/10 dark:border-emerald-500/15' },
-                  { icon: Zap, title: 'Pago automático', desc: 'Transferencias quincenales sin trámite de tu parte.', iconCls: 'text-white', iconBg: 'icon-amber', cardBg: 'bg-amber-500/8 hover:bg-amber-500/12 border border-amber-500/20 dark:bg-amber-500/6 dark:hover:bg-amber-500/10 dark:border-amber-500/15' },
-                  { icon: Globe, title: 'Red internacional', desc: 'Tus afiliados pueden estar en toda Latinoamérica.', iconCls: 'text-white', iconBg: 'icon-sky', cardBg: 'bg-sky-500/8 hover:bg-sky-500/12 border border-sky-500/20 dark:bg-sky-500/6 dark:hover:bg-sky-500/10 dark:border-sky-500/15' },
-                  { icon: TrendingUp, title: 'Crecimiento probado', desc: '+340% anual. Números reales, no promesas.', iconCls: 'text-white', iconBg: 'icon-rose', cardBg: 'bg-rose-500/8 hover:bg-rose-500/12 border border-rose-500/20 dark:bg-rose-500/6 dark:hover:bg-rose-500/10 dark:border-rose-500/15' },
+                  { icon: DollarSign, title: 'Comisiones en tiempo real', desc: 'Calculadas al instante en cada compra de tu red.' },
+                  { icon: Zap, title: 'Pago automático', desc: 'Transferencias quincenales sin trámite de tu parte.' },
+                  { icon: Globe, title: 'Red internacional', desc: 'Tus afiliados pueden estar en toda Latinoamérica.' },
+                  { icon: TrendingUp, title: 'Crecimiento probado', desc: '+340% anual. Números reales, no promesas.' },
                 ].map((item, i) => {
                   const Icon = item.icon;
                   return (
-                    <div key={i} className={cn('rounded-2xl p-4 sm:p-5 transition-all backdrop-blur-sm border', item.cardBg)}>
-                      <div className={cn('w-9 h-9 rounded-xl flex items-center justify-center mb-3', item.iconBg)}>
-                        <Icon className={cn('w-5 h-5', item.iconCls)} />
+                    <div key={i} className="rounded-2xl p-4 sm:p-5 transition-all backdrop-blur-sm border bg-muted/30 hover:bg-muted/50 border-border/40 dark:bg-white/5 dark:hover:bg-white/8 dark:border-white/10">
+                      <div className="w-9 h-9 rounded-xl icon-primary flex items-center justify-center mb-3">
+                        <Icon className="w-5 h-5" />
                       </div>
                       <div className="text-xs sm:text-sm font-semibold text-foreground dark:text-white mb-1 sm:mb-1.5">{item.title}</div>
                       <div className="text-xs text-muted-foreground dark:text-white/50 leading-relaxed">{item.desc}</div>
@@ -873,7 +865,7 @@ export default function LandingPage() {
                 <div className="flex items-center gap-3">
                   <img src={allTestimonials[0].avatar} alt={allTestimonials[0].name} className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover" />
                   <div><div className="text-sm font-semibold text-foreground">{allTestimonials[0].name}</div><div className="text-xs text-muted-foreground">{allTestimonials[0].role}</div></div>
-                  <div className="ml-auto text-sm font-bold text-emerald-600 dark:text-emerald-400">{allTestimonials[0].earnings}</div>
+                  <div className="ml-auto text-sm font-bold text-primary">{allTestimonials[0].earnings}</div>
                 </div>
               </div>
             </div>
@@ -884,7 +876,7 @@ export default function LandingPage() {
               <div className="flex items-center gap-3">
                 <img src={allTestimonials[1].avatar} alt={allTestimonials[1].name} className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover" />
                 <div><div className="text-sm font-semibold text-foreground">{allTestimonials[1].name}</div><div className="text-xs text-muted-foreground">{allTestimonials[1].role}</div></div>
-                <div className="ml-auto text-sm font-bold text-emerald-600 dark:text-emerald-400">{allTestimonials[1].earnings}</div>
+                <div className="ml-auto text-sm font-bold text-primary">{allTestimonials[1].earnings}</div>
               </div>
             </div>
 
@@ -913,7 +905,7 @@ export default function LandingPage() {
               <div className="flex items-center gap-3">
                 <img src={allTestimonials[2].avatar} alt={allTestimonials[2].name} className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover" />
                 <div><div className="text-sm font-semibold text-foreground">{allTestimonials[2].name}</div><div className="text-xs text-muted-foreground">{allTestimonials[2].role}</div></div>
-                <div className="ml-auto text-sm font-bold text-emerald-600 dark:text-emerald-400">{allTestimonials[2].earnings}</div>
+                <div className="ml-auto text-sm font-bold text-primary">{allTestimonials[2].earnings}</div>
               </div>
             </div>
           </div>
@@ -957,25 +949,19 @@ export default function LandingPage() {
                     return (
                       <div className={cn(gridClass)}>
                         {activeRanks.map((r) => {
-                          const borderStyle = r.border_color?.startsWith('#') ? { borderColor: r.border_color } : undefined;
-                          const borderClass = r.border_color?.startsWith('#') ? 'border' : cn('border', r.border_color || 'border-border/40');
                           const colorStyle = r.color?.startsWith('#') ? { color: r.color } : undefined;
-                          const colorClass = r.color?.startsWith('#') ? '' : (r.color || 'text-amber-500');
-                          const bgHex = r.bg_color?.startsWith('#') ? r.bg_color : null;
+                          const colorClass = r.color?.startsWith('#') ? '' : (r.color || 'text-primary');
                           return (
                             <div
                               key={r.id}
                               className={cn(
-                                'group relative rounded-xl p-4 transition-all backdrop-blur-sm overflow-hidden cursor-default',
-                                borderClass,
+                                'group relative rounded-xl p-4 transition-all backdrop-blur-sm overflow-hidden cursor-default border border-border/50 bg-card/60 hover:border-border/80',
                                 isCompact && 'sm:p-3',
                               )}
-                              style={borderStyle}
                             >
-                              {bgHex && <div className="absolute inset-0 opacity-10 group-hover:opacity-15 transition-opacity" style={{ backgroundColor: bgHex }} />}
                               <div className={cn('relative flex items-center gap-3', isCompact && 'gap-2.5 sm:gap-2')}>
-                                <div className={cn('w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-muted/60', isCompact && 'sm:w-8 sm:h-8')} style={bgHex ? { backgroundColor: bgHex + '25' } : undefined}>
-                                  <Award className={cn('w-4 h-4', colorClass, isCompact && 'sm:w-3.5 sm:h-3.5')} style={colorStyle} />
+                                <div className={cn('w-9 h-9 rounded-lg flex items-center justify-center shrink-0 icon-primary', isCompact && 'sm:w-8 sm:h-8')}>
+                                  <Award className={cn('w-4 h-4', isCompact && 'sm:w-3.5 sm:h-3.5')} />
                                 </div>
                                 <div className="flex-1 min-w-0">
                                   <div className={cn('text-sm font-bold', isCompact && 'sm:text-[13px]')} style={colorStyle}>
@@ -1030,12 +1016,12 @@ export default function LandingPage() {
                           : 'border border-border hover:border-primary/30',
                       )}>
                         {plan.badge && (
-                          <div className={cn('absolute -top-2.5 left-4 text-xs font-bold px-3 py-1 rounded-full', plan.is_popular ? 'bg-primary text-primary-foreground' : 'bg-amber-500 text-white')}>
+                          <div className={cn('absolute -top-2.5 left-4 text-xs font-bold px-3 py-1 rounded-full', plan.is_popular ? 'bg-primary text-primary-foreground' : 'bg-muted text-foreground border border-border/50')}>
                             {plan.badge}
                           </div>
                         )}
                         {isCurrent && (
-                          <div className="absolute -top-2.5 right-4 text-xs font-bold px-3 py-1 rounded-full bg-emerald-500 text-white">Actual</div>
+                          <div className="absolute -top-2.5 right-4 text-xs font-bold px-3 py-1 rounded-full bg-primary text-primary-foreground">Actual</div>
                         )}
                         <div className="mb-4">
                           <h3 className="text-lg font-bold text-foreground">{plan.name}</h3>
@@ -1044,19 +1030,19 @@ export default function LandingPage() {
                         <div className="mb-4">
                           <span className="text-3xl font-bold text-foreground tracking-tight">{isFree ? 'Gratis' : formatPrice(plan.price, currency, currencySymbol, exchangeRate)}</span>
                           {!isFree && <span className="text-sm text-muted-foreground font-normal">/mes</span>}
-                          {plan.trial_days > 0 && <span className="text-xs text-emerald-600 dark:text-emerald-400 block mt-1">{plan.trial_days} días de prueba</span>}
+                          {plan.trial_days > 0 && <span className="text-xs text-primary block mt-1">{plan.trial_days} días de prueba</span>}
                         </div>
                         <ul className="space-y-1.5 mb-5 flex-1">
                           {(plan.features || []).slice(0, 5).map((f: string) => (
                             <li key={f} className="flex items-start gap-2 text-sm text-muted-foreground">
-                              <Check className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
+                              <Check className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
                               <span>{f}</span>
                             </li>
                           ))}
                         </ul>
                         {isCurrent ? (
-                          <div className="py-2.5 text-center border border-emerald-500/30 rounded-lg bg-emerald-500/5">
-                            <span className="text-sm font-medium text-emerald-600 dark:text-emerald-400">Tu plan actual</span>
+                          <div className="py-2.5 text-center border border-primary/20 rounded-lg bg-primary/5">
+                            <span className="text-sm font-medium text-primary">Tu plan actual</span>
                           </div>
                         ) : (
                           <Link

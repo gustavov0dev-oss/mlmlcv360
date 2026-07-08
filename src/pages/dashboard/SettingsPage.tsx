@@ -410,13 +410,13 @@ export default function SettingsPage() {
                 </button>
               </div>
             </div>
-            <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 text-xs text-blue-700 dark:text-blue-300">
-              <p className="font-medium mb-1">Instrucciones:</p>
+            <div className="bg-muted/60 border border-border/60 rounded-lg p-3 text-xs text-muted-foreground">
+              <p className="font-medium mb-1 text-foreground">Instrucciones:</p>
               <ol className="list-decimal list-inside space-y-0.5">
                 <li>Ve a Google Cloud Console → APIs &amp; Services → Credentials</li>
                 <li>Crea un OAuth 2.0 Client ID</li>
                 <li>Copia el Client ID y Client Secret aquí</li>
-                <li>Configura la URL de redirección: <code className="bg-blue-500/10 px-1 rounded">https://tu-dominio.supabase.co/auth/v1/callback</code></li>
+                <li>Configura la URL de redirección: <code className="bg-muted px-1 rounded border border-border/50">https://tu-dominio.supabase.co/auth/v1/callback</code></li>
               </ol>
             </div>
           </div>
