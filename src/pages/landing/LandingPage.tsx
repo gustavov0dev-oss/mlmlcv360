@@ -262,37 +262,37 @@ function AppMockup() {
           <div className="p-3.5 sm:p-4 space-y-3">
             <div className="grid grid-cols-3 gap-2 sm:gap-3">
               {[
-                { label: 'Comisiones', value: 'S/ 3,240', sub: '+12% mes', subColor: 'text-emerald-500' },
-                { label: 'Mi Red', value: '48', sub: 'afiliados', subColor: 'text-blue-500' },
-                { label: 'Rango', value: 'Platino', sub: '→ Diamante', subColor: 'text-amber-500' },
+                { label: 'Comisiones', value: 'S/ 3,240', sub: '+12% mes' },
+                { label: 'Mi Red', value: '48', sub: 'afiliados' },
+                { label: 'Rango', value: 'Platino', sub: '→ Diamante' },
               ].map(s => (
                 <div key={s.label} className="bg-muted/30 rounded-xl p-2.5 sm:p-3 border border-border/40">
                   <div className="text-[9px] sm:text-[10px] text-muted-foreground/70 mb-1">{s.label}</div>
                   <div className="text-xs sm:text-sm font-bold text-foreground">{s.value}</div>
-                  <div className={cn('text-[9px] sm:text-[10px] font-medium mt-0.5', s.subColor)}>{s.sub}</div>
+                  <div className="text-[9px] sm:text-[10px] font-medium mt-0.5 text-primary">{s.sub}</div>
                 </div>
               ))}
             </div>
             <div className="bg-muted/20 rounded-xl p-3 border border-border/40">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-[9px] sm:text-[10px] text-muted-foreground/70 font-medium">Comisiones — 12 semanas</span>
-                <span className="text-[9px] sm:text-[10px] font-semibold text-emerald-500">+S/ 890</span>
+                <span className="text-[9px] sm:text-[10px] font-semibold text-primary">+S/ 890</span>
               </div>
               <div className="flex items-end gap-0.5 sm:gap-1 h-[48px] sm:h-[60px]">
                 {[28, 45, 38, 62, 50, 74, 58, 82, 68, 90, 78, 100].map((h, i) => (
-                  <div key={i} className={cn('flex-1 rounded-sm', i === 11 ? 'bg-emerald-500 dark:bg-emerald-400' : 'bg-emerald-500/18 dark:bg-emerald-400/18')} style={{ height: `${h}%` }} />
+                  <div key={i} className={cn('flex-1 rounded-sm', i === 11 ? 'bg-primary' : 'bg-primary/20')} style={{ height: `${h}%` }} />
                 ))}
               </div>
             </div>
             <div className="space-y-1.5">
               {[
-                { icon: DollarSign, text: 'Comisión directa acreditada', val: '+S/ 120', valColor: 'text-emerald-500', bg: 'bg-emerald-500/10 text-emerald-500' },
-                { icon: TrendingUp, text: 'Bono de rango desbloqueado', val: '+S/ 80', valColor: 'text-blue-500', bg: 'bg-blue-500/10 text-blue-500' },
+                { icon: DollarSign, text: 'Comisión directa acreditada', val: '+S/ 120' },
+                { icon: TrendingUp, text: 'Bono de rango desbloqueado', val: '+S/ 80' },
               ].map((item, i) => (
                 <div key={i} className="flex items-center gap-2.5 p-2 sm:p-2.5 rounded-xl bg-muted/20 border border-border/40">
-                  <div className={cn('w-6 h-6 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center flex-shrink-0', item.bg)}><item.icon className="w-3 sm:w-3.5 h-3 sm:h-3.5" /></div>
+                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center flex-shrink-0 bg-primary/10 text-primary"><item.icon className="w-3 sm:w-3.5 h-3 sm:h-3.5" /></div>
                   <span className="text-xs text-foreground flex-1 truncate">{item.text}</span>
-                  <span className={cn('text-xs font-semibold shrink-0', item.valColor)}>{item.val}</span>
+                  <span className="text-xs font-semibold text-primary shrink-0">{item.val}</span>
                 </div>
               ))}
             </div>
@@ -493,10 +493,8 @@ export default function LandingPage() {
       </section>
 
       {/* ── STATS ─────────────────────────────────────────────────────────────── */}
-      <section className="relative py-10 sm:py-14 border-y border-border/40 bg-muted/5 overflow-hidden">
-        <div className="absolute -left-32 top-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full bg-blue-500/4 blur-[80px] pointer-events-none" />
-        <div className="absolute -right-32 top-1/2 -translate-y-1/2 w-[280px] h-[280px] rounded-full bg-emerald-500/4 blur-[80px] pointer-events-none" />
-        <div className="relative max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-10 sm:py-14 border-y border-border/40 bg-muted/5">
+        <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 sm:grid-cols-4 divide-y-2 divide-x-0 sm:divide-y-0 sm:divide-x divide-border/30">
             {[
               {
@@ -505,7 +503,6 @@ export default function LandingPage() {
                 sub: 'en toda Latinoamérica',
                 icon: Users,
                 iconClass: 'icon-blue',
-                iconColor: 'text-blue-500 dark:text-blue-400',
               },
               {
                 value: !platformStats.loaded ? '—' : platformStats.totalProducts > 0 ? `${fmtNumber(platformStats.totalProducts)}+` : '0',
@@ -513,7 +510,6 @@ export default function LandingPage() {
                 sub: 'con comisiones automáticas',
                 icon: ShoppingBag,
                 iconClass: 'icon-emerald',
-                iconColor: 'text-emerald-500 dark:text-emerald-400',
               },
               {
                 value: ranks.filter(r => r.is_active !== false).length > 0 ? `${ranks.filter(r => r.is_active !== false).length}` : '—',
@@ -521,7 +517,6 @@ export default function LandingPage() {
                 sub: 'con bonos progresivos',
                 icon: Award,
                 iconClass: 'icon-amber',
-                iconColor: 'text-amber-500 dark:text-amber-400',
               },
               {
                 value: plans.length > 0 ? `${plans.length}` : '—',
@@ -529,19 +524,19 @@ export default function LandingPage() {
                 sub: 'desde gratis hasta elite',
                 icon: BarChart3,
                 iconClass: 'icon-sky',
-                iconColor: 'text-sky-500 dark:text-sky-400',
               },
             ].map((stat) => (
-              <div key={stat.label} className="relative text-center sm:px-6 lg:px-10 py-8 sm:py-6 overflow-hidden">
-                {/* Large icon as decorative background with color */}
+              <div key={stat.label} className="relative text-center sm:px-6 lg:px-10 py-6 sm:py-4 overflow-hidden group">
+                {/* Large icon as decorative background */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden>
-                  <stat.icon className={cn('w-32 h-32 opacity-[0.13]', stat.iconColor)} />
+                  <stat.icon className="w-28 h-28 opacity-[0.04] text-foreground" />
                 </div>
-                <div className="relative z-10">
-                  <div className="text-3xl sm:text-4xl font-black text-foreground tracking-tight tabular-nums">{stat.value}</div>
-                  <div className="text-sm font-semibold text-foreground/80 mt-1.5">{stat.label}</div>
-                  <div className="text-xs text-muted-foreground/50 mt-0.5">{stat.sub}</div>
+                <div className={cn('w-11 h-11 rounded-2xl flex items-center justify-center mx-auto mb-3', stat.iconClass)}>
+                  <stat.icon className="w-5 h-5" />
                 </div>
+                <div className="text-3xl sm:text-4xl font-black text-foreground tracking-tight tabular-nums">{stat.value}</div>
+                <div className="text-sm font-semibold text-foreground/80 mt-1">{stat.label}</div>
+                <div className="text-xs text-muted-foreground/50 mt-0.5">{stat.sub}</div>
               </div>
             ))}
           </div>
@@ -563,7 +558,7 @@ export default function LandingPage() {
         <div className="absolute inset-0 bg-grid opacity-[0.35] mask-fade-center pointer-events-none" />
         <div className="relative max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-10 sm:mb-14">
-            <span className="text-xs font-semibold text-foreground/40 uppercase tracking-widest mb-3 block">Plataforma</span>
+            <span className="text-xs font-semibold text-sky-500 dark:text-sky-400 uppercase tracking-widest mb-3 block">Plataforma</span>
             <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight mb-3">
               Todo lo que necesitas<br />para <span className="text-gradient-animated">crecer</span>
             </h2>
@@ -779,7 +774,7 @@ export default function LandingPage() {
         <div className="absolute inset-0 bg-grid opacity-[0.3] mask-fade-center pointer-events-none" />
         <div className="relative max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-10 sm:mb-14">
-            <span className="text-xs font-semibold text-foreground/40 uppercase tracking-widest mb-3 block">Proceso</span>
+            <span className="text-xs font-semibold text-blue-500 dark:text-blue-400 uppercase tracking-widest mb-3 block">Proceso</span>
             <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
               De cero a <span className="text-gradient-animated">comisiones</span><br className="hidden sm:block" /> en minutos
             </h2>
@@ -810,8 +805,7 @@ export default function LandingPage() {
       <SectionDivider />
 
       {/* ── TESTIMONIALS ──────────────────────────────────────────────────────── */}
-      <section className="relative py-16 sm:py-24 overflow-hidden">
-        <div className="absolute -top-20 right-1/4 w-[400px] h-[400px] rounded-full bg-primary/3 blur-[120px] pointer-events-none" />
+      <section className="py-16 sm:py-24">
         <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 mb-10 sm:mb-14">
           <span className="text-xs font-semibold text-primary uppercase tracking-widest mb-3 block">Testimonios</span>
           <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
@@ -908,10 +902,8 @@ export default function LandingPage() {
       {/* ── RANKS ─────────────────────────────────────────────────────────────── */}
       {ranks.filter(r => r.is_active !== false).length > 0 && (
         <>
-          <section className="relative py-16 sm:py-24 overflow-hidden">
-            <div className="absolute top-1/3 -right-40 w-[400px] h-[400px] rounded-full bg-amber-500/4 blur-[100px] pointer-events-none" />
-            <div className="absolute bottom-1/3 -left-40 w-[350px] h-[350px] rounded-full bg-primary/4 blur-[100px] pointer-events-none" />
-            <div className="relative max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
+          <section className="py-16 sm:py-24">
+            <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
               <div className="grid lg:grid-cols-[1fr_1.4fr] gap-10 sm:gap-12 lg:gap-16 items-start">
                 <div>
                   <span className="text-xs font-semibold text-amber-500 dark:text-amber-400 uppercase tracking-widest mb-3 block">Rangos</span>
@@ -1000,11 +992,10 @@ export default function LandingPage() {
       {/* ── PLANS ─────────────────────────────────────────────────────────────── */}
       {plans.length > 0 && (
         <>
-          <section className="relative py-16 sm:py-24 overflow-hidden" id="planes">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[300px] rounded-full bg-primary/4 blur-[120px] pointer-events-none" />
-            <div className="relative max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
+          <section className="py-16 sm:py-24" id="planes">
+            <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
               <div className="mb-10 sm:mb-14">
-                <span className="text-xs font-semibold text-foreground/40 uppercase tracking-widest mb-3 block">Precios</span>
+                <span className="text-xs font-semibold text-sky-500 dark:text-sky-400 uppercase tracking-widest mb-3 block">Precios</span>
                 <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight leading-tight mb-2">
                   <span className="text-gradient-animated">Planes flexibles</span><br />
                   <span className="text-foreground">que crecen contigo</span>
@@ -1093,8 +1084,6 @@ export default function LandingPage() {
       {/* ── FAQ ───────────────────────────────────────────────────────────────── */}
       <section className="relative py-16 sm:py-24 overflow-hidden">
         <div className="absolute inset-0 bg-grid opacity-[0.2] mask-fade-center pointer-events-none" />
-        <div className="absolute top-1/4 -left-40 w-[350px] h-[350px] rounded-full bg-primary/3 blur-[100px] pointer-events-none" />
-        <div className="absolute bottom-1/4 -right-40 w-[300px] h-[300px] rounded-full bg-sky-500/3 blur-[90px] pointer-events-none" />
         <div className="relative max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="text-center mb-10 sm:mb-14">
