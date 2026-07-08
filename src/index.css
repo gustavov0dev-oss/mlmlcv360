@@ -637,6 +637,27 @@ body {
   );
 }
 
+/* Dub grid — alias for sections */
+.bg-dub-grid {
+  background-image:
+    linear-gradient(to right, hsl(var(--border) / 0.4) 1px, transparent 1px),
+    linear-gradient(to bottom, hsl(var(--border) / 0.4) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+
+.bg-dub-grid-dark {
+  background-image:
+    linear-gradient(to right, hsl(var(--primary) / 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, hsl(var(--primary) / 0.06) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+
+.dark .bg-dub-grid {
+  background-image:
+    linear-gradient(to right, hsl(var(--primary) / 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, hsl(var(--primary) / 0.06) 1px, transparent 1px);
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════════
    RADIAL MASKS — Fade effects for backgrounds
    ═══════════════════════════════════════════════════════════════════════════════ */
@@ -1072,7 +1093,7 @@ button:focus-visible {
    All icons use the brand primary palette for perfect cohesion
    ═══════════════════════════════════════════════════════════════════════════════ */
 
-/* Primary tinted — for main feature icons */
+/* Primary tinted — for main feature icons (gold) */
 .icon-primary {
   background-color: hsl(var(--primary) / 0.1);
   color: hsl(var(--primary));
@@ -1086,13 +1107,22 @@ button:focus-visible {
   border: 1px solid hsl(var(--border) / 0.5);
 }
 
-/* Legacy aliases — all map to icon-primary for cohesion */
+/* Distinct icon colors per section meaning */
 .icon-brand   { background-color: hsl(var(--primary) / 0.1); color: hsl(var(--primary)); border: 1px solid hsl(var(--primary) / 0.15); }
-.icon-blue    { background-color: hsl(var(--primary) / 0.1); color: hsl(var(--primary)); border: 1px solid hsl(var(--primary) / 0.15); }
-.icon-emerald { background-color: hsl(var(--primary) / 0.1); color: hsl(var(--primary)); border: 1px solid hsl(var(--primary) / 0.15); }
-.icon-amber   { background-color: hsl(var(--primary) / 0.1); color: hsl(var(--primary)); border: 1px solid hsl(var(--primary) / 0.15); }
-.icon-rose    { background-color: hsl(var(--primary) / 0.1); color: hsl(var(--primary)); border: 1px solid hsl(var(--primary) / 0.15); }
-.icon-sky     { background-color: hsl(var(--primary) / 0.1); color: hsl(var(--primary)); border: 1px solid hsl(var(--primary) / 0.15); }
+.icon-blue    { background-color: hsl(210 80% 55% / 0.1); color: hsl(210 80% 55%); border: 1px solid hsl(210 80% 55% / 0.15); }
+.icon-emerald { background-color: hsl(142 70% 40% / 0.1); color: hsl(142 70% 40%); border: 1px solid hsl(142 70% 40% / 0.15); }
+.icon-amber   { background-color: hsl(38 92% 50% / 0.1); color: hsl(38 92% 50%); border: 1px solid hsl(38 92% 50% / 0.15); }
+.icon-rose    { background-color: hsl(350 80% 55% / 0.1); color: hsl(350 80% 55%); border: 1px solid hsl(350 80% 55% / 0.15); }
+.icon-sky     { background-color: hsl(190 90% 50% / 0.1); color: hsl(190 90% 50%); border: 1px solid hsl(190 90% 50% / 0.15); }
+.icon-violet  { background-color: hsl(270 60% 55% / 0.1); color: hsl(270 60% 55%); border: 1px solid hsl(270 60% 55% / 0.15); }
+
+/* Dark mode adjustments for brighter colors */
+.dark .icon-blue    { background-color: hsl(210 70% 62% / 0.12); color: hsl(210 70% 62%); border: 1px solid hsl(210 70% 62% / 0.2); }
+.dark .icon-emerald { background-color: hsl(142 60% 48% / 0.12); color: hsl(142 60% 48%); border: 1px solid hsl(142 60% 48% / 0.2); }
+.dark .icon-amber   { background-color: hsl(38 95% 58% / 0.12); color: hsl(38 95% 58%); border: 1px solid hsl(38 95% 58% / 0.2); }
+.dark .icon-rose    { background-color: hsl(350 70% 62% / 0.12); color: hsl(350 70% 62%); border: 1px solid hsl(350 70% 62% / 0.2); }
+.dark .icon-sky     { background-color: hsl(190 80% 58% / 0.12); color: hsl(190 80% 58%); border: 1px solid hsl(190 80% 58% / 0.2); }
+.dark .icon-violet  { background-color: hsl(270 55% 62% / 0.12); color: hsl(270 55% 62%); border: 1px solid hsl(270 55% 62% / 0.2); }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
    MOBILE REVEAL — Lighter animation to prevent jank on low-end devices

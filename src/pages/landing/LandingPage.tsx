@@ -1,7 +1,6 @@
 import { Link } from '@/lib/router';
 import Navbar from '@/components/landing/Navbar';
 import Footer from '@/components/landing/Footer';
-import { Reveal } from '@/components/landing/Reveal';
 import { testimonials, faqItems } from '@/lib/mockData';
 import {
   ArrowRight, Check, Star, ChevronDown, Zap, Globe, Award, DollarSign,
@@ -21,9 +20,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 // ─── steps ───────────────────────────────────────────────────────────────────
 const steps = [
-  { n: '01', title: 'Elige tu plan', desc: 'Gratis, Pro o Elite. Sin permanencia, cambia cuando quieras.', icon: BarChart3 },
-  { n: '02', title: 'Comparte tu enlace', desc: 'Tu código único conecta automáticamente a nuevos referidos.', icon: Network },
-  { n: '03', title: 'Cobra tus comisiones', desc: 'Pagos automáticos quincenales. Sin trámites, sin demoras.', icon: DollarSign },
+  { n: '01', title: 'Elige tu plan', desc: 'Gratis, Pro o Elite. Sin permanencia, cambia cuando quieras.', icon: BarChart3, iconClass: 'icon-blue' },
+  { n: '02', title: 'Comparte tu enlace', desc: 'Tu código único conecta automáticamente a nuevos referidos.', icon: Network, iconClass: 'icon-emerald' },
+  { n: '03', title: 'Cobra tus comisiones', desc: 'Pagos automáticos quincenales. Sin trámites, sin demoras.', icon: DollarSign, iconClass: 'icon-amber' },
 ];
 
 // ─── region stats ─────────────────────────────────────────────────────────────
@@ -87,7 +86,6 @@ function BrandBadge({ b }: { b: typeof paymentBrands[0] }) {
       <div
         className="flex items-center gap-2 px-3.5 py-2 rounded-xl border border-border/40 bg-card/60 backdrop-blur-sm hover:border-border/70 hover:bg-card transition-all duration-200 cursor-default"
       >
-        {/* Color dot avatar */}
         <div
           className="w-6 h-6 rounded-md flex items-center justify-center text-[9px] font-black leading-none shrink-0"
           style={{ backgroundColor: b.bg, color: b.color }}
@@ -143,7 +141,7 @@ function StoreSection() {
       <SectionDivider />
       <section className="py-16 sm:py-24">
         <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
-          <Reveal className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
             <div>
               <span className="text-xs font-semibold text-primary uppercase tracking-widest mb-3 block">Tienda</span>
               <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground tracking-tight">
@@ -151,12 +149,12 @@ function StoreSection() {
               </h2>
               <p className="text-muted-foreground mt-2 max-w-md text-sm sm:text-base">Cada producto activa comisiones automáticas para toda tu red.</p>
             </div>
-            <Link to="/tienda" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-border/70 text-sm font-medium hover:border-primary/50 hover:text-primary transition-all group shrink-0 self-start sm:self-auto">
+            <Link to="/tienda" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-border/70 bg-background/60 backdrop-blur-sm text-sm font-medium hover:border-primary/50 hover:text-primary transition-all group shrink-0 self-start sm:self-auto">
               Ver tienda completa
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
               {itemCount > 0 && <span className="bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full">{itemCount}</span>}
             </Link>
-          </Reveal>
+          </div>
 
           {categories.length > 0 && (
             <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide mb-8 -mx-4 px-4 sm:mx-0 sm:px-0">
@@ -165,8 +163,8 @@ function StoreSection() {
                 className={cn(
                   'shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all',
                   activeCat === ''
-                    ? 'bg-foreground text-background shadow-sm'
-                    : 'border border-border/60 text-muted-foreground hover:text-foreground hover:border-foreground/30 bg-transparent',
+                    ? 'bg-foreground/90 text-background shadow-sm backdrop-blur-sm'
+                    : 'border border-border/60 bg-background/50 backdrop-blur-sm text-muted-foreground hover:text-foreground hover:border-foreground/30',
                 )}
               >
                 <ShoppingBag className="w-3.5 h-3.5" />
@@ -179,8 +177,8 @@ function StoreSection() {
                   className={cn(
                     'shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all',
                     activeCat === cat.id
-                      ? 'bg-foreground text-background shadow-sm'
-                      : 'border border-border/60 text-muted-foreground hover:text-foreground hover:border-foreground/30 bg-transparent',
+                      ? 'bg-foreground/90 text-background shadow-sm backdrop-blur-sm'
+                      : 'border border-border/60 bg-background/50 backdrop-blur-sm text-muted-foreground hover:text-foreground hover:border-foreground/30',
                   )}
                 >
                   {cat.image_url && (
@@ -217,7 +215,7 @@ function AppMockup() {
   const appHost = typeof window !== 'undefined' ? window.location.host : 'app.cluv360.pe';
   return (
     <div className="relative w-full max-w-[780px] mx-auto">
-      <div className="bg-card border border-border/60 rounded-2xl shadow-[0_24px_64px_-16px_rgba(0,0,0,0.12)] dark:shadow-[0_24px_64px_-16px_rgba(0,0,0,0.5)] overflow-hidden">
+      <div className="bg-card/80 border border-border/60 rounded-2xl shadow-[0_24px_64px_-16px_rgba(0,0,0,0.12)] dark:shadow-[0_24px_64px_-16px_rgba(0,0,0,0.5)] overflow-hidden backdrop-blur-sm">
         <div className="flex items-center gap-3 px-4 sm:px-5 py-3 sm:py-3.5 border-b border-border/50 bg-muted/20">
           <div className="flex gap-1.5">
             <div className="w-3 h-3 rounded-full bg-[#ff5f57]" />
@@ -288,7 +286,7 @@ function AppMockup() {
         </div>
       </div>
 
-      <div className="absolute -top-4 sm:-top-5 -right-1 sm:-right-7 bg-card border border-primary/20 rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2.5 sm:py-3 shadow-xl shadow-primary/5">
+      <div className="absolute -top-4 sm:-top-5 -right-1 sm:-right-7 bg-card/90 border border-primary/20 rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2.5 sm:py-3 shadow-xl shadow-primary/5 backdrop-blur-sm">
         <div className="flex items-center gap-2 sm:gap-2.5">
           <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-primary/10 flex items-center justify-center">
             <Bell className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
@@ -300,7 +298,7 @@ function AppMockup() {
         </div>
       </div>
 
-      <div className="absolute -bottom-4 sm:-bottom-5 -left-1 sm:-left-7 bg-card border border-border/60 rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2.5 sm:py-3 shadow-xl shadow-black/5">
+      <div className="absolute -bottom-4 sm:-bottom-5 -left-1 sm:-left-7 bg-card/90 border border-border/60 rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2.5 sm:py-3 shadow-xl shadow-black/5 backdrop-blur-sm">
         <div className="flex items-center gap-2 sm:gap-2.5">
           <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-primary/10 flex items-center justify-center">
             <Award className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
@@ -318,7 +316,7 @@ function AppMockup() {
 // ─── testimonial carousel ─────────────────────────────────────────────────────
 function TestimonialCard({ t }: { t: (typeof allTestimonials)[0] }) {
   return (
-    <div className="w-[280px] sm:w-[320px] shrink-0 bg-card border border-border/60 rounded-2xl p-5 mx-2">
+    <div className="w-[280px] sm:w-[320px] shrink-0 bg-card/70 border border-border/60 rounded-2xl p-5 mx-2 backdrop-blur-sm">
       <div className="flex gap-0.5 mb-3">
         {Array.from({ length: 5 }).map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />)}
       </div>
@@ -420,83 +418,74 @@ export default function LandingPage() {
     <div className="min-h-screen bg-background overflow-x-hidden">
       <Navbar />
 
-      {/* ── HERO ──────────────────────────────────────────────────────────────*/}
+      {/* HERO */}
       <section className="relative pt-20 pb-0 overflow-hidden">
-        <div className="absolute inset-0 bg-dub-grid mask-fade-top" />
+        <div className="absolute inset-0 bg-grid mask-fade-top" />
         <div className="absolute inset-0 bg-dots opacity-[0.015]" />
-        {/* Subtle hero auras */}
         <div className="absolute top-20 left-1/4 w-[350px] h-[350px] rounded-full bg-primary/6 blur-[100px] pointer-events-none" />
         <div className="absolute top-32 right-1/4 w-[300px] h-[300px] rounded-full bg-amber-500/6 blur-[90px] pointer-events-none" />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-gradient-radial from-primary/8 to-transparent blur-[120px] pointer-events-none" />
 
         <div className="relative z-10 max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <Reveal>
-            <a href="#planes" className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 bg-background/90 border border-border/70 rounded-full text-xs sm:text-sm text-foreground hover:border-primary/50 transition-all mb-7 sm:mb-8 group shadow-sm backdrop-blur-sm">
-              <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shrink-0" />
-              <span className="font-medium">Nuevo: Bonos de rango Corona disponibles</span>
-              <span className="text-border mx-1 hidden sm:inline">·</span>
-              <span className="text-primary group-hover:text-primary/80 font-medium items-center gap-1 shrink-0 hidden sm:flex">
-                Ver más <ExternalLink className="w-3 h-3" />
-              </span>
-            </a>
-          </Reveal>
+          <a href="#planes" className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 bg-background/80 border border-border/70 rounded-full text-xs sm:text-sm text-foreground hover:border-primary/50 transition-all mb-7 sm:mb-8 group shadow-sm backdrop-blur-sm">
+            <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shrink-0" />
+            <span className="font-medium">Nuevo: Bonos de rango Corona disponibles</span>
+            <span className="text-border mx-1 hidden sm:inline">·</span>
+            <span className="text-primary group-hover:text-primary/80 font-medium items-center gap-1 shrink-0 hidden sm:flex">
+              Ver más <ExternalLink className="w-3 h-3" />
+            </span>
+          </a>
 
-          <Reveal delay={80}>
-            <h1 className="text-gold-glow text-[2.6rem] sm:text-6xl lg:text-7xl xl:text-[5.5rem] font-bold text-foreground leading-[1.05] tracking-[-0.02em] mb-5 sm:mb-6">
-              Construye tu red.<br />
-              <span className="text-gradient-animated">Cobra automático.</span>
-            </h1>
-          </Reveal>
+          <h1 className="text-gold-glow text-[2.6rem] sm:text-6xl lg:text-7xl xl:text-[5.5rem] font-bold text-foreground leading-[1.05] tracking-[-0.02em] mb-5 sm:mb-6">
+            Construye tu red.<br />
+            <span className="text-gradient-animated">Cobra automático.</span>
+          </h1>
 
-          <Reveal delay={150}>
-            <p className="text-base sm:text-lg lg:text-xl text-muted-foreground/80 max-w-xl sm:max-w-2xl mx-auto mb-8 sm:mb-10 leading-relaxed">
-              La plataforma MLM líder en Latinoamérica. Comisiones en tiempo real, red interactiva y tienda integrada.
-            </p>
-          </Reveal>
+          <p className="text-base sm:text-lg lg:text-xl text-muted-foreground/80 max-w-xl sm:max-w-2xl mx-auto mb-8 sm:mb-10 leading-relaxed">
+            La plataforma MLM líder en Latinoamérica. Comisiones en tiempo real, red interactiva y tienda integrada.
+          </p>
 
-          <Reveal delay={220}>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-8 sm:mb-10">
-              <Link
-                to={user ? '/dashboard' : '/registro'}
-                className="btn-gold-shimmer w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 sm:px-8 py-3.5 bg-foreground text-background font-semibold rounded-xl hover:opacity-90 active:scale-[0.98] transition-all text-base shadow-lg"
-              >
-                {user ? 'Ir a mi Panel' : 'Empezar gratis'}
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-              <Link
-                to="/planes"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 sm:px-8 py-3.5 bg-background/80 border border-border/70 text-foreground font-medium rounded-xl hover:border-primary/50 hover:text-primary transition-all text-base backdrop-blur-sm"
-              >
-                Ver planes
-              </Link>
-            </div>
-          </Reveal>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-8 sm:mb-10">
+            <Link
+              to={user ? '/dashboard' : '/registro'}
+              className="btn-gold-shimmer w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 sm:px-8 py-3.5 bg-foreground/90 backdrop-blur-sm text-background font-semibold rounded-xl hover:opacity-90 active:scale-[0.98] transition-all text-base shadow-lg"
+            >
+              {user ? 'Ir a mi Panel' : 'Empezar gratis'}
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+            <Link
+              to="/planes"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 sm:px-8 py-3.5 bg-background/70 border border-border/70 text-foreground font-medium rounded-xl hover:border-primary/50 hover:text-primary transition-all text-base backdrop-blur-sm"
+            >
+              Ver planes
+            </Link>
+          </div>
 
-          <Reveal delay={280}>
-            <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-xs sm:text-sm text-muted-foreground/70 mb-10 sm:mb-12">
-              {[
-                { icon: Lock, text: 'SSL 256-bit', color: 'text-primary' },
-                { icon: Check, text: 'Sin permanencia', color: 'text-primary' },
-                { icon: CreditCard, text: 'Pago quincenal', color: 'text-primary' },
-              ].map(item => (
-                <span key={item.text} className="flex items-center gap-1.5">
-                  <item.icon className={cn('w-3 sm:w-3.5 h-3 sm:h-3.5', item.color)} />
-                  {item.text}
+          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-xs sm:text-sm text-muted-foreground/70 mb-10 sm:mb-12">
+            {[
+              { icon: Lock, text: 'SSL 256-bit', colorClass: 'icon-sky' },
+              { icon: Check, text: 'Sin permanencia', colorClass: 'icon-emerald' },
+              { icon: CreditCard, text: 'Pago quincenal', colorClass: 'icon-blue' },
+            ].map(item => (
+              <span key={item.text} className="flex items-center gap-1.5">
+                <span className={cn('w-5 h-5 rounded-md flex items-center justify-center', item.colorClass)}>
+                  <item.icon className="w-3 h-3" />
                 </span>
-              ))}
-            </div>
-          </Reveal>
+                {item.text}
+              </span>
+            ))}
+          </div>
         </div>
 
-        <Reveal delay={340} className="relative max-w-[1100px] mx-auto px-4 sm:px-10 lg:px-16 pb-0">
+        <div className="relative max-w-[1100px] mx-auto px-4 sm:px-10 lg:px-16 pb-0">
           <div className="relative">
             <AppMockup />
             <div className="absolute bottom-0 left-0 right-0 h-32 sm:h-40 bg-gradient-to-t from-background to-transparent pointer-events-none" />
           </div>
-        </Reveal>
+        </div>
       </section>
 
-      {/* ── STATS ─────────────────────────────────────────────────────────────*/}
+      {/* STATS */}
       <section className="py-12 sm:py-16 border-y border-border/40 bg-muted/10">
         <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 sm:gap-4 lg:gap-0 divide-y sm:divide-y-0 sm:divide-x divide-border/40">
@@ -506,72 +495,72 @@ export default function LandingPage() {
                 label: 'Afiliados activos',
                 sub: 'en toda Latinoamérica',
                 icon: Users,
+                iconClass: 'icon-blue',
               },
               {
                 value: !platformStats.loaded ? '—' : platformStats.totalProducts > 0 ? `${fmtNumber(platformStats.totalProducts)}+` : '0',
                 label: 'Productos en catálogo',
                 sub: 'con comisiones automáticas',
                 icon: ShoppingBag,
+                iconClass: 'icon-emerald',
               },
               {
                 value: ranks.filter(r => r.is_active !== false).length > 0 ? `${ranks.filter(r => r.is_active !== false).length}` : '—',
                 label: 'Rangos disponibles',
                 sub: 'con bonos progresivos',
                 icon: Award,
+                iconClass: 'icon-amber',
               },
               {
                 value: plans.length > 0 ? `${plans.length}` : '—',
                 label: 'Planes flexibles',
                 sub: 'desde gratis hasta elite',
                 icon: BarChart3,
+                iconClass: 'icon-sky',
               },
-            ].map((stat, i) => (
-              <Reveal key={stat.label} delay={i * 60}>
-                <div className="text-center sm:px-8 py-2 sm:py-0 first:pt-0 sm:first:pt-0">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3 icon-primary">
-                    <stat.icon className="w-5 h-5" />
-                  </div>
-                  <div className="text-3xl sm:text-4xl font-black text-foreground tracking-tight tabular-nums">{stat.value}</div>
-                  <div className="text-sm font-semibold text-foreground/80 mt-1">{stat.label}</div>
-                  <div className="text-xs text-muted-foreground/60 mt-0.5">{stat.sub}</div>
+            ].map((stat) => (
+              <div key={stat.label} className="text-center sm:px-8 py-2 sm:py-0 first:pt-0 sm:first:pt-0">
+                <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3', stat.iconClass)}>
+                  <stat.icon className="w-5 h-5" />
                 </div>
-              </Reveal>
+                <div className="text-3xl sm:text-4xl font-black text-foreground tracking-tight tabular-nums">{stat.value}</div>
+                <div className="text-sm font-semibold text-foreground/80 mt-1">{stat.label}</div>
+                <div className="text-xs text-muted-foreground/60 mt-0.5">{stat.sub}</div>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── BRANDS MARQUEE ────────────────────────────────────────────────────*/}
+      {/* BRANDS MARQUEE */}
       <section className="py-10 sm:py-14">
-        <Reveal>
-          <p className="text-center text-[11px] font-semibold text-muted-foreground/40 uppercase tracking-widest mb-6">
-            Métodos de pago aceptados
-          </p>
-        </Reveal>
+        <p className="text-center text-[11px] font-semibold text-muted-foreground/40 uppercase tracking-widest mb-6">
+          Métodos de pago aceptados
+        </p>
         <BrandsCarousel />
       </section>
 
       <SectionDivider />
 
-      {/* ── FEATURES BENTO ────────────────────────────────────────────────────*/}
+      {/* FEATURES BENTO */}
       <section className="relative py-16 sm:py-24 overflow-hidden">
-        <div className="absolute inset-0 bg-dub-grid opacity-40 mask-fade-center" />
+        <div className="absolute inset-0 bg-grid opacity-40 mask-fade-center" />
         <div className="relative max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
-          <Reveal className="mb-10 sm:mb-14">
+          <div className="mb-10 sm:mb-14">
             <span className="text-xs font-semibold text-primary uppercase tracking-widest mb-3 block">Plataforma</span>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight mb-3">
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight mb-3">
               Todo lo que necesitas<br />para <span className="text-gradient-animated">crecer</span>
             </h2>
             <p className="text-base sm:text-lg text-muted-foreground/80 max-w-xl">Cada herramienta resuelve un problema real del negocio multinivel.</p>
-          </Reveal>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
             {/* Card 1: Comisiones — wide */}
-            <Reveal className="md:col-span-2">
-              <div className="h-full bg-card/70 border border-border/50 rounded-2xl p-5 sm:p-7 card-lift hover:border-primary/20 group backdrop-blur-sm overflow-hidden">
+            <div className="md:col-span-2">
+              <div className="h-full bg-card/60 border border-border/50 rounded-2xl p-5 sm:p-7 card-lift hover:border-primary/20 group backdrop-blur-sm overflow-hidden">
                 <div className="flex items-start justify-between gap-4 mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl icon-primary flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-xl icon-emerald flex items-center justify-center shrink-0">
                       <Wallet className="w-5 h-5" />
                     </div>
                     <h3 className="text-base sm:text-lg font-bold text-foreground">Comisiones automáticas</h3>
@@ -584,7 +573,6 @@ export default function LandingPage() {
                   )}
                 </div>
                 <p className="text-sm text-muted-foreground leading-relaxed mb-5">Comisiones directas, binarias y unilevel. Cálculo en tiempo real, pago quincenal automático sin trámites.</p>
-                {/* mini chart */}
                 <div className="flex items-end gap-1 h-14 mb-4 px-1">
                   {[28, 45, 38, 62, 50, 74, 58, 82, 68, 90, 78, 100].map((h, i) => (
                     <div key={i} className={cn('flex-1 rounded-sm transition-all group-hover:opacity-90', i === 11 ? 'bg-primary' : 'bg-primary/20')} style={{ height: `${h}%` }} />
@@ -596,19 +584,18 @@ export default function LandingPage() {
                   ))}
                 </div>
               </div>
-            </Reveal>
+            </div>
 
             {/* Card 2: Red genealógica — narrow */}
-            <Reveal>
-              <div className="h-full bg-card/70 border border-border/50 rounded-2xl p-5 sm:p-7 card-lift hover:border-primary/20 group backdrop-blur-sm flex flex-col">
+            <div>
+              <div className="h-full bg-card/60 border border-border/50 rounded-2xl p-5 sm:p-7 card-lift hover:border-primary/20 group backdrop-blur-sm flex flex-col">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-xl icon-primary flex items-center justify-center shrink-0">
+                  <div className="w-10 h-10 rounded-xl icon-blue flex items-center justify-center shrink-0">
                     <Network className="w-5 h-5" />
                   </div>
                   <h3 className="text-base sm:text-lg font-bold text-foreground">Red genealógica</h3>
                 </div>
                 <p className="text-sm text-muted-foreground leading-relaxed mb-5 flex-1">Panel visual con árbol binario, zoom dinámico y estadísticas por nodo en tiempo real.</p>
-                {/* mini network tree */}
                 <div className="relative flex flex-col items-center gap-3 py-2">
                   <div className="w-8 h-8 rounded-full bg-primary/15 border-2 border-primary/40 flex items-center justify-center">
                     <div className="w-3 h-3 rounded-full bg-primary" />
@@ -627,19 +614,18 @@ export default function LandingPage() {
                   )}
                 </div>
               </div>
-            </Reveal>
+            </div>
 
             {/* Card 3: Sistema de rangos — narrow */}
-            <Reveal>
-              <div className="h-full bg-card/70 border border-border/50 rounded-2xl p-5 sm:p-7 card-lift hover:border-primary/20 group backdrop-blur-sm flex flex-col">
+            <div>
+              <div className="h-full bg-card/60 border border-border/50 rounded-2xl p-5 sm:p-7 card-lift hover:border-primary/20 group backdrop-blur-sm flex flex-col">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-xl icon-primary flex items-center justify-center shrink-0">
+                  <div className="w-10 h-10 rounded-xl icon-amber flex items-center justify-center shrink-0">
                     <Award className="w-5 h-5" />
                   </div>
                   <h3 className="text-base sm:text-lg font-bold text-foreground">Sistema de rangos</h3>
                 </div>
                 <p className="text-sm text-muted-foreground leading-relaxed mb-5 flex-1">Cada nivel desbloquea bonos y beneficios exclusivos. Tu esfuerzo tiene recompensa.</p>
-                {/* rank ladder from DB */}
                 <div className="space-y-1.5">
                   {(ranks.filter(r => r.is_active !== false).length > 0
                     ? ranks.filter(r => r.is_active !== false).slice(0, 5)
@@ -656,15 +642,15 @@ export default function LandingPage() {
                   })}
                 </div>
               </div>
-            </Reveal>
+            </div>
 
             {/* Card 4: Tienda — wide */}
-            <Reveal className="md:col-span-2">
-              <div className="h-full bg-card/70 border border-border/50 rounded-2xl p-5 sm:p-7 card-lift hover:border-primary/20 group backdrop-blur-sm flex flex-col sm:flex-row gap-5 overflow-hidden">
+            <div className="md:col-span-2">
+              <div className="h-full bg-card/60 border border-border/50 rounded-2xl p-5 sm:p-7 card-lift hover:border-primary/20 group backdrop-blur-sm flex flex-col sm:flex-row gap-5 overflow-hidden">
                 <div className="flex-1 flex flex-col min-w-0">
                   <div className="flex items-center justify-between gap-3 mb-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl icon-primary flex items-center justify-center shrink-0">
+                      <div className="w-10 h-10 rounded-xl icon-rose flex items-center justify-center shrink-0">
                         <ShoppingBag className="w-5 h-5" />
                       </div>
                       <h3 className="text-base sm:text-lg font-bold text-foreground">Tienda integrada</h3>
@@ -686,7 +672,6 @@ export default function LandingPage() {
                     Explorar tienda <ArrowRight className="w-4 h-4 group-hover/link:translate-x-0.5 transition-transform" />
                   </Link>
                 </div>
-                {/* mini product grid with real photos */}
                 <div className="grid grid-cols-2 gap-2 sm:w-48 shrink-0">
                   {[
                     'https://images.pexels.com/photos/3762879/pexels-photo-3762879.jpeg?auto=compress&cs=tinysrgb&w=200',
@@ -701,32 +686,30 @@ export default function LandingPage() {
                   ))}
                 </div>
               </div>
-            </Reveal>
+            </div>
           </div>
         </div>
       </section>
 
       <SectionDivider />
 
-      {/* ── DARK PROMO ────────────────────────────────────────────────────────*/}
+      {/* DARK PROMO */}
       <section className="relative py-20 sm:py-28 lg:py-32 overflow-hidden section-dark">
-        {/* Fade top/bottom only in dark mode — in light mode they create ugly white bands */}
         <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-background to-transparent z-10 pointer-events-none hidden dark:block" />
         <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent z-10 pointer-events-none hidden dark:block" />
-        <div className="absolute inset-0 bg-dub-grid-dark opacity-40 mask-fade-center" />
-        {/* Atmospheric glow blobs */}
+        <div className="absolute inset-0 bg-grid opacity-40 mask-fade-center" />
         <div className="absolute -top-1/4 -left-1/4 w-[65%] h-[65%] rounded-full bg-primary/10 blur-[150px] pointer-events-none" />
         <div className="absolute -bottom-1/4 -right-1/4 w-[55%] h-[55%] rounded-full bg-amber-700/8 dark:bg-amber-900/10 blur-[140px] pointer-events-none" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[35%] h-[35%] rounded-full bg-primary/6 blur-[110px] pointer-events-none" />
 
         <div className="relative max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-10 sm:gap-12 lg:gap-16 items-center">
-            <Reveal>
+            <div>
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-muted/50 border border-border/60 rounded-full text-xs font-medium text-muted-foreground dark:bg-white/10 dark:border-white/20 dark:text-white/70 mb-5 sm:mb-6 backdrop-blur-sm">
                 <Sparkles className="w-3.5 h-3.5 text-primary" />
                 Sistema multinivel inteligente
               </div>
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground dark:text-white leading-[1.08] mb-4 sm:mb-5 tracking-tight">
+              <h2 className="text-3xl sm:text-4xl font-bold text-foreground dark:text-white leading-[1.08] mb-4 sm:mb-5 tracking-tight">
                 Potencia tu negocio<br />
                 <span className="text-gradient-animated">al máximo nivel</span>
               </h2>
@@ -754,63 +737,58 @@ export default function LandingPage() {
                   </span>
                 ))}
               </div>
-            </Reveal>
+            </div>
 
-            <Reveal delay={100}>
+            <div>
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { icon: DollarSign, title: 'Comisiones en tiempo real', desc: 'Calculadas al instante en cada compra de tu red.' },
-                  { icon: Zap, title: 'Pago automático', desc: 'Transferencias quincenales sin trámite de tu parte.' },
-                  { icon: Globe, title: 'Red internacional', desc: 'Tus afiliados pueden estar en toda Latinoamérica.' },
-                  { icon: TrendingUp, title: 'Crecimiento probado', desc: '+340% anual. Números reales, no promesas.' },
-                ].map((item, i) => {
-                  const Icon = item.icon;
-                  return (
-                    <div key={i} className="rounded-2xl p-4 sm:p-5 transition-all backdrop-blur-sm border bg-muted/30 hover:bg-muted/50 border-border/40 dark:bg-white/5 dark:hover:bg-white/8 dark:border-white/10">
-                      <div className="w-9 h-9 rounded-xl icon-primary flex items-center justify-center mb-3">
-                        <Icon className="w-5 h-5" />
-                      </div>
-                      <div className="text-xs sm:text-sm font-semibold text-foreground dark:text-white mb-1 sm:mb-1.5">{item.title}</div>
-                      <div className="text-xs text-muted-foreground dark:text-white/50 leading-relaxed">{item.desc}</div>
+                  { icon: DollarSign, title: 'Comisiones en tiempo real', desc: 'Calculadas al instante en cada compra de tu red.', iconClass: 'icon-emerald' },
+                  { icon: Zap, title: 'Pago automático', desc: 'Transferencias quincenales sin trámite de tu parte.', iconClass: 'icon-amber' },
+                  { icon: Globe, title: 'Red internacional', desc: 'Tus afiliados pueden estar en toda Latinoamérica.', iconClass: 'icon-blue' },
+                  { icon: TrendingUp, title: 'Crecimiento probado', desc: '+340% anual. Números reales, no promesas.', iconClass: 'icon-sky' },
+                ].map((item) => (
+                  <div key={item.title} className="rounded-2xl p-4 sm:p-5 transition-all backdrop-blur-sm border bg-muted/30 hover:bg-muted/50 border-border/40 dark:bg-white/5 dark:hover:bg-white/8 dark:border-white/10">
+                    <div className={cn('w-9 h-9 rounded-xl flex items-center justify-center mb-3', item.iconClass)}>
+                      <item.icon className="w-5 h-5" />
                     </div>
-                  );
-                })}
+                    <div className="text-xs sm:text-sm font-semibold text-foreground dark:text-white mb-1 sm:mb-1.5">{item.title}</div>
+                    <div className="text-xs text-muted-foreground dark:text-white/50 leading-relaxed">{item.desc}</div>
+                  </div>
+                ))}
               </div>
-            </Reveal>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ── HOW IT WORKS ──────────────────────────────────────────────────────*/}
+      {/* HOW IT WORKS */}
       <section className="relative py-16 sm:py-24 overflow-hidden">
-        <div className="absolute inset-0 bg-dub-grid opacity-30 mask-fade-center" />
+        <div className="absolute inset-0 bg-grid opacity-30 mask-fade-center" />
         <div className="relative max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
-          <Reveal className="mb-10 sm:mb-14">
+          <div className="mb-10 sm:mb-14">
             <span className="text-xs font-semibold text-primary uppercase tracking-widest mb-3 block">Proceso</span>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight">
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
               De cero a <span className="text-gradient-animated">comisiones</span><br className="hidden sm:block" /> en minutos
             </h2>
-          </Reveal>
+          </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
             {steps.map((step, i) => (
-              <Reveal key={step.n} delay={i * 80}>
-                <div className="relative bg-card/60 border border-border/50 rounded-2xl p-6 sm:p-7 card-lift backdrop-blur-sm h-full group">
-                  <div className="flex items-start justify-between mb-5">
-                    <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
-                      <step.icon className="w-5 h-5 text-primary" />
-                    </div>
-                    <span className="text-4xl sm:text-5xl font-black text-muted-foreground/25 select-none leading-none tracking-tight">{step.n}</span>
+              <div key={step.n} className="relative bg-card/60 border border-border/50 rounded-2xl p-6 sm:p-7 card-lift backdrop-blur-sm h-full group">
+                <div className="flex items-start justify-between mb-5">
+                  <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center shrink-0', step.iconClass)}>
+                    <step.icon className="w-5 h-5" />
                   </div>
-                  <h3 className="text-base sm:text-lg font-bold text-foreground mb-2">{step.title}</h3>
-                  <p className="text-muted-foreground/75 leading-relaxed text-sm">{step.desc}</p>
-                  {i < steps.length - 1 && (
-                    <div className="hidden sm:flex absolute top-1/2 -right-3 -translate-y-1/2 z-10 w-6 h-6 rounded-full bg-background border border-border/60 items-center justify-center">
-                      <ArrowRight className="w-3 h-3 text-muted-foreground/50" />
-                    </div>
-                  )}
+                  <span className="text-4xl sm:text-5xl font-black text-muted-foreground/25 select-none leading-none tracking-tight">{step.n}</span>
                 </div>
-              </Reveal>
+                <h3 className="text-base sm:text-lg font-bold text-foreground mb-2">{step.title}</h3>
+                <p className="text-muted-foreground/75 leading-relaxed text-sm">{step.desc}</p>
+                {i < steps.length - 1 && (
+                  <div className="hidden sm:flex absolute top-1/2 -right-3 -translate-y-1/2 z-10 w-6 h-6 rounded-full bg-background border border-border/60 items-center justify-center">
+                    <ArrowRight className="w-3 h-3 text-muted-foreground/50" />
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         </div>
@@ -818,22 +796,18 @@ export default function LandingPage() {
 
       <SectionDivider />
 
-      {/* ── TESTIMONIALS ──────────────────────────────────────────────────────*/}
+      {/* TESTIMONIALS */}
       <section className="py-16 sm:py-24">
         <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 mb-10 sm:mb-14">
-          <Reveal>
-            <span className="text-xs font-semibold text-primary uppercase tracking-widest mb-3 block">Testimonios</span>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight">
-              Miles ya <span className="text-gradient-animated">ganan</span> con Cluv 360
-            </h2>
-            <p className="text-base sm:text-lg text-muted-foreground/80 mt-3 max-w-xl">Historias reales de emprendedores en toda Latinoamérica.</p>
-          </Reveal>
+          <span className="text-xs font-semibold text-primary uppercase tracking-widest mb-3 block">Testimonios</span>
+          <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
+            Miles ya <span className="text-gradient-animated">ganan</span> con Cluv 360
+          </h2>
+          <p className="text-base sm:text-lg text-muted-foreground/80 mt-3 max-w-xl">Historias reales de emprendedores en toda Latinoamérica.</p>
         </div>
 
-        {/* bento grid */}
         <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 mb-10 sm:mb-14">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border border-border/50 rounded-2xl overflow-hidden">
-            {/* region stats row - background images with overlaid info */}
             {[regionStats[0], regionStats[1]].map((stat, idx) => (
               <div
                 key={stat.city}
@@ -853,7 +827,7 @@ export default function LandingPage() {
               </div>
             ))}
 
-            <div className="p-6 sm:p-8 flex flex-col justify-between border-b border-border/50 row-span-1 lg:row-span-2">
+            <div className="p-6 sm:p-8 flex flex-col justify-between border-b border-border/50 row-span-1 lg:row-span-2 bg-card/50 backdrop-blur-sm">
               <div className="flex gap-0.5 mb-4">{Array.from({ length: 5 }).map((_, i) => <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />)}</div>
               <p className="text-foreground/80 leading-relaxed mb-5 flex-1 text-sm sm:text-base">"{allTestimonials[0].content}"</p>
               <div>
@@ -870,7 +844,7 @@ export default function LandingPage() {
               </div>
             </div>
 
-            <div className="p-6 sm:p-8 border-b border-border/50 sm:border-r sm:col-span-2 lg:col-span-2 flex flex-col justify-between">
+            <div className="p-6 sm:p-8 border-b border-border/50 sm:border-r sm:col-span-2 lg:col-span-2 flex flex-col justify-between bg-card/50 backdrop-blur-sm">
               <div className="flex gap-0.5 mb-4">{Array.from({ length: 5 }).map((_, i) => <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />)}</div>
               <p className="text-foreground/80 leading-relaxed mb-5 text-sm sm:text-base">"{allTestimonials[1].content}"</p>
               <div className="flex items-center gap-3">
@@ -899,7 +873,7 @@ export default function LandingPage() {
               </div>
             ))}
 
-            <div className="p-6 sm:p-8 border-t border-border/50 flex flex-col justify-between">
+            <div className="p-6 sm:p-8 border-t border-border/50 flex flex-col justify-between bg-card/50 backdrop-blur-sm">
               <div className="flex gap-0.5 mb-4">{Array.from({ length: 5 }).map((_, i) => <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />)}</div>
               <p className="text-foreground/80 leading-relaxed mb-5 text-sm sm:text-base">"{allTestimonials[2].content}"</p>
               <div className="flex items-center gap-3">
@@ -916,30 +890,29 @@ export default function LandingPage() {
 
       <SectionDivider />
 
-      {/* ── RANKS ─────────────────────────────────────────────────────────────*/}
+      {/* RANKS */}
       {ranks.filter(r => r.is_active !== false).length > 0 && (
         <>
           <section className="py-16 sm:py-24">
             <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
               <div className="grid lg:grid-cols-[1fr_1.4fr] gap-10 sm:gap-12 lg:gap-16 items-start">
-                <Reveal>
+                <div>
                   <span className="text-xs font-semibold text-primary uppercase tracking-widest mb-3 block">Rangos</span>
-                  <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight mb-4">
+                  <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight mb-4">
                     Cada nivel,<br /><span className="text-gradient-animated">más ingresos</span>
                   </h2>
                   <p className="text-muted-foreground/80 leading-relaxed mb-6 sm:mb-8 max-w-md text-sm sm:text-base">
                     El sistema premia tu esfuerzo con bonos progresivos. Desde Bronce hasta el nivel máximo Corona.
                   </p>
-                  <Link to={user ? '/dashboard/rangos' : '/registro'} className="inline-flex items-center gap-2 px-6 py-3 bg-foreground text-background font-semibold rounded-xl hover:opacity-90 transition-all">
+                  <Link to={user ? '/dashboard/rangos' : '/registro'} className="inline-flex items-center gap-2 px-6 py-3 bg-foreground/90 backdrop-blur-sm text-background font-semibold rounded-xl hover:opacity-90 transition-all">
                     {user ? 'Ver mis rangos' : 'Ver todos los rangos'} <ArrowRight className="w-4 h-4" />
                   </Link>
-                </Reveal>
+                </div>
 
-                <Reveal delay={80}>
+                <div>
                   {(() => {
                     const activeRanks = ranks.filter(r => r.is_active !== false).slice(0, 8);
                     const count = activeRanks.length;
-                    // Adaptive grid: 3 cols for 6+, 2 cols for 4-5, list for 3 or fewer
                     const gridClass = count >= 6
                       ? 'grid grid-cols-2 sm:grid-cols-3 gap-2'
                       : count >= 4
@@ -949,8 +922,10 @@ export default function LandingPage() {
                     return (
                       <div className={cn(gridClass)}>
                         {activeRanks.map((r) => {
-                          const colorStyle = r.color?.startsWith('#') ? { color: r.color } : undefined;
-                          const colorClass = r.color?.startsWith('#') ? '' : (r.color || 'text-primary');
+                          const iconBgStyle = r.color?.startsWith('#') ? { backgroundColor: `${r.color}15` } : undefined;
+                          const iconColorStyle = r.color?.startsWith('#') ? { color: r.color } : undefined;
+                          const iconBorderStyle = r.color?.startsWith('#') ? { borderColor: `${r.color}25` } : undefined;
+                          const iconColorClass = r.color?.startsWith('#') ? '' : (r.color || 'text-primary');
                           return (
                             <div
                               key={r.id}
@@ -960,12 +935,15 @@ export default function LandingPage() {
                               )}
                             >
                               <div className={cn('relative flex items-center gap-3', isCompact && 'gap-2.5 sm:gap-2')}>
-                                <div className={cn('w-9 h-9 rounded-lg flex items-center justify-center shrink-0 icon-primary', isCompact && 'sm:w-8 sm:h-8')}>
-                                  <Award className={cn('w-4 h-4', isCompact && 'sm:w-3.5 sm:h-3.5')} />
+                                <div
+                                  className={cn('w-9 h-9 rounded-lg flex items-center justify-center shrink-0 icon-amber', isCompact && 'sm:w-8 sm:h-8')}
+                                  style={{ ...iconBgStyle, ...iconBorderStyle }}
+                                >
+                                  <Award style={iconColorStyle} className={cn('w-4 h-4', isCompact && 'sm:w-3.5 sm:h-3.5', iconColorClass)} />
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <div className={cn('text-sm font-bold', isCompact && 'sm:text-[13px]')} style={colorStyle}>
-                                    <span className={colorClass}>{r.name}</span>
+                                  <div className={cn('text-sm font-bold', isCompact && 'sm:text-[13px]')} style={iconColorStyle}>
+                                    <span className={iconColorClass}>{r.name}</span>
                                   </div>
                                   {r.min_affiliates > 0 && (
                                     <div className={cn('text-[11px] text-muted-foreground/55 mt-0.5', isCompact && 'sm:text-[10px]')}>{r.min_affiliates} afil.</div>
@@ -982,7 +960,7 @@ export default function LandingPage() {
                       </div>
                     );
                   })()}
-                </Reveal>
+                </div>
               </div>
             </div>
           </section>
@@ -990,118 +968,112 @@ export default function LandingPage() {
         </>
       )}
 
-      {/* ── PLANS ─────────────────────────────────────────────────────────────*/}
+      {/* PLANS */}
       {plans.length > 0 && (
         <>
           <section className="py-16 sm:py-24" id="planes">
             <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
-              <Reveal className="mb-10 sm:mb-14">
+              <div className="mb-10 sm:mb-14">
                 <span className="text-xs font-semibold text-primary uppercase tracking-widest mb-3 block">Precios</span>
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-foreground tracking-tight leading-tight mb-4">
+                <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight leading-tight mb-4">
                   Planes flexibles<br />que crecen contigo
                 </h2>
                 <p className="text-base sm:text-lg text-muted-foreground/80 max-w-lg">Comienza gratis y escala cuando tu negocio lo necesite.</p>
-              </Reveal>
+              </div>
 
-              <Reveal delay={60}>
-                <div className={cn('grid gap-4', plans.length === 1 ? 'grid-cols-1 max-w-sm' : plans.length === 2 ? 'grid-cols-1 sm:grid-cols-2 max-w-2xl mx-auto' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3')}>
-                  {plans.map(plan => {
-                    const isFree = plan.is_free || plan.price === 0;
-                    const isCurrent = user && (user as any).plan === plan.slug;
-                    return (
-                      <div key={plan.id} className={cn(
-                        'bg-card rounded-xl p-6 flex flex-col relative transition-all card-lift',
-                        plan.is_popular
-                          ? 'border-2 border-primary ring-4 ring-primary/10'
-                          : 'border border-border hover:border-primary/30',
-                      )}>
-                        {plan.badge && (
-                          <div className={cn('absolute -top-2.5 left-4 text-xs font-bold px-3 py-1 rounded-full', plan.is_popular ? 'bg-primary text-primary-foreground' : 'bg-muted text-foreground border border-border/50')}>
-                            {plan.badge}
-                          </div>
-                        )}
-                        {isCurrent && (
-                          <div className="absolute -top-2.5 right-4 text-xs font-bold px-3 py-1 rounded-full bg-primary text-primary-foreground">Actual</div>
-                        )}
-                        <div className="mb-4">
-                          <h3 className="text-lg font-bold text-foreground">{plan.name}</h3>
-                          {plan.description && <p className="text-sm text-muted-foreground mt-1">{plan.description}</p>}
+              <div className={cn('grid gap-4', plans.length === 1 ? 'grid-cols-1 max-w-sm' : plans.length === 2 ? 'grid-cols-1 sm:grid-cols-2 max-w-2xl mx-auto' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3')}>
+                {plans.map(plan => {
+                  const isFree = plan.is_free || plan.price === 0;
+                  const isCurrent = user && (user as any).plan === plan.slug;
+                  return (
+                    <div key={plan.id} className={cn(
+                      'bg-card/70 backdrop-blur-sm rounded-xl p-6 flex flex-col relative transition-all card-lift',
+                      plan.is_popular
+                        ? 'border-2 border-primary ring-4 ring-primary/10'
+                        : 'border border-border hover:border-primary/30',
+                    )}>
+                      {plan.badge && (
+                        <div className={cn('absolute -top-2.5 left-4 text-xs font-bold px-3 py-1 rounded-full', plan.is_popular ? 'bg-primary text-primary-foreground' : 'bg-muted text-foreground border border-border/50')}>
+                          {plan.badge}
                         </div>
-                        <div className="mb-4">
-                          <span className="text-3xl font-bold text-foreground tracking-tight">{isFree ? 'Gratis' : formatPrice(plan.price, currency, currencySymbol, exchangeRate)}</span>
-                          {!isFree && <span className="text-sm text-muted-foreground font-normal">/mes</span>}
-                          {plan.trial_days > 0 && <span className="text-xs text-primary block mt-1">{plan.trial_days} días de prueba</span>}
-                        </div>
-                        <ul className="space-y-1.5 mb-5 flex-1">
-                          {(plan.features || []).slice(0, 5).map((f: string) => (
-                            <li key={f} className="flex items-start gap-2 text-sm text-muted-foreground">
-                              <Check className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-                              <span>{f}</span>
-                            </li>
-                          ))}
-                        </ul>
-                        {isCurrent ? (
-                          <div className="py-2.5 text-center border border-primary/20 rounded-lg bg-primary/5">
-                            <span className="text-sm font-medium text-primary">Tu plan actual</span>
-                          </div>
-                        ) : (
-                          <Link
-                            to={user ? '/dashboard/mi-plan' : `/registro?plan=${plan.slug}`}
-                            className={cn(
-                              'py-2.5 rounded-lg text-sm font-semibold text-center transition-all block',
-                              plan.is_popular
-                                ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-                                : 'border border-border hover:bg-muted text-foreground',
-                            )}
-                          >
-                            {isFree ? 'Comenzar gratis' : 'Activar plan'}
-                          </Link>
-                        )}
+                      )}
+                      {isCurrent && (
+                        <div className="absolute -top-2.5 right-4 text-xs font-bold px-3 py-1 rounded-full bg-primary text-primary-foreground">Actual</div>
+                      )}
+                      <div className="mb-4">
+                        <h3 className="text-lg font-bold text-foreground">{plan.name}</h3>
+                        {plan.description && <p className="text-sm text-muted-foreground mt-1">{plan.description}</p>}
                       </div>
-                    );
-                  })}
-                </div>
-              </Reveal>
+                      <div className="mb-4">
+                        <span className="text-3xl font-bold text-foreground tracking-tight">{isFree ? 'Gratis' : formatPrice(plan.price, currency, currencySymbol, exchangeRate)}</span>
+                        {!isFree && <span className="text-sm text-muted-foreground font-normal">/mes</span>}
+                        {plan.trial_days > 0 && <span className="text-xs text-primary block mt-1">{plan.trial_days} días de prueba</span>}
+                      </div>
+                      <ul className="space-y-1.5 mb-5 flex-1">
+                        {(plan.features || []).slice(0, 5).map((f: string) => (
+                          <li key={f} className="flex items-start gap-2 text-sm text-muted-foreground">
+                            <Check className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                            <span>{f}</span>
+                          </li>
+                        ))}
+                      </ul>
+                      {isCurrent ? (
+                        <div className="py-2.5 text-center border border-primary/20 rounded-lg bg-primary/5">
+                          <span className="text-sm font-medium text-primary">Tu plan actual</span>
+                        </div>
+                      ) : (
+                        <Link
+                          to={user ? '/dashboard/mi-plan' : `/registro?plan=${plan.slug}`}
+                          className={cn(
+                            'py-2.5 rounded-lg text-sm font-semibold text-center transition-all block backdrop-blur-sm',
+                            plan.is_popular
+                              ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                              : 'border border-border bg-background/60 hover:bg-muted text-foreground',
+                          )}
+                        >
+                          {isFree ? 'Comenzar gratis' : 'Activar plan'}
+                        </Link>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
 
-              <Reveal delay={120}>
-                <p className="text-center text-sm text-muted-foreground/60 mt-8">
-                  <Link to="/planes" className="text-primary font-medium hover:underline">Ver comparación completa de planes →</Link>
-                </p>
-              </Reveal>
+              <p className="text-center text-sm text-muted-foreground/60 mt-8">
+                <Link to="/planes" className="text-primary font-medium hover:underline">Ver comparación completa de planes →</Link>
+              </p>
             </div>
           </section>
           <SectionDivider />
         </>
       )}
 
-      {/* ── STORE ─────────────────────────────────────────────────────────────*/}
+      {/* STORE */}
       <StoreSection />
 
-      {/* ── FAQ ───────────────────────────────────────────────────────────────*/}
+      {/* FAQ */}
       <section className="relative py-16 sm:py-24 overflow-hidden">
-        <div className="absolute inset-0 bg-dub-grid opacity-20 mask-fade-center pointer-events-none" />
+        <div className="absolute inset-0 bg-grid opacity-20 mask-fade-center pointer-events-none" />
         <div className="relative max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-[380px_1fr] gap-10 lg:gap-16 items-start">
-            <Reveal>
-              <div className="lg:sticky lg:top-24">
-                <span className="text-xs font-semibold text-primary uppercase tracking-widest mb-3 block">FAQ</span>
-                <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight mb-4">
-                  Preguntas <span className="text-gradient-animated">frecuentes</span>
-                </h2>
-                <p className="text-muted-foreground/70 leading-relaxed text-sm sm:text-base mb-8">
-                  Todo lo que necesitas saber antes de empezar. Si tienes más preguntas, estamos disponibles 24/7.
-                </p>
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/8 border border-primary/20 mb-6">
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-                  <span className="text-xs font-medium text-primary">{faqItems.length} preguntas</span>
-                </div>
-                <Link to="/contacto" className="inline-flex items-center gap-2 px-5 py-2.5 border border-border/60 rounded-xl text-sm font-medium hover:border-primary/40 hover:text-primary transition-all group">
-                  Contactar soporte
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-                </Link>
+            <div className="lg:sticky lg:top-24">
+              <span className="text-xs font-semibold text-primary uppercase tracking-widest mb-3 block">FAQ</span>
+              <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight mb-4">
+                Preguntas <span className="text-gradient-animated">frecuentes</span>
+              </h2>
+              <p className="text-muted-foreground/70 leading-relaxed text-sm sm:text-base mb-8">
+                Todo lo que necesitas saber antes de empezar. Si tienes más preguntas, estamos disponibles 24/7.
+              </p>
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/8 border border-primary/20 mb-6">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+                <span className="text-xs font-medium text-primary">{faqItems.length} preguntas</span>
               </div>
-            </Reveal>
-            <Reveal delay={80}>
+              <Link to="/contacto" className="inline-flex items-center gap-2 px-5 py-2.5 border border-border/60 bg-background/60 backdrop-blur-sm rounded-xl text-sm font-medium hover:border-primary/40 hover:text-primary transition-all group">
+                Contactar soporte
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              </Link>
+            </div>
+            <div>
               {faqItems.length === 0 ? (
                 <div className="py-20 text-center">
                   <p className="text-sm text-muted-foreground/50">No hay preguntas configuradas aún.</p>
@@ -1140,57 +1112,53 @@ export default function LandingPage() {
                   ))}
                 </div>
               )}
-            </Reveal>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ── CTA ───────────────────────────────────────────────────────────────*/}
+      {/* CTA */}
       <section className="relative py-20 sm:py-28 lg:py-36 overflow-hidden section-dark">
-        {/* Seamless fade — mirrors the dark promo section */}
         <div className="absolute top-0 left-0 right-0 h-24 sm:h-32 bg-gradient-to-b from-background to-transparent z-20 pointer-events-none" />
         <div className="absolute bottom-0 left-0 right-0 h-24 sm:h-32 bg-gradient-to-t from-background to-transparent z-20 pointer-events-none" />
-        <div className="absolute inset-0 bg-dub-grid-dark opacity-50 mask-fade-center" />
-        {/* Visible aura effects */}
+        <div className="absolute inset-0 bg-grid opacity-50 mask-fade-center" />
         <div className="absolute top-[-20%] left-1/2 -translate-x-1/2 w-[700px] h-[500px] rounded-full bg-primary/12 blur-[130px]" />
         <div className="absolute bottom-[-15%] left-1/2 -translate-x-1/2 w-[500px] h-[320px] rounded-full bg-amber-600/10 blur-[110px]" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full bg-primary/6 blur-[90px]" />
 
         <div className="relative z-10 max-w-[700px] mx-auto px-4 sm:px-6 text-center">
-          <Reveal>
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-muted/50 border border-border/60 rounded-full text-xs font-medium text-muted-foreground dark:bg-white/8 dark:border-white/10 dark:text-white/60 mb-6 sm:mb-8 backdrop-blur-sm">
-              <Zap className="w-3.5 h-3.5 text-primary" />
-              Sin tarjeta de crédito
-            </div>
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-foreground dark:text-white mb-3 sm:mb-4 leading-[1.05] tracking-tight">
-              Tu red no espera.
-            </h2>
-            <p className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-5 text-gradient-animated">
-              Empieza hoy mismo.
-            </p>
-            <p className="text-sm sm:text-base lg:text-lg text-muted-foreground dark:text-white/45 max-w-md sm:max-w-lg mx-auto mb-10 sm:mb-12 leading-relaxed">
-              Unete a miles de emprendedores que ya construyen libertad financiera con Cluv 360.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-10 sm:mb-12">
-              <Link
-                to={user ? '/dashboard' : '/registro'}
-                className="btn-gold-shimmer w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 sm:px-9 py-4 bg-foreground text-background font-semibold rounded-xl hover:opacity-90 active:scale-[0.98] transition-all shadow-2xl shadow-white/10 text-base"
-              >
-                {user ? 'Ir a mi Panel' : 'Crear cuenta gratis'} <ArrowRight className="w-5 h-5" />
-              </Link>
-              <Link
-                to="/contacto"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 sm:px-9 py-4 bg-muted/50 border border-border/60 text-foreground dark:bg-white/5 dark:border-white/12 dark:text-white font-medium rounded-xl hover:bg-muted/60 dark:hover:bg-white/10 transition-all text-base backdrop-blur-sm"
-              >
-                Hablar con ventas
-              </Link>
-            </div>
-            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 lg:gap-8 text-xs sm:text-sm text-muted-foreground/60 dark:text-white/35">
-              {['Cuenta gratuita', 'Sin permanencia', 'Pago quincenal', 'Soporte 24/7'].map(t => (
-                <span key={t} className="flex items-center gap-1.5 sm:gap-2"><Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground/80 dark:text-white/45" /> {t}</span>
-              ))}
-            </div>
-          </Reveal>
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-muted/50 border border-border/60 rounded-full text-xs font-medium text-muted-foreground dark:bg-white/8 dark:border-white/10 dark:text-white/60 mb-6 sm:mb-8 backdrop-blur-sm">
+            <Zap className="w-3.5 h-3.5 text-primary" />
+            Sin tarjeta de crédito
+          </div>
+          <h2 className="text-4xl sm:text-5xl font-bold text-foreground dark:text-white mb-3 sm:mb-4 leading-[1.05] tracking-tight">
+            Tu red no espera.
+          </h2>
+          <p className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-5 text-gradient-animated">
+            Empieza hoy mismo.
+          </p>
+          <p className="text-sm sm:text-base lg:text-lg text-muted-foreground dark:text-white/45 max-w-md sm:max-w-lg mx-auto mb-10 sm:mb-12 leading-relaxed">
+            Unete a miles de emprendedores que ya construyen libertad financiera con Cluv 360.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-10 sm:mb-12">
+            <Link
+              to={user ? '/dashboard' : '/registro'}
+              className="btn-gold-shimmer w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 sm:px-9 py-4 bg-foreground/90 backdrop-blur-sm text-background font-semibold rounded-xl hover:opacity-90 active:scale-[0.98] transition-all shadow-2xl shadow-white/10 text-base"
+            >
+              {user ? 'Ir a mi Panel' : 'Crear cuenta gratis'} <ArrowRight className="w-5 h-5" />
+            </Link>
+            <Link
+              to="/contacto"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 sm:px-9 py-4 bg-muted/50 border border-border/60 text-foreground dark:bg-white/5 dark:border-white/12 dark:text-white font-medium rounded-xl hover:bg-muted/60 dark:hover:bg-white/10 transition-all text-base backdrop-blur-sm"
+            >
+              Hablar con ventas
+            </Link>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 lg:gap-8 text-xs sm:text-sm text-muted-foreground/60 dark:text-white/35">
+            {['Cuenta gratuita', 'Sin permanencia', 'Pago quincenal', 'Soporte 24/7'].map(t => (
+              <span key={t} className="flex items-center gap-1.5 sm:gap-2"><Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground/80 dark:text-white/45" /> {t}</span>
+            ))}
+          </div>
         </div>
       </section>
 
