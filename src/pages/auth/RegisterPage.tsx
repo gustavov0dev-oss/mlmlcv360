@@ -164,14 +164,12 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col lg:flex-row">
-      {/* Brand panel - desktop only */}
-      <div className="hidden lg:flex lg:w-[45%] xl:w-1/2 bg-gradient-to-br from-primary/5 via-background to-primary/3 flex-col justify-between p-10 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-[0.02] dark:opacity-[0.04]" style={{
-          backgroundImage: 'radial-gradient(circle at 1px 1px, currentColor 1px, transparent 1px)',
-          backgroundSize: '24px 24px'
-        }} />
-        <div className="absolute top-20 left-10 w-64 h-64 bg-primary/20 dark:bg-primary/10 rounded-full blur-[80px]" />
-        <div className="absolute bottom-20 right-10 w-48 h-48 bg-primary/15 dark:bg-primary/5 rounded-full blur-[60px]" />
+      {/* Brand panel - desktop only with premium gradient mesh */}
+      <div className="hidden lg:flex lg:w-[45%] xl:w-1/2 bg-gradient-mesh flex-col justify-between p-10 relative overflow-hidden">
+        <div className="absolute inset-0 bg-dots opacity-[0.03]" />
+        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/20 dark:bg-primary/15 rounded-full blur-[100px]" />
+        <div className="absolute bottom-20 right-10 w-56 h-56 bg-primary/15 dark:bg-primary/10 rounded-full blur-[80px]" />
+        <div className="absolute top-1/2 left-1/3 w-40 h-40 bg-primary/10 dark:bg-primary/5 rounded-full blur-[60px]" />
 
         <div className="relative z-10">
           <Link to="/" className="inline-flex items-center gap-2.5">
@@ -196,8 +194,8 @@ export default function RegisterPage() {
 
       {/* Form panel */}
       <div className="flex-1 flex flex-col min-h-screen lg:min-h-0">
-        {/* Top bar */}
-        <div className="flex items-center justify-between px-6 lg:px-10 py-5 border-b border-border/50">
+        {/* Top bar with glass effect */}
+        <div className="flex items-center justify-between px-6 lg:px-10 py-5 border-b border-border/30 glass-subtle">
           <Link to="/" className="lg:hidden">
             <LogoWithText value={logoValue} fallbackText={companyName} size="w-8 h-8" textClass="font-semibold text-foreground" />
           </Link>
@@ -211,7 +209,7 @@ export default function RegisterPage() {
             </span>
             <button
               onClick={() => setTheme(isDark ? 'light' : 'dark')}
-              className="w-9 h-9 rounded-xl flex items-center justify-center bg-muted/50 hover:bg-muted transition-colors text-muted-foreground"
+              className="w-9 h-9 rounded-xl flex items-center justify-center bg-muted/50 hover:bg-muted/80 transition-colors text-muted-foreground"
               aria-label="Toggle theme"
             >
               {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
@@ -219,9 +217,9 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        {/* Form content */}
+        {/* Form content with premium styling */}
         <div className="flex-1 flex items-center justify-center px-6 py-8">
-          <div className="w-full max-w-[380px]">
+          <div className="w-full max-w-[380px] animate-fade-in-up">
             {/* Step indicator */}
             <div className="flex items-center justify-center gap-1.5 mb-7">
               {Array.from({ length: totalSteps }, (_, i) => i + 1).map((s, i) => (
@@ -311,7 +309,7 @@ export default function RegisterPage() {
                           "placeholder:text-muted-foreground/60",
                           errors.full_name
                             ? "border-destructive focus:border-destructive"
-                            : "border-border/50 focus:border-primary focus:bg-background"
+                            : "border-border/50 focus:border-primary focus:bg-background hover:border-border"
                         )}
                       />
                     </div>
@@ -329,7 +327,6 @@ export default function RegisterPage() {
                     <div className="relative">
                       <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <input
-                        type="email"
                         {...register('email')}
                         placeholder="tu@correo.com"
                         className={cn(
@@ -337,7 +334,7 @@ export default function RegisterPage() {
                           "placeholder:text-muted-foreground/60",
                           errors.email || dupError.email
                             ? "border-destructive focus:border-destructive"
-                            : "border-border/50 focus:border-primary focus:bg-background"
+                            : "border-border/50 focus:border-primary focus:bg-background hover:border-border"
                         )}
                       />
                       {!errors.email && !dupError.email && emailVal && emailVal.includes('@') && (
@@ -366,7 +363,7 @@ export default function RegisterPage() {
                           "placeholder:text-muted-foreground/60",
                           errors.password
                             ? "border-destructive focus:border-destructive"
-                            : "border-border/50 focus:border-primary focus:bg-background"
+                            : "border-border/50 focus:border-primary focus:bg-background hover:border-border"
                         )}
                       />
                       <button
@@ -437,7 +434,7 @@ export default function RegisterPage() {
                           "placeholder:text-muted-foreground/60",
                           errors.confirm_password
                             ? "border-destructive focus:border-destructive"
-                            : "border-border/50 focus:border-primary focus:bg-background"
+                            : "border-border/50 focus:border-primary focus:bg-background hover:border-border"
                         )}
                       />
                       <button
@@ -484,9 +481,9 @@ export default function RegisterPage() {
                     disabled={validating || !!dupError.email}
                     className={cn(
                       "w-full py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all",
-                      "bg-primary text-primary-foreground shadow-sm shadow-primary/20",
+                      "bg-primary text-primary-foreground shadow-premium",
                       "hover:opacity-90 active:scale-[0.99]",
-                      "disabled:opacity-60 disabled:cursor-not-allowed"
+                      "disabled:opacity-50 disabled:cursor-not-allowed"
                     )}
                   >
                     {validating ? (
@@ -560,7 +557,7 @@ export default function RegisterPage() {
                     disabled={requirePlan && !selectedPlan}
                     className={cn(
                       "flex-1 py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-1 transition-all",
-                      "bg-primary text-primary-foreground shadow-sm shadow-primary/20",
+                      "bg-primary text-primary-foreground shadow-premium",
                       "hover:opacity-90 active:scale-[0.99]",
                       "disabled:opacity-50 disabled:cursor-not-allowed"
                     )}
@@ -624,9 +621,9 @@ export default function RegisterPage() {
                     disabled={loading}
                     className={cn(
                       "flex-1 py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-1.5 transition-all",
-                      "bg-primary text-primary-foreground shadow-sm shadow-primary/20",
+                      "bg-primary text-primary-foreground shadow-premium",
                       "hover:opacity-90 active:scale-[0.99]",
-                      "disabled:opacity-60 disabled:cursor-not-allowed"
+                      "disabled:opacity-50 disabled:cursor-not-allowed"
                     )}
                   >
                     {loading ? (

@@ -68,13 +68,14 @@ export default function ResetPasswordPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4 py-8 relative">
-      {/* Background decoration */}
-      <div className="absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-primary/5 dark:bg-primary/3 rounded-full blur-[100px]" />
-        <div className="absolute bottom-1/4 right-1/4 w-[300px] h-[200px] bg-primary/3 dark:bg-primary/2 rounded-full blur-[80px]" />
+      {/* Background decoration with premium gradient mesh */}
+      <div className="absolute inset-0 -z-10 bg-gradient-mesh overflow-hidden">
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-primary/10 dark:bg-primary/8 rounded-full blur-[120px]" />
+        <div className="absolute bottom-1/4 right-1/4 w-[300px] h-[200px] bg-primary/8 dark:bg-primary/5 rounded-full blur-[100px]" />
+        <div className="absolute inset-0 bg-dots opacity-[0.02]" />
       </div>
 
-      <div className="w-full max-w-[360px]">
+      <div className="w-full max-w-[360px] animate-fade-in-up">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <Link to="/">
@@ -82,7 +83,7 @@ export default function ResetPasswordPage() {
           </Link>
           <button
             onClick={() => setTheme(isDark ? 'light' : 'dark')}
-            className="w-9 h-9 rounded-xl flex items-center justify-center bg-muted/50 hover:bg-muted transition-colors text-muted-foreground"
+            className="w-9 h-9 rounded-xl flex items-center justify-center bg-muted/50 hover:bg-muted/80 transition-colors text-muted-foreground"
             aria-label="Toggle theme"
           >
             {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
@@ -91,13 +92,13 @@ export default function ResetPasswordPage() {
 
         {checking ? (
           /* Checking state */
-          <div className="bg-card border border-border/50 rounded-2xl p-8 text-center">
+          <div className="glass-card rounded-2xl p-8 text-center">
             <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
             <p className="text-sm text-muted-foreground">Verificando enlace de recuperacion...</p>
           </div>
         ) : !valid ? (
           /* Invalid link state */
-          <div className="bg-card border border-border/50 rounded-2xl p-8">
+          <div className="glass-card rounded-2xl p-8">
             <div className="text-center">
               <div className="w-14 h-14 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-5">
                 <ShieldAlert className="w-6 h-6 text-destructive" />
@@ -117,7 +118,7 @@ export default function ResetPasswordPage() {
           </div>
         ) : done ? (
           /* Success state */
-          <div className="bg-card border border-border/50 rounded-2xl p-8">
+          <div className="glass-card rounded-2xl p-8">
             <div className="text-center">
               <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-5">
                 <CheckCircle className="w-6 h-6 text-primary" />
@@ -146,7 +147,7 @@ export default function ResetPasswordPage() {
           </div>
         ) : (
           /* Reset form */
-          <div className="bg-card border border-border/50 rounded-2xl p-6 sm:p-8">
+          <div className="glass-card rounded-2xl p-6 sm:p-8">
             <div className="text-center mb-6">
               <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
                 <Lock className="w-5 h-5 text-primary" />
@@ -169,7 +170,7 @@ export default function ResetPasswordPage() {
                     className={cn(
                       "w-full pl-11 pr-12 py-3 rounded-xl text-sm bg-muted/30 border border-border/50 transition-all outline-none",
                       "placeholder:text-muted-foreground/60",
-                      "focus:border-primary focus:bg-background"
+                      "focus:border-primary focus:bg-background hover:border-border"
                     )}
                   />
                   <button
@@ -235,7 +236,7 @@ export default function ResetPasswordPage() {
                       "placeholder:text-muted-foreground/60",
                       confirm && !passwordsMatch
                         ? "border-destructive focus:border-destructive"
-                        : "border-border/50 focus:border-primary focus:bg-background"
+                        : "border-border/50 focus:border-primary focus:bg-background hover:border-border"
                     )}
                   />
                   <button
@@ -267,7 +268,7 @@ export default function ResetPasswordPage() {
                 disabled={loading || !canSubmit}
                 className={cn(
                   "w-full py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all",
-                  "bg-primary text-primary-foreground shadow-sm shadow-primary/20",
+                  "bg-primary text-primary-foreground shadow-premium",
                   "hover:opacity-90 active:scale-[0.99]",
                   "disabled:opacity-50 disabled:cursor-not-allowed"
                 )}

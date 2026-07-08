@@ -3,8 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#AB710D" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#0E1016" media="(prefers-color-scheme: dark)" />
+    <!-- Theme color for mobile browser chrome - matches our premium color system -->
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)" />
 
     <!-- Primary Meta Tags -->
     <title>MLM 360 - Sistema MLM Empresarial Premium del Perú</title>
@@ -75,19 +76,33 @@
       }
     }
     </script>
-    <!-- Apply theme before first paint to prevent flash -->
+
+    <!-- ═══════════════════════════════════════════════════════════════════════════
+         FOUC PREVENTION — Apply theme before first paint
+         Runs synchronously to prevent any flash of unstyled content
+         ═══════════════════════════════════════════════════════════════════════════ -->
     <script>
       (function() {
         try {
-          var t = localStorage.getItem('mlm360-theme');
-          var d = document.documentElement;
-          if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            d.classList.add('dark');
-            d.style.colorScheme = 'dark';
+          var stored = localStorage.getItem('mlm360-theme');
+          var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var shouldDark = stored === 'dark' || (!stored && prefersDark);
+          var doc = document.documentElement;
+
+          if (shouldDark) {
+            doc.classList.add('dark');
+            doc.style.colorScheme = 'dark';
           } else {
-            d.style.colorScheme = 'light';
+            doc.classList.remove('dark');
+            doc.style.colorScheme = 'light';
           }
-        } catch(e) {}
+
+          // Update meta theme-color
+          var meta = document.querySelector('meta[name="theme-color"]');
+          if (meta) {
+            meta.setAttribute('content', shouldDark ? '#0a0a0a' : '#ffffff');
+          }
+        } catch (e) {}
       })();
     </script>
   </head>
