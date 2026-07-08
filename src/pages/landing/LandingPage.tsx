@@ -423,10 +423,11 @@ export default function LandingPage() {
       {/* ── HERO ──────────────────────────────────────────────────────────────*/}
       <section className="relative pt-20 pb-0 overflow-hidden">
         <div className="absolute inset-0 bg-dub-grid mask-fade-top" />
+        <div className="absolute inset-0 bg-dots opacity-[0.015]" />
         {/* Subtle hero auras */}
-        <div className="absolute top-20 left-1/4 w-[350px] h-[350px] rounded-full bg-primary/4 blur-[100px] pointer-events-none" />
-        <div className="absolute top-32 right-1/4 w-[300px] h-[300px] rounded-full bg-amber-500/4 blur-[90px] pointer-events-none" />
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-gradient-radial from-primary/5 to-transparent blur-[120px] pointer-events-none" />
+        <div className="absolute top-20 left-1/4 w-[350px] h-[350px] rounded-full bg-primary/6 blur-[100px] pointer-events-none" />
+        <div className="absolute top-32 right-1/4 w-[300px] h-[300px] rounded-full bg-amber-500/6 blur-[90px] pointer-events-none" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-gradient-radial from-primary/8 to-transparent blur-[120px] pointer-events-none" />
 
         <div className="relative z-10 max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <Reveal>
@@ -505,32 +506,32 @@ export default function LandingPage() {
                 label: 'Afiliados activos',
                 sub: 'en toda Latinoamérica',
                 icon: Users,
-                color: 'text-primary',
-                iconBg: 'bg-primary/10',
+                color: 'text-white',
+                iconBg: 'icon-brand rounded-xl',
               },
               {
                 value: !platformStats.loaded ? '—' : platformStats.totalProducts > 0 ? `${fmtNumber(platformStats.totalProducts)}+` : '0',
                 label: 'Productos en catálogo',
                 sub: 'con comisiones automáticas',
                 icon: ShoppingBag,
-                color: 'text-blue-600 dark:text-blue-400',
-                iconBg: 'bg-blue-500/10',
+                color: 'text-white',
+                iconBg: 'icon-blue rounded-xl',
               },
               {
                 value: ranks.filter(r => r.is_active !== false).length > 0 ? `${ranks.filter(r => r.is_active !== false).length}` : '—',
                 label: 'Rangos disponibles',
                 sub: 'con bonos progresivos',
                 icon: Award,
-                color: 'text-amber-600 dark:text-amber-400',
-                iconBg: 'bg-amber-500/10',
+                color: 'text-white',
+                iconBg: 'icon-amber rounded-xl',
               },
               {
                 value: plans.length > 0 ? `${plans.length}` : '—',
                 label: 'Planes flexibles',
                 sub: 'desde gratis hasta elite',
                 icon: BarChart3,
-                color: 'text-emerald-600 dark:text-emerald-400',
-                iconBg: 'bg-emerald-500/10',
+                color: 'text-white',
+                iconBg: 'icon-emerald rounded-xl',
               },
             ].map((stat, i) => (
               <Reveal key={stat.label} delay={i * 60}>
@@ -578,8 +579,8 @@ export default function LandingPage() {
               <div className="h-full bg-card/70 border border-border/50 rounded-2xl p-5 sm:p-7 card-lift hover:border-emerald-500/20 group backdrop-blur-sm overflow-hidden">
                 <div className="flex items-start justify-between gap-4 mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
-                      <Wallet className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                    <div className="w-10 h-10 rounded-xl icon-emerald flex items-center justify-center shrink-0">
+                      <Wallet className="w-5 h-5 text-white" />
                     </div>
                     <h3 className="text-base sm:text-lg font-bold text-foreground">Comisiones automáticas</h3>
                   </div>
@@ -609,8 +610,8 @@ export default function LandingPage() {
             <Reveal>
               <div className="h-full bg-card/70 border border-border/50 rounded-2xl p-5 sm:p-7 card-lift hover:border-primary/20 group backdrop-blur-sm flex flex-col">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                    <Network className="w-5 h-5 text-primary" />
+                  <div className="w-10 h-10 rounded-xl icon-brand flex items-center justify-center shrink-0">
+                    <Network className="w-5 h-5 text-white" />
                   </div>
                   <h3 className="text-base sm:text-lg font-bold text-foreground">Red genealógica</h3>
                 </div>
@@ -640,8 +641,8 @@ export default function LandingPage() {
             <Reveal>
               <div className="h-full bg-card/70 border border-border/50 rounded-2xl p-5 sm:p-7 card-lift hover:border-amber-500/20 group backdrop-blur-sm flex flex-col">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0">
-                    <Award className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                  <div className="w-10 h-10 rounded-xl icon-amber flex items-center justify-center shrink-0">
+                    <Award className="w-5 h-5 text-white" />
                   </div>
                   <h3 className="text-base sm:text-lg font-bold text-foreground">Sistema de rangos</h3>
                 </div>
@@ -671,8 +672,8 @@ export default function LandingPage() {
                 <div className="flex-1 flex flex-col min-w-0">
                   <div className="flex items-center justify-between gap-3 mb-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center shrink-0">
-                        <ShoppingBag className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                      <div className="w-10 h-10 rounded-xl icon-blue flex items-center justify-center shrink-0">
+                        <ShoppingBag className="w-5 h-5 text-white" />
                       </div>
                       <h3 className="text-base sm:text-lg font-bold text-foreground">Tienda integrada</h3>
                     </div>
@@ -716,7 +717,7 @@ export default function LandingPage() {
       <SectionDivider />
 
       {/* ── DARK PROMO ────────────────────────────────────────────────────────*/}
-      <section className="relative py-20 sm:py-28 lg:py-32 overflow-hidden bg-zinc-950 dark:bg-[#0c0a07]">
+      <section className="relative py-20 sm:py-28 lg:py-32 overflow-hidden section-dark">
         {/* Fade top/bottom only in dark mode — in light mode they create ugly white bands */}
         <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-background to-transparent z-10 pointer-events-none hidden dark:block" />
         <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent z-10 pointer-events-none hidden dark:block" />
@@ -729,15 +730,15 @@ export default function LandingPage() {
         <div className="relative max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-10 sm:gap-12 lg:gap-16 items-center">
             <Reveal>
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 border border-white/20 rounded-full text-xs font-medium text-white/70 mb-5 sm:mb-6 backdrop-blur-sm">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-muted/50 border border-border/60 rounded-full text-xs font-medium text-muted-foreground dark:bg-white/10 dark:border-white/20 dark:text-white/70 mb-5 sm:mb-6 backdrop-blur-sm">
                 <Sparkles className="w-3.5 h-3.5 text-primary" />
                 Sistema multinivel inteligente
               </div>
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-[1.08] mb-4 sm:mb-5 tracking-tight">
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground dark:text-white leading-[1.08] mb-4 sm:mb-5 tracking-tight">
                 Potencia tu negocio<br />
                 <span className="text-gradient-animated">al máximo nivel</span>
               </h2>
-              <p className="text-sm sm:text-base lg:text-lg text-white/60 leading-relaxed mb-7 sm:mb-8 max-w-lg">
+              <p className="text-sm sm:text-base lg:text-lg text-muted-foreground dark:text-white/60 leading-relaxed mb-7 sm:mb-8 max-w-lg">
                 Mientras duermes, el sistema calcula y distribuye comisiones a toda tu red. Sin errores, sin retrasos.
               </p>
               <div className="flex flex-col sm:flex-row gap-3">
@@ -749,15 +750,15 @@ export default function LandingPage() {
                 </Link>
                 <Link
                   to="/contacto"
-                  className="inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-3.5 bg-white/10 border border-white/20 text-white font-medium rounded-xl hover:bg-white/15 transition-all backdrop-blur-sm text-base"
+                  className="inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-3.5 bg-muted/50 border border-border/60 text-foreground dark:bg-white/10 dark:border-white/20 dark:text-white font-medium rounded-xl hover:bg-muted/60 dark:hover:bg-white/15 transition-all backdrop-blur-sm text-base"
                 >
                   Hablar con ventas
                 </Link>
               </div>
               <div className="flex flex-wrap gap-x-5 gap-y-2 mt-4">
                 {['Sin tarjeta de crédito', 'Sin permanencia', 'Pago quincenal'].map(t => (
-                  <span key={t} className="flex items-center gap-1.5 text-xs text-white/40">
-                    <Check className="w-3 h-3 text-white/30" /> {t}
+                  <span key={t} className="flex items-center gap-1.5 text-xs text-muted-foreground/70 dark:text-white/40">
+                    <Check className="w-3 h-3 text-muted-foreground/50 dark:text-white/30" /> {t}
                   </span>
                 ))}
               </div>
@@ -766,19 +767,19 @@ export default function LandingPage() {
             <Reveal delay={100}>
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { icon: DollarSign, title: 'Comisiones en tiempo real', desc: 'Calculadas al instante en cada compra de tu red.', iconCls: 'text-emerald-400', iconBg: 'bg-emerald-500/20', cardBg: 'bg-emerald-500/6 hover:bg-emerald-500/10 border-emerald-500/15' },
-                  { icon: Zap, title: 'Pago automático', desc: 'Transferencias quincenales sin trámite de tu parte.', iconCls: 'text-amber-400', iconBg: 'bg-amber-500/20', cardBg: 'bg-amber-500/6 hover:bg-amber-500/10 border-amber-500/15' },
-                  { icon: Globe, title: 'Red internacional', desc: 'Tus afiliados pueden estar en toda Latinoamérica.', iconCls: 'text-sky-400', iconBg: 'bg-sky-500/20', cardBg: 'bg-sky-500/6 hover:bg-sky-500/10 border-sky-500/15' },
-                  { icon: TrendingUp, title: 'Crecimiento probado', desc: '+340% anual. Números reales, no promesas.', iconCls: 'text-rose-400', iconBg: 'bg-rose-500/20', cardBg: 'bg-rose-500/6 hover:bg-rose-500/10 border-rose-500/15' },
+                  { icon: DollarSign, title: 'Comisiones en tiempo real', desc: 'Calculadas al instante en cada compra de tu red.', iconCls: 'text-white', iconBg: 'icon-emerald', cardBg: 'bg-emerald-500/8 hover:bg-emerald-500/12 border border-emerald-500/20 dark:bg-emerald-500/6 dark:hover:bg-emerald-500/10 dark:border-emerald-500/15' },
+                  { icon: Zap, title: 'Pago automático', desc: 'Transferencias quincenales sin trámite de tu parte.', iconCls: 'text-white', iconBg: 'icon-amber', cardBg: 'bg-amber-500/8 hover:bg-amber-500/12 border border-amber-500/20 dark:bg-amber-500/6 dark:hover:bg-amber-500/10 dark:border-amber-500/15' },
+                  { icon: Globe, title: 'Red internacional', desc: 'Tus afiliados pueden estar en toda Latinoamérica.', iconCls: 'text-white', iconBg: 'icon-sky', cardBg: 'bg-sky-500/8 hover:bg-sky-500/12 border border-sky-500/20 dark:bg-sky-500/6 dark:hover:bg-sky-500/10 dark:border-sky-500/15' },
+                  { icon: TrendingUp, title: 'Crecimiento probado', desc: '+340% anual. Números reales, no promesas.', iconCls: 'text-white', iconBg: 'icon-rose', cardBg: 'bg-rose-500/8 hover:bg-rose-500/12 border border-rose-500/20 dark:bg-rose-500/6 dark:hover:bg-rose-500/10 dark:border-rose-500/15' },
                 ].map((item, i) => {
                   const Icon = item.icon;
                   return (
-                    <div key={i} className={cn('rounded-2xl p-4 sm:p-5 transition-all backdrop-blur-sm border border-white/10', item.cardBg)}>
+                    <div key={i} className={cn('rounded-2xl p-4 sm:p-5 transition-all backdrop-blur-sm border', item.cardBg)}>
                       <div className={cn('w-9 h-9 rounded-xl flex items-center justify-center mb-3', item.iconBg)}>
                         <Icon className={cn('w-5 h-5', item.iconCls)} />
                       </div>
-                      <div className="text-xs sm:text-sm font-semibold text-white mb-1 sm:mb-1.5">{item.title}</div>
-                      <div className="text-xs text-white/50 leading-relaxed">{item.desc}</div>
+                      <div className="text-xs sm:text-sm font-semibold text-foreground dark:text-white mb-1 sm:mb-1.5">{item.title}</div>
+                      <div className="text-xs text-muted-foreground dark:text-white/50 leading-relaxed">{item.desc}</div>
                     </div>
                   );
                 })}
@@ -1159,7 +1160,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── CTA ───────────────────────────────────────────────────────────────*/}
-      <section className="relative py-20 sm:py-28 lg:py-36 overflow-hidden bg-zinc-950 dark:bg-[#0b0905]">
+      <section className="relative py-20 sm:py-28 lg:py-36 overflow-hidden section-dark">
         {/* Seamless fade — mirrors the dark promo section */}
         <div className="absolute top-0 left-0 right-0 h-24 sm:h-32 bg-gradient-to-b from-background to-transparent z-20 pointer-events-none" />
         <div className="absolute bottom-0 left-0 right-0 h-24 sm:h-32 bg-gradient-to-t from-background to-transparent z-20 pointer-events-none" />
@@ -1171,36 +1172,36 @@ export default function LandingPage() {
 
         <div className="relative z-10 max-w-[700px] mx-auto px-4 sm:px-6 text-center">
           <Reveal>
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/8 border border-white/10 rounded-full text-xs font-medium text-white/60 mb-6 sm:mb-8 backdrop-blur-sm">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-muted/50 border border-border/60 rounded-full text-xs font-medium text-muted-foreground dark:bg-white/8 dark:border-white/10 dark:text-white/60 mb-6 sm:mb-8 backdrop-blur-sm">
               <Zap className="w-3.5 h-3.5 text-primary" />
               Sin tarjeta de crédito
             </div>
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-white mb-3 sm:mb-4 leading-[1.05] tracking-tight">
+            <h2 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-foreground dark:text-white mb-3 sm:mb-4 leading-[1.05] tracking-tight">
               Tu red no espera.
             </h2>
             <p className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-5 text-gradient-animated">
               Empieza hoy mismo.
             </p>
-            <p className="text-sm sm:text-base lg:text-lg text-white/45 max-w-md sm:max-w-lg mx-auto mb-10 sm:mb-12 leading-relaxed">
+            <p className="text-sm sm:text-base lg:text-lg text-muted-foreground dark:text-white/45 max-w-md sm:max-w-lg mx-auto mb-10 sm:mb-12 leading-relaxed">
               Unete a miles de emprendedores que ya construyen libertad financiera con Cluv 360.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-10 sm:mb-12">
               <Link
                 to={user ? '/dashboard' : '/registro'}
-                className="btn-gold-shimmer w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 sm:px-9 py-4 bg-white text-zinc-900 font-semibold rounded-xl hover:opacity-90 active:scale-[0.98] transition-all shadow-2xl shadow-white/10 text-base"
+                className="btn-gold-shimmer w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 sm:px-9 py-4 bg-foreground text-background font-semibold rounded-xl hover:opacity-90 active:scale-[0.98] transition-all shadow-2xl shadow-white/10 text-base"
               >
                 {user ? 'Ir a mi Panel' : 'Crear cuenta gratis'} <ArrowRight className="w-5 h-5" />
               </Link>
               <Link
                 to="/contacto"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 sm:px-9 py-4 bg-white/5 border border-white/12 text-white font-medium rounded-xl hover:bg-white/10 transition-all text-base backdrop-blur-sm"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 sm:px-9 py-4 bg-muted/50 border border-border/60 text-foreground dark:bg-white/5 dark:border-white/12 dark:text-white font-medium rounded-xl hover:bg-muted/60 dark:hover:bg-white/10 transition-all text-base backdrop-blur-sm"
               >
                 Hablar con ventas
               </Link>
             </div>
-            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 lg:gap-8 text-xs sm:text-sm text-white/35">
+            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 lg:gap-8 text-xs sm:text-sm text-muted-foreground/60 dark:text-white/35">
               {['Cuenta gratuita', 'Sin permanencia', 'Pago quincenal', 'Soporte 24/7'].map(t => (
-                <span key={t} className="flex items-center gap-1.5 sm:gap-2"><Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white/45" /> {t}</span>
+                <span key={t} className="flex items-center gap-1.5 sm:gap-2"><Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground/80 dark:text-white/45" /> {t}</span>
               ))}
             </div>
           </Reveal>

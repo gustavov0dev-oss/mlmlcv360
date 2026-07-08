@@ -7,17 +7,29 @@ export function useReveal<T extends HTMLElement = HTMLDivElement>() {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+
+    // Use requestAnimationFrame to batch observations
+    let rafId: number;
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setRevealed(true);
+          rafId = requestAnimationFrame(() => {
+            setRevealed(true);
+          });
           observer.disconnect();
         }
       },
-      { threshold: 0.12, rootMargin: '0px 0px -60px 0px' },
+      {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px',
+      },
     );
     observer.observe(el);
-    return () => observer.disconnect();
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      observer.disconnect();
+    };
   }, []);
 
   return { ref, revealed };

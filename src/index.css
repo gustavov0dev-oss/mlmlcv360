@@ -689,6 +689,9 @@ body {
     transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
     box-shadow 0.25s ease,
     border-color 0.2s ease;
+  /* GPU acceleration for smoother interactions */
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 .card-lift:hover {
@@ -696,6 +699,24 @@ body {
   box-shadow:
     0 12px 40px -12px hsl(var(--primary) / 0.2),
     0 0 0 1px hsl(var(--primary) / 0.1);
+  will-change: auto;
+}
+
+/* Disable hover effects on touch devices to prevent scroll jank */
+@media (hover: none) and (pointer: coarse) {
+  .card-lift {
+    transition: none;
+    will-change: auto;
+  }
+
+  .card-lift:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .card-lift:active {
+    transform: scale(0.98);
+  }
 }
 
 .card-glow {
@@ -803,11 +824,15 @@ body {
   transition:
     opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
     transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  /* GPU acceleration for smoother animations */
+  will-change: opacity, transform;
+  backface-visibility: hidden;
 }
 
 .reveal.revealed {
   opacity: 1;
   transform: translateY(0);
+  will-change: auto;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
@@ -988,5 +1013,89 @@ body {
 @layer utilities {
   .bg-gradient-radial {
     background-image: radial-gradient(circle, var(--tw-gradient-stops));
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   INPUT AUTOFILL OVERRIDE — Prevent browser blue/yellow autofill flash
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px hsl(var(--muted)) inset !important;
+  -webkit-text-fill-color: hsl(var(--foreground)) !important;
+  caret-color: hsl(var(--foreground)) !important;
+  border-color: hsl(var(--border)) !important;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+/* Input focus ring — use brand color, not browser blue */
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none !important;
+}
+
+/* Remove default browser focus ring on buttons */
+button:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   SECTION DARK — Theme-aware "dark" promotional sections
+   In light mode: uses card background (clean/white)
+   In dark mode: deep near-black
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.section-dark {
+  background-color: hsl(var(--card));
+  border-top: 1px solid hsl(var(--border) / 0.4);
+  border-bottom: 1px solid hsl(var(--border) / 0.4);
+}
+
+.dark .section-dark {
+  background-color: hsl(0 0% 4%);
+  border-color: transparent;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   ICON CONTAINERS — Modern solid app-icon style
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.icon-blue    { background-color: #2563eb; color: #fff; }
+.icon-emerald { background-color: #059669; color: #fff; }
+.icon-amber   { background-color: #d97706; color: #fff; }
+.icon-rose    { background-color: #e11d48; color: #fff; }
+.icon-sky     { background-color: #0284c7; color: #fff; }
+.icon-brand   { background-color: hsl(var(--primary)); color: hsl(var(--primary-foreground)); }
+.icon-muted   { background-color: hsl(var(--muted)); color: hsl(var(--muted-foreground)); }
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   MOBILE REVEAL — Lighter animation to prevent jank on low-end devices
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 767px) {
+  .reveal {
+    opacity: 0;
+    transform: translateY(8px);  /* Reduced for mobile performance */
+    transition:
+      opacity 0.4s ease-out,
+      transform 0.4s ease-out;
+    will-change: opacity, transform;
+  }
+
+  .reveal.revealed {
+    opacity: 1;
+    transform: translateY(0);
+    will-change: auto;
   }
 }

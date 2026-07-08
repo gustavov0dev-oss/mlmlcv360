@@ -189,24 +189,18 @@ export default function Navbar() {
   const isDark = theme === 'dark';
   const isLoggedIn = !!user;
 
-  // Lock scroll without jumping to top
+  // Simple scroll lock - no position:fixed to avoid jelly scroll
   useEffect(() => {
     if (mobileNavOpen) {
-      const scrollY = window.scrollY;
-      document.body.style.position = 'fixed';
-      document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+      document.body.style.overscrollBehavior = 'contain';
     } else {
-      const top = Math.abs(parseInt(document.body.style.top || '0', 10));
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
-      if (top) window.scrollTo(0, top);
+      document.body.style.overflow = '';
+      document.body.style.overscrollBehavior = '';
     }
     return () => {
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
+      document.body.style.overflow = '';
+      document.body.style.overscrollBehavior = '';
     };
   }, [mobileNavOpen]);
 
@@ -334,10 +328,11 @@ export default function Navbar() {
       <div
         role="dialog"
         aria-modal="true"
+        aria-hidden={!mobileNavOpen}
         className={cn(
-          'fixed top-16 left-0 right-0 bottom-0 z-[55] lg:hidden pointer-events-none',
+          'fixed top-16 left-0 right-0 bottom-0 z-[55] lg:hidden',
+          mobileNavOpen ? 'pointer-events-auto' : 'pointer-events-none',
         )}
-
       >
         {/* Backdrop — moderate blur */}
         <div
@@ -351,10 +346,11 @@ export default function Navbar() {
         {/* Bottom-sheet panel — rises from bottom, not full height */}
         <div
           className={cn(
-            'absolute bottom-0 left-0 right-0 bg-background rounded-t-3xl border-t border-border shadow-2xl pointer-events-auto',
-            'transition-transform duration-300 ease-out',
+            'absolute bottom-0 left-0 right-0 bg-background rounded-t-3xl border-t border-border shadow-2xl',
+            'transition-transform duration-300 ease-out touch-pan-y overscroll-contain',
             mobileNavOpen ? 'translate-y-0' : 'translate-y-full',
           )}
+          onTouchMove={(e) => e.stopPropagation()}
         >
           {/* Handle bar */}
           <div className="flex justify-center pt-3 pb-1">
