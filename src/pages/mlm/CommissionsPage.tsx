@@ -1,6 +1,9 @@
 import { useAuthStore } from '@/store/authStore';
-import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
-import { DollarSign, Clock, CircleCheck as CheckCircle, Download, Circle as XCircle } from 'lucide-react';
+import {
+  AreaChart, Area, BarChart, Bar, ResponsiveContainer, XAxis, YAxis,
+  CartesianGrid, Tooltip,
+} from 'recharts';
+import { DollarSign, Clock, CircleCheck as CheckCircle, Download, Circle as XCircle, TrendingUp, TrendingDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useCommissions, useCommissionsPagination, TYPE_LABELS } from '@/modules/mlm';
@@ -10,13 +13,15 @@ import { Skeleton } from '@/components/ui/skeleton';
 function CustomTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-card border border-border rounded-lg px-3 py-2 shadow-lg text-xs">
-      <div className="font-semibold text-foreground mb-1">{label}</div>
-      <div className="flex items-center gap-2">
-        <div className="w-2 h-2 rounded-full bg-primary" />
-        <span className="text-muted-foreground">Comisiones:</span>
-        <span className="font-semibold text-foreground">S/ {Number(payload[0].value).toLocaleString()}</span>
-      </div>
+    <div className="bg-card/95 border border-border/80 rounded-xl px-3.5 py-2.5 shadow-xl backdrop-blur-sm text-xs">
+      <div className="font-semibold text-foreground/70 mb-1.5">{label}</div>
+      {payload.map((p: any, i: number) => (
+        <div key={i} className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} />
+          <span className="text-muted-foreground">{p.name}:</span>
+          <span className="font-bold text-foreground">S/ {Number(p.value).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span>
+        </div>
+      ))}
     </div>
   );
 }
@@ -134,24 +139,113 @@ export default function CommissionsPage() {
         ))}
       </div>
 
-      {/* Chart */}
-      <div className="bg-card border border-border rounded-xl p-4 sm:p-5">
-        <h3 className="text-sm font-semibold text-foreground mb-4">Evolución de comisiones</h3>
-        <ResponsiveContainer width="100%" height={220}>
-          <AreaChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
-            <defs>
-              <linearGradient id="colorComm" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#1d4ed8" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="#1d4ed8" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
-            <XAxis dataKey="name" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
-            <Tooltip content={<CustomTooltip />} />
-            <Area type="monotone" dataKey="comisiones" name="Comisiones" stroke="#1d4ed8" strokeWidth={2} fill="url(#colorComm)" />
-          </AreaChart>
-        </ResponsiveContainer>
+      {/* Chart — 12 semanas */}
+      <div className="bg-card border border-border rounded-2xl p-5 sm:p-6 overflow-hidden">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-5">
+          <div>
+            <h3 className="text-base font-bold text-foreground">Comisiones — 12 semanas</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">Evolución semanal de tus ingresos por comisiones</p>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="text-right">
+              <div className="text-2xl font-black text-foreground tabular-nums">
+                S/ {chartData.length > 0
+                  ? chartData.reduce((s: number, d: any) => s + (d.comisiones || 0), 0).toLocaleString('es-PE', { minimumFractionDigits: 0 })
+                  : '0'}
+              </div>
+              <div className="text-xs text-muted-foreground">Total acumulado</div>
+            </div>
+            <div className="text-right">
+              <div className="flex items-center gap-1 justify-end">
+                {(() => {
+                  const arr = chartData.map((d: any) => d.comisiones || 0);
+                  if (arr.length < 2) return <span className="text-sm font-semibold text-muted-foreground">—</span>;
+                  const last = arr[arr.length - 1];
+                  const prev = arr[arr.length - 2];
+                  const diff = last - prev;
+                  const pct = prev > 0 ? Math.round((diff / prev) * 100) : 0;
+                  const up = diff >= 0;
+                  return (
+                    <>
+                      <span className={cn('text-sm font-bold flex items-center gap-0.5', up ? 'text-emerald-500' : 'text-rose-500')}>
+                        {up ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
+                        {up ? '+' : ''}{pct}%
+                      </span>
+                    </>
+                  );
+                })()}
+              </div>
+              <div className="text-xs text-muted-foreground">vs. semana anterior</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Dual chart: area trend + bar weekly */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-4">
+          {/* Area chart */}
+          <div className="relative">
+            <ResponsiveContainer width="100%" height={240}>
+              <AreaChart data={chartData} margin={{ top: 5, right: 8, left: -16, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="gradComm" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.35} />
+                    <stop offset="60%" stopColor="#3b82f6" stopOpacity={0.08} />
+                    <stop offset="100%" stopColor="#3b82f6" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="gradLine" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor="#3b82f6" />
+                    <stop offset="100%" stopColor="#6366f1" />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.25} vertical={false} />
+                <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
+                <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} width={40} />
+                <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'hsl(var(--border))', strokeWidth: 1, strokeDasharray: '4 4' }} />
+                <Area type="monotone" dataKey="comisiones" name="Comisiones" stroke="url(#gradLine)" strokeWidth={2.5} fill="url(#gradComm)" dot={{ r: 3, fill: '#3b82f6', strokeWidth: 0 }} activeDot={{ r: 5, fill: '#3b82f6', stroke: 'hsl(var(--background))', strokeWidth: 2 }} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Bar chart — weekly breakdown */}
+          <div className="relative">
+            <div className="text-xs font-semibold text-muted-foreground mb-2 px-1">Desglose semanal</div>
+            <ResponsiveContainer width="100%" height={240}>
+              <BarChart data={chartData} margin={{ top: 5, right: 8, left: -16, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="gradBar" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#6366f1" stopOpacity={0.9} />
+                    <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.5} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.25} vertical={false} />
+                <XAxis dataKey="name" tick={{ fontSize: 9, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} interval={0} />
+                <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} width={40} />
+                <Tooltip content={<CustomTooltip />} cursor={{ fill: 'hsl(var(--muted))', opacity: 0.3 }} />
+                <Bar dataKey="comisiones" name="Comisiones" fill="url(#gradBar)" radius={[4, 4, 0, 0]} maxBarSize={28} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Mini stats row */}
+        <div className="grid grid-cols-3 gap-3 mt-5 pt-5 border-t border-border/50">
+          {(() => {
+            const arr = chartData.map((d: any) => d.comisiones || 0);
+            const max = arr.length > 0 ? Math.max(...arr) : 0;
+            const avg = arr.length > 0 ? arr.reduce((a: number, b: number) => a + b, 0) / arr.length : 0;
+            const last = arr.length > 0 ? arr[arr.length - 1] : 0;
+            return [
+              { label: 'Mejor semana', value: `S/ ${max.toLocaleString('es-PE', { minimumFractionDigits: 0 })}`, accent: 'text-emerald-500' },
+              { label: 'Promedio semanal', value: `S/ ${avg.toLocaleString('es-PE', { minimumFractionDigits: 0 })}`, accent: 'text-blue-500' },
+              { label: 'Última semana', value: `S/ ${last.toLocaleString('es-PE', { minimumFractionDigits: 0 })}`, accent: 'text-foreground' },
+            ];
+          })().map(s => (
+            <div key={s.label} className="text-center sm:text-left">
+              <div className={cn('text-sm sm:text-base font-bold tabular-nums', s.accent)}>{s.value}</div>
+              <div className="text-[11px] text-muted-foreground mt-0.5">{s.label}</div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Filters */}

@@ -300,7 +300,7 @@ function AppMockup() {
         </div>
       </div>
 
-      {/* Floating notification cards */}
+      {/* Floating notification card */}
       <div className="absolute -top-4 sm:-top-5 -right-1 sm:-right-7 bg-card/90 border border-primary/20 rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2.5 shadow-xl shadow-primary/5 backdrop-blur-sm pointer-events-none">
         <div className="flex items-center gap-2 sm:gap-2.5">
           <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -309,18 +309,6 @@ function AppMockup() {
           <div>
             <div className="text-[10px] text-muted-foreground leading-tight">Comisión acreditada</div>
             <div className="text-sm font-bold text-primary">+S/ 320.50</div>
-          </div>
-        </div>
-      </div>
-
-      <div className="absolute -bottom-4 sm:-bottom-5 -left-1 sm:-left-7 bg-card/90 border border-border/60 rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2.5 shadow-xl shadow-black/5 backdrop-blur-sm pointer-events-none">
-        <div className="flex items-center gap-2 sm:gap-2.5">
-          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
-            <Award className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500" />
-          </div>
-          <div>
-            <div className="text-[10px] text-muted-foreground leading-tight">Nuevo rango</div>
-            <div className="text-sm font-bold text-amber-500 dark:text-amber-400">Diamante alcanzado</div>
           </div>
         </div>
       </div>
@@ -527,11 +515,11 @@ export default function LandingPage() {
               },
             ].map((stat) => (
               <div key={stat.label} className="relative text-center sm:px-6 lg:px-10 py-6 sm:py-4 overflow-hidden group">
-                {/* Large icon as decorative background */}
+                {/* Large icon as decorative background — ultra-faded */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden>
-                  <stat.icon className="w-28 h-28 opacity-[0.04] text-foreground" />
+                  <stat.icon className="w-32 h-32 opacity-[0.025] text-foreground" />
                 </div>
-                <div className={cn('w-11 h-11 rounded-2xl flex items-center justify-center mx-auto mb-3', stat.iconClass)}>
+                <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3 opacity-80', stat.iconClass)}>
                   <stat.icon className="w-5 h-5" />
                 </div>
                 <div className="text-3xl sm:text-4xl font-black text-foreground tracking-tight tabular-nums">{stat.value}</div>
@@ -1086,18 +1074,22 @@ export default function LandingPage() {
         <div className="absolute inset-0 bg-grid opacity-[0.2] mask-fade-center pointer-events-none" />
         <div className="relative max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
-          <div className="text-center mb-10 sm:mb-14">
+          <div className="mb-10 sm:mb-14">
             <span className="text-xs font-semibold text-primary uppercase tracking-widest mb-3 block">FAQ</span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight mb-4">
-              Preguntas <span className="text-gradient-animated">frecuentes</span>
-            </h2>
-            <p className="text-muted-foreground/70 text-sm sm:text-base max-w-md mx-auto mb-5">
-              Todo lo que necesitas saber. Si tienes más preguntas, estamos disponibles 24/7.
-            </p>
-            <Link to="/contacto" className="inline-flex items-center gap-2 px-5 py-2.5 border border-border/60 bg-background/60 backdrop-blur-sm rounded-xl text-sm font-medium hover:border-primary/40 hover:text-primary transition-all group">
-              Contactar soporte
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-            </Link>
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-5">
+              <div>
+                <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight mb-3">
+                  Preguntas <span className="text-gradient-animated">frecuentes</span>
+                </h2>
+                <p className="text-muted-foreground/70 text-sm sm:text-base max-w-md">
+                  Todo lo que necesitas saber. Si tienes más preguntas, estamos disponibles 24/7.
+                </p>
+              </div>
+              <Link to="/contacto" className="inline-flex items-center gap-2 px-5 py-2.5 border border-border/60 bg-background/60 backdrop-blur-sm rounded-xl text-sm font-medium hover:border-primary/40 hover:text-primary transition-all group shrink-0">
+                Contactar soporte
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              </Link>
+            </div>
           </div>
 
           {faqItems.length === 0 ? (
