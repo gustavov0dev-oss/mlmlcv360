@@ -2,85 +2,111 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─────────────────────────────────────────────
+   LIGHT MODE — warm neutral, WCAG-AA verified
+   ───────────────────────────────────────────── */
 :root {
-  --background: 0 0% 100%;
-  --foreground: 220 20% 6%;
-  --card: 0 0% 100%;
-  --card-foreground: 220 20% 6%;
+  /* Surfaces */
+  --background: 36 25% 98%;       /* Warm off-white — softer than pure white   */
+  --foreground: 222 20% 9%;       /* Deep blue-gray near-black — high contrast  */
+  --card: 0 0% 100%;              /* Pure white for elevated cards              */
+  --card-foreground: 222 20% 9%;
   --popover: 0 0% 100%;
-  --popover-foreground: 220 20% 6%;
-  --primary: 38 86% 40%;
+  --popover-foreground: 222 20% 9%;
+
+  /* Brand */
+  --primary: 38 86% 36%;          /* Gold — 4.2:1 on white (AA for large text)  */
   --primary-foreground: 0 0% 100%;
-  --secondary: 38 15% 95%;
-  --secondary-foreground: 38 20% 18%;
-  --muted: 38 10% 95%;
-  --muted-foreground: 38 8% 46%;
-  --accent: 43 96% 90%;
-  --accent-foreground: 38 86% 28%;
-  --destructive: 0 84% 60%;
+
+  /* Supporting surfaces */
+  --secondary: 36 20% 95%;        /* Warm light surface                         */
+  --secondary-foreground: 222 15% 20%;
+  --muted: 36 18% 94%;            /* Subtle warm muted bg                       */
+  --muted-foreground: 222 12% 42%;/* 5.6:1 on background — WCAG AA ✓            */
+  --accent: 43 85% 92%;           /* Light gold accent wash                     */
+  --accent-foreground: 38 80% 30%;
+
+  /* Semantic */
+  --destructive: 0 72% 47%;       /* Red — 4.5:1 on white — WCAG AA ✓           */
   --destructive-foreground: 0 0% 100%;
-  --border: 38 10% 88%;
-  --input: 38 10% 88%;
-  --ring: 38 86% 40%;
+
+  /* Structure */
+  --border: 36 15% 88%;           /* Warm visible border                        */
+  --input: 36 15% 88%;
+  --ring: 38 86% 36%;
   --radius: 0.625rem;
 
-  /* Club 360 gold brand */
-  --brand-50: 43 100% 97%;
+  /* Gold brand ramp */
+  --brand-50:  43 100% 97%;
   --brand-100: 43 100% 92%;
-  --brand-200: 43 96% 82%;
-  --brand-300: 43 90% 68%;
-  --brand-400: 40 88% 52%;
-  --brand-500: 38 86% 40%;
-  --brand-600: 36 88% 34%;
-  --brand-700: 34 88% 28%;
-  --brand-800: 32 82% 22%;
-  --brand-900: 30 75% 16%;
+  --brand-200: 43 95%  82%;
+  --brand-300: 43 88%  68%;
+  --brand-400: 40 86%  52%;
+  --brand-500: 38 86%  36%;
+  --brand-600: 36 87%  30%;
+  --brand-700: 34 86%  24%;
+  --brand-800: 32 80%  18%;
+  --brand-900: 30 74%  13%;
 
-  /* Chart colors */
-  --chart-1: 38 86% 40%;
-  --chart-2: 158 64% 42%;
-  --chart-3: 213 94% 48%;
-  --chart-4: 0 84% 60%;
-  --chart-5: 270 70% 55%;
+  /* Charts */
+  --chart-1: 38 86% 36%;
+  --chart-2: 158 60% 38%;
+  --chart-3: 210 90% 50%;
+  --chart-4: 0 72% 47%;
+  --chart-5: 262 60% 52%;
 }
 
+/* ─────────────────────────────────────────────
+   DARK MODE — deep blue-gray, WCAG-AA verified
+   ───────────────────────────────────────────── */
 .dark {
-  --background: 20 10% 5%;
-  --foreground: 40 20% 96%;
-  --card: 20 8% 8%;
-  --card-foreground: 40 20% 96%;
-  --popover: 20 8% 8%;
-  --popover-foreground: 40 20% 96%;
-  --primary: 43 95% 56%;
-  --primary-foreground: 20 10% 5%;
-  --secondary: 20 8% 12%;
-  --secondary-foreground: 40 15% 85%;
-  --muted: 20 8% 12%;
-  --muted-foreground: 40 10% 52%;
-  --accent: 38 40% 16%;
-  --accent-foreground: 43 96% 72%;
-  --destructive: 0 62% 40%;
+  /* Surfaces — cohesive with auth panel (#05101d feel) */
+  --background: 222 22% 7%;       /* Deep blue-gray premium dark                */
+  --foreground: 36 18% 93%;       /* Warm near-white — very readable            */
+  --card: 222 20% 10%;            /* Elevated surface layer                     */
+  --card-foreground: 36 18% 93%;
+  --popover: 222 20% 10%;
+  --popover-foreground: 36 18% 93%;
+
+  /* Brand */
+  --primary: 43 92% 54%;          /* Bright gold — 10:1 on dark bg ✓            */
+  --primary-foreground: 222 22% 7%;
+
+  /* Supporting surfaces */
+  --secondary: 222 16% 14%;       /* Dark elevated surface                      */
+  --secondary-foreground: 36 15% 78%;
+  --muted: 222 16% 14%;           /* Muted bg (same as secondary)               */
+  --muted-foreground: 36 12% 58%; /* 5.9:1 on card bg — WCAG AA ✓              */
+  --accent: 38 32% 16%;           /* Dark warm accent wash                      */
+  --accent-foreground: 43 88% 68%;
+
+  /* Semantic */
+  --destructive: 0 68% 56%;       /* Visible red — readable in dark             */
   --destructive-foreground: 0 0% 100%;
-  --border: 20 8% 15%;
-  --input: 20 8% 15%;
-  --ring: 43 95% 56%;
 
-  --brand-50: 38 30% 8%;
-  --brand-100: 38 35% 12%;
-  --brand-200: 38 50% 20%;
-  --brand-300: 38 70% 32%;
-  --brand-400: 40 80% 44%;
-  --brand-500: 43 95% 56%;
-  --brand-600: 43 96% 66%;
-  --brand-700: 43 96% 76%;
-  --brand-800: 43 96% 86%;
-  --brand-900: 43 96% 94%;
+  /* Structure */
+  --border: 222 16% 19%;          /* Subtle but crisp border                    */
+  --input: 222 16% 19%;
+  --ring: 43 92% 54%;
 
-  --chart-1: 43 95% 56%;
-  --chart-2: 158 64% 50%;
-  --chart-3: 213 94% 60%;
-  --chart-4: 0 84% 65%;
-  --chart-5: 270 70% 65%;
+  /* Gold brand ramp (inverted for dark) */
+  --brand-50:  222 20% 9%;
+  --brand-100: 222 18% 12%;
+  --brand-200: 38 30%  18%;
+  --brand-300: 38 55%  30%;
+  --brand-400: 40 78%  42%;
+  --brand-500: 43 92%  54%;
+  --brand-600: 43 94%  64%;
+  --brand-700: 43 96%  74%;
+  --brand-800: 43 96%  84%;
+  --brand-900: 43 96%  93%;
+
+  /* Charts */
+  --chart-1: 43 92% 54%;
+  --chart-2: 158 60% 48%;
+  --chart-3: 210 90% 60%;
+  --chart-4: 0 68% 56%;
+  --chart-5: 262 60% 62%;
 }
 
 @layer base {
@@ -155,7 +181,7 @@
   }
 
   .gradient-brand {
-    background: linear-gradient(135deg, hsl(213 94% 48%) 0%, hsl(213 94% 60%) 100%);
+    background: linear-gradient(135deg, hsl(38 86% 36%) 0%, hsl(43 92% 54%) 100%);
   }
 
   .gradient-dark {

@@ -14,16 +14,19 @@ const ThemeContext = createContext<ThemeContextType>({
 
 function applyTheme(theme: Theme, animate = false) {
   const root = document.documentElement;
+  const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
   if (animate) {
     root.classList.add('theme-transitioning');
-    setTimeout(() => root.classList.remove('theme-transitioning'), 220);
+    setTimeout(() => root.classList.remove('theme-transitioning'), 250);
   }
-  if (theme === 'dark') root.classList.add('dark');
-  else if (theme === 'light') root.classList.remove('dark');
-  else {
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    if (prefersDark) root.classList.add('dark');
-    else root.classList.remove('dark');
+
+  if (isDark) {
+    root.classList.add('dark');
+    root.style.colorScheme = 'dark';
+  } else {
+    root.classList.remove('dark');
+    root.style.colorScheme = 'light';
   }
 }
 
