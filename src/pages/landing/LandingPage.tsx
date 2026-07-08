@@ -1,7 +1,7 @@
 import { Link } from '@/lib/router';
 import Navbar from '@/components/landing/Navbar';
 import Footer from '@/components/landing/Footer';
-import { testimonials, faqItems } from '@/lib/mockData';
+import { faqItems } from '@/lib/mockData';
 import {
   ArrowRight, Check, Star, ChevronDown, Zap, Globe, Award, DollarSign,
   TrendingUp, Users, Lock, ShoppingBag, Bell, Network, CreditCard, Sparkles,
@@ -73,28 +73,31 @@ const paymentBrands = [
   { name: 'Niubiz', abbr: 'NB', color: '#004b93', bg: '#e3eef9' },
 ];
 
-// ─── extended testimonials ────────────────────────────────────────────────────
-const allTestimonials = [
-  ...testimonials,
-  {
-    id: '4', name: 'Sandra Palomino', role: 'Emprendedora', city: 'Trujillo',
-    avatar: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=80',
-    content: 'La automatización de comisiones me ahorró horas de trabajo. Ahora me enfoco en expandir mi red.',
-    rank: 'Platino', earnings: 'S/ 6,100/mes',
-  },
-  {
-    id: '5', name: 'Diego Ramírez', role: 'Profesional', city: 'Piura',
-    avatar: 'https://images.pexels.com/photos/1680172/pexels-photo-1680172.jpeg?auto=compress&cs=tinysrgb&w=80',
-    content: 'Escalé de Bronce a Platino en 4 meses. Los reportes me muestran exactamente qué necesita mi red.',
-    rank: 'Platino', earnings: 'S/ 5,500/mes',
-  },
-  {
-    id: '6', name: 'Luciana Flores', role: 'Comerciante', city: 'Ica',
-    avatar: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=80',
-    content: 'El soporte 24/7 es increíble. Tuve una duda un domingo y en 15 minutos tenía respuesta.',
-    rank: 'Oro', earnings: 'S/ 3,800/mes',
-  },
-];
+// ─── DB testimonials ─────────────────────────────────────────────────────────
+interface DBTestimonial {
+  id: string;
+  name: string;
+  role: string;
+  avatar_url: string;
+  content: string;
+  earnings: string;
+  rating: number;
+  is_active: boolean;
+  sort_order: number;
+}
+
+function useTestimonials() {
+  const [items, setItems] = useState<DBTestimonial[]>([]);
+  useEffect(() => {
+    supabase
+      .from('testimonials')
+      .select('*')
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true })
+      .then(({ data }) => { if (data) setItems(data); });
+  }, []);
+  return items;
+}
 
 function SectionDivider() {
   return <div className="section-divider mx-auto max-w-[1100px]" />;
@@ -317,37 +320,39 @@ function AppMockup() {
 }
 
 // ─── testimonial carousel ─────────────────────────────────────────────────────
-function TestimonialCard({ t }: { t: (typeof allTestimonials)[0] }) {
+function TestimonialCard({ t }: { t: DBTestimonial }) {
+  const avatarFallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(t.name)}&background=e2e8f0&color=64748b`;
   return (
     <div className="w-[280px] sm:w-[300px] shrink-0 bg-card/70 border border-border/60 rounded-2xl p-5 mx-2 backdrop-blur-sm">
       <div className="flex gap-0.5 mb-3">
-        {Array.from({ length: 5 }).map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />)}
+        {Array.from({ length: 5 }).map((_, i) => <Star key={i} className={cn('w-3.5 h-3.5', i < t.rating ? 'fill-amber-400 text-amber-400' : 'text-muted-foreground/20')} />)}
       </div>
       <p className="text-sm text-foreground/75 leading-relaxed mb-4">"{t.content}"</p>
       <div className="flex items-center gap-3 pt-3 border-t border-border/50">
-        <img src={t.avatar} alt={t.name} className="w-9 h-9 rounded-full object-cover ring-2 ring-primary/15" />
+        <img src={t.avatar_url || avatarFallback} alt={t.name} className="w-9 h-9 rounded-full object-cover ring-2 ring-primary/15" onError={e => { (e.target as HTMLImageElement).src = avatarFallback; }} />
         <div className="flex-1 min-w-0">
           <div className="text-sm font-semibold text-foreground leading-tight">{t.name}</div>
-          <div className="text-xs text-muted-foreground">{t.role}{(t as any).city ? `, ${(t as any).city}` : ''}</div>
+          <div className="text-xs text-muted-foreground">{t.role}</div>
         </div>
-        <div className="text-sm font-bold text-primary shrink-0">{t.earnings}</div>
+        {t.earnings && <div className="text-sm font-bold text-primary shrink-0">{t.earnings}</div>}
       </div>
     </div>
   );
 }
 
-function TestimonialsCarousel() {
-  const row1 = [...allTestimonials, ...allTestimonials];
-  const row2 = [...allTestimonials, ...allTestimonials].reverse();
+function TestimonialsCarousel({ items }: { items: DBTestimonial[] }) {
+  if (items.length === 0) return null;
+  const doubled1 = [...items, ...items, ...items];
+  const doubled2 = [...items, ...items, ...items].reverse();
   return (
     <div className="relative overflow-hidden">
       <div className="absolute left-0 top-0 bottom-0 w-12 sm:w-24 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
       <div className="absolute right-0 top-0 bottom-0 w-12 sm:w-24 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
       <div className="flex mb-3 animate-marquee-left">
-        {row1.map((t, i) => <TestimonialCard key={`r1-${i}`} t={t} />)}
+        {doubled1.map((t, i) => <TestimonialCard key={`r1-${i}`} t={t} />)}
       </div>
       <div className="flex animate-marquee-right">
-        {row2.map((t, i) => <TestimonialCard key={`r2-${i}`} t={t} />)}
+        {doubled2.map((t, i) => <TestimonialCard key={`r2-${i}`} t={t} />)}
       </div>
     </div>
   );
@@ -396,6 +401,7 @@ function useTopCategories() {
 export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const { plans: allPlans, ranks, currency, currencySymbol, exchangeRate } = useConfig();
+  const dbTestimonials = useTestimonials();
   const plans = allPlans.filter(p => p.is_active);
   const { user } = useAuthStore();
   const platformStats = usePlatformStats();
@@ -826,7 +832,7 @@ export default function LandingPage() {
 
             <div className="p-6 sm:p-8 flex flex-col justify-between border-b border-border/50 row-span-1 lg:row-span-2 bg-card/40 backdrop-blur-sm">
               <div className="flex gap-0.5 mb-4">{Array.from({ length: 5 }).map((_, i) => <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />)}</div>
-              <p className="text-foreground/80 leading-relaxed mb-5 flex-1 text-sm sm:text-base">"{allTestimonials[0].content}"</p>
+              <p className="text-foreground/80 leading-relaxed mb-5 flex-1 text-sm sm:text-base">"{dbTestimonials[0]?.content}"</p>
               <div>
                 <div className="flex gap-2 mb-3 flex-wrap">
                   {['Comisiones auto', 'Red binaria'].map(tag => (
@@ -834,20 +840,20 @@ export default function LandingPage() {
                   ))}
                 </div>
                 <div className="flex items-center gap-3">
-                  <img src={allTestimonials[0].avatar} alt={allTestimonials[0].name} className="w-9 h-9 rounded-full object-cover" />
-                  <div><div className="text-sm font-semibold text-foreground">{allTestimonials[0].name}</div><div className="text-xs text-muted-foreground">{allTestimonials[0].role}</div></div>
-                  <div className="ml-auto text-sm font-bold text-primary">{allTestimonials[0].earnings}</div>
+                  <img src={dbTestimonials[0]?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(dbTestimonials[0]?.name || '')}`} alt={dbTestimonials[0]?.name} className="w-9 h-9 rounded-full object-cover" />
+                  <div><div className="text-sm font-semibold text-foreground">{dbTestimonials[0]?.name}</div><div className="text-xs text-muted-foreground">{dbTestimonials[0]?.role}</div></div>
+                  <div className="ml-auto text-sm font-bold text-primary">{dbTestimonials[0]?.earnings}</div>
                 </div>
               </div>
             </div>
 
             <div className="p-6 sm:p-8 border-b border-border/50 sm:border-r sm:col-span-2 lg:col-span-2 flex flex-col justify-between bg-card/40 backdrop-blur-sm">
               <div className="flex gap-0.5 mb-4">{Array.from({ length: 5 }).map((_, i) => <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />)}</div>
-              <p className="text-foreground/80 leading-relaxed mb-5 text-sm sm:text-base">"{allTestimonials[1].content}"</p>
+              <p className="text-foreground/80 leading-relaxed mb-5 text-sm sm:text-base">"{dbTestimonials[1]?.content}"</p>
               <div className="flex items-center gap-3">
-                <img src={allTestimonials[1].avatar} alt={allTestimonials[1].name} className="w-9 h-9 rounded-full object-cover" />
-                <div><div className="text-sm font-semibold text-foreground">{allTestimonials[1].name}</div><div className="text-xs text-muted-foreground">{allTestimonials[1].role}</div></div>
-                <div className="ml-auto text-sm font-bold text-primary">{allTestimonials[1].earnings}</div>
+                <img src={dbTestimonials[1]?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(dbTestimonials[1]?.name || '')}`} alt={dbTestimonials[1]?.name} className="w-9 h-9 rounded-full object-cover" />
+                <div><div className="text-sm font-semibold text-foreground">{dbTestimonials[1]?.name}</div><div className="text-xs text-muted-foreground">{dbTestimonials[1]?.role}</div></div>
+                <div className="ml-auto text-sm font-bold text-primary">{dbTestimonials[1]?.earnings}</div>
               </div>
             </div>
 
@@ -872,17 +878,17 @@ export default function LandingPage() {
 
             <div className="p-6 sm:p-8 border-t border-border/50 flex flex-col justify-between bg-card/40 backdrop-blur-sm">
               <div className="flex gap-0.5 mb-4">{Array.from({ length: 5 }).map((_, i) => <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />)}</div>
-              <p className="text-foreground/80 leading-relaxed mb-5 text-sm">{allTestimonials[2].content}</p>
+              <p className="text-foreground/80 leading-relaxed mb-5 text-sm">{dbTestimonials[2]?.content}</p>
               <div className="flex items-center gap-3">
-                <img src={allTestimonials[2].avatar} alt={allTestimonials[2].name} className="w-9 h-9 rounded-full object-cover" />
-                <div><div className="text-sm font-semibold text-foreground">{allTestimonials[2].name}</div><div className="text-xs text-muted-foreground">{allTestimonials[2].role}</div></div>
-                <div className="ml-auto text-sm font-bold text-primary">{allTestimonials[2].earnings}</div>
+                <img src={dbTestimonials[2]?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(dbTestimonials[2]?.name || '')}`} alt={dbTestimonials[2]?.name} className="w-9 h-9 rounded-full object-cover" />
+                <div><div className="text-sm font-semibold text-foreground">{dbTestimonials[2]?.name}</div><div className="text-xs text-muted-foreground">{dbTestimonials[2]?.role}</div></div>
+                <div className="ml-auto text-sm font-bold text-primary">{dbTestimonials[2]?.earnings}</div>
               </div>
             </div>
           </div>
         </div>
 
-        <TestimonialsCarousel />
+        <TestimonialsCarousel items={dbTestimonials} />
       </section>
 
       <SectionDivider />
