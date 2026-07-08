@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useDatabase, useStorage } from '@/lib/backend';
 import { useAuthStore } from '@/store/authStore';
 import { cn } from '@/lib/utils';
@@ -20,7 +20,7 @@ interface RegionStat {
 type FormData = Omit<RegionStat, 'id'>;
 const emptyForm = (): FormData => ({ city: '', members: '', image_url: '', is_active: true, sort_order: 0 });
 
-// ── Avatar/Image Input ─────────────────────────────────────────────────────────
+// ── Image Input ────────────────────────────────────────────────────────────────
 function ImageInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const storage = useStorage();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -61,7 +61,7 @@ function ImageInput({ value, onChange }: { value: string; onChange: (v: string) 
       {mode === 'url' ? (
         <input type="url" value={value} onChange={e => onChange(e.target.value)}
           placeholder="https://images.pexels.com/..."
-          className="w-full px-3 py-2 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors" />
+          className="w-full px-3 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
       ) : (
         <label className={cn('flex items-center justify-center gap-2 w-full h-10 border-2 border-dashed rounded-lg cursor-pointer text-sm transition-colors',
           uploading ? 'opacity-50 pointer-events-none border-border' : 'border-border hover:border-primary/50 hover:bg-primary/5 text-muted-foreground hover:text-primary')}>
@@ -72,9 +72,10 @@ function ImageInput({ value, onChange }: { value: string; onChange: (v: string) 
       )}
       {value && (
         <div className="flex items-center gap-3 p-2 bg-muted/50 rounded-lg border border-border">
-          <img src={value} alt="preview" className="w-12 h-8 rounded object-cover border border-border flex-shrink-0" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+          <img src={value} alt="preview" className="w-14 h-9 rounded-lg object-cover border border-border flex-shrink-0"
+            onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
           <span className="text-xs text-muted-foreground truncate flex-1">{value}</span>
-          <button type="button" onClick={() => onChange('')} className="text-muted-foreground hover:text-red-500 transition-colors">
+          <button type="button" onClick={() => onChange('')} className="text-muted-foreground hover:text-red-500 transition-colors flex-shrink-0">
             <X className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -103,47 +104,59 @@ function RegionFormModal({ item, onSave, onClose, saving }: {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="bg-card border border-border rounded-2xl w-full max-w-md shadow-2xl">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
-          <h2 className="text-base font-bold text-foreground">{item ? 'Editar ciudad' : 'Nueva ciudad'}</h2>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm"
+      onClick={e => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div className="bg-card border border-border rounded-2xl w-full max-w-md shadow-2xl flex flex-col max-h-[90dvh]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border flex-shrink-0">
+          <div>
+            <h2 className="text-base font-bold text-foreground">{item ? 'Editar ciudad' : 'Nueva ciudad'}</h2>
+            <p className="text-xs text-muted-foreground mt-0.5">Configura la ciudad destacada</p>
+          </div>
           <button onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-muted text-muted-foreground hover:text-foreground transition-colors">
             <X className="w-4 h-4" />
           </button>
         </div>
-        <form onSubmit={submit} className="p-6 space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-semibold text-foreground mb-1.5">Ciudad *</label>
-              <input value={form.city} onChange={e => set('city', e.target.value)} placeholder="Lima"
-                className="w-full px-3 py-2 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors" />
+
+        <form onSubmit={submit} className="flex flex-col flex-1 min-h-0">
+          <div className="overflow-y-auto flex-1 p-6 space-y-5">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-semibold text-foreground mb-1.5">Ciudad *</label>
+                <input value={form.city} onChange={e => set('city', e.target.value)} placeholder="Lima"
+                  className="w-full px-3 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-foreground mb-1.5">Afiliados *</label>
+                <input value={form.members} onChange={e => set('members', e.target.value)} placeholder="4,820+"
+                  className="w-full px-3 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+              </div>
             </div>
+
             <div>
-              <label className="block text-xs font-semibold text-foreground mb-1.5">Afiliados *</label>
-              <input value={form.members} onChange={e => set('members', e.target.value)} placeholder="4,820+"
-                className="w-full px-3 py-2 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors" />
+              <label className="block text-xs font-semibold text-foreground mb-1.5">Imagen de fondo</label>
+              <ImageInput value={form.image_url} onChange={v => set('image_url', v)} />
             </div>
-          </div>
-          <div>
-            <label className="block text-xs font-semibold text-foreground mb-1.5">Imagen de fondo</label>
-            <ImageInput value={form.image_url} onChange={v => set('image_url', v)} />
-          </div>
-          <div className="flex items-center gap-6">
-            <div>
-              <label className="block text-xs font-semibold text-foreground mb-1.5">Orden</label>
-              <input type="number" min={0} value={form.sort_order} onChange={e => set('sort_order', parseInt(e.target.value) || 0)}
-                className="w-20 px-3 py-2 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary text-center" />
-            </div>
-            <div className="flex items-center gap-2 mt-4">
+
+            <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-xl border border-border">
               <button type="button" onClick={() => set('is_active', !form.is_active)}
-                className={cn('w-10 h-6 rounded-full relative transition-colors', form.is_active ? 'bg-primary' : 'bg-muted-foreground/30')}>
-                <div className={cn('w-4 h-4 bg-white rounded-full absolute top-1 transition-transform', form.is_active ? 'translate-x-5' : 'translate-x-1')} />
+                className={cn('w-11 h-6 rounded-full relative transition-colors flex-shrink-0', form.is_active ? 'bg-primary' : 'bg-muted-foreground/30')}>
+                <div className="absolute top-[3px] rounded-full bg-white shadow transition-transform"
+                  style={{ width: 18, height: 18, transform: `translateX(${form.is_active ? 22 : 3}px)` }} />
               </button>
-              <span className="text-sm font-medium text-foreground">{form.is_active ? 'Activa' : 'Inactiva'}</span>
+              <div>
+                <p className="text-sm font-medium text-foreground leading-tight">{form.is_active ? 'Activa — visible en el bento' : 'Inactiva — oculta'}</p>
+                <p className="text-xs text-muted-foreground">Los primeros 4 activos aparecen en el landing</p>
+              </div>
             </div>
           </div>
-          <div className="flex gap-3 pt-2 border-t border-border">
-            <button type="button" onClick={onClose} className="flex-1 border border-border rounded-xl py-2.5 text-sm font-medium hover:bg-muted transition-colors">Cancelar</button>
+
+          <div className="flex gap-3 p-6 border-t border-border flex-shrink-0">
+            <button type="button" onClick={onClose}
+              className="flex-1 border border-border rounded-xl py-2.5 text-sm font-medium hover:bg-muted transition-colors text-foreground">
+              Cancelar
+            </button>
             <button type="submit" disabled={saving}
               className="flex-1 bg-primary text-primary-foreground rounded-xl py-2.5 text-sm font-semibold hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 disabled:opacity-50">
               {saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
@@ -158,7 +171,8 @@ function RegionFormModal({ item, onSave, onClose, saving }: {
 
 function DeleteConfirm({ name, onConfirm, onCancel }: { name: string; onConfirm: () => void; onCancel: () => void }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+      onClick={e => { if (e.target === e.currentTarget) onCancel(); }}>
       <div className="bg-card border border-border rounded-2xl w-full max-w-sm shadow-2xl p-6 text-center">
         <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4">
           <Trash2 className="w-6 h-6 text-red-500" />
@@ -183,6 +197,8 @@ export default function RegionStatsAdminPage() {
   const [editing, setEditing] = useState<RegionStat | null>(null);
   const [deleteItem, setDeleteItem] = useState<RegionStat | null>(null);
   const [saving, setSaving] = useState(false);
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [dragOverId, setDragOverId] = useState<string | null>(null);
 
   const isAdmin = user?.role === 'super_admin' || user?.role === 'admin';
 
@@ -200,7 +216,8 @@ export default function RegionStatsAdminPage() {
   const handleSave = async (data: FormData & { id?: string }) => {
     setSaving(true);
     const { id, ...fields } = data;
-    const payload = { ...fields, updated_at: new Date().toISOString() };
+    const nextOrder = id ? fields.sort_order : items.length;
+    const payload = { ...fields, sort_order: nextOrder, updated_at: new Date().toISOString() };
     if (id) {
       await database.update('testimonial_region_stats', id, payload);
       toast.success('Ciudad actualizada');
@@ -228,6 +245,25 @@ export default function RegionStatsAdminPage() {
     toast.success(item.is_active ? 'Ciudad desactivada' : 'Ciudad activada');
   };
 
+  const handleDragStart = useCallback((id: string) => { setDragId(id); }, []);
+  const handleDragOver = useCallback((_e: React.DragEvent, id: string) => {
+    if (id !== dragId) setDragOverId(id);
+  }, [dragId]);
+  const handleDrop = useCallback(async (_e: React.DragEvent, targetId: string) => {
+    if (!dragId || dragId === targetId) { setDragId(null); setDragOverId(null); return; }
+    const reordered = [...items];
+    const fromIdx = reordered.findIndex(x => x.id === dragId);
+    const toIdx = reordered.findIndex(x => x.id === targetId);
+    const [moved] = reordered.splice(fromIdx, 1);
+    reordered.splice(toIdx, 0, moved);
+    const updated = reordered.map((x, i) => ({ ...x, sort_order: i }));
+    setItems(updated);
+    setDragId(null);
+    setDragOverId(null);
+    await Promise.all(updated.map(x => database.update('testimonial_region_stats', x.id, { sort_order: x.sort_order })));
+    toast.success('Orden guardado');
+  }, [dragId, items, database]);
+
   if (!isAdmin) {
     return (
       <div className="flex items-center justify-center h-64 text-center">
@@ -241,17 +277,16 @@ export default function RegionStatsAdminPage() {
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h2 className="text-xl font-bold text-foreground">Ciudades destacadas</h2>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Aparecen en el bento de la sección testimonios.
-            <span className="ml-2 font-medium text-green-500">{items.filter(i => i.is_active).length} activas</span>
-            {' · '}<span className="text-muted-foreground">{items.length} total (máx. 4 visibles)</span>
+            Arrastra para reordenar · <span className="text-green-500 font-medium">{items.filter(i => i.is_active).length} activas</span>
+            {' · '}{items.length} total · máx. 4 visibles en el landing
           </p>
         </div>
         <button onClick={() => { setEditing(null); setShowForm(true); }}
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors">
+          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:bg-primary/90 active:scale-95 transition-all">
           <Plus className="w-4 h-4" /> Nueva ciudad
         </button>
       </div>
@@ -259,34 +294,53 @@ export default function RegionStatsAdminPage() {
       {loading ? (
         <div className="space-y-3">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="bg-card border border-border rounded-xl p-4 animate-pulse h-16" />
+            <div key={i} className="bg-card border border-border rounded-2xl p-4 animate-pulse h-16" />
           ))}
         </div>
       ) : items.length === 0 ? (
-        <div className="bg-card border border-border rounded-xl py-16 text-center">
+        <div className="bg-card border border-border rounded-2xl py-16 text-center">
           <MapPin className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
           <p className="text-muted-foreground font-medium">No hay ciudades configuradas.</p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-2.5">
           {items.map(item => (
-            <div key={item.id} className={cn('bg-card border rounded-xl p-4 flex items-center gap-4 transition-all', item.is_active ? 'border-border' : 'border-border/50 opacity-60')}>
-              <div className="flex-shrink-0 text-muted-foreground/30"><GripVertical className="w-4 h-4" /></div>
+            <div
+              key={item.id}
+              draggable
+              onDragStart={() => handleDragStart(item.id)}
+              onDragOver={e => { e.preventDefault(); handleDragOver(e, item.id); }}
+              onDrop={e => handleDrop(e, item.id)}
+              className={cn(
+                'bg-card border rounded-2xl p-4 flex items-center gap-3 transition-all cursor-default select-none',
+                item.is_active ? 'border-border' : 'border-border/40 opacity-60',
+                dragOverId === item.id && 'border-primary/60 bg-primary/5 scale-[1.01] shadow-lg',
+              )}
+            >
+              <div className="flex-shrink-0 text-muted-foreground/40 cursor-grab active:cursor-grabbing">
+                <GripVertical className="w-4 h-4" />
+              </div>
+
               {item.image_url ? (
-                <img src={item.image_url} alt={item.city} className="w-14 h-10 rounded-lg object-cover border border-border flex-shrink-0" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                <div className="w-14 h-10 rounded-xl overflow-hidden border border-border flex-shrink-0">
+                  <img src={item.image_url} alt={item.city} className="w-full h-full object-cover"
+                    onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                </div>
               ) : (
-                <div className="w-14 h-10 rounded-lg bg-muted border border-border flex-shrink-0 flex items-center justify-center">
+                <div className="w-14 h-10 rounded-xl bg-muted border border-border flex-shrink-0 flex items-center justify-center">
                   <MapPin className="w-4 h-4 text-muted-foreground/40" />
                 </div>
               )}
+
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-semibold text-foreground">{item.city}</span>
-                  <span className="text-sm font-bold text-green-500">{item.members}</span>
+                  <span className="font-semibold text-foreground text-sm">{item.city}</span>
+                  <span className="text-xs font-bold text-green-600 dark:text-green-400">{item.members} afiliados</span>
                   {!item.is_active && <span className="text-[10px] text-red-500 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded-full">Inactiva</span>}
                 </div>
-                <p className="text-xs text-muted-foreground mt-0.5">Orden: {item.sort_order}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Posición #{items.indexOf(item) + 1}</p>
               </div>
+
               <div className="flex items-center gap-1 flex-shrink-0">
                 <button onClick={() => toggleActive(item)}
                   className={cn('p-2 rounded-lg transition-colors', item.is_active ? 'text-green-500 hover:bg-green-500/10' : 'text-muted-foreground hover:bg-muted')}
@@ -307,8 +361,10 @@ export default function RegionStatsAdminPage() {
         </div>
       )}
 
-      <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 text-sm text-blue-700 dark:text-blue-300">
-        <p className="text-xs">Solo los primeros <strong>4 activos</strong> (ordenados por "Orden") aparecen en el bento del landing. La imagen se usa como fondo semitransparente.</p>
+      <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
+        <p className="text-xs text-blue-700 dark:text-blue-300">
+          Solo los primeros <strong>4 activos</strong> aparecen en el bento del landing. La imagen se usa como fondo semitransparente detrás del número.
+        </p>
       </div>
 
       {showForm && (
