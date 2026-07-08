@@ -50,12 +50,28 @@ const steps = [
 ];
 
 // ─── region stats ─────────────────────────────────────────────────────────────
-const regionStats = [
-  { city: 'Lima', members: '4,820+', img: 'https://images.pexels.com/photos/2610756/pexels-photo-2610756.jpeg?auto=compress&cs=tinysrgb&w=120' },
-  { city: 'Arequipa', members: '1,940+', img: 'https://images.pexels.com/photos/2166553/pexels-photo-2166553.jpeg?auto=compress&cs=tinysrgb&w=120' },
-  { city: 'Trujillo', members: '1,560+', img: 'https://images.pexels.com/photos/1285625/pexels-photo-1285625.jpeg?auto=compress&cs=tinysrgb&w=120' },
-  { city: 'Cusco', members: '980+', img: 'https://images.pexels.com/photos/2325446/pexels-photo-2325446.jpeg?auto=compress&cs=tinysrgb&w=120' },
-];
+interface RegionStat {
+  id: string;
+  city: string;
+  members: string;
+  image_url: string;
+  is_active: boolean;
+  sort_order: number;
+}
+
+function useRegionStats() {
+  const [items, setItems] = useState<RegionStat[]>([]);
+  useEffect(() => {
+    supabase
+      .from('testimonial_region_stats')
+      .select('*')
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true })
+      .limit(4)
+      .then(({ data }) => { if (data) setItems(data); });
+  }, []);
+  return items;
+}
 
 // ─── payment brands ───────────────────────────────────────────────────────────
 const paymentBrands = [
@@ -402,6 +418,7 @@ export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const { plans: allPlans, ranks, currency, currencySymbol, exchangeRate } = useConfig();
   const dbTestimonials = useTestimonials();
+  const regionStats = useRegionStats();
   const plans = allPlans.filter(p => p.is_active);
   const { user } = useAuthStore();
   const platformStats = usePlatformStats();
@@ -799,97 +816,137 @@ export default function LandingPage() {
       <SectionDivider />
 
       {/* ── TESTIMONIALS ──────────────────────────────────────────────────────── */}
-      <section className="py-16 sm:py-24">
-        <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 mb-10 sm:mb-14">
-          <span className="text-xs font-semibold text-primary uppercase tracking-widest mb-3 block">Testimonios</span>
-          <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
-            Miles ya <span className="text-gradient-animated">ganan</span> con Cluv 360
-          </h2>
-          <p className="text-base text-muted-foreground/80 mt-3 max-w-xl">Historias reales de emprendedores en toda Latinoamérica.</p>
-        </div>
-
-        {/* Bento testimonials */}
-        <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 mb-10 sm:mb-14">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border border-border/50 rounded-2xl overflow-hidden">
-            {regionStats.slice(0, 2).map((stat, idx) => (
-              <div
-                key={stat.city}
-                className={cn(
-                  'relative p-6 sm:p-8 flex flex-col items-center justify-center text-center border-b border-border/50 min-h-[160px] overflow-hidden',
-                  idx === 0 ? 'sm:border-r border-border/50' : 'sm:border-r border-border/50'
-                )}
-              >
-                <div className="absolute inset-0 pointer-events-none">
-                  <img src={stat.img} alt={stat.city} className="w-full h-full object-cover opacity-35" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/75 to-background/50" />
-                </div>
-                <div className="relative z-10">
-                  <div className="text-2xl font-bold text-foreground">{stat.members}</div>
-                  <div className="text-sm text-muted-foreground mt-1">afiliados en {stat.city}</div>
-                </div>
-              </div>
-            ))}
-
-            <div className="p-6 sm:p-8 flex flex-col justify-between border-b border-border/50 row-span-1 lg:row-span-2 bg-card/40 backdrop-blur-sm">
-              <div className="flex gap-0.5 mb-4">{Array.from({ length: 5 }).map((_, i) => <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />)}</div>
-              <p className="text-foreground/80 leading-relaxed mb-5 flex-1 text-sm sm:text-base">"{dbTestimonials[0]?.content}"</p>
-              <div>
-                <div className="flex gap-2 mb-3 flex-wrap">
-                  {['Comisiones auto', 'Red binaria'].map(tag => (
-                    <span key={tag} className="px-2.5 py-1 bg-primary/8 text-primary text-xs font-medium rounded-full border border-primary/15">{tag}</span>
-                  ))}
-                </div>
-                <div className="flex items-center gap-3">
-                  <img src={dbTestimonials[0]?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(dbTestimonials[0]?.name || '')}`} alt={dbTestimonials[0]?.name} className="w-9 h-9 rounded-full object-cover" />
-                  <div><div className="text-sm font-semibold text-foreground">{dbTestimonials[0]?.name}</div><div className="text-xs text-muted-foreground">{dbTestimonials[0]?.role}</div></div>
-                  <div className="ml-auto text-sm font-bold text-primary">{dbTestimonials[0]?.earnings}</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6 sm:p-8 border-b border-border/50 sm:border-r sm:col-span-2 lg:col-span-2 flex flex-col justify-between bg-card/40 backdrop-blur-sm">
-              <div className="flex gap-0.5 mb-4">{Array.from({ length: 5 }).map((_, i) => <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />)}</div>
-              <p className="text-foreground/80 leading-relaxed mb-5 text-sm sm:text-base">"{dbTestimonials[1]?.content}"</p>
-              <div className="flex items-center gap-3">
-                <img src={dbTestimonials[1]?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(dbTestimonials[1]?.name || '')}`} alt={dbTestimonials[1]?.name} className="w-9 h-9 rounded-full object-cover" />
-                <div><div className="text-sm font-semibold text-foreground">{dbTestimonials[1]?.name}</div><div className="text-xs text-muted-foreground">{dbTestimonials[1]?.role}</div></div>
-                <div className="ml-auto text-sm font-bold text-primary">{dbTestimonials[1]?.earnings}</div>
-              </div>
-            </div>
-
-            {regionStats.slice(2, 4).map((stat, idx) => (
-              <div
-                key={stat.city}
-                className={cn(
-                  'relative p-6 sm:p-8 flex flex-col items-center justify-center text-center border-t border-border/50 min-h-[160px] overflow-hidden',
-                  idx === 0 ? 'sm:border-r border-border/50' : 'sm:border-r border-border/50'
-                )}
-              >
-                <div className="absolute inset-0 pointer-events-none">
-                  <img src={stat.img} alt={stat.city} className="w-full h-full object-cover opacity-35" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/75 to-background/50" />
-                </div>
-                <div className="relative z-10">
-                  <div className="text-2xl font-bold text-foreground">{stat.members}</div>
-                  <div className="text-sm text-muted-foreground mt-1">afiliados en {stat.city}</div>
-                </div>
-              </div>
-            ))}
-
-            <div className="p-6 sm:p-8 border-t border-border/50 flex flex-col justify-between bg-card/40 backdrop-blur-sm">
-              <div className="flex gap-0.5 mb-4">{Array.from({ length: 5 }).map((_, i) => <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />)}</div>
-              <p className="text-foreground/80 leading-relaxed mb-5 text-sm">{dbTestimonials[2]?.content}</p>
-              <div className="flex items-center gap-3">
-                <img src={dbTestimonials[2]?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(dbTestimonials[2]?.name || '')}`} alt={dbTestimonials[2]?.name} className="w-9 h-9 rounded-full object-cover" />
-                <div><div className="text-sm font-semibold text-foreground">{dbTestimonials[2]?.name}</div><div className="text-xs text-muted-foreground">{dbTestimonials[2]?.role}</div></div>
-                <div className="ml-auto text-sm font-bold text-primary">{dbTestimonials[2]?.earnings}</div>
-              </div>
-            </div>
+      {(dbTestimonials.length > 0 || regionStats.length > 0) && (
+        <section className="py-16 sm:py-24">
+          <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 mb-10 sm:mb-14">
+            <span className="text-xs font-semibold text-primary uppercase tracking-widest mb-3 block">Testimonios</span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
+              Miles ya <span className="text-gradient-animated">ganan</span> con Cluv 360
+            </h2>
+            <p className="text-base text-muted-foreground/80 mt-3 max-w-xl">Historias reales de emprendedores en toda Latinoamérica.</p>
           </div>
-        </div>
 
-        <TestimonialsCarousel items={dbTestimonials} />
-      </section>
+          {/* Bento grid — only render when we have data */}
+          {(regionStats.length > 0 || dbTestimonials.length > 0) && (
+            <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 mb-10 sm:mb-14">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border border-border/50 rounded-2xl overflow-hidden divide-y divide-border/50 sm:divide-y-0">
+
+                {/* Region stats — top row (first 2) */}
+                {regionStats.slice(0, 2).map((stat, idx) => (
+                  <div
+                    key={stat.id}
+                    className={cn(
+                      'relative flex flex-col items-center justify-center text-center min-h-[140px] sm:min-h-[160px] overflow-hidden',
+                      'border-b border-border/50',
+                      idx === 0 && 'sm:border-r border-border/50',
+                      idx === 1 && 'sm:border-r border-border/50',
+                    )}
+                  >
+                    <div className="absolute inset-0 pointer-events-none">
+                      {stat.image_url && <img src={stat.image_url} alt={stat.city} className="w-full h-full object-cover opacity-30" />}
+                      <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/80 to-background/50" />
+                    </div>
+                    <div className="relative z-10 p-6">
+                      <div className="text-3xl font-black text-foreground">{stat.members}</div>
+                      <div className="text-sm text-muted-foreground mt-1">afiliados en {stat.city}</div>
+                    </div>
+                  </div>
+                ))}
+
+                {/* First testimonial card — spans rows on lg */}
+                {dbTestimonials[0] && (
+                  <div className="p-6 sm:p-8 flex flex-col justify-between border-b border-border/50 lg:row-span-2 bg-card/40">
+                    <div>
+                      <div className="flex gap-0.5 mb-4">
+                        {Array.from({ length: dbTestimonials[0].rating }).map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />)}
+                      </div>
+                      <p className="text-foreground/80 leading-relaxed mb-4 text-sm sm:text-base">"{dbTestimonials[0].content}"</p>
+                      <div className="flex gap-2 mb-4 flex-wrap">
+                        {['Comisiones auto', 'Red binaria'].map(tag => (
+                          <span key={tag} className="px-2.5 py-1 bg-primary/8 text-primary text-xs font-medium rounded-full border border-primary/15">{tag}</span>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <img src={dbTestimonials[0].avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(dbTestimonials[0].name)}&background=e2e8f0&color=64748b`} alt={dbTestimonials[0].name} className="w-9 h-9 rounded-full object-cover flex-shrink-0" onError={e => { (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(dbTestimonials[0].name)}&background=e2e8f0&color=64748b`; }} />
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-semibold text-foreground truncate">{dbTestimonials[0].name}</div>
+                        <div className="text-xs text-muted-foreground truncate">{dbTestimonials[0].role}</div>
+                      </div>
+                      {dbTestimonials[0].earnings && <div className="text-sm font-bold text-green-500 shrink-0">{dbTestimonials[0].earnings}</div>}
+                    </div>
+                  </div>
+                )}
+
+                {/* Second testimonial — col-span-2 on lg */}
+                {dbTestimonials[1] && (
+                  <div className="p-6 sm:p-8 border-b border-border/50 sm:col-span-2 lg:col-span-2 flex flex-col justify-between bg-card/40">
+                    <div>
+                      <div className="flex gap-0.5 mb-4">
+                        {Array.from({ length: dbTestimonials[1].rating }).map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />)}
+                      </div>
+                      <p className="text-foreground/80 leading-relaxed mb-4 text-sm sm:text-base">"{dbTestimonials[1].content}"</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <img src={dbTestimonials[1].avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(dbTestimonials[1].name)}&background=e2e8f0&color=64748b`} alt={dbTestimonials[1].name} className="w-9 h-9 rounded-full object-cover flex-shrink-0" onError={e => { (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(dbTestimonials[1].name)}&background=e2e8f0&color=64748b`; }} />
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-semibold text-foreground truncate">{dbTestimonials[1].name}</div>
+                        <div className="text-xs text-muted-foreground truncate">{dbTestimonials[1].role}</div>
+                      </div>
+                      {dbTestimonials[1].earnings && <div className="text-sm font-bold text-green-500 shrink-0">{dbTestimonials[1].earnings}</div>}
+                    </div>
+                  </div>
+                )}
+
+                {/* Region stats — bottom row (3 & 4) */}
+                {regionStats.slice(2, 4).map((stat, idx) => (
+                  <div
+                    key={stat.id}
+                    className={cn(
+                      'relative flex flex-col items-center justify-center text-center min-h-[140px] sm:min-h-[160px] overflow-hidden',
+                      'border-t border-border/50',
+                      idx === 0 && 'sm:border-r border-border/50',
+                    )}
+                  >
+                    <div className="absolute inset-0 pointer-events-none">
+                      {stat.image_url && <img src={stat.image_url} alt={stat.city} className="w-full h-full object-cover opacity-30" />}
+                      <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/80 to-background/50" />
+                    </div>
+                    <div className="relative z-10 p-6">
+                      <div className="text-3xl font-black text-foreground">{stat.members}</div>
+                      <div className="text-sm text-muted-foreground mt-1">afiliados en {stat.city}</div>
+                    </div>
+                  </div>
+                ))}
+
+                {/* Third testimonial */}
+                {dbTestimonials[2] && (
+                  <div className="p-6 sm:p-8 border-t border-border/50 flex flex-col justify-between bg-card/40">
+                    <div>
+                      <div className="flex gap-0.5 mb-4">
+                        {Array.from({ length: dbTestimonials[2].rating }).map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />)}
+                      </div>
+                      <p className="text-foreground/80 leading-relaxed mb-4 text-sm">"{dbTestimonials[2].content}"</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <img src={dbTestimonials[2].avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(dbTestimonials[2].name)}&background=e2e8f0&color=64748b`} alt={dbTestimonials[2].name} className="w-9 h-9 rounded-full object-cover flex-shrink-0" onError={e => { (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(dbTestimonials[2].name)}&background=e2e8f0&color=64748b`; }} />
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-semibold text-foreground truncate">{dbTestimonials[2].name}</div>
+                        <div className="text-xs text-muted-foreground truncate">{dbTestimonials[2].role}</div>
+                      </div>
+                      {dbTestimonials[2].earnings && <div className="text-sm font-bold text-green-500 shrink-0">{dbTestimonials[2].earnings}</div>}
+                    </div>
+                  </div>
+                )}
+
+              </div>
+            </div>
+          )}
+
+          {/* Carousel — only when there are testimonials */}
+          {dbTestimonials.length > 0 && <TestimonialsCarousel items={dbTestimonials} />}
+        </section>
+      )}
 
       <SectionDivider />
 

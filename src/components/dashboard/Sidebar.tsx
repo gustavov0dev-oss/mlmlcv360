@@ -68,6 +68,12 @@ const superAdminNav: NavItem[] = [
   },
   { label: 'Mi Plan', href: '/dashboard/mi-plan', icon: CreditCard },
   { label: 'Reportes', href: '/dashboard/reportes', icon: BarChart3 },
+  {
+    label: 'Contenido', icon: MessageSquare, children: [
+      { label: 'Testimonios', href: '/dashboard/admin/testimonios', icon: Star },
+      { label: 'Ciudades', href: '/dashboard/admin/ciudades', icon: LayoutDashboard },
+    ],
+  },
   { label: 'Gestión Admin', href: '/dashboard/admin', icon: Shield, exact: true },
   { label: 'Configuración', href: '/dashboard/configuracion', icon: Settings },
 ];
@@ -94,6 +100,12 @@ const adminNav: NavItem[] = [
   },
   { label: 'Mi Plan', href: '/dashboard/mi-plan', icon: CreditCard },
   { label: 'Reportes', href: '/dashboard/reportes', icon: BarChart3 },
+  {
+    label: 'Contenido', icon: MessageSquare, children: [
+      { label: 'Testimonios', href: '/dashboard/admin/testimonios', icon: Star },
+      { label: 'Ciudades', href: '/dashboard/admin/ciudades', icon: LayoutDashboard },
+    ],
+  },
   { label: 'Gestión Admin', href: '/dashboard/admin', icon: Shield, exact: true },
 ];
 

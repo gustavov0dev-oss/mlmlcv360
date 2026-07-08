@@ -28,6 +28,7 @@ import CouponsAdminPage from '@/pages/admin/store/CouponsAdminPage';
 import CategoriesAdminPage from '@/pages/admin/store/CategoriesAdminPage';
 import MlmCommissionsAdminPage from '@/pages/admin/store/MlmCommissionsAdminPage';
 import ReviewsAdminPage from '@/pages/admin/store/ReviewsAdminPage';
+import TestimonialsManagerPage from '@/pages/admin/TestimonialsManagerPage';
 
 function DashboardContent() {
   const { pathname } = useLocation();
@@ -57,6 +58,7 @@ function DashboardContent() {
   if (pathname === '/dashboard/admin/categorias') return <CategoriesAdminPage />;
   if (pathname === '/dashboard/admin/comisiones-mlm') return <MlmCommissionsAdminPage />;
   if (pathname === '/dashboard/admin/resenas') return <ReviewsAdminPage />;
+  if (pathname === '/dashboard/admin/testimonios' || pathname === '/dashboard/admin/ciudades') return <TestimonialsManagerPage />;
 
   return <DashboardPage />;
 }

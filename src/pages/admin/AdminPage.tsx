@@ -5,7 +5,6 @@ import { useSearchParams } from '@/lib/router';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { Building2, Shield, Smartphone, Search, Mail, Save, ChevronRight, RefreshCw, MessageCircle, Eye, EyeOff, Lock, CreditCard, Award, Plus, Trash2, CreditCard as Edit2, X, CircleCheck as CheckCircle, DollarSign, Wrench, TriangleAlert as AlertTriangle, Image } from 'lucide-react';
-import TestimonialsAdminPage from '@/pages/admin/TestimonialsAdminPage';
 import { useConfig, type Plan, type Rank } from '@/store/configStore';
 import { LogoWithText } from '@/components/Logo';
 
@@ -35,7 +34,6 @@ const modules = [
   { id: 'auth', icon: Lock, label: 'Auth Social', desc: 'Google OAuth y login social' },
   { id: 'whatsapp', icon: MessageCircle, label: 'WhatsApp', desc: 'Configuración del botón de WhatsApp' },
   { id: 'finanzas', icon: DollarSign, label: 'Finanzas', desc: 'Pasarelas de pago y credenciales' },
-  { id: 'testimonios', icon: MessageCircle, label: 'Testimonios', desc: 'Gestionar testimonios del landing' },
 ];
 
 const permissionRoles = ['super_admin', 'admin', 'inspector', 'user', 'support'];
@@ -830,8 +828,6 @@ export default function AdminPage() {
           {/* ── FINANZAS ── */}
           {activeModule === 'finanzas' && <GatewaysManager />}
 
-          {/* ── TESTIMONIOS ── */}
-          {activeModule === 'testimonios' && <TestimonialsAdminPage />}
         </div>
       </div>
     </div>
