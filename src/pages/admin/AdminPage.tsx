@@ -263,6 +263,7 @@ export default function AdminPage() {
                       { k: 'company_phone', label: 'Telefono', placeholder: '+51 1 234 5678' },
                       { k: 'company_address', label: 'Direccion', placeholder: 'Av. Javier Prado, Lima' },
                       { k: 'company_ruc', label: 'RUC', placeholder: '20123456789' },
+                      { k: 'company_tagline', label: 'Eslogan (footer)', placeholder: 'Plataforma empresarial para gestión de redes y comercio. Impulsa tu negocio al siguiente nivel.' },
                     ].map(f => (
                       <div key={f.k}>
                         <label className="block text-xs font-medium text-foreground mb-1">{f.label}</label>
@@ -382,7 +383,7 @@ export default function AdminPage() {
               <div className="mt-6 pt-4 border-t border-border flex justify-end">
                 <button
                   onClick={() => saveConfigKeys([
-                    'company_name', 'company_email', 'company_phone', 'company_address', 'company_ruc',
+                    'company_name', 'company_email', 'company_phone', 'company_address', 'company_ruc', 'company_tagline',
                     'logo_value', 'logo_collapsed_value',
                     'logo_size_navbar', 'logo_size_sidebar', 'logo_size_collapsed', 'logo_size_login'
                   ])}

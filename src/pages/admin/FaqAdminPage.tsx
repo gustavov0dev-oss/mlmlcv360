@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/lib/backend/client';
 import {
   Card,
@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
-import { Plus, Trash2, Save, Loader as Loader2, RefreshCw, CircleHelp as HelpCircle, ChevronUp, ChevronDown } from 'lucide-react';
+import { Plus, Trash2, Save, GripVertical, Loader as Loader2, RefreshCw, CircleHelp as HelpCircle, X, Pencil } from 'lucide-react';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 interface FaqItem {
@@ -24,7 +24,12 @@ interface FaqItem {
   created_at: string;
 }
 
-type FormData = Omit<FaqItem, 'id' | 'created_at'>;
+type FormData = {
+  question: string;
+  answer: string;
+  is_active: boolean;
+  sort_order: number;
+};
 
 const emptyForm = (): FormData => ({
   question: '',
@@ -37,11 +42,17 @@ const emptyForm = (): FormData => ({
 export default function FaqAdminPage() {
   const [items, setItems] = useState<FaqItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState<string | null>(null); // id being saved (or 'new')
+  const [saving, setSaving] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [reordering, setReordering] = useState(false);
   const [form, setForm] = useState<FormData>(emptyForm());
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+
+  // Drag-and-drop state
+  const dragIndex = useRef<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   // ── Fetch ────────────────────────────────────────────────────────────────────
   const fetchItems = useCallback(async () => {
@@ -70,6 +81,11 @@ export default function FaqAdminPage() {
     setRefreshing(false);
   };
 
+  // ── Stats ────────────────────────────────────────────────────────────────────
+  const total = items.length;
+  const activeCount = items.filter(i => i.is_active).length;
+  const inactiveCount = total - activeCount;
+
   // ── Form helpers ─────────────────────────────────────────────────────────────
   const resetForm = () => {
     setForm(emptyForm());
@@ -92,6 +108,10 @@ export default function FaqAdminPage() {
     });
     setEditingId(item.id);
     setShowForm(true);
+    // Scroll to form on mobile
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   // ── Save (create or update) ──────────────────────────────────────────────────
@@ -112,7 +132,7 @@ export default function FaqAdminPage() {
       sort_order: Number(form.sort_order) || 0,
     };
 
-    setSaving(editingId || 'new');
+    setSaving(true);
     try {
       if (editingId) {
         const { error } = await supabase
@@ -131,7 +151,7 @@ export default function FaqAdminPage() {
     } catch (err: any) {
       toast.error('Error al guardar: ' + (err?.message || 'desconocido'));
     } finally {
-      setSaving(null);
+      setSaving(false);
     }
   };
 
@@ -149,94 +169,67 @@ export default function FaqAdminPage() {
     }
   };
 
-  // ── Toggle active ────────────────────────────────────────────────────────────
-  const handleToggleActive = async (item: FaqItem) => {
-    const next = !item.is_active;
-    // Optimistic update
-    setItems(prev => prev.map(i => (i.id === item.id ? { ...i, is_active: next } : i)));
-    try {
-      const { error } = await supabase
-        .from('faq_items')
-        .update({ is_active: next })
-        .eq('id', item.id);
-      if (error) throw error;
-      toast.success(next ? 'Pregunta activada' : 'Pregunta desactivada');
-    } catch (err: any) {
-      // Revert on failure
-      setItems(prev => prev.map(i => (i.id === item.id ? { ...i, is_active: !next } : i)));
-      toast.error('Error al cambiar el estado: ' + (err?.message || 'desconocido'));
+  // ── Drag and drop reorder ────────────────────────────────────────────────────
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+    dragIndex.current = index;
+    setIsDragging(true);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', String(index));
+  };
+
+  const handleDragEnd = () => {
+    dragIndex.current = null;
+    setDragOverIndex(null);
+    setIsDragging(false);
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (dragIndex.current !== null && dragIndex.current !== index) {
+      setDragOverIndex(index);
     }
   };
 
-  // ── Inline edit ──────────────────────────────────────────────────────────────
-  const handleInlineChange = (
-    id: string,
-    field: 'question' | 'answer' | 'sort_order',
-    value: string,
-  ) => {
-    setItems(prev =>
-      prev.map(i =>
-        i.id === id
-          ? { ...i, [field]: field === 'sort_order' ? Number(value) || 0 : value }
-          : i,
-      ),
-    );
-  };
-
-  const handleInlineSave = async (item: FaqItem) => {
-    setSaving(item.id);
-    try {
-      const { error } = await supabase
-        .from('faq_items')
-        .update({
-          question: item.question,
-          answer: item.answer,
-          sort_order: item.sort_order,
-        })
-        .eq('id', item.id);
-      if (error) throw error;
-      toast.success('Cambios guardados');
-      await fetchItems();
-    } catch (err: any) {
-      toast.error('Error al guardar: ' + (err?.message || 'desconocido'));
-    } finally {
-      setSaving(null);
+  const handleDragLeave = (_e: React.DragEvent<HTMLDivElement>, index: number) => {
+    // Only clear if leaving the row entirely (not entering a child)
+    if (dragOverIndex === index) {
+      setDragOverIndex(null);
     }
   };
 
-  // ── Move (reorder) ───────────────────────────────────────────────────────────
-  const handleMove = async (item: FaqItem, dir: -1 | 1) => {
-    const index = items.findIndex(i => i.id === item.id);
-    const target = index + dir;
-    if (target < 0 || target >= items.length) return;
+  const handleDrop = async (e: React.DragEvent<HTMLDivElement>, dropIndex: number) => {
+    e.preventDefault();
+    const fromIndex = dragIndex.current;
+    setDragOverIndex(null);
+    setIsDragging(false);
+    dragIndex.current = null;
 
-    const a = items[index];
-    const b = items[target];
-    const newOrderA = b.sort_order;
-    const newOrderB = a.sort_order;
+    if (fromIndex === null || fromIndex === dropIndex) return;
 
-    // Optimistic reorder
-    setItems(prev =>
-      prev
-        .map(i => {
-          if (i.id === a.id) return { ...i, sort_order: newOrderA };
-          if (i.id === b.id) return { ...i, sort_order: newOrderB };
-          return i;
-        })
-        .sort((x, y) => x.sort_order - y.sort_order),
-    );
+    // Reorder array locally
+    const reordered = [...items];
+    const [moved] = reordered.splice(fromIndex, 1);
+    reordered.splice(dropIndex, 0, moved);
 
+    // Reassign sort_order 0..n
+    const withNewOrder = reordered.map((it, i) => ({ ...it, sort_order: i }));
+    setItems(withNewOrder);
+
+    // Persist new sort_order for all items
+    setReordering(true);
     try {
-      const updates = [
-        supabase.from('faq_items').update({ sort_order: newOrderA }).eq('id', a.id),
-        supabase.from('faq_items').update({ sort_order: newOrderB }).eq('id', b.id),
-      ];
+      const updates = withNewOrder.map(it =>
+        supabase.from('faq_items').update({ sort_order: it.sort_order }).eq('id', it.id),
+      );
       const results = await Promise.all(updates);
       for (const r of results) if (r.error) throw r.error;
-      toast.success('Orden actualizado');
+      toast.success('Orden actualizado correctamente');
     } catch (err: any) {
       toast.error('Error al reordenar: ' + (err?.message || 'desconocido'));
       await fetchItems();
+    } finally {
+      setReordering(false);
     }
   };
 
@@ -246,7 +239,7 @@ export default function FaqAdminPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2 text-foreground">
             <HelpCircle className="w-6 h-6 text-primary" />
             Preguntas Frecuentes
           </h1>
@@ -271,16 +264,60 @@ export default function FaqAdminPage() {
         </div>
       </div>
 
+      {/* Stats */}
+      <div className="grid grid-cols-3 gap-3 sm:gap-4">
+        <Card>
+          <CardContent className="p-4">
+            <div className="text-xs text-muted-foreground uppercase tracking-wide">
+              Total
+            </div>
+            <div className="text-2xl font-bold text-foreground mt-1">{total}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="text-xs text-muted-foreground uppercase tracking-wide">
+              Activas
+            </div>
+            <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-500 mt-1">
+              {activeCount}
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="text-xs text-muted-foreground uppercase tracking-wide">
+              Inactivas
+            </div>
+            <div className="text-2xl font-bold text-muted-foreground mt-1">
+              {inactiveCount}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Add / Edit form */}
       {showForm && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              {editingId ? (
-                <><Save className="w-5 h-5" /> Editar pregunta</>
-              ) : (
-                <><Plus className="w-5 h-5" /> Nueva pregunta</>
-              )}
+            <CardTitle className="text-lg flex items-center justify-between">
+              <span className="flex items-center gap-2 text-foreground">
+                {editingId ? (
+                  <><Pencil className="w-5 h-5" /> Editar pregunta</>
+                ) : (
+                  <><Plus className="w-5 h-5" /> Nueva pregunta</>
+                )}
+              </span>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
+                onClick={resetForm}
+                disabled={saving}
+                title="Cerrar"
+              >
+                <X className="w-4 h-4" />
+              </Button>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -311,40 +348,24 @@ export default function FaqAdminPage() {
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Sort order */}
-              <div className="space-y-2">
-                <Label htmlFor="sort_order">Orden</Label>
-                <Input
-                  id="sort_order"
-                  type="number"
-                  min={0}
-                  value={form.sort_order}
-                  onChange={e =>
-                    setForm(f => ({ ...f, sort_order: Number(e.target.value) || 0 }))
-                  }
-                />
-              </div>
-
-              {/* Active */}
-              <div className="flex items-end gap-3 pb-2">
-                <Switch
-                  id="is_active"
-                  checked={form.is_active}
-                  onCheckedChange={c => setForm(f => ({ ...f, is_active: c }))}
-                />
-                <Label htmlFor="is_active" className="cursor-pointer">
-                  {form.is_active ? 'Activa' : 'Inactiva'}
-                </Label>
-              </div>
+            {/* Active toggle */}
+            <div className="flex items-center gap-3">
+              <Switch
+                id="is_active"
+                checked={form.is_active}
+                onCheckedChange={c => setForm(f => ({ ...f, is_active: c }))}
+              />
+              <Label htmlFor="is_active" className="cursor-pointer">
+                {form.is_active ? 'Activa' : 'Inactiva'}
+              </Label>
             </div>
 
             {/* Actions */}
-            <div className="flex justify-end gap-2 pt-2 border-t">
-              <Button variant="outline" onClick={resetForm} disabled={!!saving}>
+            <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-4 border-t border-border">
+              <Button variant="outline" onClick={resetForm} disabled={saving}>
                 Cancelar
               </Button>
-              <Button onClick={handleSave} disabled={!!saving}>
+              <Button onClick={handleSave} disabled={saving}>
                 {saving ? (
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 ) : (
@@ -360,7 +381,7 @@ export default function FaqAdminPage() {
       {/* List */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg flex items-center justify-between">
+          <CardTitle className="text-lg flex items-center justify-between text-foreground">
             <span>Preguntas configuradas</span>
             <span className="text-sm font-normal text-muted-foreground">
               {items.length} {items.length === 1 ? 'pregunta' : 'preguntas'}
@@ -386,121 +407,89 @@ export default function FaqAdminPage() {
             </div>
           ) : (
             <div className="space-y-3">
-              {items.map((item, idx) => (
-                <div
-                  key={item.id}
-                  className={`flex flex-col lg:flex-row lg:items-start gap-3 p-4 rounded-lg border transition-colors ${
-                    item.is_active
-                      ? 'bg-card hover:bg-accent/30'
-                      : 'bg-muted/30 opacity-70 hover:opacity-100'
-                  }`}
-                >
-                  {/* Reorder controls */}
-                  <div className="flex items-center gap-1 lg:pt-1">
-                    <div className="flex flex-col">
+              {reordering && (
+                <div className="flex items-center justify-center py-2 text-sm text-muted-foreground">
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Guardando nuevo orden...
+                </div>
+              )}
+              {items.map((item, idx) => {
+                const isDragged = isDragging && dragIndex.current === idx;
+                const isDropTarget = dragOverIndex === idx;
+                return (
+                  <div
+                    key={item.id}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, idx)}
+                    onDragEnd={handleDragEnd}
+                    onDragOver={e => handleDragOver(e, idx)}
+                    onDragLeave={e => handleDragLeave(e, idx)}
+                    onDrop={e => handleDrop(e, idx)}
+                    className={`group flex items-start gap-3 p-4 rounded-lg border bg-card transition-all ${
+                      isDropTarget
+                        ? 'border-t-2 border-t-primary border-primary'
+                        : 'border-border'
+                    } ${
+                      isDragged
+                        ? 'opacity-50'
+                        : 'hover:bg-accent/30'
+                    } ${!item.is_active ? 'opacity-70' : ''}`}
+                  >
+                    {/* Drag handle */}
+                    <div
+                      className="flex items-center justify-center pt-1 cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground transition-colors"
+                      title="Arrastra para reordenar"
+                    >
+                      <GripVertical className="w-5 h-5" />
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0 space-y-1">
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="font-medium text-foreground truncate">
+                          {item.question || 'Pregunta sin título'}
+                        </p>
+                        <span
+                          className={`shrink-0 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+                            item.is_active
+                              ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
+                              : 'bg-muted text-muted-foreground'
+                          }`}
+                        >
+                          {item.is_active ? 'Activa' : 'Inactiva'}
+                        </span>
+                      </div>
+                      <p className="text-sm text-muted-foreground line-clamp-2">
+                        {item.answer || 'Sin respuesta'}
+                      </p>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center gap-1 shrink-0">
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-6 w-6"
-                        onClick={() => handleMove(item, -1)}
-                        disabled={idx === 0}
-                        title="Subir"
+                        className="h-8 w-8"
+                        onClick={() => startEdit(item)}
+                        disabled={saving || reordering}
+                        title="Editar"
                       >
-                        <ChevronUp className="w-4 h-4" />
+                        <Pencil className="w-4 h-4" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-6 w-6"
-                        onClick={() => handleMove(item, 1)}
-                        disabled={idx === items.length - 1}
-                        title="Bajar"
+                        className="h-8 w-8 text-destructive hover:text-destructive"
+                        onClick={() => handleDelete(item.id)}
+                        disabled={saving || reordering}
+                        title="Eliminar"
                       >
-                        <ChevronDown className="w-4 h-4" />
+                        <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
                   </div>
-
-                  {/* Content */}
-                  <div className="flex-1 min-w-0 space-y-2">
-                    <Input
-                      value={item.question}
-                      onChange={e => handleInlineChange(item.id, 'question', e.target.value)}
-                      className="h-9 font-medium"
-                      placeholder="Pregunta"
-                    />
-                    <Textarea
-                      value={item.answer}
-                      onChange={e => handleInlineChange(item.id, 'answer', e.target.value)}
-                      className="text-sm text-muted-foreground min-h-[60px]"
-                      placeholder="Respuesta"
-                      rows={2}
-                    />
-                  </div>
-
-                  {/* Sort order */}
-                  <div className="flex items-center gap-2 lg:pt-1">
-                    <Label className="text-xs text-muted-foreground whitespace-nowrap">Orden</Label>
-                    <Input
-                      type="number"
-                      value={item.sort_order}
-                      onChange={e => handleInlineChange(item.id, 'sort_order', e.target.value)}
-                      className="h-8 w-16"
-                    />
-                  </div>
-
-                  {/* Active toggle */}
-                  <div className="flex items-center gap-2 lg:pt-2">
-                    <Switch
-                      checked={item.is_active}
-                      onCheckedChange={() => handleToggleActive(item)}
-                    />
-                    <span className="text-xs text-muted-foreground w-14">
-                      {item.is_active ? (
-                        <span className="text-emerald-600">Activa</span>
-                      ) : (
-                        <span>Inactiva</span>
-                      )}
-                    </span>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex items-center gap-1 lg:pt-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => handleInlineSave(item)}
-                      disabled={saving === item.id}
-                      title="Guardar cambios"
-                    >
-                      {saving === item.id ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <Save className="w-4 h-4" />
-                      )}
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => startEdit(item)}
-                      title="Editar en el formulario"
-                    >
-                      <HelpCircle className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-destructive hover:text-destructive"
-                      onClick={() => handleDelete(item.id)}
-                      title="Eliminar"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </CardContent>

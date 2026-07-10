@@ -123,6 +123,7 @@ const userNav: NavItem[] = [
   { label: 'Mi Rango', href: '/dashboard/rangos', icon: Award },
   { label: 'Mi Plan', href: '/dashboard/mi-plan', icon: CreditCard },
   { label: 'Mis Pedidos', href: '/dashboard/pedidos', icon: ShoppingCart },
+  { label: 'Mis Reclamos', href: '/dashboard/mis-reclamos', icon: FileText },
   { label: 'Reportes', href: '/dashboard/reportes', icon: BarChart2 },
 ];
 

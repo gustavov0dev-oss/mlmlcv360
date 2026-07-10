@@ -32,6 +32,7 @@ import TestimonialsManagerPage from '@/pages/admin/TestimonialsManagerPage';
 import SocialLinksAdminPage from '@/pages/admin/SocialLinksAdminPage';
 import FaqAdminPage from '@/pages/admin/FaqAdminPage';
 import ComplaintsAdminPage from '@/pages/admin/ComplaintsAdminPage';
+import MyComplaintsPage from '@/pages/dashboard/MyComplaintsPage';
 
 function DashboardContent() {
   const { pathname } = useLocation();
@@ -65,6 +66,7 @@ function DashboardContent() {
   if (pathname === '/dashboard/admin/redes-sociales') return <SocialLinksAdminPage />;
   if (pathname === '/dashboard/admin/faq') return <FaqAdminPage />;
   if (pathname === '/dashboard/admin/libro-reclamaciones') return <ComplaintsAdminPage />;
+  if (pathname === '/dashboard/mis-reclamos') return <MyComplaintsPage />;
 
   return <DashboardPage />;
 }

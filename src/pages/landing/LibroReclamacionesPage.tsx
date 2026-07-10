@@ -247,10 +247,10 @@ export default function LibroReclamacionesPage() {
 
           {/* ── Success screen ────────────────────────────────────────── */}
           {success ? (
-            <Card className="border-green-200 bg-green-50/50">
+            <Card className="border-emerald-500/30 bg-emerald-500/5">
               <CardContent className="pt-8 pb-8 text-center">
-                <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-5">
-                  <CheckCircle2 className="w-9 h-9 text-green-600" />
+                <div className="w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto mb-5">
+                  <CheckCircle2 className="w-9 h-9 text-emerald-500" />
                 </div>
                 <h2 className="text-2xl font-bold text-foreground mb-2">
                   Reclamo registrado
@@ -259,12 +259,12 @@ export default function LibroReclamacionesPage() {
                   Tu solicitud se registró correctamente. Guarda el siguiente código
                   para futuras consultas sobre el estado de tu reclamo.
                 </p>
-                <div className="inline-flex flex-col items-center gap-1 px-6 py-4 bg-white border border-green-200 rounded-xl mb-6">
+                <div className="inline-flex flex-col items-center gap-1 px-6 py-4 bg-muted border border-border rounded-xl mb-6">
                   <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Código de seguimiento
                   </span>
-                  <span className="text-2xl font-bold text-green-700 tracking-wide">
-                    {correlativo}
+                  <span className="text-2xl font-bold text-foreground tracking-wide">
+                    {correlativo || 'Generando...'}
                   </span>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">

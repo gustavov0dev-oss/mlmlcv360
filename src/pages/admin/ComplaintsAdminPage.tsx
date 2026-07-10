@@ -57,25 +57,25 @@ const STATUS_CONFIG: Record<
     label: 'Pendiente',
     color: 'amber',
     badgeClass:
-      'bg-amber-100 text-amber-800 border-amber-200 hover:bg-amber-100',
+      'bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30 hover:bg-amber-500/20',
   },
   en_proceso: {
     label: 'En proceso',
     color: 'blue',
     badgeClass:
-      'bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-100',
+      'bg-blue-500/15 text-blue-700 dark:text-blue-400 border-blue-500/30 hover:bg-blue-500/20',
   },
   resuelto: {
     label: 'Resuelto',
     color: 'green',
     badgeClass:
-      'bg-green-100 text-green-800 border-green-200 hover:bg-green-100',
+      'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20',
   },
   cerrado: {
     label: 'Cerrado',
     color: 'gray',
     badgeClass:
-      'bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-100',
+      'bg-muted text-muted-foreground border-border hover:bg-muted/80',
   },
 };
 
@@ -299,14 +299,14 @@ export default function ComplaintsAdminPage() {
       {/* Toggle enabled/disabled */}
       <Card
         className={`border-2 ${
-          complaintsEnabled ? 'border-green-200 bg-green-50/50' : 'border-amber-200 bg-amber-50/50'
+          complaintsEnabled ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-amber-500/30 bg-amber-500/5'
         }`}
       >
         <CardContent className="flex items-center justify-between py-5">
           <div className="flex items-start gap-3">
             <div className="mt-0.5">
               {complaintsEnabled ? (
-                <CheckCircle2 className="h-6 w-6 text-green-600" />
+                <CheckCircle2 className="h-6 w-6 text-emerald-500" />
               ) : (
                 <Clock className="h-6 w-6 text-amber-600" />
               )}
@@ -387,7 +387,7 @@ export default function ComplaintsAdminPage() {
             <CheckCircle2 className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">
+            <div className="text-2xl font-bold text-emerald-500">
               {stats.resuelto}
             </div>
           </CardContent>

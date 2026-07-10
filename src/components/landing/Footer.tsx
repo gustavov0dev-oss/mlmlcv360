@@ -58,6 +58,11 @@ export default function Footer() {
                 size="w-8 h-8"
                 textClass="text-lg font-bold text-foreground"
               />
+              {company.company_tagline && (
+                <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
+                  {company.company_tagline}
+                </p>
+              )}
               <div className="flex gap-1.5 mt-5">
                 {socialLinks.length > 0 ? (
                   socialLinks.map((link) => {

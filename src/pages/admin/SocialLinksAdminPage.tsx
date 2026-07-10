@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/lib/backend/client';
 import {
   Card,
@@ -17,8 +17,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { Plus, Trash2, Save, GripVertical, Eye, EyeOff, Loader as Loader2, RefreshCw, Link2 } from 'lucide-react';
+import { Plus, Trash2, Save, GripVertical, Eye, EyeOff, Loader as Loader2, RefreshCw, Link2, X } from 'lucide-react';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 interface SocialLink {
@@ -26,22 +27,35 @@ interface SocialLink {
   platform: string;
   url: string;
   icon: string;
+  icon_svg: string | null;
   is_active: boolean;
   sort_order: number;
   created_at: string;
 }
 
-type FormData = Omit<SocialLink, 'id' | 'created_at'>;
+type IconMode = 'preset' | 'custom';
 
-const emptyForm = (): FormData => ({
+interface FormState {
+  id: string | null;
+  platform: string;
+  url: string;
+  icon: string;
+  icon_svg: string;
+  is_active: boolean;
+  sort_order: number;
+}
+
+const emptyForm = (): FormState => ({
+  id: null,
   platform: '',
   url: '',
   icon: 'facebook',
+  icon_svg: '',
   is_active: true,
   sort_order: 0,
 });
 
-// ── Icon options ──────────────────────────────────────────────────────────────
+// ── Preset icons ─────────────────────────────────────────────────────────────
 const ICON_OPTIONS = [
   'facebook',
   'instagram',
@@ -52,9 +66,8 @@ const ICON_OPTIONS = [
   'whatsapp',
   'telegram',
   'github',
-] as const;
+];
 
-// SVG paths for the live preview. Simple, recognizable glyphs per platform.
 const ICON_PATHS: Record<string, string> = {
   facebook:
     'M22 12a10 10 0 1 0-11.5 9.9v-7H8v-2.9h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.5h-1.3c-1.2 0-1.6.8-1.6 1.6v1.9h2.8l-.4 2.9h-2.4v7A10 10 0 0 0 22 12z',
@@ -76,14 +89,20 @@ const ICON_PATHS: Record<string, string> = {
     'M12 2a10 10 0 0 0-3.2 19.5c.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.3-3.4-1.3-.5-1.1-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.9.8.1-.6.3-1.1.6-1.4-2.2-.3-4.5-1.1-4.5-5a3.9 3.9 0 0 1 1-2.7c-.1-.3-.4-1.3.1-2.6 0 0 .8-.3 2.7 1a9.4 9.4 0 0 1 5 0c1.9-1.3 2.7-1 2.7-1 .5 1.3.2 2.3.1 2.6a3.9 3.9 0 0 1 1 2.7c0 3.9-2.3 4.7-4.5 5 .3.3.6.9.6 1.8v2.6c0 .3.2.6.7.5A10 10 0 0 0 12 2z',
 };
 
+// ── PlatformIcon ────────────────────────────────────────────────────────────
 function PlatformIcon({
-  name,
-  className = 'w-5 h-5',
+  icon,
+  iconSvg,
+  className = 'h-5 w-5',
 }: {
-  name: string;
+  icon: string;
+  iconSvg?: string | null;
   className?: string;
 }) {
-  const path = ICON_PATHS[name] || ICON_PATHS.facebook;
+  const path =
+    iconSvg && iconSvg.trim() !== ''
+      ? iconSvg
+      : ICON_PATHS[icon] || ICON_PATHS.facebook;
   return (
     <svg
       viewBox="0 0 24 24"
@@ -96,17 +115,21 @@ function PlatformIcon({
   );
 }
 
-// ── Page ──────────────────────────────────────────────────────────────────────
+// ── Component ───────────────────────────────────────────────────────────────
 export default function SocialLinksAdminPage() {
   const [links, setLinks] = useState<SocialLink[]>([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState<string | null>(null); // id being saved (or 'new')
-  const [refreshing, setRefreshing] = useState(false);
-  const [form, setForm] = useState<FormData>(emptyForm());
+  const [saving, setSaving] = useState(false);
   const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [form, setForm] = useState<FormState>(emptyForm());
+  const [iconMode, setIconMode] = useState<IconMode>('preset');
 
-  // ── Fetch ────────────────────────────────────────────────────────────────────
+  // Drag-and-drop state
+  const dragIndex = useRef<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
+  // ── Fetch ──────────────────────────────────────────────────────────────────
   const fetchLinks = useCallback(async () => {
     setLoading(true);
     try {
@@ -116,8 +139,9 @@ export default function SocialLinksAdminPage() {
         .order('sort_order', { ascending: true });
       if (error) throw error;
       setLinks((data as SocialLink[]) || []);
-    } catch (err: any) {
-      toast.error('Error al cargar los enlaces: ' + (err?.message || 'desconocido'));
+    } catch (err) {
+      console.error(err);
+      toast.error('Error al cargar los enlaces sociales');
     } finally {
       setLoading(false);
     }
@@ -127,38 +151,34 @@ export default function SocialLinksAdminPage() {
     fetchLinks();
   }, [fetchLinks]);
 
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    await fetchLinks();
-    setRefreshing(false);
-  };
-
-  // ── Form helpers ─────────────────────────────────────────────────────────────
-  const resetForm = () => {
+  // ── Form helpers ───────────────────────────────────────────────────────────
+  const openCreateForm = () => {
     setForm(emptyForm());
-    setShowForm(false);
-    setEditingId(null);
-  };
-
-  const startAdd = () => {
-    setForm({ ...emptyForm(), sort_order: links.length });
-    setEditingId(null);
+    setIconMode('preset');
     setShowForm(true);
   };
 
-  const startEdit = (link: SocialLink) => {
+  const openEditForm = (link: SocialLink) => {
     setForm({
+      id: link.id,
       platform: link.platform,
       url: link.url,
       icon: link.icon,
+      icon_svg: link.icon_svg || '',
       is_active: link.is_active,
       sort_order: link.sort_order,
     });
-    setEditingId(link.id);
+    setIconMode(link.icon_svg && link.icon_svg.trim() !== '' ? 'custom' : 'preset');
     setShowForm(true);
   };
 
-  // ── Save (create or update) ──────────────────────────────────────────────────
+  const closeForm = () => {
+    setShowForm(false);
+    setForm(emptyForm());
+    setIconMode('preset');
+  };
+
+  // ── Save ────────────────────────────────────────────────────────────────────
   const handleSave = async () => {
     if (!form.platform.trim()) {
       toast.error('El nombre de la plataforma es obligatorio');
@@ -169,286 +189,370 @@ export default function SocialLinksAdminPage() {
       return;
     }
 
-    const payload = {
-      platform: form.platform.trim(),
-      url: form.url.trim(),
-      icon: form.icon,
-      is_active: form.is_active,
-      sort_order: Number(form.sort_order) || 0,
-    };
-
-    setSaving(editingId || 'new');
+    setSaving(true);
     try {
-      if (editingId) {
+      const payload = {
+        platform: form.platform.trim(),
+        url: form.url.trim(),
+        icon: form.icon,
+        icon_svg: form.icon_svg.trim() === '' ? null : form.icon_svg.trim(),
+        is_active: form.is_active,
+        sort_order: form.sort_order,
+      };
+
+      if (form.id) {
         const { error } = await supabase
           .from('social_links')
           .update(payload)
-          .eq('id', editingId);
+          .eq('id', form.id);
         if (error) throw error;
-        toast.success('Enlace actualizado correctamente');
+        toast.success('Enlace social actualizado');
       } else {
-        const { error } = await supabase.from('social_links').insert(payload);
+        const { error } = await supabase
+          .from('social_links')
+          .insert(payload)
+          .select()
+          .single();
         if (error) throw error;
-        toast.success('Enlace creado correctamente');
+        toast.success('Enlace social creado');
       }
-      resetForm();
+
+      closeForm();
       await fetchLinks();
-    } catch (err: any) {
-      toast.error('Error al guardar: ' + (err?.message || 'desconocido'));
+    } catch (err) {
+      console.error(err);
+      toast.error('Error al guardar el enlace social');
     } finally {
-      setSaving(null);
+      setSaving(false);
     }
   };
 
-  // ── Delete ───────────────────────────────────────────────────────────────────
-  const handleDelete = async (id: string) => {
-    if (!confirm('¿Eliminar este enlace social? Esta acción no se puede deshacer.')) return;
+  // ── Delete ──────────────────────────────────────────────────────────────────
+  const handleDelete = async (link: SocialLink) => {
+    if (!confirm(`¿Eliminar el enlace de "${link.platform}"?`)) return;
     try {
-      const { error } = await supabase.from('social_links').delete().eq('id', id);
+      const { error } = await supabase
+        .from('social_links')
+        .delete()
+        .eq('id', link.id);
       if (error) throw error;
       toast.success('Enlace eliminado');
-      if (editingId === id) resetForm();
       await fetchLinks();
-    } catch (err: any) {
-      toast.error('Error al eliminar: ' + (err?.message || 'desconocido'));
+    } catch (err) {
+      console.error(err);
+      toast.error('Error al eliminar el enlace');
     }
   };
 
-  // ── Toggle active ────────────────────────────────────────────────────────────
+  // ── Toggle active ───────────────────────────────────────────────────────────
   const handleToggleActive = async (link: SocialLink) => {
-    const next = !link.is_active;
-    // Optimistic update
-    setLinks(prev => prev.map(l => (l.id === link.id ? { ...l, is_active: next } : l)));
     try {
       const { error } = await supabase
         .from('social_links')
-        .update({ is_active: next })
+        .update({ is_active: !link.is_active })
         .eq('id', link.id);
       if (error) throw error;
-      toast.success(next ? 'Enlace activado' : 'Enlace desactivado');
-    } catch (err: any) {
-      // Revert on failure
-      setLinks(prev => prev.map(l => (l.id === link.id ? { ...l, is_active: !next } : l)));
-      toast.error('Error al cambiar el estado: ' + (err?.message || 'desconocido'));
+      setLinks((prev) =>
+        prev.map((l) =>
+          l.id === link.id ? { ...l, is_active: !l.is_active } : l
+        )
+      );
+      toast.success(
+        !link.is_active ? 'Enlace activado' : 'Enlace desactivado'
+      );
+    } catch (err) {
+      console.error(err);
+      toast.error('Error al cambiar el estado');
     }
   };
 
-  // ── Inline edit (sort_order) ──────────────────────────────────────────────────
-  const handleInlineChange = (id: string, field: 'platform' | 'url' | 'sort_order', value: string) => {
-    setLinks(prev =>
-      prev.map(l =>
-        l.id === id
-          ? { ...l, [field]: field === 'sort_order' ? Number(value) || 0 : value }
-          : l,
-      ),
-    );
+  // ── Drag and drop ───────────────────────────────────────────────────────────
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    dragIndex.current = index;
+    setIsDragging(true);
+    e.dataTransfer.effectAllowed = 'move';
+    // necessary for Firefox to initiate drag
+    e.dataTransfer.setData('text/plain', String(index));
   };
 
-  const handleInlineSave = async (link: SocialLink) => {
-    setSaving(link.id);
-    try {
-      const { error } = await supabase
-        .from('social_links')
-        .update({
-          platform: link.platform,
-          url: link.url,
-          sort_order: link.sort_order,
-        })
-        .eq('id', link.id);
-      if (error) throw error;
-      toast.success('Cambios guardados');
-      await fetchLinks();
-    } catch (err: any) {
-      toast.error('Error al guardar: ' + (err?.message || 'desconocido'));
-    } finally {
-      setSaving(null);
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (dragIndex.current !== null && dragIndex.current !== index) {
+      setDragOverIndex(index);
     }
   };
 
-  // ── Move (reorder) ───────────────────────────────────────────────────────────
-  const handleMove = async (link: SocialLink, dir: -1 | 1) => {
-    const index = links.findIndex(l => l.id === link.id);
-    const target = index + dir;
-    if (target < 0 || target >= links.length) return;
+  const handleDragLeave = (_e: React.DragEvent, index: number) => {
+    // Only clear if leaving the row entirely (not entering a child)
+    if (dragOverIndex === index) {
+      setDragOverIndex(null);
+    }
+  };
 
-    const a = links[index];
-    const b = links[target];
-    const newOrderA = b.sort_order;
-    const newOrderB = a.sort_order;
+  const handleDragEnd = () => {
+    dragIndex.current = null;
+    setDragOverIndex(null);
+    setIsDragging(false);
+  };
 
-    // Optimistic reorder
-    setLinks(prev =>
-      prev
-        .map(l => {
-          if (l.id === a.id) return { ...l, sort_order: newOrderA };
-          if (l.id === b.id) return { ...l, sort_order: newOrderB };
-          return l;
-        })
-        .sort((x, y) => x.sort_order - y.sort_order),
-    );
+  const handleDrop = async (e: React.DragEvent, dropIndex: number) => {
+    e.preventDefault();
+    const fromIndex = dragIndex.current;
+    dragIndex.current = null;
+    setDragOverIndex(null);
+    setIsDragging(false);
 
+    if (fromIndex === null || fromIndex === dropIndex) return;
+
+    // Reorder locally
+    const reordered = [...links];
+    const [moved] = reordered.splice(fromIndex, 1);
+    reordered.splice(dropIndex, 0, moved);
+    // Reassign sort_order
+    const withOrder = reordered.map((l, i) => ({ ...l, sort_order: i }));
+    setLinks(withOrder);
+
+    // Persist new sort_order for all items
     try {
-      const updates = [
-        supabase.from('social_links').update({ sort_order: newOrderA }).eq('id', a.id),
-        supabase.from('social_links').update({ sort_order: newOrderB }).eq('id', b.id),
-      ];
-      const results = await Promise.all(updates);
-      for (const r of results) if (r.error) throw r.error;
+      const updates = withOrder.map((l) =>
+        supabase
+          .from('social_links')
+          .update({ sort_order: l.sort_order })
+          .eq('id', l.id)
+      );
+      await Promise.all(updates);
       toast.success('Orden actualizado');
-    } catch (err: any) {
-      toast.error('Error al reordenar: ' + (err?.message || 'desconocido'));
+    } catch (err) {
+      console.error(err);
+      toast.error('Error al guardar el nuevo orden');
       await fetchLinks();
     }
   };
 
-  // ── Render ───────────────────────────────────────────────────────────────────
+  // ── Derived preview values ──────────────────────────────────────────────────
+  const previewIcon = form.icon;
+  const previewIconSvg = iconMode === 'custom' ? form.icon_svg : null;
+
+  // ── Render ──────────────────────────────────────────────────────────────────
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-4 md:p-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-            <Link2 className="w-6 h-6 text-primary" />
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
             Enlaces Sociales
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Gestiona los enlaces a redes sociales que aparecen en el pie de página.
+          <p className="mt-1 text-sm text-muted-foreground">
+            Gestiona los enlaces a redes sociales que se muestran en el pie de
+            página. Arrastra para reordenar.
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button
             variant="outline"
             size="sm"
-            onClick={handleRefresh}
-            disabled={refreshing || loading}
+            onClick={fetchLinks}
+            disabled={loading}
           >
-            <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-            Actualizar
+            <RefreshCw
+              className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`}
+            />
+            <span className="hidden sm:inline">Actualizar</span>
           </Button>
-          <Button size="sm" onClick={startAdd} disabled={showForm && !editingId}>
-            <Plus className="w-4 h-4 mr-2" />
-            Nuevo enlace
+          <Button size="sm" onClick={openCreateForm} disabled={showForm}>
+            <Plus className="h-4 w-4" />
+            <span>Nuevo enlace</span>
           </Button>
         </div>
       </div>
 
-      {/* Add / Edit form */}
+      {/* Form */}
       {showForm && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              {editingId ? (
-                <><Save className="w-5 h-5" /> Editar enlace</>
-              ) : (
-                <><Plus className="w-5 h-5" /> Nuevo enlace</>
-              )}
+        <Card className="border-border bg-card">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+            <CardTitle className="text-base font-semibold text-foreground">
+              {form.id ? 'Editar enlace' : 'Nuevo enlace'}
             </CardTitle>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-muted-foreground"
+              onClick={closeForm}
+              type="button"
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Platform */}
-              <div className="space-y-2">
-                <Label htmlFor="platform">Plataforma</Label>
-                <Input
-                  id="platform"
-                  placeholder="Ej. Facebook"
-                  value={form.platform}
-                  onChange={e => setForm(f => ({ ...f, platform: e.target.value }))}
-                />
-              </div>
+          <CardContent className="space-y-5">
+            {/* Platform name */}
+            <div className="space-y-2">
+              <Label htmlFor="platform" className="text-foreground">
+                Plataforma
+              </Label>
+              <Input
+                id="platform"
+                value={form.platform}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, platform: e.target.value }))
+                }
+                placeholder="Ej. Facebook, Instagram..."
+                className="bg-background"
+              />
+            </div>
 
-              {/* URL */}
-              <div className="space-y-2">
-                <Label htmlFor="url">URL</Label>
-                <Input
-                  id="url"
-                  placeholder="https://facebook.com/tu-pagina"
-                  value={form.url}
-                  onChange={e => setForm(f => ({ ...f, url: e.target.value }))}
-                />
-              </div>
+            {/* URL */}
+            <div className="space-y-2">
+              <Label htmlFor="url" className="text-foreground">
+                URL
+              </Label>
+              <Input
+                id="url"
+                value={form.url}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, url: e.target.value }))
+                }
+                placeholder="https://..."
+                className="bg-background"
+              />
+            </div>
 
-              {/* Icon */}
+            {/* Icon mode toggle */}
+            <div className="space-y-2">
+              <Label className="text-foreground">Icono</Label>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={iconMode === 'preset' ? 'default' : 'outline'}
+                  onClick={() => setIconMode('preset')}
+                >
+                  Preset
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={iconMode === 'custom' ? 'default' : 'outline'}
+                  onClick={() => setIconMode('custom')}
+                >
+                  Personalizado (SVG)
+                </Button>
+              </div>
+            </div>
+
+            {/* Icon field - conditional */}
+            {iconMode === 'preset' ? (
               <div className="space-y-2">
-                <Label>Icono</Label>
+                <Label className="text-foreground">Selecciona un icono</Label>
                 <Select
                   value={form.icon}
-                  onValueChange={v => setForm(f => ({ ...f, icon: v }))}
+                  onValueChange={(value) =>
+                    setForm((f) => ({ ...f, icon: value }))
+                  }
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecciona un icono" />
+                  <SelectTrigger className="bg-background">
+                    <SelectValue placeholder="Selecciona una plataforma" />
                   </SelectTrigger>
                   <SelectContent>
-                    {ICON_OPTIONS.map(opt => (
-                      <SelectItem key={opt} value={opt}>
-                        <div className="flex items-center gap-2 capitalize">
-                          <PlatformIcon name={opt} className="w-4 h-4" />
-                          {opt}
-                        </div>
+                    {ICON_OPTIONS.map((opt) => (
+                      <SelectItem key={opt} value={opt} className="capitalize">
+                        <span className="flex items-center gap-2">
+                          <PlatformIcon
+                            icon={opt}
+                            className="h-4 w-4 text-muted-foreground"
+                          />
+                          <span className="capitalize">{opt}</span>
+                        </span>
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-
-              {/* Sort order */}
+            ) : (
               <div className="space-y-2">
-                <Label htmlFor="sort_order">Orden</Label>
-                <Input
-                  id="sort_order"
-                  type="number"
-                  min={0}
-                  value={form.sort_order}
-                  onChange={e =>
-                    setForm(f => ({ ...f, sort_order: Number(e.target.value) || 0 }))
+                <Label htmlFor="icon_svg" className="text-foreground">
+                  Ruta SVG (atributo <code className="text-xs">d</code>)
+                </Label>
+                <Textarea
+                  id="icon_svg"
+                  value={form.icon_svg}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, icon_svg: e.target.value }))
                   }
+                  placeholder="Pega aquí el valor del atributo d del path de tu SVG..."
+                  className="min-h-[100px] resize-y bg-background font-mono text-xs"
                 />
+                <p className="text-xs text-muted-foreground">
+                  Pega solo el contenido del atributo{' '}
+                  <code className="text-foreground">d</code>. Cuando este campo
+                  no esté vacío, sobrescribirá el icono preset.
+                </p>
               </div>
+            )}
+
+            {/* Active toggle */}
+            <div className="flex items-center justify-between rounded-md border border-border bg-muted/30 p-3">
+              <div className="space-y-0.5">
+                <Label htmlFor="active" className="text-foreground">
+                  Activo
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  Si está inactivo, no se mostrará en el pie de página.
+                </p>
+              </div>
+              <Switch
+                id="active"
+                checked={form.is_active}
+                onCheckedChange={(checked) =>
+                  setForm((f) => ({ ...f, is_active: checked }))
+                }
+              />
             </div>
 
-            {/* Active + Preview */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2 border-t">
-              <div className="flex items-center gap-3">
-                <Switch
-                  id="is_active"
-                  checked={form.is_active}
-                  onCheckedChange={c => setForm(f => ({ ...f, is_active: c }))}
-                />
-                <Label htmlFor="is_active" className="cursor-pointer">
-                  {form.is_active ? 'Activo' : 'Inactivo'}
-                </Label>
-              </div>
-
-              {/* Live preview */}
-              <div className="flex items-center gap-3">
-                <span className="text-xs text-muted-foreground">Vista previa:</span>
-                <div
-                  className={`flex items-center gap-2 px-3 py-2 rounded-lg border ${
-                    form.is_active
-                      ? 'bg-primary/10 border-primary/30 text-primary'
-                      : 'bg-muted border-border text-muted-foreground'
-                  }`}
-                >
-                  <PlatformIcon name={form.icon} className="w-5 h-5" />
-                  <span className="text-sm font-medium">
-                    {form.platform || 'Plataforma'}
-                  </span>
+            {/* Live preview */}
+            <div className="space-y-2">
+              <Label className="text-foreground">Vista previa</Label>
+              <div className="flex items-center gap-3 rounded-md border border-border bg-muted/30 p-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                  <PlatformIcon
+                    icon={previewIcon}
+                    iconSvg={previewIconSvg}
+                    className="h-5 w-5"
+                  />
                 </div>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium text-foreground">
+                    {form.platform || 'Nombre de la plataforma'}
+                  </p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {form.url || 'https://...'}
+                  </p>
+                </div>
+                {!form.is_active && (
+                  <span className="ml-auto rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                    Inactivo
+                  </span>
+                )}
               </div>
             </div>
 
             {/* Actions */}
-            <div className="flex justify-end gap-2 pt-2">
-              <Button variant="outline" onClick={resetForm} disabled={!!saving}>
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              <Button
+                variant="outline"
+                onClick={closeForm}
+                disabled={saving}
+                type="button"
+              >
                 Cancelar
               </Button>
-              <Button onClick={handleSave} disabled={!!saving}>
+              <Button onClick={handleSave} disabled={saving} type="button">
                 {saving ? (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
-                  <Save className="w-4 h-4 mr-2" />
+                  <Save className="h-4 w-4" />
                 )}
-                {editingId ? 'Guardar cambios' : 'Crear enlace'}
+                <span>Guardar</span>
               </Button>
             </div>
           </CardContent>
@@ -456,158 +560,141 @@ export default function SocialLinksAdminPage() {
       )}
 
       {/* List */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg flex items-center justify-between">
-            <span>Enlaces configurados</span>
-            <span className="text-sm font-normal text-muted-foreground">
-              {links.length} {links.length === 1 ? 'enlace' : 'enlaces'}
-            </span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="flex items-center justify-center py-12 text-muted-foreground">
-              <Loader2 className="w-6 h-6 mr-2 animate-spin" />
+      {loading ? (
+        <Card className="border-border bg-card">
+          <CardContent className="flex items-center justify-center py-16">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            <span className="ml-3 text-sm text-muted-foreground">
               Cargando enlaces...
-            </div>
-          ) : links.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <Link2 className="w-10 h-10 text-muted-foreground/40 mb-3" />
-              <p className="text-sm text-muted-foreground">
-                No hay enlaces sociales configurados.
+            </span>
+          </CardContent>
+        </Card>
+      ) : links.length === 0 ? (
+        <Card className="border-border bg-card">
+          <CardContent className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+            <Link2 className="h-10 w-10 text-muted-foreground" />
+            <div>
+              <p className="text-sm font-medium text-foreground">
+                No hay enlaces sociales
               </p>
-              <Button variant="outline" size="sm" className="mt-4" onClick={startAdd}>
-                <Plus className="w-4 h-4 mr-2" />
-                Crear el primer enlace
-              </Button>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Crea tu primer enlace social para mostrarlo en el pie de página.
+              </p>
             </div>
-          ) : (
-            <div className="space-y-3">
-              {links.map((link, idx) => (
-                <div
-                  key={link.id}
-                  className={`flex flex-col lg:flex-row lg:items-center gap-3 p-3 rounded-lg border transition-colors ${
-                    link.is_active
-                      ? 'bg-card hover:bg-accent/30'
-                      : 'bg-muted/30 opacity-70 hover:opacity-100'
-                  }`}
-                >
-                  {/* Drag handle + reorder */}
-                  <div className="flex items-center gap-1">
-                    <GripVertical className="w-4 h-4 text-muted-foreground/40 cursor-grab" />
-                    <div className="flex flex-col">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-5 w-5"
-                        onClick={() => handleMove(link, -1)}
-                        disabled={idx === 0}
-                        title="Subir"
+            <Button size="sm" onClick={openCreateForm}>
+              <Plus className="h-4 w-4" />
+              <span>Crear enlace</span>
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-3">
+          {links.map((link, index) => {
+            const isDragged = isDragging && dragIndex.current === index;
+            const isDropTarget = dragOverIndex === index;
+            return (
+              <Card
+                key={link.id}
+                draggable
+                onDragStart={(e) => handleDragStart(e, index)}
+                onDragOver={(e) => handleDragOver(e, index)}
+                onDragLeave={(e) => handleDragLeave(e, index)}
+                onDrop={(e) => handleDrop(e, index)}
+                onDragEnd={handleDragEnd}
+                className={`group relative border-border bg-card transition-colors ${
+                  isDragged ? 'opacity-50' : ''
+                } ${isDropTarget ? 'border-t-2 border-t-primary' : ''}`}
+              >
+                <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
+                  {/* Drag handle */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      className="cursor-grab touch-none text-muted-foreground hover:text-foreground active:cursor-grabbing"
+                      aria-label="Arrastrar para reordenar"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <GripVertical className="h-5 w-5" />
+                    </button>
+                  </div>
+
+                  {/* Icon preview */}
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                    <PlatformIcon
+                      icon={link.icon}
+                      iconSvg={link.icon_svg}
+                      className="h-5 w-5"
+                    />
+                  </div>
+
+                  {/* Info */}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="truncate text-sm font-semibold text-foreground">
+                        {link.platform}
+                      </p>
+                      <span
+                        className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
+                          link.is_active
+                            ? 'bg-primary/10 text-primary'
+                            : 'bg-muted text-muted-foreground'
+                        }`}
                       >
-                        <svg viewBox="0 0 24 24" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m18 15-6-6-6 6" /></svg>
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-5 w-5"
-                        onClick={() => handleMove(link, 1)}
-                        disabled={idx === links.length - 1}
-                        title="Bajar"
-                      >
-                        <svg viewBox="0 0 24 24" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
-                      </Button>
+                        {link.is_active ? (
+                          <>
+                            <Eye className="h-3 w-3" />
+                            Activo
+                          </>
+                        ) : (
+                          <>
+                            <EyeOff className="h-3 w-3" />
+                            Inactivo
+                          </>
+                        )}
+                      </span>
                     </div>
-                  </div>
-
-                  {/* Icon */}
-                  <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10 text-primary shrink-0">
-                    <PlatformIcon name={link.icon} className="w-5 h-5" />
-                  </div>
-
-                  {/* Platform */}
-                  <div className="flex-1 min-w-0 space-y-1">
-                    <Input
-                      value={link.platform}
-                      onChange={e => handleInlineChange(link.id, 'platform', e.target.value)}
-                      className="h-8 font-medium"
-                      placeholder="Plataforma"
-                    />
-                    <Input
-                      value={link.url}
-                      onChange={e => handleInlineChange(link.id, 'url', e.target.value)}
-                      className="h-8 text-xs text-muted-foreground"
-                      placeholder="https://..."
-                    />
-                  </div>
-
-                  {/* Sort order */}
-                  <div className="flex items-center gap-2">
-                    <Label className="text-xs text-muted-foreground whitespace-nowrap">Orden</Label>
-                    <Input
-                      type="number"
-                      value={link.sort_order}
-                      onChange={e => handleInlineChange(link.id, 'sort_order', e.target.value)}
-                      className="h-8 w-16"
-                    />
-                  </div>
-
-                  {/* Active toggle */}
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      checked={link.is_active}
-                      onCheckedChange={() => handleToggleActive(link)}
-                    />
-                    <span className="text-xs text-muted-foreground w-12">
-                      {link.is_active ? (
-                        <span className="flex items-center gap-1 text-emerald-600"><Eye className="w-3 h-3" /> Activo</span>
-                      ) : (
-                        <span className="flex items-center gap-1"><EyeOff className="w-3 h-3" /> Oculto</span>
-                      )}
-                    </span>
+                    <a
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-0.5 block truncate text-xs text-muted-foreground hover:text-primary hover:underline"
+                    >
+                      {link.url}
+                    </a>
                   </div>
 
                   {/* Actions */}
-                  <div className="flex items-center gap-1 lg:ml-2">
+                  <div className="flex items-center gap-1.5">
+                    <Switch
+                      checked={link.is_active}
+                      onCheckedChange={() => handleToggleActive(link)}
+                      aria-label="Activar/desactivar"
+                    />
                     <Button
-                      variant="ghost"
+                      variant="outline"
                       size="icon"
                       className="h-8 w-8"
-                      onClick={() => handleInlineSave(link)}
-                      disabled={saving === link.id}
-                      title="Guardar cambios"
+                      onClick={() => openEditForm(link)}
+                      aria-label="Editar"
                     >
-                      {saving === link.id ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <Save className="w-4 h-4" />
-                      )}
+                      <Save className="h-4 w-4" />
                     </Button>
                     <Button
-                      variant="ghost"
+                      variant="outline"
                       size="icon"
-                      className="h-8 w-8"
-                      onClick={() => startEdit(link)}
-                      title="Editar"
+                      className="h-8 w-8 text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                      onClick={() => handleDelete(link)}
+                      aria-label="Eliminar"
                     >
-                      <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-destructive hover:text-destructive"
-                      onClick={() => handleDelete(link.id)}
-                      title="Eliminar"
-                    >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
