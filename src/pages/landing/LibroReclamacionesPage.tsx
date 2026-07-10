@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
-import { FileText, CircleCheck as CheckCircle2, CircleAlert as AlertCircle, Loader as Loader2, ArrowLeft, Search, Clock, CheckCheck, Circle as XCircle, ChevronRight, BookOpen, Package } from 'lucide-react';
+import { FileText, CircleCheck as CheckCircle2, CircleAlert as AlertCircle, Loader as Loader2, ArrowLeft, Search, Clock, CheckCheck, Circle as XCircle, ChevronRight, BookOpen } from 'lucide-react';
 import Navbar from '@/components/landing/Navbar';
 import Footer from '@/components/landing/Footer';
 import { cn } from '@/lib/utils';
@@ -155,6 +155,7 @@ export default function LibroReclamacionesPage() {
           apoderado_nombre: form.es_menor ? form.apoderado_nombre.trim() || null : null,
           apoderado_doc: form.es_menor ? form.apoderado_doc.trim() || null : null,
           tipo_bien: form.tipo_bien,
+          moneda: form.moneda,
           monto: form.monto ? parseFloat(form.monto) : null,
           descripcion_bien: form.descripcion_bien.trim(),
           detalle: form.detalle.trim(),
@@ -311,45 +312,47 @@ export default function LibroReclamacionesPage() {
                   {/* Section 0: Tipo de solicitud */}
                   <section>
                     <SectionTitle>Tipo de solicitud</SectionTitle>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="flex gap-2">
                       <button
                         type="button"
                         onClick={() => set('tipo', 'reclamo')}
                         className={cn(
-                          'flex items-start gap-3 p-4 rounded-xl border text-left transition-all',
+                          'flex-1 flex items-center gap-3 px-4 py-3 rounded-lg border text-left transition-all',
                           form.tipo === 'reclamo'
-                            ? 'border-blue-500/40 bg-blue-500/10 ring-1 ring-blue-500/20'
-                            : 'border-border/60 bg-card hover:border-blue-500/20',
+                            ? 'border-foreground/20 bg-foreground/[0.03] ring-1 ring-foreground/10'
+                            : 'border-border/50 bg-card hover:border-foreground/15',
                         )}
                       >
-                        <div className="w-9 h-9 rounded-lg bg-blue-500/15 flex items-center justify-center shrink-0">
-                          <Package className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                        </div>
+                        <span className={cn(
+                          'w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors',
+                          form.tipo === 'reclamo' ? 'border-foreground' : 'border-muted-foreground/30',
+                        )}>
+                          {form.tipo === 'reclamo' && <span className="w-2 h-2 rounded-full bg-foreground" />}
+                        </span>
                         <div>
                           <p className="text-sm font-semibold text-foreground">Reclamo</p>
-                          <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">
-                            Disconformidad relacionada al producto o servicio adquirido.
-                          </p>
+                          <p className="text-xs text-muted-foreground/60 leading-relaxed mt-0.5 hidden sm:block">Producto o servicio adquirido</p>
                         </div>
                       </button>
                       <button
                         type="button"
                         onClick={() => set('tipo', 'queja')}
                         className={cn(
-                          'flex items-start gap-3 p-4 rounded-xl border text-left transition-all',
+                          'flex-1 flex items-center gap-3 px-4 py-3 rounded-lg border text-left transition-all',
                           form.tipo === 'queja'
-                            ? 'border-amber-500/40 bg-amber-500/10 ring-1 ring-amber-500/20'
-                            : 'border-border/60 bg-card hover:border-amber-500/20',
+                            ? 'border-foreground/20 bg-foreground/[0.03] ring-1 ring-foreground/10'
+                            : 'border-border/50 bg-card hover:border-foreground/15',
                         )}
                       >
-                        <div className="w-9 h-9 rounded-lg bg-amber-500/15 flex items-center justify-center shrink-0">
-                          <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                        </div>
+                        <span className={cn(
+                          'w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors',
+                          form.tipo === 'queja' ? 'border-foreground' : 'border-muted-foreground/30',
+                        )}>
+                          {form.tipo === 'queja' && <span className="w-2 h-2 rounded-full bg-foreground" />}
+                        </span>
                         <div>
                           <p className="text-sm font-semibold text-foreground">Queja</p>
-                          <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">
-                            Disconformidad con la atención recibida.
-                          </p>
+                          <p className="text-xs text-muted-foreground/60 leading-relaxed mt-0.5 hidden sm:block">Atención recibida</p>
                         </div>
                       </button>
                     </div>
@@ -548,27 +551,40 @@ export default function LibroReclamacionesPage() {
 
                       {/* Progress bar */}
                       <div>
-                        <div className="flex justify-between mb-2">
-                          {(['pendiente', 'en_proceso', 'resuelto', 'cerrado'] as const).map((s, i) => {
-                            const steps = ['pendiente', 'en_proceso', 'resuelto', 'cerrado'];
-                            const current = steps.indexOf(statusResult.status);
-                            const done = i <= current;
-                            return (
-                              <div key={s} className="flex flex-col items-center gap-1 flex-1">
-                                <div className={cn('w-2.5 h-2.5 rounded-full border-2 transition-colors', done ? 'bg-primary border-primary' : 'border-border bg-background')} />
-                                <span className={cn('text-[9px] font-medium hidden sm:block', done ? 'text-primary' : 'text-muted-foreground/40')}>
-                                  {STATUS_CONFIG[s]?.label}
-                                </span>
+                        {(() => {
+                          const steps = ['pendiente', 'en_proceso', 'resuelto', 'cerrado'] as const;
+                          const current = steps.indexOf(statusResult.status as typeof steps[number]);
+                          const stepColors = [
+                            { dot: 'bg-amber-500 border-amber-500', bar: 'bg-amber-500', text: 'text-amber-600 dark:text-amber-400' },
+                            { dot: 'bg-blue-500 border-blue-500', bar: 'bg-blue-500', text: 'text-blue-600 dark:text-blue-400' },
+                            { dot: 'bg-emerald-500 border-emerald-500', bar: 'bg-emerald-500', text: 'text-emerald-600 dark:text-emerald-400' },
+                            { dot: 'bg-muted-foreground border-muted-foreground', bar: 'bg-muted-foreground', text: 'text-muted-foreground' },
+                          ];
+                          return (
+                            <>
+                              <div className="flex justify-between mb-2">
+                                {steps.map((s, i) => {
+                                  const done = i <= current;
+                                  const col = stepColors[i];
+                                  return (
+                                    <div key={s} className="flex flex-col items-center gap-1 flex-1">
+                                      <div className={cn('w-2.5 h-2.5 rounded-full border-2 transition-colors', done ? col.dot : 'border-border bg-background')} />
+                                      <span className={cn('text-[9px] font-medium hidden sm:block', done ? col.text : 'text-muted-foreground/40')}>
+                                        {STATUS_CONFIG[s]?.label}
+                                      </span>
+                                    </div>
+                                  );
+                                })}
                               </div>
-                            );
-                          })}
-                        </div>
-                        <div className="h-1 bg-muted rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-primary rounded-full transition-all"
-                            style={{ width: `${(['pendiente', 'en_proceso', 'resuelto', 'cerrado'].indexOf(statusResult.status) / 3) * 100}%` }}
-                          />
-                        </div>
+                              <div className="h-1 bg-muted rounded-full overflow-hidden">
+                                <div
+                                  className={cn('h-full rounded-full transition-all', stepColors[current]?.bar || 'bg-primary')}
+                                  style={{ width: `${(current / (steps.length - 1)) * 100}%` }}
+                                />
+                              </div>
+                            </>
+                          );
+                        })()}
                       </div>
 
                       {/* Response */}

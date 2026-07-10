@@ -1,17 +1,15 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/backend/client';
-import { useConfig } from '@/store/configStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { FileText, Eye, Clock, Loader as Loader2, Search, RefreshCw, Trash2, Upload, Image as ImageIcon, MessageSquare, Bell, ChevronRight, ArrowRight, User, Mail, Phone, CreditCard, MapPin, Package, DollarSign, Send } from 'lucide-react';
+import { FileText, Clock, Loader as Loader2, Search, RefreshCw, Trash2, MessageSquare, Bell, ArrowRight, User, Mail, Phone, CreditCard, MapPin, Send } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 type ComplaintStatus = 'pendiente' | 'en_proceso' | 'resuelto' | 'cerrado';
@@ -31,6 +29,7 @@ interface Complaint {
   detalle?: string;
   pedido?: string;
   tipo_bien?: string;
+  moneda?: string;
   monto?: number;
   status: ComplaintStatus;
   respuesta?: string;
@@ -42,11 +41,11 @@ interface Complaint {
 
 const STATUS_ORDER: ComplaintStatus[] = ['pendiente', 'en_proceso', 'resuelto', 'cerrado'];
 
-const STATUS_CONFIG: Record<ComplaintStatus, { label: string; badgeClass: string; stepClass: string }> = {
-  pendiente:  { label: 'Pendiente',  badgeClass: 'bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30',        stepClass: 'bg-amber-500' },
-  en_proceso: { label: 'En proceso', badgeClass: 'bg-blue-500/15 text-blue-700 dark:text-blue-400 border-blue-500/30',            stepClass: 'bg-blue-500' },
-  resuelto:   { label: 'Resuelto',   badgeClass: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30', stepClass: 'bg-emerald-500' },
-  cerrado:    { label: 'Cerrado',    badgeClass: 'bg-muted text-muted-foreground border-border',                                   stepClass: 'bg-muted-foreground' },
+const STATUS_CONFIG: Record<ComplaintStatus, { label: string; badgeClass: string; stepClass: string; cls: string; icon: typeof Clock; iconBg: string; iconCls: string }> = {
+  pendiente:  { label: 'Pendiente',  badgeClass: 'bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30',        stepClass: 'bg-amber-500', cls: 'text-amber-700 dark:text-amber-400 bg-amber-500/10 border-amber-500/25', icon: Clock, iconBg: 'bg-amber-500/15', iconCls: 'text-amber-600 dark:text-amber-400' },
+  en_proceso: { label: 'En proceso', badgeClass: 'bg-blue-500/15 text-blue-700 dark:text-blue-400 border-blue-500/30',            stepClass: 'bg-blue-500', cls: 'text-blue-700 dark:text-blue-400 bg-blue-500/10 border-blue-500/25', icon: Loader2, iconBg: 'bg-blue-500/15', iconCls: 'text-blue-600 dark:text-blue-400' },
+  resuelto:   { label: 'Resuelto',   badgeClass: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30', stepClass: 'bg-emerald-500', cls: 'text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/25', icon: FileText, iconBg: 'bg-emerald-500/15', iconCls: 'text-emerald-600 dark:text-emerald-400' },
+  cerrado:    { label: 'Cerrado',    badgeClass: 'bg-muted text-muted-foreground border-border',                                   stepClass: 'bg-muted-foreground', cls: 'text-muted-foreground bg-muted/50 border-border', icon: FileText, iconBg: 'bg-muted', iconCls: 'text-muted-foreground' },
 };
 
 function fmt(v?: string | null) {
@@ -77,17 +76,17 @@ function MetaField({ icon: Icon, label, value }: { icon: typeof User; label: str
 
 // ── Detail modal (centered Dialog) ───────────────────────────────────────────
 function DetailPanel({
-  complaint, onClose, onStatusChange, onSaveResponse, onDelete, savingStatus, savingResp,
+  complaint, onClose, onStatusChange, onSaveResponse, onDelete,
 }: {
   complaint: Complaint;
   onClose: () => void;
   onStatusChange: (s: ComplaintStatus) => void;
   onSaveResponse: (text: string) => void;
   onDelete: () => void;
-  savingStatus: boolean;
-  savingResp: boolean;
 }) {
   const [responseText, setResponseText] = useState(complaint.respuesta ?? '');
+  const [savingStatus, setSavingStatus] = useState(false);
+  const [savingResp, setSavingResp] = useState(false);
   const stepIndex = STATUS_ORDER.indexOf(complaint.status);
   const cfg = STATUS_CONFIG[complaint.status] ?? STATUS_CONFIG.pendiente;
   const nextStatus = stepIndex < STATUS_ORDER.length - 1 ? STATUS_ORDER[stepIndex + 1] : null;
@@ -146,7 +145,7 @@ function DetailPanel({
 
           {/* Status controls */}
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-            <Select value={complaint.status} onValueChange={v => onStatusChange(v as ComplaintStatus)} disabled={savingStatus}>
+            <Select value={complaint.status} onValueChange={async (v) => { setSavingStatus(true); await onStatusChange(v as ComplaintStatus); setSavingStatus(false); }} disabled={savingStatus}>
               <SelectTrigger className="flex-1">
                 <SelectValue />
               </SelectTrigger>
@@ -162,7 +161,7 @@ function DetailPanel({
               </SelectContent>
             </Select>
             {nextStatus && (
-              <Button onClick={() => onStatusChange(nextStatus)} disabled={savingStatus} size="sm" className="shrink-0 gap-1.5">
+              <Button onClick={async () => { setSavingStatus(true); await onStatusChange(nextStatus); setSavingStatus(false); }} disabled={savingStatus} size="sm" className="shrink-0 gap-1.5">
                 {savingStatus ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
                 Avanzar a {STATUS_CONFIG[nextStatus].label}
               </Button>
@@ -197,20 +196,17 @@ function DetailPanel({
                 )}
                 {typeof complaint.monto === 'number' && (
                   <span className="text-xs font-medium text-muted-foreground bg-muted/50 border border-border/50 px-2.5 py-1 rounded-full flex items-center gap-1">
-                    <DollarSign className="w-3 h-3" />S/ {complaint.monto.toFixed(2)}
+                    {complaint.moneda === 'USD' ? '$' : 'S/'} {complaint.monto.toFixed(2)}
                   </span>
                 )}
               </div>
               {complaint.descripcion_bien && (
                 <div>
-                  <p className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wide mb-1 flex items-center gap-1.5">
-                    <Package className="w-3 h-3" />Producto / Servicio
-                  </p>
+                  <p className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wide mb-1.5">Producto / Servicio</p>
                   <p className="text-sm text-foreground/80">{complaint.descripcion_bien}</p>
                 </div>
               )}
               <div>
-                <p className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wide mb-1.5">Descripción del caso</p>
                 <div className="bg-muted/20 border border-border/40 rounded-lg p-3 text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">
                   {complaint.detalle || '—'}
                 </div>
@@ -260,7 +256,7 @@ function DetailPanel({
                 <p className="text-xs text-muted-foreground/60 leading-relaxed">
                   Al guardar, el cliente verá esta respuesta en "Mis Reclamos" y recibirá una notificación por correo.
                 </p>
-                <Button onClick={() => onSaveResponse(responseText)} disabled={savingResp || !responseText.trim()} size="sm" className="shrink-0 gap-1.5">
+                <Button onClick={async () => { setSavingResp(true); await onSaveResponse(responseText); setSavingResp(false); }} disabled={savingResp || !responseText.trim()} size="sm" className="shrink-0 gap-1.5">
                   {savingResp ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
                   Guardar y enviar
                 </Button>
@@ -276,7 +272,7 @@ function DetailPanel({
             onClick={onDelete}>
             <Trash2 className="h-4 w-4 mr-1.5" />Eliminar
           </Button>
-          <p className="text-xs text-muted-foreground/50 hidden sm:block">Cierra con la X superior</p>
+          <p className="text-xs text-muted-foreground/50 hidden sm:block">&nbsp;</p>
         </div>
       </DialogContent>
     </Dialog>
@@ -284,33 +280,14 @@ function DetailPanel({
 }
 
 export default function ComplaintsAdminPage() {
-  const { company, refresh } = useConfig();
-  const [complaints, setComplaints]     = useState<Complaint[]>([]);
-  const [loading, setLoading]           = useState(true);
-  const [refreshing, setRefreshing]     = useState(false);
-  const [search, setSearch]             = useState('');
+  const [complaints, setComplaints] = useState<Complaint[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | ComplaintStatus>('all');
-  const [selected, setSelected]         = useState<Complaint | null>(null);
+  const [selected, setSelected] = useState<Complaint | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Complaint | null>(null);
-  const [savingStatus, setSavingStatus] = useState(false);
-  const [savingResp, setSavingResp]     = useState(false);
-  const [deletingId, setDeletingId]     = useState<string | null>(null);
-  const [togglingEnabled, setTogglingEnabled] = useState(false);
-  const [bookImage, setBookImage]       = useState('');
-  const [urlInput, setUrlInput]         = useState('');
-  const [imageMode, setImageMode]       = useState<'upload' | 'url'>('upload');
-  const [uploadingImage, setUploadingImage] = useState(false);
-  const imageRef = useRef<HTMLInputElement>(null);
-
-  const complaintsEnabled =
-    company?.complaints_book_enabled === 'true' ||
-    (company?.complaints_book_enabled as unknown as boolean) === true;
-
-  useEffect(() => {
-    const v = company?.complaints_book_image ?? '';
-    setBookImage(v);
-    setUrlInput(v);
-  }, [company?.complaints_book_image]);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const load = useCallback(async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
@@ -318,97 +295,57 @@ export default function ComplaintsAdminPage() {
       const { data, error } = await supabase.from('complaints_book').select('*').order('created_at', { ascending: false });
       if (error) throw error;
       setComplaints((data as Complaint[]) ?? []);
-    } catch (e) { toast.error(e instanceof Error ? e.message : 'Error al cargar'); }
-    finally { setLoading(false); setRefreshing(false); }
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Error al cargar');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
   }, []);
 
   useEffect(() => { load(); }, [load]);
 
   const filtered = complaints.filter(c => {
     const q = search.trim().toLowerCase();
-    const matchSearch = !q || c.correlativo?.toLowerCase().includes(q) || c.nombre?.toLowerCase().includes(q) || c.email?.toLowerCase().includes(q) || c.tipo?.toLowerCase().includes(q);
-    return matchSearch && (statusFilter === 'all' || c.status === statusFilter);
+    const matchSearch = !q || c.correlativo?.toLowerCase().includes(q) || c.nombre?.toLowerCase().includes(q) || c.email?.toLowerCase().includes(q);
+    const matchStatus = statusFilter === 'all' || c.status === statusFilter;
+    return matchSearch && matchStatus;
   });
-
-  const stats = {
-    total:      complaints.length,
-    pendiente:  complaints.filter(c => c.status === 'pendiente').length,
-    en_proceso: complaints.filter(c => c.status === 'en_proceso').length,
-    resuelto:   complaints.filter(c => c.status === 'resuelto').length,
-  };
-
-  const handleToggleEnabled = async () => {
-    setTogglingEnabled(true);
-    try {
-      const next = !complaintsEnabled;
-      const { error } = await supabase.from('system_config').update({ value: String(next) }).eq('key', 'complaints_book_enabled');
-      if (error) throw error;
-      await refresh?.();
-      toast.success(next ? 'Libro habilitado' : 'Libro deshabilitado');
-    } catch (e) { toast.error(e instanceof Error ? e.message : 'Error al actualizar'); }
-    finally { setTogglingEnabled(false); }
-  };
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!file.type.startsWith('image/')) { toast.error('Solo se permiten imágenes'); return; }
-    if (file.size > 3 * 1024 * 1024) { toast.error('La imagen no puede superar 3 MB'); return; }
-    setUploadingImage(true);
-    try {
-      const ext = file.name.split('.').pop();
-      const path = `complaints/book-image-${Date.now()}.${ext}`;
-      const { data: up, error: upErr } = await supabase.storage.from('logos').upload(path, file, { contentType: file.type, upsert: true });
-      if (upErr) throw upErr;
-      const { data: urlData } = supabase.storage.from('logos').getPublicUrl(up.path);
-      const { error: cfgErr } = await supabase.from('system_config').update({ value: urlData.publicUrl }).eq('key', 'complaints_book_image');
-      if (cfgErr) throw cfgErr;
-      setBookImage(urlData.publicUrl);
-      await refresh?.();
-      toast.success('Imagen actualizada');
-    } catch (e) { toast.error(e instanceof Error ? e.message : 'Error al subir imagen'); }
-    finally { setUploadingImage(false); if (imageRef.current) imageRef.current.value = ''; }
-  };
 
   const handleStatusChange = async (newStatus: ComplaintStatus) => {
     if (!selected) return;
-    setSavingStatus(true);
     try {
-      const { data, error } = await supabase.from('complaints_book')
+      const { error } = await supabase.from('complaints_book')
         .update({ status: newStatus, updated_at: new Date().toISOString() })
         .eq('id', selected.id).select('*').single();
       if (error) throw error;
-      const updated = data as Complaint;
-      setSelected(updated);
-      setComplaints(prev => prev.map(c => c.id === updated.id ? updated : c));
+      setComplaints(prev => prev.map(c => c.id === selected.id ? { ...c, status: newStatus } : c));
+      setSelected(prev => prev ? { ...prev, status: newStatus } : null);
       toast.success('Estado actualizado');
-      // Trigger email notification
       supabase.functions.invoke('complaint-notify', {
         body: { complaint_id: selected.id, event: 'status_change', new_status: newStatus },
       }).catch(() => {});
-    } catch (e) { toast.error(e instanceof Error ? e.message : 'Error'); }
-    finally { setSavingStatus(false); }
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Error');
+    }
   };
 
   const handleSaveResponse = async (responseText: string) => {
     if (!selected) return;
-    setSavingResp(true);
     try {
-      const now = new Date().toISOString();
-      const { data, error } = await supabase.from('complaints_book')
-        .update({ respuesta: responseText, fecha_respuesta: now, notificado: true, updated_at: now })
+      const { error } = await supabase.from('complaints_book')
+        .update({ respuesta: responseText, fecha_respuesta: new Date().toISOString(), status: 'resuelto', updated_at: new Date().toISOString() })
         .eq('id', selected.id).select('*').single();
       if (error) throw error;
-      const updated = data as Complaint;
-      setSelected(updated);
-      setComplaints(prev => prev.map(c => c.id === updated.id ? updated : c));
-      toast.success('Respuesta guardada');
-      // Trigger email notification
+      setComplaints(prev => prev.map(c => c.id === selected.id ? { ...c, respuesta: responseText, status: 'resuelto', fecha_respuesta: new Date().toISOString() } : c));
+      setSelected(prev => prev ? { ...prev, respuesta: responseText, status: 'resuelto' } : null);
+      toast.success('Respuesta enviada');
       supabase.functions.invoke('complaint-notify', {
         body: { complaint_id: selected.id, event: 'response', response_text: responseText },
       }).catch(() => {});
-    } catch (e) { toast.error(e instanceof Error ? e.message : 'Error'); }
-    finally { setSavingResp(false); }
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Error');
+    }
   };
 
   const handleDelete = async () => {
@@ -418,10 +355,13 @@ export default function ComplaintsAdminPage() {
       const { error } = await supabase.from('complaints_book').delete().eq('id', deleteTarget.id);
       if (error) throw error;
       setComplaints(prev => prev.filter(c => c.id !== deleteTarget.id));
-      if (selected?.id === deleteTarget.id) setSelected(null);
       toast.success('Reclamo eliminado');
-    } catch (e) { toast.error(e instanceof Error ? e.message : 'Error'); }
-    finally { setDeletingId(null); setDeleteTarget(null); }
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Error');
+    } finally {
+      setDeletingId(null);
+      setDeleteTarget(null);
+    }
   };
 
   if (loading) {
@@ -430,13 +370,6 @@ export default function ComplaintsAdminPage() {
         <div className="flex justify-between items-center">
           <div className="space-y-1.5"><Skeleton className="h-7 w-52" /><Skeleton className="h-4 w-72" /></div>
           <Skeleton className="h-9 w-28 rounded-lg" />
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <Skeleton className="h-24 rounded-xl" />
-          <Skeleton className="h-28 rounded-xl" />
-        </div>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {[0,1,2,3].map(i => <Skeleton key={i} className="h-20 rounded-xl" />)}
         </div>
         <Skeleton className="h-10 rounded-lg" />
         <Skeleton className="h-64 rounded-xl" />
@@ -450,7 +383,7 @@ export default function ComplaintsAdminPage() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Libro de Reclamaciones</h1>
-          <p className="text-sm text-muted-foreground">Gestiona las quejas y reclamos de los clientes</p>
+          <p className="text-sm text-muted-foreground">Gestiona reclamos y quejas de clientes</p>
         </div>
         <Button variant="outline" size="sm" onClick={() => load(true)} disabled={refreshing}>
           <RefreshCw className={cn('h-4 w-4 mr-2', refreshing && 'animate-spin')} />
@@ -458,178 +391,101 @@ export default function ComplaintsAdminPage() {
         </Button>
       </div>
 
-      {/* Config row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-
-        {/* Toggle habilitado — clean switch card */}
-        <div className="border border-border/60 bg-card rounded-xl p-4 flex items-center gap-4">
-          <div className={cn('w-11 h-11 rounded-xl flex items-center justify-center shrink-0', complaintsEnabled ? 'bg-emerald-500/10' : 'bg-muted/60')}>
-            <FileText className={cn('h-5 w-5', complaintsEnabled ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground')} />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="font-semibold text-sm text-foreground">
-              {complaintsEnabled ? 'Libro habilitado' : 'Libro deshabilitado'}
-            </p>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {complaintsEnabled ? 'Clientes pueden registrar quejas.' : 'Registro temporalmente inactivo.'}
-            </p>
-          </div>
-          {togglingEnabled
-            ? <Loader2 className="h-5 w-5 animate-spin text-muted-foreground shrink-0" />
-            : <Switch checked={complaintsEnabled} onCheckedChange={handleToggleEnabled} aria-label="Habilitar libro" />}
-        </div>
-
-        {/* Imagen del libro */}
-        <div className="border border-border/60 bg-card rounded-xl p-4 space-y-3">
-          <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-xl border border-border/60 bg-muted/40 flex items-center justify-center overflow-hidden shrink-0">
-              {bookImage
-                ? <img src={bookImage} alt="Libro" className="w-full h-full object-contain p-0.5" />
-                : <ImageIcon className="w-5 h-5 text-muted-foreground/40" />}
-            </div>
-            <div>
-              <p className="font-semibold text-sm text-foreground">Imagen del libro</p>
-              <p className="text-xs text-muted-foreground/70">Aparece en la página pública.</p>
-            </div>
-          </div>
-          <div className="flex gap-1 p-0.5 bg-muted/40 rounded-lg border border-border/50">
-            {(['upload', 'url'] as const).map(m => (
-              <button key={m} onClick={() => setImageMode(m)}
-                className={cn('flex-1 text-xs font-medium py-1.5 rounded-md transition-all',
-                  imageMode === m ? 'bg-background border border-border/60 text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground')}>
-                {m === 'upload' ? 'Subir archivo' : 'Pegar URL'}
-              </button>
-            ))}
-          </div>
-          {imageMode === 'upload' ? (
-            <>
-              <input ref={imageRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
-              <Button variant="outline" size="sm" className="w-full" onClick={() => imageRef.current?.click()} disabled={uploadingImage}>
-                {uploadingImage ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <Upload className="h-3.5 w-3.5 mr-1.5" />}
-                {uploadingImage ? 'Subiendo...' : 'Seleccionar imagen'}
-              </Button>
-            </>
-          ) : (
-            <div className="flex gap-2">
-              <Input value={urlInput} onChange={e => setUrlInput(e.target.value)} placeholder="https://..." className="text-xs h-8" />
-              <Button size="sm" className="h-8 shrink-0" disabled={uploadingImage || !urlInput.trim()}
-                onClick={async () => {
-                  if (!urlInput.trim()) return;
-                  setUploadingImage(true);
-                  try {
-                    const { error } = await supabase.from('system_config').update({ value: urlInput.trim() }).eq('key', 'complaints_book_image');
-                    if (error) throw error;
-                    setBookImage(urlInput.trim());
-                    await refresh?.();
-                    toast.success('Imagen actualizada');
-                  } catch (e) { toast.error(e instanceof Error ? e.message : 'Error'); }
-                  finally { setUploadingImage(false); }
-                }}>
-                {uploadingImage ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Guardar'}
-              </Button>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Stats */}
-      <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
-        {[
-          { label: 'Total', value: stats.total, color: 'text-foreground', bg: 'bg-muted/50' },
-          { label: 'Pendientes', value: stats.pendiente, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-500/10' },
-          { label: 'En proceso', value: stats.en_proceso, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-500/10' },
-          { label: 'Resueltos', value: stats.resuelto, color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-500/10' },
-        ].map(s => (
-          <div key={s.label} className={cn('rounded-xl p-4 border border-border/60', s.bg)}>
-            <p className="text-xs font-medium text-muted-foreground mb-1">{s.label}</p>
-            <p className={cn('text-3xl font-bold', s.color)}>{s.value}</p>
-          </div>
-        ))}
-      </div>
-
       {/* Filters */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+      <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-          <Input placeholder="Buscar por correlativo, nombre, email o tipo…" value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
+          <Input placeholder="Buscar por correlativo, nombre o email..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
         </div>
         <Select value={statusFilter} onValueChange={v => setStatusFilter(v as typeof statusFilter)}>
-          <SelectTrigger className="w-full sm:w-[200px]"><SelectValue placeholder="Filtrar estado" /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-[180px]"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos los estados</SelectItem>
-            {STATUS_ORDER.map(s => (
-              <SelectItem key={s} value={s}>
-                <div className="flex items-center gap-2">
-                  <div className={cn('w-2 h-2 rounded-full', STATUS_CONFIG[s].stepClass)} />
-                  {STATUS_CONFIG[s].label}
-                </div>
-              </SelectItem>
-            ))}
+            <SelectItem value="pendiente">Pendiente</SelectItem>
+            <SelectItem value="en_proceso">En proceso</SelectItem>
+            <SelectItem value="resuelto">Resuelto</SelectItem>
+            <SelectItem value="cerrado">Cerrado</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
+      {/* Stats */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {(['pendiente', 'en_proceso', 'resuelto', 'cerrado'] as const).map(s => {
+          const cfg = STATUS_CONFIG[s];
+          const Icon = cfg.icon;
+          const count = complaints.filter(c => c.status === s).length;
+          return (
+            <div key={s} className="border border-border/60 rounded-xl p-3 bg-card">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-xs font-medium text-muted-foreground">{cfg.label}</span>
+                <div className={cn('w-6 h-6 rounded-lg flex items-center justify-center', cfg.iconBg)}>
+                  <Icon className="w-3.5 h-3.5" />
+                </div>
+              </div>
+              <p className="text-2xl font-bold text-foreground">{count}</p>
+            </div>
+          );
+        })}
+      </div>
+
       {/* List */}
       <div className="border border-border/60 rounded-xl overflow-hidden bg-card">
-        <div className="px-5 py-3.5 border-b border-border/50 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-foreground">
-            Reclamos{filtered.length !== complaints.length ? ` — ${filtered.length} de ${complaints.length}` : ` (${complaints.length})`}
-          </h2>
-        </div>
-
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center px-4">
             <div className="w-10 h-10 rounded-2xl bg-muted/50 flex items-center justify-center mb-3">
               <FileText className="h-5 w-5 text-muted-foreground/40" />
             </div>
             <p className="text-sm font-medium text-foreground mb-0.5">
-              {complaints.length === 0 ? 'Sin reclamos registrados' : 'Sin resultados'}
+              {complaints.length === 0 ? 'Sin reclamos' : 'Sin resultados'}
             </p>
             <p className="text-xs text-muted-foreground/60">
-              {complaints.length === 0 ? 'Cuando los clientes registren quejas aparecerán aquí.' : 'Prueba con otros filtros.'}
+              {complaints.length === 0 ? 'Los reclamos apareceran aqui.' : 'Prueba con otra busqueda.'}
             </p>
           </div>
         ) : (
           <div className="divide-y divide-border/50">
             {filtered.map(c => {
-              const cfg = STATUS_CONFIG[c.status] ?? STATUS_CONFIG.pendiente;
+              const cfg = STATUS_CONFIG[c.status as ComplaintStatus] ?? STATUS_CONFIG.pendiente;
+              const Icon = cfg.icon;
               return (
-                <button key={c.id} onClick={() => setSelected(c)}
-                  className="w-full text-left flex items-center gap-4 px-5 py-3.5 hover:bg-muted/30 transition-colors group">
-                  <div className="flex-1 min-w-0 flex flex-col gap-1">
+                <div key={c.id} className="flex items-center gap-3 px-4 py-3.5 hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => setSelected(c)}>
+                  <div className={cn('w-9 h-9 rounded-xl flex items-center justify-center shrink-0', cfg.iconBg)}>
+                    <Icon className={cn('w-4 h-4', cfg.iconCls)} />
+                  </div>
+                  <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-mono text-sm font-bold text-foreground">{c.correlativo ?? '—'}</span>
-                      <Badge variant="outline" className={cn('text-[11px] h-5 px-2', cfg.badgeClass)}>{cfg.label}</Badge>
-                      {c.notificado && <Bell className="h-3 w-3 text-emerald-500" />}
+                      <span className="text-sm font-semibold text-foreground font-mono">{c.correlativo || '—'}</span>
+                      <span className={cn('text-[10px] font-semibold px-1.5 py-0.5 rounded-full border', cfg.cls)}>
+                        {cfg.label}
+                      </span>
                     </div>
-                    <div className="flex items-center gap-3 text-xs text-muted-foreground/60 flex-wrap">
-                      <span className="font-medium text-foreground/70">{c.nombre ?? ''} {c.apellido ?? ''}</span>
-                      <span>·</span>
-                      <span className="capitalize">{c.tipo ?? '—'}</span>
-                      <span>·</span>
-                      <span>{fmt(c.created_at)}</span>
-                    </div>
-                    {c.detalle && <p className="text-xs text-muted-foreground/50 line-clamp-1 mt-0.5">{c.detalle}</p>}
+                    <p className="text-xs text-muted-foreground/60 mt-0.5 truncate">
+                      {c.nombre} {c.apellido} - {c.tipo === 'queja' ? 'Queja' : 'Reclamo'}
+                    </p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={e => { e.stopPropagation(); setSelected(c); }}>
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={e => { e.stopPropagation(); setDeleteTarget(c); }} disabled={deletingId === c.id}>
+                    {typeof c.monto === 'number' && (
+                      <span className="text-xs font-medium text-muted-foreground bg-muted/50 border border-border/50 px-2.5 py-1 rounded-full">
+                        {c.moneda === 'USD' ? '$' : 'S/'} {c.monto.toFixed(2)}
+                      </span>
+                    )}
+                    <span className="text-xs text-muted-foreground/40 hidden sm:block">
+                      {fmtDate(c.created_at)}
+                    </span>
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10"
+                      onClick={(e) => { e.stopPropagation(); setDeleteTarget(c); }} disabled={deletingId === c.id}>
                       {deletingId === c.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                     </Button>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground/30 group-hover:text-muted-foreground/60 transition-colors" />
                   </div>
-                </button>
+                </div>
               );
             })}
           </div>
         )}
       </div>
 
-      {/* Detail panel */}
+      {/* Detail Modal */}
       {selected && (
         <DetailPanel
           complaint={selected}
@@ -637,8 +493,6 @@ export default function ComplaintsAdminPage() {
           onStatusChange={handleStatusChange}
           onSaveResponse={handleSaveResponse}
           onDelete={() => { setDeleteTarget(selected); setSelected(null); }}
-          savingStatus={savingStatus}
-          savingResp={savingResp}
         />
       )}
 
@@ -646,15 +500,16 @@ export default function ComplaintsAdminPage() {
       <AlertDialog open={!!deleteTarget} onOpenChange={open => { if (!open) setDeleteTarget(null); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar este reclamo?</AlertDialogTitle>
+            <AlertDialogTitle>Eliminar reclamo</AlertDialogTitle>
             <AlertDialogDescription>
-              Se eliminará permanentemente{deleteTarget?.correlativo && <> el reclamo <strong>#{deleteTarget.correlativo}</strong></>} de{' '}
-              <strong>{deleteTarget?.nombre}</strong>. Esta acción no se puede deshacer.
+              Se eliminara permanentemente el reclamo <strong>{deleteTarget?.correlativo}</strong>. Esta accion no se puede deshacer.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Eliminar</AlertDialogAction>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Eliminar
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

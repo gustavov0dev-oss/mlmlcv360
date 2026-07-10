@@ -5,7 +5,7 @@ import { useDatabase } from '@/lib/backend';
 import { cn } from '@/lib/utils';
 import { Link, useLocation, useNavigate } from '@/lib/router';
 import { useState, useEffect, useRef } from 'react';
-import { LayoutDashboard, Users, GitBranch, DollarSign, Award, ChartBar as BarChart3, Settings, ChevronDown, ChevronRight, UserCog, CreditCard, User, ShoppingBag, Package, Truck, Tag, ChartBar as BarChart2, ShoppingCart, FolderOpen, MessageSquare, Shield, Crown, Star, Medal, LogOut, Link2, CircleHelp as HelpCircle, FileText } from 'lucide-react';
+import { LayoutDashboard, Users, GitBranch, DollarSign, Award, ChartBar as BarChart3, Settings, ChevronDown, ChevronRight, UserCog, CreditCard, User, ShoppingBag, Package, Truck, Tag, ChartBar as BarChart2, ShoppingCart, FolderOpen, MessageSquare, Shield, Crown, Star, Medal, LogOut, Link2, CircleHelp as HelpCircle, FileText, ScrollText } from 'lucide-react';
 import { type Rank } from '@/store/configStore';
 
 const rankIconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -74,6 +74,7 @@ const superAdminNav: NavItem[] = [
       { label: 'Preguntas Frecuentes', href: '/dashboard/admin/faq', icon: HelpCircle },
       { label: 'Redes Sociales', href: '/dashboard/admin/redes-sociales', icon: Link2 },
       { label: 'Libro de Reclamaciones', href: '/dashboard/admin/libro-reclamaciones', icon: FileText },
+      { label: 'Páginas Legales', href: '/dashboard/admin/paginas', icon: ScrollText },
     ],
   },
   { label: 'Gestión Admin', href: '/dashboard/admin', icon: Shield, exact: true },
@@ -108,6 +109,7 @@ const adminNav: NavItem[] = [
       { label: 'Preguntas Frecuentes', href: '/dashboard/admin/faq', icon: HelpCircle },
       { label: 'Redes Sociales', href: '/dashboard/admin/redes-sociales', icon: Link2 },
       { label: 'Libro de Reclamaciones', href: '/dashboard/admin/libro-reclamaciones', icon: FileText },
+      { label: 'Páginas Legales', href: '/dashboard/admin/paginas', icon: ScrollText },
     ],
   },
   { label: 'Gestión Admin', href: '/dashboard/admin', icon: Shield, exact: true },

@@ -61,6 +61,7 @@ export default function Footer() {
   const bookImage = company.complaints_book_image || '';
 
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
+  const [legalPages, setLegalPages] = useState<{ id: string; slug: string; title: string }[]>([]);
 
   useEffect(() => {
     supabase
@@ -69,6 +70,13 @@ export default function Footer() {
       .eq('is_active', true)
       .order('sort_order', { ascending: true })
       .then(({ data }) => { if (data) setSocialLinks(data); });
+    supabase
+      .from('legal_pages')
+      .select('id, slug, title')
+      .eq('is_published', true)
+      .eq('show_in_footer', true)
+      .order('sort_order', { ascending: true })
+      .then(({ data }) => { if (data) setLegalPages(data); });
   }, []);
 
   return (
@@ -133,12 +141,15 @@ export default function Footer() {
               <div>
                 <h4 className="text-xs font-semibold text-foreground uppercase tracking-wider mb-4">Legal</h4>
                 <ul className="space-y-2.5">
-                  {['Terminos de servicio', 'Politica de privacidad', 'Politica de cookies', 'Aviso legal'].map(l => (
-                    <li key={l}>
-                      <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                        {l}
-                      </a>
+                  {legalPages.map(p => (
+                    <li key={p.id}>
+                      <Link to={`/legal/${p.slug}`} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                        {p.title}
+                      </Link>
                     </li>
+                  ))}
+                  {legalPages.length === 0 && ['Terminos de servicio', 'Politica de privacidad', 'Politica de cookies', 'Aviso legal'].map(l => (
+                    <li key={l}><span className="text-sm text-muted-foreground/40">{l}</span></li>
                   ))}
                 </ul>
                 {complaintsEnabled && (
