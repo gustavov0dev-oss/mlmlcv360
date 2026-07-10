@@ -71,6 +71,7 @@ const superAdminNav: NavItem[] = [
   {
     label: 'Contenido', icon: MessageSquare, children: [
       { label: 'Testimonios', href: '/dashboard/admin/testimonios', icon: Star },
+      { label: 'Ciudades', href: '/dashboard/admin/ciudades', icon: LayoutDashboard },
       { label: 'Preguntas Frecuentes', href: '/dashboard/admin/faq', icon: HelpCircle },
       { label: 'Redes Sociales', href: '/dashboard/admin/redes-sociales', icon: Link2 },
       { label: 'Libro de Reclamaciones', href: '/dashboard/admin/libro-reclamaciones', icon: FileText },
@@ -105,6 +106,7 @@ const adminNav: NavItem[] = [
   {
     label: 'Contenido', icon: MessageSquare, children: [
       { label: 'Testimonios', href: '/dashboard/admin/testimonios', icon: Star },
+      { label: 'Ciudades', href: '/dashboard/admin/ciudades', icon: LayoutDashboard },
       { label: 'Preguntas Frecuentes', href: '/dashboard/admin/faq', icon: HelpCircle },
       { label: 'Redes Sociales', href: '/dashboard/admin/redes-sociales', icon: Link2 },
       { label: 'Libro de Reclamaciones', href: '/dashboard/admin/libro-reclamaciones', icon: FileText },
