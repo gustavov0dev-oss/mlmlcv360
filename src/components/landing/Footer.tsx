@@ -1,7 +1,30 @@
+import { useState, useEffect } from 'react';
 import { Link } from '@/lib/router';
-import { Mail, Phone, MapPin, Facebook, Instagram, Linkedin, X } from 'lucide-react';
+import { Mail, Phone, MapPin, Facebook, Instagram, Linkedin, Youtube, Twitter, MessageCircle, ExternalLink } from 'lucide-react';
 import { useConfig } from '@/store/configStore';
+import { supabase } from '@/lib/backend/client';
 import { LogoWithText } from '@/components/Logo';
+
+interface SocialLink {
+  id: string;
+  platform: string;
+  url: string;
+  icon: string;
+  is_active: boolean;
+  sort_order: number;
+}
+
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  facebook: Facebook,
+  instagram: Instagram,
+  linkedin: Linkedin,
+  youtube: Youtube,
+  twitter: Twitter,
+  tiktok: MessageCircle,
+  whatsapp: MessageCircle,
+  telegram: MessageCircle,
+  github: MessageCircle,
+};
 
 export default function Footer() {
   const { company, logoValue } = useConfig();
@@ -9,6 +32,18 @@ export default function Footer() {
   const companyEmail = company.company_email || 'contacto@mlm360.pe';
   const companyPhone = company.company_phone || '+51 1 234-5678';
   const companyAddress = company.company_address || 'Av. Javier Prado Este 4200, San Isidro, Lima, Peru';
+  const complaintsEnabled = company.complaints_book_enabled === 'true';
+
+  const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
+
+  useEffect(() => {
+    supabase
+      .from('social_links')
+      .select('*')
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true })
+      .then(({ data }) => { if (data) setSocialLinks(data); });
+  }, []);
 
   return (
     <footer className="bg-muted/30 border-t border-border">
@@ -23,25 +58,42 @@ export default function Footer() {
                 size="w-8 h-8"
                 textClass="text-lg font-bold text-foreground"
               />
-              <p className="text-sm text-muted-foreground leading-relaxed mt-4">
-                Plataforma empresarial para gestion de redes y comercio. Impulsa tu negocio al siguiente nivel.
-              </p>
               <div className="flex gap-1.5 mt-5">
-                {[
-                  { Icon: Facebook, label: 'Facebook' },
-                  { Icon: Instagram, label: 'Instagram' },
-                  { Icon: Linkedin, label: 'LinkedIn' },
-                  { Icon: X, label: 'X' },
-                ].map(({ Icon, label }) => (
-                  <a
-                    key={label}
-                    href="#"
-                    aria-label={label}
-                    className="w-9 h-9 rounded-lg bg-background border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/30 hover:bg-primary/5 transition-colors"
-                  >
-                    <Icon className="w-4 h-4" />
-                  </a>
-                ))}
+                {socialLinks.length > 0 ? (
+                  socialLinks.map((link) => {
+                    const Icon = iconMap[link.icon] || MessageCircle;
+                    return (
+                      <a
+                        key={link.id}
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={link.platform}
+                        className="w-9 h-9 rounded-lg bg-background border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/30 hover:bg-primary/5 transition-colors"
+                      >
+                        <Icon className="w-4 h-4" />
+                      </a>
+                    );
+                  })
+                ) : (
+                  <>
+                    {[
+                      { Icon: Facebook, label: 'Facebook' },
+                      { Icon: Instagram, label: 'Instagram' },
+                      { Icon: Linkedin, label: 'LinkedIn' },
+                      { Icon: Twitter, label: 'X' },
+                    ].map(({ Icon, label }) => (
+                      <a
+                        key={label}
+                        href="#"
+                        aria-label={label}
+                        className="w-9 h-9 rounded-lg bg-background border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/30 hover:bg-primary/5 transition-colors"
+                      >
+                        <Icon className="w-4 h-4" />
+                      </a>
+                    ))}
+                  </>
+                )}
               </div>
             </div>
 
@@ -80,6 +132,22 @@ export default function Footer() {
                       </a>
                     </li>
                   ))}
+                  {complaintsEnabled && (
+                    <li>
+                      <Link
+                        to="/libro-reclamaciones"
+                        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors group"
+                      >
+                        <img
+                          src="/images/icons/libro-de-reclamaciones-37735.png"
+                          alt="Libro de Reclamaciones"
+                          className="w-4 h-4 object-contain"
+                        />
+                        <span className="group-hover:underline">Libro de Reclamaciones</span>
+                        <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </Link>
+                    </li>
+                  )}
                 </ul>
               </div>
 
@@ -119,7 +187,22 @@ export default function Footer() {
           <p className="text-sm text-muted-foreground">
             © {new Date().getFullYear()} {companyName}. Todos los derechos reservados.
           </p>
-          <p className="text-xs text-muted-foreground">Hecho en Lima, Peru</p>
+          <div className="flex items-center gap-4">
+            {complaintsEnabled && (
+              <Link
+                to="/libro-reclamaciones"
+                className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors"
+              >
+                <img
+                  src="/images/icons/libro-de-reclamaciones-37735.png"
+                  alt="Libro de Reclamaciones"
+                  className="w-3.5 h-3.5 object-contain"
+                />
+                Libro de Reclamaciones
+              </Link>
+            )}
+            <p className="text-xs text-muted-foreground">Hecho en Lima, Peru</p>
+          </div>
         </div>
       </div>
     </footer>

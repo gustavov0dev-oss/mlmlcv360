@@ -15,6 +15,7 @@ import ContactoPage from '@/pages/landing/ContactoPage';
 import PlanesPage from '@/pages/landing/PlanesPage';
 import BlogPage from '@/pages/landing/BlogPage';
 import BlogDetailPage from '@/pages/landing/BlogDetailPage';
+import LibroReclamacionesPage from '@/pages/landing/LibroReclamacionesPage';
 import PagoPage from '@/pages/landing/PagoPage';
 import PedidosPage from '@/pages/landing/PedidosPage';
 import LoginPage from '@/pages/auth/LoginPage';
@@ -32,7 +33,7 @@ import WishlistPage from '@/pages/store/WishlistPage';
 import { CartProvider } from '@/store/cartStore';
 import { Boxes, Wrench as WrenchIcon } from 'lucide-react';
 
-const LANDING_PATHS = ['/', '/nosotros', '/precios', '/empresa', '/contacto', '/planes', '/blog', '/pago', '/login', '/registro', '/reset-password', '/tienda', '/carrito', '/checkout', '/favoritos', '/tienda/comparar'];
+const LANDING_PATHS = ['/', '/nosotros', '/precios', '/empresa', '/contacto', '/planes', '/blog', '/pago', '/login', '/registro', '/reset-password', '/tienda', '/carrito', '/checkout', '/favoritos', '/tienda/comparar', '/libro-reclamaciones'];
 const ADMIN_BYPASS_ROLES = ['super_admin', 'admin'];
 
 function MaintenancePage() {
@@ -132,6 +133,7 @@ function AppRoutes() {
         <Route path="/planes" element={<PlanesPage />} />
         <Route path="/blog" element={<BlogPage />} />
         <Route path="/blog/:slug" element={<BlogDetailPage />} />
+        <Route path="/libro-reclamaciones" element={<LibroReclamacionesPage />} />
         <Route path="/pago" element={<PagoPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/registro" element={<RegisterPage />} />

@@ -1,7 +1,6 @@
 import { Link } from '@/lib/router';
 import Navbar from '@/components/landing/Navbar';
 import Footer from '@/components/landing/Footer';
-import { faqItems } from '@/lib/mockData';
 import {
   ArrowRight, Check, Star, ChevronDown, Zap, Globe, Award, DollarSign,
   TrendingUp, Users, Lock, ShoppingBag, Bell, Network, CreditCard, Sparkles,
@@ -423,6 +422,17 @@ export default function LandingPage() {
   const { user } = useAuthStore();
   const platformStats = usePlatformStats();
   const topCategories = useTopCategories();
+
+  // Dynamic FAQs from database
+  const [faqItems, setFaqItems] = useState<{ id: string; question: string; answer: string }[]>([]);
+  useEffect(() => {
+    supabase
+      .from('faq_items')
+      .select('id, question, answer')
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true })
+      .then(({ data }) => { if (data) setFaqItems(data); });
+  }, []);
 
   // Split FAQ into two columns
   const faqLeft = faqItems.filter((_, i) => i % 2 === 0);
