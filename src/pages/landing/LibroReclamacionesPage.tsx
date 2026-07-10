@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
-import { FileText, CircleCheck as CheckCircle2, CircleAlert as AlertCircle, Loader as Loader2, ArrowLeft, Search, Clock, CheckCheck, Circle as XCircle, ChevronRight, BookOpen } from 'lucide-react';
+import { FileText, CircleCheck as CheckCircle2, CircleAlert as AlertCircle, Loader as Loader2, ArrowLeft, Search, Clock, CheckCheck, Circle as XCircle, ChevronRight, BookOpen, Package } from 'lucide-react';
 import Navbar from '@/components/landing/Navbar';
 import Footer from '@/components/landing/Footer';
 import { cn } from '@/lib/utils';
@@ -249,12 +249,39 @@ export default function LibroReclamacionesPage() {
             </div>
           </div>
 
-          {/* ── Info bar ── */}
-          <div className="flex items-start gap-3 p-4 rounded-xl border border-amber-500/20 bg-amber-500/5 mb-8 text-sm">
-            <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-            <div className="text-muted-foreground leading-relaxed">
-              <span className="font-semibold text-foreground">Queja:</span> disconformidad con la atención del servicio. &nbsp;
-              <span className="font-semibold text-foreground">Reclamo:</span> disconformidad con el producto o servicio adquirido.
+          {/* ── Queja / Reclamo cards ── */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
+            <div className={cn(
+              'flex items-start gap-3 p-4 rounded-xl border transition-all cursor-pointer',
+              form.tipo === 'queja'
+                ? 'border-amber-500/40 bg-amber-500/10 ring-1 ring-amber-500/20'
+                : 'border-border/60 bg-card hover:border-amber-500/20 hover:bg-amber-500/5',
+            )} onClick={() => set('tipo', 'queja')}>
+              <div className="w-9 h-9 rounded-lg bg-amber-500/15 flex items-center justify-center shrink-0">
+                <AlertCircle className="w-4.5 h-4.5 text-amber-600 dark:text-amber-400" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-foreground">Queja</p>
+                <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">
+                  Disconformidad con la atención del servicio.
+                </p>
+              </div>
+            </div>
+            <div className={cn(
+              'flex items-start gap-3 p-4 rounded-xl border transition-all cursor-pointer',
+              form.tipo === 'reclamo'
+                ? 'border-blue-500/40 bg-blue-500/10 ring-1 ring-blue-500/20'
+                : 'border-border/60 bg-card hover:border-blue-500/20 hover:bg-blue-500/5',
+            )} onClick={() => set('tipo', 'reclamo')}>
+              <div className="w-9 h-9 rounded-lg bg-blue-500/15 flex items-center justify-center shrink-0">
+                <Package className="w-4.5 h-4.5 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-foreground">Reclamo</p>
+                <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">
+                  Disconformidad con el producto o servicio adquirido.
+                </p>
+              </div>
             </div>
           </div>
 
@@ -311,16 +338,6 @@ export default function LibroReclamacionesPage() {
                   <section>
                     <SectionTitle>Datos del consumidor</SectionTitle>
                     <div className="space-y-4">
-                      <Field label="Tipo de solicitud" required>
-                        <Select value={form.tipo} onValueChange={v => set('tipo', v)}>
-                          <SelectTrigger><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="queja">Queja</SelectItem>
-                            <SelectItem value="reclamo">Reclamo</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </Field>
-
                       <div className="grid grid-cols-2 gap-3">
                         <Field label="Nombre" required>
                           <Input value={form.nombre} onChange={e => set('nombre', e.target.value)} placeholder="Tu nombre" />

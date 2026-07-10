@@ -9,8 +9,9 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { FileText, Eye, Clock, Loader as Loader2, Search, RefreshCw, Trash2, Upload, Image as ImageIcon, MessageSquare, Bell, X, ChevronRight, ArrowRight, User, Mail, Phone, CreditCard, MapPin, Package, DollarSign, Send } from 'lucide-react';
+import { FileText, Eye, Clock, Loader as Loader2, Search, RefreshCw, Trash2, Upload, Image as ImageIcon, MessageSquare, Bell, ChevronRight, ArrowRight, User, Mail, Phone, CreditCard, MapPin, Package, DollarSign, Send } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 type ComplaintStatus = 'pendiente' | 'en_proceso' | 'resuelto' | 'cerrado';
@@ -74,7 +75,7 @@ function MetaField({ icon: Icon, label, value }: { icon: typeof User; label: str
   );
 }
 
-// ── Detail side panel ────────────────────────────────────────────────────────
+// ── Detail modal (centered Dialog) ───────────────────────────────────────────
 function DetailPanel({
   complaint, onClose, onStatusChange, onSaveResponse, onDelete, savingStatus, savingResp,
 }: {
@@ -94,178 +95,175 @@ function DetailPanel({
   useEffect(() => { setResponseText(complaint.respuesta ?? ''); }, [complaint.id, complaint.respuesta]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-end">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative z-10 w-full sm:w-[560px] h-full sm:h-[calc(100vh-40px)] sm:my-5 sm:mr-5 sm:rounded-2xl bg-background border border-border/60 shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-right-4 duration-200">
+    <Dialog open onOpenChange={open => { if (!open) onClose(); }}>
+      <DialogContent className="max-w-2xl max-h-[92vh] overflow-hidden flex flex-col gap-0 p-0">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-border/50 shrink-0">
-          <div>
-            <p className="text-xs text-muted-foreground/60 uppercase tracking-wider font-semibold mb-0.5">Detalle del reclamo</p>
-            <p className="text-base font-black font-mono tracking-widest text-foreground">{complaint.correlativo || '—'}</p>
-          </div>
-          <div className="flex items-center gap-2">
+        <DialogHeader className="px-5 py-4 border-b border-border/50 shrink-0 space-y-0">
+          <div className="flex items-center justify-between">
+            <div>
+              <DialogTitle className="text-base font-black font-mono tracking-widest text-foreground">
+                {complaint.correlativo || '—'}
+              </DialogTitle>
+              <DialogDescription className="text-xs text-muted-foreground/60 mt-0.5">
+                Detalle del reclamo
+              </DialogDescription>
+            </div>
             <Badge variant="outline" className={cfg.badgeClass}>{cfg.label}</Badge>
-            <button onClick={onClose} className="w-8 h-8 rounded-full bg-muted/60 flex items-center justify-center hover:bg-muted transition-colors">
-              <X className="w-4 h-4 text-muted-foreground" />
-            </button>
           </div>
-        </div>
+        </DialogHeader>
 
         {/* Scrollable body */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="p-5 space-y-6">
+        <div className="flex-1 overflow-y-auto p-5 space-y-6">
 
-            {/* Progress stepper */}
-            <div className="bg-muted/20 border border-border/50 rounded-xl p-4">
-              <p className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wide mb-3">Progreso</p>
-              <div className="flex items-center gap-0">
-                {STATUS_ORDER.map((s, i) => {
-                  const done = i <= stepIndex;
-                  const sCfg = STATUS_CONFIG[s];
-                  return (
-                    <div key={s} className="flex items-center flex-1 last:flex-none">
-                      <div className="flex flex-col items-center gap-1">
-                        <div className={cn(
-                          'w-7 h-7 rounded-full border-2 flex items-center justify-center text-[10px] font-bold transition-colors',
-                          done ? `${sCfg.stepClass} border-transparent text-white` : 'border-border bg-background text-muted-foreground'
-                        )}>
-                          {i + 1}
-                        </div>
-                        <span className={cn('text-[9px] font-medium whitespace-nowrap', done ? 'text-foreground' : 'text-muted-foreground/40')}>
-                          {sCfg.label}
-                        </span>
+          {/* Progress stepper */}
+          <div className="bg-muted/20 border border-border/50 rounded-xl p-4">
+            <p className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wide mb-3">Progreso</p>
+            <div className="flex items-center gap-0">
+              {STATUS_ORDER.map((s, i) => {
+                const done = i <= stepIndex;
+                const sCfg = STATUS_CONFIG[s];
+                return (
+                  <div key={s} className="flex items-center flex-1 last:flex-none">
+                    <div className="flex flex-col items-center gap-1">
+                      <div className={cn(
+                        'w-7 h-7 rounded-full border-2 flex items-center justify-center text-[10px] font-bold transition-colors',
+                        done ? `${sCfg.stepClass} border-transparent text-white` : 'border-border bg-background text-muted-foreground'
+                      )}>
+                        {i + 1}
                       </div>
-                      {i < STATUS_ORDER.length - 1 && (
-                        <div className={cn('h-0.5 flex-1 mb-4 mx-1 rounded transition-colors', i < stepIndex ? 'bg-primary' : 'bg-border')} />
-                      )}
+                      <span className={cn('text-[9px] font-medium whitespace-nowrap', done ? 'text-foreground' : 'text-muted-foreground/40')}>
+                        {sCfg.label}
+                      </span>
                     </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Status controls */}
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-              <Select value={complaint.status} onValueChange={v => onStatusChange(v as ComplaintStatus)} disabled={savingStatus}>
-                <SelectTrigger className="flex-1">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {STATUS_ORDER.map(s => (
-                    <SelectItem key={s} value={s}>
-                      <div className="flex items-center gap-2">
-                        <div className={cn('w-2 h-2 rounded-full', STATUS_CONFIG[s].stepClass)} />
-                        {STATUS_CONFIG[s].label}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {nextStatus && (
-                <Button onClick={() => onStatusChange(nextStatus)} disabled={savingStatus} size="sm" className="shrink-0 gap-1.5">
-                  {savingStatus ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
-                  Avanzar a {STATUS_CONFIG[nextStatus].label}
-                </Button>
-              )}
-            </div>
-
-            {/* Datos del solicitante */}
-            <div>
-              <p className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wide mb-3">Datos del solicitante</p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <MetaField icon={User} label="Nombre completo" value={`${complaint.nombre ?? ''} ${complaint.apellido ?? ''}`.trim()} />
-                <MetaField icon={Mail} label="Correo electrónico" value={complaint.email} />
-                <MetaField icon={Phone} label="Teléfono" value={complaint.telefono} />
-                <MetaField icon={CreditCard} label="Documento" value={complaint.num_doc ? `${complaint.tipo_doc ?? ''} ${complaint.num_doc}`.trim() : null} />
-                <MetaField icon={MapPin} label="Dirección" value={complaint.direccion} />
-                <MetaField icon={Clock} label="Fecha de registro" value={fmtDate(complaint.created_at)} />
-              </div>
-            </div>
-
-            {/* Detalle del reclamo */}
-            <div>
-              <p className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wide mb-3">Detalle del reclamo</p>
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className={cn('inline-flex items-center px-2.5 py-1 rounded-full border text-xs font-semibold', STATUS_CONFIG[complaint.status]?.badgeClass ?? '')}>
-                    {complaint.tipo ? complaint.tipo.charAt(0).toUpperCase() + complaint.tipo.slice(1) : 'N/A'}
-                  </span>
-                  {complaint.tipo_bien && (
-                    <span className="text-xs font-medium text-muted-foreground bg-muted/50 border border-border/50 px-2.5 py-1 rounded-full">
-                      {complaint.tipo_bien}
-                    </span>
-                  )}
-                  {typeof complaint.monto === 'number' && (
-                    <span className="text-xs font-medium text-muted-foreground bg-muted/50 border border-border/50 px-2.5 py-1 rounded-full flex items-center gap-1">
-                      <DollarSign className="w-3 h-3" />S/ {complaint.monto.toFixed(2)}
-                    </span>
-                  )}
-                </div>
-                {complaint.descripcion_bien && (
-                  <div>
-                    <p className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wide mb-1 flex items-center gap-1.5">
-                      <Package className="w-3 h-3" />Producto / Servicio
-                    </p>
-                    <p className="text-sm text-foreground/80">{complaint.descripcion_bien}</p>
+                    {i < STATUS_ORDER.length - 1 && (
+                      <div className={cn('h-0.5 flex-1 mb-4 mx-1 rounded transition-colors', i < stepIndex ? 'bg-primary' : 'bg-border')} />
+                    )}
                   </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Status controls */}
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <Select value={complaint.status} onValueChange={v => onStatusChange(v as ComplaintStatus)} disabled={savingStatus}>
+              <SelectTrigger className="flex-1">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {STATUS_ORDER.map(s => (
+                  <SelectItem key={s} value={s}>
+                    <div className="flex items-center gap-2">
+                      <div className={cn('w-2 h-2 rounded-full', STATUS_CONFIG[s].stepClass)} />
+                      {STATUS_CONFIG[s].label}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {nextStatus && (
+              <Button onClick={() => onStatusChange(nextStatus)} disabled={savingStatus} size="sm" className="shrink-0 gap-1.5">
+                {savingStatus ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
+                Avanzar a {STATUS_CONFIG[nextStatus].label}
+              </Button>
+            )}
+          </div>
+
+          {/* Datos del solicitante */}
+          <div>
+            <p className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wide mb-3">Datos del solicitante</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <MetaField icon={User} label="Nombre completo" value={`${complaint.nombre ?? ''} ${complaint.apellido ?? ''}`.trim()} />
+              <MetaField icon={Mail} label="Correo electrónico" value={complaint.email} />
+              <MetaField icon={Phone} label="Teléfono" value={complaint.telefono} />
+              <MetaField icon={CreditCard} label="Documento" value={complaint.num_doc ? `${complaint.tipo_doc ?? ''} ${complaint.num_doc}`.trim() : null} />
+              <MetaField icon={MapPin} label="Dirección" value={complaint.direccion} />
+              <MetaField icon={Clock} label="Fecha de registro" value={fmtDate(complaint.created_at)} />
+            </div>
+          </div>
+
+          {/* Detalle del reclamo */}
+          <div>
+            <p className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wide mb-3">Detalle del reclamo</p>
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className={cn('inline-flex items-center px-2.5 py-1 rounded-full border text-xs font-semibold', STATUS_CONFIG[complaint.status]?.badgeClass ?? '')}>
+                  {complaint.tipo ? complaint.tipo.charAt(0).toUpperCase() + complaint.tipo.slice(1) : 'N/A'}
+                </span>
+                {complaint.tipo_bien && (
+                  <span className="text-xs font-medium text-muted-foreground bg-muted/50 border border-border/50 px-2.5 py-1 rounded-full">
+                    {complaint.tipo_bien}
+                  </span>
                 )}
+                {typeof complaint.monto === 'number' && (
+                  <span className="text-xs font-medium text-muted-foreground bg-muted/50 border border-border/50 px-2.5 py-1 rounded-full flex items-center gap-1">
+                    <DollarSign className="w-3 h-3" />S/ {complaint.monto.toFixed(2)}
+                  </span>
+                )}
+              </div>
+              {complaint.descripcion_bien && (
                 <div>
-                  <p className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wide mb-1.5">Descripción del caso</p>
-                  <div className="bg-muted/20 border border-border/40 rounded-lg p-3 text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">
-                    {complaint.detalle || '—'}
-                  </div>
-                </div>
-                {complaint.pedido && (
-                  <div>
-                    <p className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wide mb-1.5">Pedido / Solicitud</p>
-                    <div className="bg-muted/20 border border-border/40 rounded-lg p-3 text-sm text-foreground/80 leading-relaxed">
-                      {complaint.pedido}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Respuesta al cliente */}
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <MessageSquare className="h-4 w-4 text-muted-foreground/60" />
-                <p className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wide">Respuesta al cliente</p>
-                {complaint.notificado && (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full ml-auto">
-                    <Bell className="h-2.5 w-2.5" />Notificado
-                  </span>
-                )}
-              </div>
-
-              {/* Existing response preview */}
-              {complaint.respuesta && (
-                <div className="mb-3 p-3.5 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
-                  <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 mb-1.5">Respuesta actual</p>
-                  <p className="text-sm text-foreground/80 whitespace-pre-wrap leading-relaxed">{complaint.respuesta}</p>
-                  {complaint.fecha_respuesta && (
-                    <p className="text-xs text-muted-foreground/50 mt-2">{fmt(complaint.fecha_respuesta)}</p>
-                  )}
+                  <p className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wide mb-1 flex items-center gap-1.5">
+                    <Package className="w-3 h-3" />Producto / Servicio
+                  </p>
+                  <p className="text-sm text-foreground/80">{complaint.descripcion_bien}</p>
                 </div>
               )}
-
-              <div className="space-y-2.5">
-                <Textarea
-                  placeholder="Escribe la respuesta que verá el cliente en &quot;Mis Reclamos&quot; y en su correo electrónico..."
-                  value={responseText}
-                  onChange={e => setResponseText(e.target.value)}
-                  rows={4}
-                  className="resize-y"
-                />
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-xs text-muted-foreground/60 leading-relaxed">
-                    Al guardar, el cliente verá esta respuesta en "Mis Reclamos" y recibirá una notificación por correo.
-                  </p>
-                  <Button onClick={() => onSaveResponse(responseText)} disabled={savingResp || !responseText.trim()} size="sm" className="shrink-0 gap-1.5">
-                    {savingResp ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
-                    Guardar y enviar
-                  </Button>
+              <div>
+                <p className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wide mb-1.5">Descripción del caso</p>
+                <div className="bg-muted/20 border border-border/40 rounded-lg p-3 text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">
+                  {complaint.detalle || '—'}
                 </div>
+              </div>
+              {complaint.pedido && (
+                <div>
+                  <p className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wide mb-1.5">Pedido / Solicitud</p>
+                  <div className="bg-muted/20 border border-border/40 rounded-lg p-3 text-sm text-foreground/80 leading-relaxed">
+                    {complaint.pedido}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Respuesta al cliente */}
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <MessageSquare className="h-4 w-4 text-muted-foreground/60" />
+              <p className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wide">Respuesta al cliente</p>
+              {complaint.notificado && (
+                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full ml-auto">
+                  <Bell className="h-2.5 w-2.5" />Notificado
+                </span>
+              )}
+            </div>
+
+            {complaint.respuesta && (
+              <div className="mb-3 p-3.5 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
+                <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 mb-1.5">Respuesta actual</p>
+                <p className="text-sm text-foreground/80 whitespace-pre-wrap leading-relaxed">{complaint.respuesta}</p>
+                {complaint.fecha_respuesta && (
+                  <p className="text-xs text-muted-foreground/50 mt-2">{fmt(complaint.fecha_respuesta)}</p>
+                )}
+              </div>
+            )}
+
+            <div className="space-y-2.5">
+              <Textarea
+                placeholder="Escribe la respuesta que verá el cliente en &quot;Mis Reclamos&quot; y en su correo electrónico..."
+                value={responseText}
+                onChange={e => setResponseText(e.target.value)}
+                rows={4}
+                className="resize-y"
+              />
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-xs text-muted-foreground/60 leading-relaxed">
+                  Al guardar, el cliente verá esta respuesta en "Mis Reclamos" y recibirá una notificación por correo.
+                </p>
+                <Button onClick={() => onSaveResponse(responseText)} disabled={savingResp || !responseText.trim()} size="sm" className="shrink-0 gap-1.5">
+                  {savingResp ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+                  Guardar y enviar
+                </Button>
               </div>
             </div>
           </div>
@@ -273,17 +271,17 @@ function DetailPanel({
 
         {/* Footer actions */}
         <div className="shrink-0 px-5 py-4 border-t border-border/50 flex items-center justify-between gap-3">
-          <Button variant="ghost" onClick={onClose} size="sm">
-            <X className="h-4 w-4 mr-1.5" />Cerrar
-          </Button>
           <Button variant="outline" size="sm"
             className="text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/50"
             onClick={onDelete}>
             <Trash2 className="h-4 w-4 mr-1.5" />Eliminar
           </Button>
+          <Button variant="ghost" onClick={onClose} size="sm">
+            Cerrar
+          </Button>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 

@@ -29,12 +29,13 @@ interface FormState {
   url: string;
   icon: string;
   icon_svg: string;
+  icon_color: string;
   is_active: boolean;
   sort_order: number;
 }
 
 const emptyForm = (): FormState => ({
-  id: null, platform: '', url: '', icon: 'facebook', icon_svg: '', is_active: true, sort_order: 0,
+  id: null, platform: '', url: '', icon: 'facebook', icon_svg: '', icon_color: '#6366f1', is_active: true, sort_order: 0,
 });
 
 const ICON_OPTIONS = ['facebook','instagram','linkedin','twitter','youtube','tiktok','whatsapp','telegram','github'];
@@ -63,8 +64,34 @@ const ICON_PATHS: Record<string, string> = {
   github:    'M12 2a10 10 0 0 0-3.2 19.5c.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.3-3.4-1.3-.5-1.1-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.9.8.1-.6.3-1.1.6-1.4-2.2-.3-4.5-1.1-4.5-5a3.9 3.9 0 0 1 1-2.7c-.1-.3-.4-1.3.1-2.6 0 0 .8-.3 2.7 1a9.4 9.4 0 0 1 5 0c1.9-1.3 2.7-1 2.7-1 .5 1.3.2 2.3.1 2.6a3.9 3.9 0 0 1 1 2.7c0 3.9-2.3 4.7-4.5 5 .3.3.6.9.6 1.8v2.6c0 .3.2.6.7.5A10 10 0 0 0 12 2z',
 };
 
-function PlatformIcon({ icon, iconSvg, className = 'h-5 w-5' }: { icon: string; iconSvg?: string | null; className?: string }) {
-  const path = iconSvg?.trim() ? iconSvg : ICON_PATHS[icon] || ICON_PATHS.facebook;
+// Extracts viewBox and inner content from full SVG markup, or returns null if it's a path d value
+function parseSvgInput(raw: string): { viewBox: string; inner: string } | null {
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  // Full <svg> tag
+  if (trimmed.startsWith('<svg') || trimmed.startsWith('<SVG')) {
+    const vbMatch = trimmed.match(/viewBox=["']([^"']+)["']/i);
+    const viewBox = vbMatch?.[1] ?? '0 0 24 24';
+    const inner = trimmed.replace(/<\/?svg[^>]*>/gi, '').trim();
+    return { viewBox, inner };
+  }
+  // Bare path d value
+  return { viewBox: '0 0 24 24', inner: `<path d="${trimmed}" />` };
+}
+
+function PlatformIcon({ icon, iconSvg, className = 'h-5 w-5' }: {
+  icon: string; iconSvg?: string | null; className?: string;
+}) {
+  if (iconSvg?.trim()) {
+    const parsed = parseSvgInput(iconSvg);
+    if (parsed) {
+      return (
+        <svg viewBox={parsed.viewBox} fill="currentColor" className={className} aria-hidden
+          dangerouslySetInnerHTML={{ __html: parsed.inner }} />
+      );
+    }
+  }
+  const path = ICON_PATHS[icon] || ICON_PATHS.facebook;
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden>
       <path d={path} />
@@ -72,8 +99,8 @@ function PlatformIcon({ icon, iconSvg, className = 'h-5 w-5' }: { icon: string; 
   );
 }
 
-function getColor(icon: string, iconSvg?: string | null) {
-  if (iconSvg?.trim()) return '#6366f1';
+function getColor(icon: string, iconSvg?: string | null, iconColor?: string | null) {
+  if (iconSvg?.trim()) return iconColor || '#6366f1';
   return PLATFORM_COLORS[icon] || '#6366f1';
 }
 
@@ -102,7 +129,7 @@ export default function SocialLinksAdminPage() {
 
   const openCreate = () => { setForm(emptyForm()); setIconMode('preset'); setShowForm(true); };
   const openEdit = (l: SocialLink) => {
-    setForm({ id: l.id, platform: l.platform, url: l.url, icon: l.icon, icon_svg: l.icon_svg || '', is_active: l.is_active, sort_order: l.sort_order });
+    setForm({ id: l.id, platform: l.platform, url: l.url, icon: l.icon, icon_svg: l.icon_svg || '', icon_color: (l as SocialLink & { icon_color?: string }).icon_color || '#6366f1', is_active: l.is_active, sort_order: l.sort_order });
     setIconMode(l.icon_svg?.trim() ? 'custom' : 'preset');
     setShowForm(true);
   };
@@ -117,7 +144,8 @@ export default function SocialLinksAdminPage() {
         platform: form.platform.trim(),
         url: form.url.trim(),
         icon: form.icon,
-        icon_svg: form.icon_svg.trim() || null,
+        icon_svg: iconMode === 'custom' ? (form.icon_svg.trim() || null) : null,
+        icon_color: iconMode === 'custom' ? form.icon_color : null,
         is_active: form.is_active,
         sort_order: form.sort_order,
       };
@@ -207,7 +235,7 @@ export default function SocialLinksAdminPage() {
               {/* Live icon preview */}
               <div
                 className="w-8 h-8 rounded-lg flex items-center justify-center text-white shrink-0"
-                style={{ backgroundColor: getColor(form.icon, iconMode === 'custom' ? form.icon_svg : null) }}
+                style={{ backgroundColor: getColor(form.icon, iconMode === 'custom' ? form.icon_svg : null, form.icon_color) }}
               >
                 <PlatformIcon icon={form.icon} iconSvg={iconMode === 'custom' ? form.icon_svg : null} className="h-4 w-4" />
               </div>
@@ -263,14 +291,43 @@ export default function SocialLinksAdminPage() {
                   ))}
                 </div>
               ) : (
-                <div className="space-y-1.5">
-                  <Textarea
-                    value={form.icon_svg}
-                    onChange={e => setForm(f => ({ ...f, icon_svg: e.target.value }))}
-                    placeholder="Pega el valor del atributo d del SVG path..."
-                    className="min-h-[80px] font-mono text-xs resize-y"
-                  />
-                  <p className="text-xs text-muted-foreground">Solo el contenido del atributo <code className="text-foreground">d</code> del path.</p>
+                <div className="space-y-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium text-muted-foreground">Código SVG completo</Label>
+                    <Textarea
+                      value={form.icon_svg}
+                      onChange={e => setForm(f => ({ ...f, icon_svg: e.target.value }))}
+                      placeholder={`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">\n  <path d="M12 2..." />\n</svg>`}
+                      className="min-h-[100px] font-mono text-xs resize-y"
+                    />
+                    <p className="text-xs text-muted-foreground">Pega el SVG completo <code className="text-foreground">&lt;svg&gt;...&lt;/svg&gt;</code> o solo el valor del atributo <code className="text-foreground">d</code>.</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-medium text-muted-foreground">Color de fondo</Label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="color"
+                          value={form.icon_color}
+                          onChange={e => setForm(f => ({ ...f, icon_color: e.target.value }))}
+                          className="w-9 h-9 rounded-lg border border-border cursor-pointer p-0.5 bg-transparent"
+                        />
+                        <Input
+                          value={form.icon_color}
+                          onChange={e => setForm(f => ({ ...f, icon_color: e.target.value }))}
+                          placeholder="#6366f1"
+                          className="w-28 font-mono text-xs h-9"
+                          maxLength={9}
+                        />
+                        <div
+                          className="w-9 h-9 rounded-lg flex items-center justify-center text-white shrink-0 border border-border/40"
+                          style={{ backgroundColor: form.icon_color }}
+                        >
+                          <PlatformIcon icon={form.icon} iconSvg={form.icon_svg} className="h-5 w-5" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>

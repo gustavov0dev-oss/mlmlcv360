@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from '@/lib/router';
-import { Mail, Phone, MapPin, ExternalLink, FileText } from 'lucide-react';
+import { Mail, Phone, MapPin, FileText } from 'lucide-react';
 import { useConfig } from '@/store/configStore';
 import { supabase } from '@/lib/backend/client';
 import { LogoWithText } from '@/components/Logo';
@@ -127,21 +127,20 @@ export default function Footer() {
                       </a>
                     </li>
                   ))}
-                  {complaintsEnabled && (
-                    <li>
-                      <Link
-                        to="/libro-reclamaciones"
-                        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors group"
-                      >
-                        {bookImage
-                          ? <img src={bookImage} alt="Libro de Reclamaciones" className="w-4 h-4 object-contain" />
-                          : <FileText className="w-4 h-4" />}
-                        <span className="group-hover:underline">Libro de Reclamaciones</span>
-                        <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-                      </Link>
-                    </li>
-                  )}
                 </ul>
+                {complaintsEnabled && (
+                  <Link
+                    to="/libro-reclamaciones"
+                    className="inline-flex items-center gap-3 mt-5 p-3 rounded-xl border border-border/60 bg-background/40 hover:bg-background/80 hover:border-border transition-all group"
+                  >
+                    {bookImage
+                      ? <img src={bookImage} alt="Libro de Reclamaciones" className="w-10 h-10 object-contain shrink-0" />
+                      : <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center shrink-0"><FileText className="w-5 h-5 text-muted-foreground" /></div>}
+                    <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors leading-tight">
+                      Libro de<br/>Reclamaciones
+                    </span>
+                  </Link>
+                )}
               </div>
 
               <div className="col-span-2 sm:col-span-1">
@@ -180,20 +179,7 @@ export default function Footer() {
           <p className="text-sm text-muted-foreground">
             © {new Date().getFullYear()} {companyName}. Todos los derechos reservados.
           </p>
-          <div className="flex items-center gap-4">
-            {complaintsEnabled && (
-              <Link
-                to="/libro-reclamaciones"
-                className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors"
-              >
-                {bookImage
-                  ? <img src={bookImage} alt="Libro de Reclamaciones" className="w-3.5 h-3.5 object-contain" />
-                  : <FileText className="w-3 h-3" />}
-                Libro de Reclamaciones
-              </Link>
-            )}
-            <p className="text-xs text-muted-foreground">Hecho en Lima, Peru</p>
-          </div>
+          <p className="text-xs text-muted-foreground">Hecho en Lima, Peru</p>
         </div>
       </div>
     </footer>
