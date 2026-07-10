@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
-import { FileText, CheckCircle2, AlertCircle, Loader2, ArrowLeft } from 'lucide-react';
+import { FileText, CircleCheck as CheckCircle2, CircleAlert as AlertCircle, Loader as Loader2, ArrowLeft } from 'lucide-react';
 import Navbar from '@/components/landing/Navbar';
 import Footer from '@/components/landing/Footer';
 
