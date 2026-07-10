@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from '@/lib/router';
-import { Mail, Phone, MapPin, ExternalLink } from 'lucide-react';
+import { Mail, Phone, MapPin, ExternalLink, FileText } from 'lucide-react';
 import { useConfig } from '@/store/configStore';
 import { supabase } from '@/lib/backend/client';
 import { LogoWithText } from '@/components/Logo';
@@ -45,6 +45,7 @@ export default function Footer() {
   const companyPhone = company.company_phone || '+51 1 234-5678';
   const companyAddress = company.company_address || 'Av. Javier Prado Este 4200, San Isidro, Lima, Peru';
   const complaintsEnabled = company.complaints_book_enabled === 'true';
+  const bookImage = company.complaints_book_image || '';
 
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
 
@@ -132,11 +133,9 @@ export default function Footer() {
                         to="/libro-reclamaciones"
                         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors group"
                       >
-                        <img
-                          src="/images/icons/libro-de-reclamaciones-37735.png"
-                          alt="Libro de Reclamaciones"
-                          className="w-4 h-4 object-contain"
-                        />
+                        {bookImage
+                          ? <img src={bookImage} alt="Libro de Reclamaciones" className="w-4 h-4 object-contain" />
+                          : <FileText className="w-4 h-4" />}
                         <span className="group-hover:underline">Libro de Reclamaciones</span>
                         <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                       </Link>
@@ -187,11 +186,9 @@ export default function Footer() {
                 to="/libro-reclamaciones"
                 className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors"
               >
-                <img
-                  src="/images/icons/libro-de-reclamaciones-37735.png"
-                  alt="Libro de Reclamaciones"
-                  className="w-3.5 h-3.5 object-contain"
-                />
+                {bookImage
+                  ? <img src={bookImage} alt="Libro de Reclamaciones" className="w-3.5 h-3.5 object-contain" />
+                  : <FileText className="w-3 h-3" />}
                 Libro de Reclamaciones
               </Link>
             )}
