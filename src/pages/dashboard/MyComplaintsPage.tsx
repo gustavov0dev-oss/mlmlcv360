@@ -68,6 +68,13 @@ function DetailPanel({ complaint, onClose }: { complaint: Complaint; onClose: ()
   const steps = ['pendiente', 'en_proceso', 'resuelto', 'cerrado'];
   const currentStep = steps.indexOf(complaint.status);
 
+  const stepColors: Array<{ dot: string; bar: string; text: string }> = [
+    { dot: 'bg-amber-500 border-amber-500', bar: 'bg-amber-500', text: 'text-amber-600 dark:text-amber-400' },
+    { dot: 'bg-blue-500 border-blue-500', bar: 'bg-blue-500', text: 'text-blue-600 dark:text-blue-400' },
+    { dot: 'bg-emerald-500 border-emerald-500', bar: 'bg-emerald-500', text: 'text-emerald-600 dark:text-emerald-400' },
+    { dot: 'bg-muted-foreground border-muted-foreground', bar: 'bg-muted-foreground', text: 'text-muted-foreground' },
+  ];
+
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       {/* Backdrop */}
@@ -99,10 +106,11 @@ function DetailPanel({ complaint, onClose }: { complaint: Complaint; onClose: ()
               {steps.map((s, i) => {
                 const done = i <= currentStep;
                 const cfg = STATUS_CONFIG[s];
+                const col = stepColors[i];
                 return (
                   <div key={s} className="flex flex-col items-center gap-1 flex-1">
-                    <div className={cn('w-2.5 h-2.5 rounded-full border-2 transition-colors', done ? 'bg-primary border-primary' : 'border-border bg-background')} />
-                    <span className={cn('text-[9px] font-medium hidden sm:block', done ? 'text-primary' : 'text-muted-foreground/40')}>
+                    <div className={cn('w-2.5 h-2.5 rounded-full border-2 transition-colors', done ? col.dot : 'border-border bg-background')} />
+                    <span className={cn('text-[9px] font-medium hidden sm:block', done ? col.text : 'text-muted-foreground/40')}>
                       {cfg?.label}
                     </span>
                   </div>
@@ -110,7 +118,7 @@ function DetailPanel({ complaint, onClose }: { complaint: Complaint; onClose: ()
               })}
             </div>
             <div className="h-1 bg-muted rounded-full overflow-hidden">
-              <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${(currentStep / (steps.length - 1)) * 100}%` }} />
+              <div className={cn('h-full rounded-full transition-all', stepColors[currentStep]?.bar || 'bg-primary')} style={{ width: `${(currentStep / (steps.length - 1)) * 100}%` }} />
             </div>
           </div>
 

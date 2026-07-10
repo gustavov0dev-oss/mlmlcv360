@@ -276,9 +276,7 @@ function DetailPanel({
             onClick={onDelete}>
             <Trash2 className="h-4 w-4 mr-1.5" />Eliminar
           </Button>
-          <Button variant="ghost" onClick={onClose} size="sm">
-            Cerrar
-          </Button>
+          <p className="text-xs text-muted-foreground/50 hidden sm:block">Cierra con la X superior</p>
         </div>
       </DialogContent>
     </Dialog>

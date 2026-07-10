@@ -27,7 +27,7 @@ Deno.serve(async (req: Request) => {
     const body = await req.json();
     const { complaint_id, event, new_status, response_text } = body as {
       complaint_id: string;
-      event: "status_change" | "response";
+      event: "registered" | "status_change" | "response";
       new_status?: string;
       response_text?: string;
     };
@@ -63,13 +63,31 @@ Deno.serve(async (req: Request) => {
     const toEmail     = complaint.email;
     const fullName    = `${complaint.nombre ?? ""} ${complaint.apellido ?? ""}`.trim();
     const correlativo = complaint.correlativo ?? complaint_id;
+    const tipoLabel   = complaint.tipo === "queja" ? "queja" : "reclamo";
 
     let subject = "";
     let html = "";
 
-    if (event === "status_change" && new_status) {
+    if (event === "registered") {
+      subject = `[${companyName}] Confirmación de ${tipoLabel} #${correlativo}`;
+      html = buildEmail({
+        companyName,
+        fullName,
+        correlativo,
+        title: `Hemos recibido tu ${tipoLabel}`,
+        bodyHtml: `
+          <p>Hola <strong>${fullName}</strong>,</p>
+          <p>Tu ${tipoLabel} ha sido registrado correctamente en nuestro Libro de Reclamaciones.</p>
+          <div style="margin:20px 0;padding:16px 20px;background:#f4f4f5;border-radius:10px;border-left:4px solid #3b82f6;">
+            <strong>Estado actual:</strong> Pendiente de revisión
+          </div>
+          <p>Guarda tu código de seguimiento <strong>${correlativo}</strong> para consultar el estado de tu ${tipoLabel} en cualquier momento desde nuestro sitio web.</p>
+          <p>Te notificaremos por correo cada vez que haya una actualización.</p>
+        `,
+      });
+    } else if (event === "status_change" && new_status) {
       const statusLabel = STATUS_LABELS[new_status] ?? new_status;
-      subject = `[${companyName}] Actualización de tu reclamo #${correlativo}`;
+      subject = `[${companyName}] Actualización de tu ${tipoLabel} #${correlativo}`;
       html = buildEmail({
         companyName,
         fullName,
@@ -77,15 +95,15 @@ Deno.serve(async (req: Request) => {
         title: "Tu reclamo fue actualizado",
         bodyHtml: `
           <p>Hola <strong>${fullName}</strong>,</p>
-          <p>El estado de tu ${complaint.tipo ?? "reclamo"} ha cambiado:</p>
+          <p>El estado de tu ${tipoLabel} ha cambiado:</p>
           <div style="margin:20px 0;padding:16px 20px;background:#f4f4f5;border-radius:10px;border-left:4px solid #3b82f6;">
             <strong>Estado actual:</strong> ${statusLabel}
           </div>
-          <p>Puedes consultar el estado completo de tu reclamo en cualquier momento ingresando el código <strong>${correlativo}</strong> en nuestro Libro de Reclamaciones.</p>
+          <p>Puedes consultar el estado completo de tu ${tipoLabel} en cualquier momento ingresando el código <strong>${correlativo}</strong> en nuestro Libro de Reclamaciones.</p>
         `,
       });
     } else if (event === "response" && response_text) {
-      subject = `[${companyName}] Respuesta a tu reclamo #${correlativo}`;
+      subject = `[${companyName}] Respuesta a tu ${tipoLabel} #${correlativo}`;
       html = buildEmail({
         companyName,
         fullName,
@@ -93,7 +111,7 @@ Deno.serve(async (req: Request) => {
         title: "Hemos respondido a tu reclamo",
         bodyHtml: `
           <p>Hola <strong>${fullName}</strong>,</p>
-          <p>Hemos dado respuesta a tu ${complaint.tipo ?? "reclamo"} con código <strong>${correlativo}</strong>:</p>
+          <p>Hemos dado respuesta a tu ${tipoLabel} con código <strong>${correlativo}</strong>:</p>
           <div style="margin:20px 0;padding:16px 20px;background:#f0fdf4;border-radius:10px;border-left:4px solid #22c55e;">
             ${response_text.replace(/\n/g, "<br/>")}
           </div>
@@ -105,6 +123,9 @@ Deno.serve(async (req: Request) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // Mark as notified
+    await db.from("complaints_book").update({ notificado: true }).eq("id", complaint_id);
 
     if (!resendKey) {
       console.warn("RESEND_API_KEY not configured — email skipped");
@@ -155,12 +176,12 @@ function buildEmail({ companyName, fullName, correlativo, title, bodyHtml }: {
       <h2 style="font-size:18px;font-weight:700;color:#0f172a;margin:0 0 20px;">${title}</h2>
       ${bodyHtml}
       <div style="margin-top:28px;padding:14px 18px;background:#f1f5f9;border-radius:10px;text-align:center;">
-        <p style="font-size:12px;color:#64748b;margin:0 0 4px;">Código de seguimiento</p>
+        <p style="font-size:12px;color:#64748b;margin:0 0 4px;">Codigo de seguimiento</p>
         <p style="font-size:22px;font-weight:900;color:#0f172a;letter-spacing:3px;font-family:monospace;margin:0;">${correlativo}</p>
       </div>
     </div>
     <div style="background:#f8fafc;border-top:1px solid #e2e8f0;padding:20px 32px;text-align:center;">
-      <p style="font-size:12px;color:#94a3b8;margin:0;">Este correo fue enviado automáticamente por ${companyName}. Por favor no respondas a este mensaje.</p>
+      <p style="font-size:12px;color:#94a3b8;margin:0;">Este correo fue enviado automaticamente por ${companyName}. Por favor no respondas a este mensaje.</p>
     </div>
   </div>
 </body></html>`;

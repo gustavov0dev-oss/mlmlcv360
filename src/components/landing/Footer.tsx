@@ -28,6 +28,19 @@ const ICON_PATHS: Record<string, string> = {
 };
 
 function SocialIcon({ icon, iconSvg }: { icon: string; iconSvg?: string | null }) {
+  const isFullSvg = iconSvg && iconSvg.trim().startsWith('<svg');
+  if (isFullSvg) {
+    const sanitized = iconSvg!
+      .replace(/\s(width|height)="[^"]*"/g, '')
+      .replace(/fill="[^"]*"/g, 'fill="currentColor"');
+    return (
+      <span
+        className="w-4 h-4 flex items-center justify-center [&_svg]:w-4 [&_svg]:h-4"
+        aria-hidden="true"
+        dangerouslySetInnerHTML={{ __html: sanitized }}
+      />
+    );
+  }
   const path = iconSvg && iconSvg.trim() !== ''
     ? iconSvg
     : ICON_PATHS[icon.toLowerCase()] || ICON_PATHS.facebook;
@@ -131,11 +144,11 @@ export default function Footer() {
                 {complaintsEnabled && (
                   <Link
                     to="/libro-reclamaciones"
-                    className="inline-flex items-center gap-3 mt-5 p-3 rounded-xl border border-border/60 bg-background/40 hover:bg-background/80 hover:border-border transition-all group"
+                    className="inline-flex items-center gap-2.5 mt-5 group"
                   >
                     {bookImage
-                      ? <img src={bookImage} alt="Libro de Reclamaciones" className="w-10 h-10 object-contain shrink-0" />
-                      : <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center shrink-0"><FileText className="w-5 h-5 text-muted-foreground" /></div>}
+                      ? <img src={bookImage} alt="Libro de Reclamaciones" className="w-9 h-9 object-contain shrink-0" />
+                      : <FileText className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />}
                     <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors leading-tight">
                       Libro de<br/>Reclamaciones
                     </span>

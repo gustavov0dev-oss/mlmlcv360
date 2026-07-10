@@ -27,6 +27,7 @@ interface ComplaintForm {
   apoderado_nombre: string;
   apoderado_doc: string;
   tipo_bien: string;
+  moneda: string;
   monto: string;
   descripcion_bien: string;
   detalle: string;
@@ -56,6 +57,7 @@ const initialForm: ComplaintForm = {
   apoderado_nombre: '',
   apoderado_doc: '',
   tipo_bien: 'producto',
+  moneda: 'PEN',
   monto: '',
   descripcion_bien: '',
   detalle: '',
@@ -158,12 +160,20 @@ export default function LibroReclamacionesPage() {
           detalle: form.detalle.trim(),
           pedido: form.pedido.trim() || null,
         })
-        .select('correlativo')
+        .select('id, correlativo')
         .single();
       if (error) throw error;
-      setCorrelativo(data?.correlativo || '');
+      const newId = (data as { id: string; correlativo: string })?.id;
+      const newCorr = (data as { id: string; correlativo: string })?.correlativo || '';
+      setCorrelativo(newCorr);
       setSuccess(true);
       toast.success('Tu reclamo se registró correctamente');
+      // Send confirmation email with the correlativo
+      if (newId) {
+        supabase.functions.invoke('complaint-notify', {
+          body: { complaint_id: newId, event: 'registered' },
+        }).catch(() => {});
+      }
     } catch {
       toast.error('Ocurrió un error al registrar tu reclamo. Inténtalo nuevamente.');
     } finally {
@@ -249,42 +259,6 @@ export default function LibroReclamacionesPage() {
             </div>
           </div>
 
-          {/* ── Queja / Reclamo cards ── */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
-            <div className={cn(
-              'flex items-start gap-3 p-4 rounded-xl border transition-all cursor-pointer',
-              form.tipo === 'queja'
-                ? 'border-amber-500/40 bg-amber-500/10 ring-1 ring-amber-500/20'
-                : 'border-border/60 bg-card hover:border-amber-500/20 hover:bg-amber-500/5',
-            )} onClick={() => set('tipo', 'queja')}>
-              <div className="w-9 h-9 rounded-lg bg-amber-500/15 flex items-center justify-center shrink-0">
-                <AlertCircle className="w-4.5 h-4.5 text-amber-600 dark:text-amber-400" />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-foreground">Queja</p>
-                <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">
-                  Disconformidad con la atención del servicio.
-                </p>
-              </div>
-            </div>
-            <div className={cn(
-              'flex items-start gap-3 p-4 rounded-xl border transition-all cursor-pointer',
-              form.tipo === 'reclamo'
-                ? 'border-blue-500/40 bg-blue-500/10 ring-1 ring-blue-500/20'
-                : 'border-border/60 bg-card hover:border-blue-500/20 hover:bg-blue-500/5',
-            )} onClick={() => set('tipo', 'reclamo')}>
-              <div className="w-9 h-9 rounded-lg bg-blue-500/15 flex items-center justify-center shrink-0">
-                <Package className="w-4.5 h-4.5 text-blue-600 dark:text-blue-400" />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-foreground">Reclamo</p>
-                <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">
-                  Disconformidad con el producto o servicio adquirido.
-                </p>
-              </div>
-            </div>
-          </div>
-
           {/* ── Tabs ── */}
           <div className="flex gap-1 p-1 bg-muted/50 rounded-xl border border-border/50 mb-8">
             {([['registrar', 'Registrar reclamo', FileText], ['consultar', 'Consultar estado', Search]] as const).map(([t, label, Icon]) => (
@@ -334,6 +308,53 @@ export default function LibroReclamacionesPage() {
               ) : (
                 /* ── Form ── */
                 <form onSubmit={handleSubmit} className="space-y-10">
+                  {/* Section 0: Tipo de solicitud */}
+                  <section>
+                    <SectionTitle>Tipo de solicitud</SectionTitle>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <button
+                        type="button"
+                        onClick={() => set('tipo', 'reclamo')}
+                        className={cn(
+                          'flex items-start gap-3 p-4 rounded-xl border text-left transition-all',
+                          form.tipo === 'reclamo'
+                            ? 'border-blue-500/40 bg-blue-500/10 ring-1 ring-blue-500/20'
+                            : 'border-border/60 bg-card hover:border-blue-500/20',
+                        )}
+                      >
+                        <div className="w-9 h-9 rounded-lg bg-blue-500/15 flex items-center justify-center shrink-0">
+                          <Package className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-foreground">Reclamo</p>
+                          <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">
+                            Disconformidad relacionada al producto o servicio adquirido.
+                          </p>
+                        </div>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => set('tipo', 'queja')}
+                        className={cn(
+                          'flex items-start gap-3 p-4 rounded-xl border text-left transition-all',
+                          form.tipo === 'queja'
+                            ? 'border-amber-500/40 bg-amber-500/10 ring-1 ring-amber-500/20'
+                            : 'border-border/60 bg-card hover:border-amber-500/20',
+                        )}
+                      >
+                        <div className="w-9 h-9 rounded-lg bg-amber-500/15 flex items-center justify-center shrink-0">
+                          <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-foreground">Queja</p>
+                          <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">
+                            Disconformidad con la atención recibida.
+                          </p>
+                        </div>
+                      </button>
+                    </div>
+                  </section>
+
                   {/* Section 1: Datos del consumidor */}
                   <section>
                     <SectionTitle>Datos del consumidor</SectionTitle>
@@ -413,8 +434,17 @@ export default function LibroReclamacionesPage() {
                             </SelectContent>
                           </Select>
                         </Field>
-                        <Field label="Monto reclamado (S/)">
-                          <Input type="number" min="0" step="0.01" value={form.monto} onChange={e => set('monto', e.target.value)} placeholder="0.00" />
+                        <Field label="Monto reclamado">
+                          <div className="flex gap-2">
+                            <Select value={form.moneda} onValueChange={v => set('moneda', v)}>
+                              <SelectTrigger className="w-[88px] shrink-0"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="PEN">S/</SelectItem>
+                                <SelectItem value="USD">$</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <Input type="number" min="0" step="0.01" value={form.monto} onChange={e => set('monto', e.target.value)} placeholder="0.00" className="flex-1" />
+                          </div>
                         </Field>
                       </div>
 
