@@ -93,6 +93,8 @@ export default function ComplaintsAdminPage() {
   const [togglingEnabled, setTogglingEnabled] = useState(false);
   const [responseText, setResponseText]   = useState('');
   const [bookImage, setBookImage]         = useState('');
+  const [urlInput, setUrlInput]           = useState('');
+  const [imageMode, setImageMode]         = useState<'upload' | 'url'>('upload');
   const [uploadingImage, setUploadingImage] = useState(false);
   const imageRef = useRef<HTMLInputElement>(null);
 
@@ -100,7 +102,7 @@ export default function ComplaintsAdminPage() {
     company?.complaints_book_enabled === 'true' ||
     (company?.complaints_book_enabled as unknown as boolean) === true;
 
-  useEffect(() => { setBookImage(company?.complaints_book_image ?? ''); }, [company?.complaints_book_image]);
+  useEffect(() => { const v = company?.complaints_book_image ?? ''; setBookImage(v); setUrlInput(v); }, [company?.complaints_book_image]);
 
   const load = useCallback(async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
@@ -277,20 +279,60 @@ export default function ComplaintsAdminPage() {
               Imagen del Libro
             </CardTitle>
           </CardHeader>
-          <CardContent className="flex items-center gap-4 px-4 pb-4">
-            <div className="w-14 h-14 rounded-lg border border-border bg-muted flex items-center justify-center overflow-hidden shrink-0">
-              {bookImage
-                ? <img src={bookImage} alt="Libro" className="w-full h-full object-contain" />
-                : <ImageIcon className="w-6 h-6 text-muted-foreground/40" />}
+          <CardContent className="px-4 pb-4 space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="w-14 h-14 rounded-lg border border-border bg-muted flex items-center justify-center overflow-hidden shrink-0">
+                {bookImage
+                  ? <img src={bookImage} alt="Libro" className="w-full h-full object-contain" />
+                  : <ImageIcon className="w-6 h-6 text-muted-foreground/40" />}
+              </div>
+              <p className="text-xs text-muted-foreground">Aparece en la página pública del libro de reclamaciones.</p>
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs text-muted-foreground mb-2">Aparece en la página pública del libro.</p>
-              <input ref={imageRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
-              <Button variant="outline" size="sm" onClick={() => imageRef.current?.click()} disabled={uploadingImage}>
-                {uploadingImage ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <Upload className="h-3.5 w-3.5 mr-1.5" />}
-                {uploadingImage ? 'Subiendo...' : 'Cambiar imagen'}
-              </Button>
+            {/* Mode toggle */}
+            <div className="flex gap-1 p-1 bg-muted/40 rounded-lg border border-border/50">
+              {(['upload', 'url'] as const).map(m => (
+                <button key={m} onClick={() => setImageMode(m)}
+                  className={`flex-1 text-xs font-medium py-1.5 rounded-md transition-all ${
+                    imageMode === m ? 'bg-background border border-border/60 text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                  }`}>
+                  {m === 'upload' ? 'Subir archivo' : 'Pegar URL'}
+                </button>
+              ))}
             </div>
+            {imageMode === 'upload' ? (
+              <div>
+                <input ref={imageRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+                <Button variant="outline" size="sm" className="w-full" onClick={() => imageRef.current?.click()} disabled={uploadingImage}>
+                  {uploadingImage ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <Upload className="h-3.5 w-3.5 mr-1.5" />}
+                  {uploadingImage ? 'Subiendo...' : 'Seleccionar imagen'}
+                </Button>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <Input
+                  value={urlInput}
+                  onChange={e => setUrlInput(e.target.value)}
+                  placeholder="https://..."
+                  className="text-xs h-8"
+                />
+                <Button size="sm" className="h-8 shrink-0" disabled={uploadingImage || !urlInput.trim()}
+                  onClick={async () => {
+                    if (!urlInput.trim()) return;
+                    setUploadingImage(true);
+                    try {
+                      const { error } = await supabase.from('system_config')
+                        .update({ value: urlInput.trim() }).eq('key', 'complaints_book_image');
+                      if (error) throw error;
+                      setBookImage(urlInput.trim());
+                      await refresh?.();
+                      toast.success('Imagen actualizada');
+                    } catch (e) { toast.error(e instanceof Error ? e.message : 'Error'); }
+                    finally { setUploadingImage(false); }
+                  }}>
+                  {uploadingImage ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Guardar'}
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

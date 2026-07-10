@@ -640,7 +640,7 @@ export default function SocialLinksAdminPage() {
                       <span
                         className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
                           link.is_active
-                            ? 'bg-primary/10 text-primary'
+                            ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400'
                             : 'bg-muted text-muted-foreground'
                         }`}
                       >
