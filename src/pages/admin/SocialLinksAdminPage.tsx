@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/lib/backend/client';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Card,
   CardContent,
@@ -336,7 +337,7 @@ export default function SocialLinksAdminPage() {
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
-    <div className="space-y-6 p-4 md:p-6">
+    <div className="space-y-6 max-w-5xl">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -562,11 +563,14 @@ export default function SocialLinksAdminPage() {
       {/* List */}
       {loading ? (
         <Card className="border-border bg-card">
-          <CardContent className="flex items-center justify-center py-16">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-            <span className="ml-3 text-sm text-muted-foreground">
-              Cargando enlaces...
-            </span>
+          <CardContent className="py-6 space-y-3">
+            {[0,1,2].map(i => (
+              <div key={i} className="flex items-center gap-3 p-3 border border-border rounded-xl">
+                <Skeleton className="h-9 w-9 rounded-lg shrink-0" />
+                <div className="flex-1 space-y-1.5"><Skeleton className="h-4 w-1/3" /><Skeleton className="h-3 w-2/3" /></div>
+                <Skeleton className="h-8 w-16 rounded-lg" />
+              </div>
+            ))}
           </CardContent>
         </Card>
       ) : links.length === 0 ? (

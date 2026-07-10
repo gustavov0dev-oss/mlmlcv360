@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/lib/backend/client';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Card,
   CardContent,
@@ -235,7 +236,7 @@ export default function FaqAdminPage() {
 
   // ── Render ───────────────────────────────────────────────────────────────────
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-5xl">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -390,9 +391,13 @@ export default function FaqAdminPage() {
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="flex items-center justify-center py-12 text-muted-foreground">
-              <Loader2 className="w-6 h-6 mr-2 animate-spin" />
-              Cargando preguntas...
+            <div className="space-y-3 py-2">
+              {[0,1,2].map(i => (
+                <div key={i} className="flex items-start gap-3 p-3 border border-border rounded-xl">
+                  <Skeleton className="h-5 w-5 rounded mt-0.5 shrink-0" />
+                  <div className="flex-1 space-y-2"><Skeleton className="h-4 w-3/4" /><Skeleton className="h-3 w-full" /><Skeleton className="h-3 w-1/2" /></div>
+                </div>
+              ))}
             </div>
           ) : items.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">

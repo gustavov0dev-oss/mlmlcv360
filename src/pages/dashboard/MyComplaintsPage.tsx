@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import { FileText, Search, Loader as Loader2, RefreshCw, Eye, Clock, CircleCheck as CheckCircle2, CircleAlert as AlertCircle, Circle as XCircle, ArrowLeft } from 'lucide-react';
+import { FileText, Search, RefreshCw, Eye, Clock, CircleCheck as CheckCircle2, CircleAlert as AlertCircle, Circle as XCircle, ArrowLeft } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Link, useNavigate } from '@/lib/router';
 
 interface Complaint {
@@ -247,9 +248,20 @@ export default function MyComplaintsPage() {
 
       {/* Content */}
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-20 gap-3 bg-card border border-border rounded-2xl">
-          <Loader2 className="w-8 h-8 text-primary animate-spin" />
-          <p className="text-sm text-muted-foreground">Cargando tus reclamos...</p>
+        <div className="space-y-3">
+          {[0,1,2].map(i => (
+            <div key={i} className="bg-card border border-border rounded-2xl p-5">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 space-y-2">
+                  <div className="flex items-center gap-2"><Skeleton className="h-4 w-28" /><Skeleton className="h-5 w-16 rounded-full" /><Skeleton className="h-5 w-20 rounded-full" /></div>
+                  <Skeleton className="h-3 w-24" />
+                  <Skeleton className="h-3 w-full" />
+                  <Skeleton className="h-3 w-3/4" />
+                </div>
+                <Skeleton className="h-4 w-4 mt-1" />
+              </div>
+            </div>
+          ))}
         </div>
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 gap-4 bg-card border border-border rounded-2xl">

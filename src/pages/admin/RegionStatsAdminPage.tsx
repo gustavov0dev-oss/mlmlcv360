@@ -276,7 +276,7 @@ export default function RegionStatsAdminPage() {
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 max-w-5xl">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h2 className="text-xl font-bold text-foreground">Ciudades destacadas</h2>
