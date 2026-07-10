@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from '@/lib/router';
-import { Mail, Phone, MapPin, Facebook, Instagram, Linkedin, Youtube, Twitter, MessageCircle, ExternalLink } from 'lucide-react';
+import { Mail, Phone, MapPin, ExternalLink } from 'lucide-react';
 import { useConfig } from '@/store/configStore';
 import { supabase } from '@/lib/backend/client';
 import { LogoWithText } from '@/components/Logo';
@@ -10,21 +10,33 @@ interface SocialLink {
   platform: string;
   url: string;
   icon: string;
+  icon_svg?: string | null;
   is_active: boolean;
   sort_order: number;
 }
 
-const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-  facebook: Facebook,
-  instagram: Instagram,
-  linkedin: Linkedin,
-  youtube: Youtube,
-  twitter: Twitter,
-  tiktok: MessageCircle,
-  whatsapp: MessageCircle,
-  telegram: MessageCircle,
-  github: MessageCircle,
+const ICON_PATHS: Record<string, string> = {
+  facebook: 'M22 12a10 10 0 1 0-11.5 9.9v-7H8v-2.9h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.5h-1.3c-1.2 0-1.6.8-1.6 1.6v1.9h2.8l-.4 2.9h-2.4v7A10 10 0 0 0 22 12z',
+  instagram: 'M12 2c2.7 0 3 0 4.1.1 1 0 1.7.2 2.3.5.6.2 1.5.6 2 1.1.5.5.9 1.4 1.1 2 .3.6.5 1.3.5 2.3.1 1.1.1 1.4.1 4.1s0 3-.1 4.1c0 1-.2 1.7-.5 2.3-.2.6-.6 1.5-1.1 2-.5.5-1.4.9-2 1.1-.6.3-1.3.5-2.3.5-1.1.1-1.4.1-4.1.1s-3 0-4.1-.1c-1 0-1.7-.2-2.3-.5-.6-.2-1.5-.6-2-1.1-.5-.5-.9-1.4-1.1-2-.3-.6-.5-1.3-.5-2.3C2 15 2 14.7 2 12s0-3 .1-4.1c0-1 .2-1.7.5-2.3.2-.6.6-1.5 1.1-2 .5-.5 1.4-.9 2-1.1.6-.3 1.3-.5 2.3-.5C9 2 9.3 2 12 2zm0 5a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0 8.3a3.3 3.3 0 1 1 0-6.6 3.3 3.3 0 0 1 0 6.6zm5.2-8.6a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4z',
+  linkedin: 'M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3zM9 9h3.8v1.7h.1c.5-1 1.8-2 3.7-2 4 0 4.7 2.6 4.7 6V21h-4v-5.3c0-1.3 0-3-1.8-3s-2.1 1.4-2.1 2.9V21H9z',
+  twitter: 'M18.9 1.9h3.7l-8 9.1 9.4 12.4h-7.4l-5.8-7.6-6.6 7.6H.5l8.5-9.7L0 1.9h7.6l5.2 6.9zM17.6 21h2L6.5 4H4.4z',
+  youtube: 'M23 12s0-3.2-.4-4.7a2.5 2.5 0 0 0-1.8-1.8C19.3 5 12 5 12 5s-7.3 0-8.8.5A2.5 2.5 0 0 0 1.4 7.3C1 8.8 1 12 1 12s0 3.2.4 4.7a2.5 2.5 0 0 0 1.8 1.8C4.7 19 12 19 12 19s7.3 0 8.8-.5a2.5 2.5 0 0 0 1.8-1.8C23 15.2 23 12 23 12zM9.8 15.3V8.7l5.7 3.3z',
+  tiktok: 'M16.6 5.8a4.8 4.8 0 0 1-1-2.8h-3.4v13.6c0 1.4-1.1 2.5-2.5 2.5a2.5 2.5 0 0 1-2.5-2.5c0-1.4 1.1-2.5 2.5-2.5.3 0 .5 0 .8.1v-3.4a6 6 0 0 0-.8-.1 5.9 5.9 0 1 0 5.9 5.9V9.3a8 8 0 0 0 4.8 1.6V7.5a4.8 4.8 0 0 1-3.8-1.7z',
+  whatsapp: 'M12 2a10 10 0 0 0-8.5 15.2L2 22l4.9-1.5A10 10 0 1 0 12 2zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-2.9.9.9-2.8-.2-.3A8 8 0 1 1 12 20zm4.4-6c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1-.2.2-.6.8-.7.9-.1.1-.3.2-.5.1a6.5 6.5 0 0 1-1.9-1.2 7.3 7.3 0 0 1-1.3-1.7c-.1-.2 0-.4.1-.5l.4-.5.2-.4v-.4l-.7-1.7c-.2-.5-.4-.4-.5-.4h-.5a1 1 0 0 0-.7.3c-.2.3-.9.9-.9 2.2s.9 2.5 1 2.7c.1.2 1.8 2.8 4.4 3.9.6.3 1.1.4 1.5.5.6.2 1.2.2 1.6.1.5-.1 1.4-.6 1.6-1.1.2-.6.2-1 .1-1.1z',
+  telegram: 'M21.9 4.3 18.6 20a1 1 0 0 1-1.5.7l-4-3-2 2c-.3.3-.6.4-1 .4l.3-4.2 7.8-7c.3-.3-.1-.5-.5-.2L7.3 14l-3.8-1.2c-.8-.2-.8-.8.2-1.2L20.6 3c.7-.3 1.4.2 1.3 1.3z',
+  github: 'M12 2a10 10 0 0 0-3.2 19.5c.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.3-3.4-1.3-.5-1.1-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.9.8.1-.6.3-1.1.6-1.4-2.2-.3-4.5-1.1-4.5-5a3.9 3.9 0 0 1 1-2.7c-.1-.3-.4-1.3.1-2.6 0 0 .8-.3 2.7 1a9.4 9.4 0 0 1 5 0c1.9-1.3 2.7-1 2.7-1 .5 1.3.2 2.3.1 2.6a3.9 3.9 0 0 1 1 2.7c0 3.9-2.3 4.7-4.5 5 .3.3.6.9.6 1.8v2.6c0 .3.2.6.7.5A10 10 0 0 0 12 2z',
 };
+
+function SocialIcon({ icon, iconSvg }: { icon: string; iconSvg?: string | null }) {
+  const path = iconSvg && iconSvg.trim() !== ''
+    ? iconSvg
+    : ICON_PATHS[icon.toLowerCase()] || ICON_PATHS.facebook;
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4" aria-hidden="true">
+      <path d={path} />
+    </svg>
+  );
+}
 
 export default function Footer() {
   const { company, logoValue } = useConfig();
@@ -64,41 +76,18 @@ export default function Footer() {
                 </p>
               )}
               <div className="flex gap-1.5 mt-5">
-                {socialLinks.length > 0 ? (
-                  socialLinks.map((link) => {
-                    const Icon = iconMap[link.icon] || MessageCircle;
-                    return (
-                      <a
-                        key={link.id}
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label={link.platform}
-                        className="w-9 h-9 rounded-lg bg-background border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/30 hover:bg-primary/5 transition-colors"
-                      >
-                        <Icon className="w-4 h-4" />
-                      </a>
-                    );
-                  })
-                ) : (
-                  <>
-                    {[
-                      { Icon: Facebook, label: 'Facebook' },
-                      { Icon: Instagram, label: 'Instagram' },
-                      { Icon: Linkedin, label: 'LinkedIn' },
-                      { Icon: Twitter, label: 'X' },
-                    ].map(({ Icon, label }) => (
-                      <a
-                        key={label}
-                        href="#"
-                        aria-label={label}
-                        className="w-9 h-9 rounded-lg bg-background border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/30 hover:bg-primary/5 transition-colors"
-                      >
-                        <Icon className="w-4 h-4" />
-                      </a>
-                    ))}
-                  </>
-                )}
+                {socialLinks.map((link) => (
+                  <a
+                    key={link.id}
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={link.platform}
+                    className="w-9 h-9 rounded-lg bg-background border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/30 hover:bg-primary/5 transition-colors"
+                  >
+                    <SocialIcon icon={link.icon} iconSvg={link.icon_svg} />
+                  </a>
+                ))}
               </div>
             </div>
 
