@@ -41,11 +41,11 @@ interface Complaint {
 
 const STATUS_ORDER: ComplaintStatus[] = ['pendiente', 'en_proceso', 'resuelto', 'cerrado'];
 
-const STATUS_CONFIG: Record<ComplaintStatus, { label: string; badgeClass: string; stepClass: string; cls: string; icon: typeof Clock; iconBg: string; iconCls: string }> = {
-  pendiente:  { label: 'Pendiente',  badgeClass: 'bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30',        stepClass: 'bg-amber-500', cls: 'text-amber-700 dark:text-amber-400 bg-amber-500/10 border-amber-500/25', icon: Clock, iconBg: 'bg-amber-500/15', iconCls: 'text-amber-600 dark:text-amber-400' },
-  en_proceso: { label: 'En proceso', badgeClass: 'bg-blue-500/15 text-blue-700 dark:text-blue-400 border-blue-500/30',            stepClass: 'bg-blue-500', cls: 'text-blue-700 dark:text-blue-400 bg-blue-500/10 border-blue-500/25', icon: Loader2, iconBg: 'bg-blue-500/15', iconCls: 'text-blue-600 dark:text-blue-400' },
-  resuelto:   { label: 'Resuelto',   badgeClass: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30', stepClass: 'bg-emerald-500', cls: 'text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/25', icon: FileText, iconBg: 'bg-emerald-500/15', iconCls: 'text-emerald-600 dark:text-emerald-400' },
-  cerrado:    { label: 'Cerrado',    badgeClass: 'bg-muted text-muted-foreground border-border',                                   stepClass: 'bg-muted-foreground', cls: 'text-muted-foreground bg-muted/50 border-border', icon: FileText, iconBg: 'bg-muted', iconCls: 'text-muted-foreground' },
+const STATUS_CONFIG: Record<ComplaintStatus, { label: string; badgeClass: string; stepClass: string; cls: string; icon: typeof Clock; iconBg: string; iconCls: string; cardBg: string; cardBorder: string }> = {
+  pendiente:  { label: 'Pendiente',  badgeClass: 'bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30',        stepClass: 'bg-amber-500', cls: 'text-amber-700 dark:text-amber-400 bg-amber-500/10 border-amber-500/25', icon: Clock, iconBg: 'bg-amber-500/15', iconCls: 'text-amber-600 dark:text-amber-400', cardBg: 'bg-amber-500/5', cardBorder: 'border-amber-500/30' },
+  en_proceso: { label: 'En proceso', badgeClass: 'bg-blue-500/15 text-blue-700 dark:text-blue-400 border-blue-500/30',            stepClass: 'bg-blue-500', cls: 'text-blue-700 dark:text-blue-400 bg-blue-500/10 border-blue-500/25', icon: Loader2, iconBg: 'bg-blue-500/15', iconCls: 'text-blue-600 dark:text-blue-400', cardBg: 'bg-blue-500/5', cardBorder: 'border-blue-500/30' },
+  resuelto:   { label: 'Resuelto',   badgeClass: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30', stepClass: 'bg-emerald-500', cls: 'text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/25', icon: FileText, iconBg: 'bg-emerald-500/15', iconCls: 'text-emerald-600 dark:text-emerald-400', cardBg: 'bg-emerald-500/5', cardBorder: 'border-emerald-500/30' },
+  cerrado:    { label: 'Cerrado',    badgeClass: 'bg-muted text-muted-foreground border-border',                                   stepClass: 'bg-muted-foreground', cls: 'text-muted-foreground bg-muted/50 border-border', icon: FileText, iconBg: 'bg-muted', iconCls: 'text-muted-foreground', cardBg: 'bg-muted/30', cardBorder: 'border-border/60' },
 };
 
 function fmt(v?: string | null) {
@@ -95,9 +95,9 @@ function DetailPanel({
 
   return (
     <Dialog open onOpenChange={open => { if (!open) onClose(); }}>
-      <DialogContent className="max-w-2xl max-h-[92vh] overflow-hidden flex flex-col gap-0 p-0">
+      <DialogContent className="max-w-2xl max-h-[92vh] overflow-hidden flex flex-col gap-0 p-0 [&>button]:top-3.5 [&>button]:right-3.5 [&>button]:z-20">
         {/* Header */}
-        <DialogHeader className="px-5 py-4 border-b border-border/50 shrink-0 space-y-0">
+        <DialogHeader className="px-5 py-4 border-b border-border/50 shrink-0 space-y-0 pr-12">
           <div className="flex items-center justify-between">
             <div>
               <DialogTitle className="text-base font-black font-mono tracking-widest text-foreground">
@@ -244,20 +244,26 @@ function DetailPanel({
               </div>
             )}
 
-            <div className="space-y-2.5">
+            <div className="rounded-xl border border-border/50 bg-muted/10 p-3.5 space-y-3">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-medium text-foreground">
+                  {complaint.respuesta ? 'Escribir nueva respuesta' : 'Escribir respuesta'}
+                </p>
+                <span className="text-[10px] text-muted-foreground/50">{responseText.length} caracteres</span>
+              </div>
               <Textarea
-                placeholder="Escribe la respuesta que verá el cliente en &quot;Mis Reclamos&quot; y en su correo electrónico..."
+                placeholder="Escribe aqui la respuesta que vera el cliente..."
                 value={responseText}
                 onChange={e => setResponseText(e.target.value)}
                 rows={4}
-                className="resize-y"
+                className="resize-y bg-card"
               />
               <div className="flex items-center justify-between gap-3">
-                <p className="text-xs text-muted-foreground/60 leading-relaxed">
-                  Al guardar, el cliente verá esta respuesta en "Mis Reclamos" y recibirá una notificación por correo.
+                <p className="text-xs text-muted-foreground/60 leading-relaxed flex-1">
+                  Al guardar, el reclamo pasa a "Resuelto" y el cliente recibe una notificacion.
                 </p>
                 <Button onClick={async () => { setSavingResp(true); await onSaveResponse(responseText); setSavingResp(false); }} disabled={savingResp || !responseText.trim()} size="sm" className="shrink-0 gap-1.5">
-                  {savingResp ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+                  {savingResp ? <Loader2 className="h-3.5 h-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
                   Guardar y enviar
                 </Button>
               </div>
@@ -416,14 +422,14 @@ export default function ComplaintsAdminPage() {
           const Icon = cfg.icon;
           const count = complaints.filter(c => c.status === s).length;
           return (
-            <div key={s} className="border border-border/60 rounded-xl p-3 bg-card">
+            <div key={s} className={cn('border rounded-xl p-3 transition-colors', cfg.cardBg, cfg.cardBorder)}>
               <div className="flex items-center justify-between mb-1.5">
-                <span className="text-xs font-medium text-muted-foreground">{cfg.label}</span>
+                <span className={cn('text-xs font-medium', cfg.iconCls)}>{cfg.label}</span>
                 <div className={cn('w-6 h-6 rounded-lg flex items-center justify-center', cfg.iconBg)}>
-                  <Icon className="w-3.5 h-3.5" />
+                  <Icon className={cn('w-3.5 h-3.5', cfg.iconCls)} />
                 </div>
               </div>
-              <p className="text-2xl font-bold text-foreground">{count}</p>
+              <p className={cn('text-2xl font-bold', cfg.iconCls)}>{count}</p>
             </div>
           );
         })}

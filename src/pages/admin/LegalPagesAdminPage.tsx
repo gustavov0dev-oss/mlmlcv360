@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/backend/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+
 import { Switch } from '@/components/ui/switch';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
@@ -15,9 +15,10 @@ import {
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 import {
-  FileText, Plus, Search, RefreshCw, Trash2, Eye, GripVertical,
+  FileText, Plus, Search, RefreshCw, Trash2, Pencil, GripVertical,
   ArrowUp, ArrowDown, ExternalLink, Loader as Loader2, Save,
 } from 'lucide-react';
+import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { cn } from '@/lib/utils';
 import { Link } from '@/lib/router';
 
@@ -299,8 +300,8 @@ export default function LegalPagesAdminPage() {
                       </Link>
                     </Button>
                   )}
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => openEdit(p)}>
-                    <Eye className="h-4 w-4" />
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => openEdit(p)} title="Editar">
+                    <Pencil className="h-4 w-4" />
                   </Button>
                   <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10"
                     onClick={() => setDeleteTarget(p)} disabled={deletingId === p.id}>
@@ -349,17 +350,12 @@ export default function LegalPagesAdminPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground">Contenido (HTML)</label>
-                <Textarea
+                <label className="text-sm font-medium text-foreground">Contenido</label>
+                <RichTextEditor
                   value={form.content}
-                  onChange={e => setForm(f => ({ ...f, content: e.target.value }))}
-                  placeholder="<h2>1. Aceptación</h2><p>Escribe aquí el contenido...</p>"
-                  rows={14}
-                  className="font-mono text-sm resize-y"
+                  onChange={html => setForm(f => ({ ...f, content: html }))}
+                  minHeight={280}
                 />
-                <p className="text-xs text-muted-foreground/50">
-                  Puedes usar etiquetas HTML: &lt;h2&gt;, &lt;p&gt;, &lt;ul&gt;, &lt;li&gt;, &lt;strong&gt;, &lt;a&gt;, etc.
-                </p>
               </div>
 
               <div className="flex items-center gap-6 pt-2 border-t border-border/50">
