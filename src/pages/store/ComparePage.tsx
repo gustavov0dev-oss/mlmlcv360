@@ -67,7 +67,7 @@ export default function ComparePage() {
       <Navbar />
       <div className="pt-20 max-w-7xl mx-auto px-4 sm:px-6 py-8">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-black text-foreground">Comparar productos</h1>
+          <h1 className="text-2xl font-bold text-foreground">Comparar productos</h1>
           <button onClick={() => navigate('/tienda')} className="flex items-center gap-2 px-4 py-2 border border-border rounded-xl text-sm font-semibold hover:bg-muted transition-colors"><X className="w-4 h-4" /> Volver</button>
         </div>
 
@@ -88,7 +88,7 @@ export default function ComparePage() {
                     <div className="flex justify-center gap-1 mt-1">
                       {Array.from({ length: 5 }).map((_, i) => <Star key={i} className={cn('w-3 h-3', i < Math.round(p.avg_rating ?? 0) ? 'text-amber-400 fill-amber-400' : 'text-border')} />)}
                     </div>
-                    <p className="text-lg font-black text-primary mt-2">{fmt(p.base_price, p.currency)}</p>
+                    <p className="text-lg font-bold text-primary mt-2">{fmt(p.base_price, p.currency)}</p>
                     <button onClick={() => { addItem(p); toast.success('Producto agregado'); }} className="mt-2 flex items-center gap-1 mx-auto px-3 py-1.5 bg-primary text-primary-foreground rounded-lg text-xs font-bold"><ShoppingCart className="w-3 h-3" /> Agregar</button>
                   </th>
                 ))}

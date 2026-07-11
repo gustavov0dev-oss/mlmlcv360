@@ -118,7 +118,7 @@ export default function AdminPage() {
   const [permissions, setPermissions] = useState(defaultPermissions);
   const [savingPerms, setSavingPerms] = useState(false);
   const [config, setConfig] = useState<Record<string, string>>({});
-  const [, setLoadingConfig] = useState(true);
+  const [loadingConfig, setLoadingConfig] = useState(true);
   const [savingConfig, setSavingConfig] = useState(false);
   const [showSecrets, setShowSecrets] = useState<Record<string, boolean>>({});
   const [customRoles, setCustomRoles] = useState<{ name: string; label: string; color: string }[]>([]);
@@ -212,6 +212,40 @@ export default function AdminPage() {
         <div>
           <Lock className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
           <p className="text-muted-foreground">No tienes permisos para acceder a esta sección.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (loadingConfig) {
+    return (
+      <div className="space-y-6 animate-fade-in">
+        <div className="space-y-1.5">
+          <div className="h-7 w-64 bg-muted rounded-lg animate-pulse" />
+          <div className="h-4 w-80 bg-muted rounded animate-pulse" />
+        </div>
+        <div className="flex flex-col lg:flex-row gap-6">
+          <div className="lg:w-56 flex-shrink-0">
+            <div className="bg-card border border-border rounded-xl overflow-hidden">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-3 px-4 py-3.5 border-b border-border/50 last:border-0">
+                  <div className="w-4 h-4 bg-muted rounded animate-pulse" />
+                  <div className="h-3 flex-1 bg-muted rounded animate-pulse" />
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="flex-1 bg-card border border-border rounded-xl p-6 space-y-4">
+            <div className="h-5 w-48 bg-muted rounded animate-pulse" />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="space-y-1.5">
+                  <div className="h-3 w-24 bg-muted rounded animate-pulse" />
+                  <div className="h-10 w-full bg-muted rounded-lg animate-pulse" />
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -436,7 +470,7 @@ export default function AdminPage() {
                           <Fragment key={group}>
                             <tr className="border-b border-border/30 bg-muted/30">
                               <td colSpan={(customRoles.length > 0 ? customRoles : permissionRoles).length + 1} className="px-4 sm:px-5 py-2">
-                                <span className="text-[11px] font-black text-muted-foreground uppercase tracking-wider">{group}</span>
+                                <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">{group}</span>
                               </td>
                             </tr>
                             {groupPerms.map(perm => (
@@ -552,7 +586,7 @@ export default function AdminPage() {
                   </div>
                 </div>
               </div>
-              <div className="bg-primary/10 border border-blue-500/20 rounded-lg p-3 text-xs text-primary">
+              <div className="bg-primary/10 border border-primary/20 rounded-lg p-3 text-xs text-primary">
                 <p className="font-medium mb-1">Instrucciones:</p>
                 <ol className="list-decimal list-inside space-y-0.5">
                   <li>Ve a Google Cloud Console → APIs & Services → Credentials</li>

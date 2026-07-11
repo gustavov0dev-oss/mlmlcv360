@@ -69,7 +69,7 @@ function DescriptionRenderer({ text }: { text: string }) {
         const imgMatch = trimmed.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
         if (imgMatch) {
           return (
-            <div key={bi} className="rounded-2xl overflow-hidden border border-border shadow-sm">
+            <div key={bi} className="rounded-xl overflow-hidden border border-border shadow-sm">
               <img src={imgMatch[2]} alt={imgMatch[1]}
                 className="w-full object-cover max-h-[500px]"
                 loading="lazy" />
@@ -94,10 +94,10 @@ function DescriptionRenderer({ text }: { text: string }) {
 
         // Heading: ## or #
         if (trimmed.startsWith('## ')) {
-          return <h3 key={bi} className="text-lg font-black text-foreground mt-2">{trimmed.slice(3)}</h3>;
+          return <h3 key={bi} className="text-lg font-bold text-foreground mt-2">{trimmed.slice(3)}</h3>;
         }
         if (trimmed.startsWith('# ')) {
-          return <h2 key={bi} className="text-xl font-black text-foreground mt-2">{trimmed.slice(2)}</h2>;
+          return <h2 key={bi} className="text-xl font-bold text-foreground mt-2">{trimmed.slice(2)}</h2>;
         }
 
         // Bullet list
@@ -368,7 +368,7 @@ export default function ProductDetailPage() {
         <Navbar />
         <div className="pt-16 max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div className="lg:col-span-5 space-y-3">
-            <div className="aspect-square bg-muted rounded-2xl animate-pulse" />
+            <div className="aspect-square bg-muted rounded-xl animate-pulse" />
             <div className="flex gap-2">{[...Array(4)].map((_, i) => <div key={i} className="w-16 h-16 bg-muted rounded-xl animate-pulse" />)}</div>
           </div>
           <div className="lg:col-span-7 space-y-4">
@@ -429,20 +429,20 @@ export default function ProductDetailPage() {
 
           {/* ── LEFT: Gallery ── */}
           <div className="lg:col-span-5 space-y-3">
-            <div className="relative rounded-2xl overflow-hidden bg-muted border border-border" style={{ paddingBottom: '100%' }}>
+            <div className="relative rounded-xl overflow-hidden bg-muted border border-border" style={{ paddingBottom: '100%' }}>
               <div className="absolute inset-0">
                 {discount > 0 && (
-                  <span className="absolute top-3 left-3 z-10 bg-red-500 text-white text-xs font-black px-2.5 py-1 rounded-full shadow-lg">
+                  <span className="absolute top-3 left-3 z-10 bg-red-500 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-lg">
                     -{discount}%
                   </span>
                 )}
                 {product.featured && (
-                  <span className="absolute top-3 right-14 z-10 bg-amber-400 text-amber-900 text-xs font-black px-2.5 py-1 rounded-full">
+                  <span className="absolute top-3 right-14 z-10 bg-amber-400 text-amber-900 text-xs font-bold px-2.5 py-1 rounded-full">
                     ★ Destacado
                   </span>
                 )}
                 {product.is_digital && (
-                  <span className="absolute top-3 right-3 z-10 bg-blue-500 text-white text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
+                  <span className="absolute top-3 right-3 z-10 bg-primary text-primary-foreground text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
                     <Zap className="w-3 h-3" /> Digital
                   </span>
                 )}
@@ -520,7 +520,7 @@ export default function ProductDetailPage() {
             )}
 
             <div className="flex items-start justify-between gap-3">
-              <h1 className="text-2xl sm:text-3xl font-black text-foreground leading-tight flex-1">{product.name}</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground leading-tight flex-1">{product.name}</h1>
               {isAdmin && (
                 <button onClick={() => navigate(`/dashboard/admin/productos/${product.id}`)}
                   className="flex-shrink-0 flex items-center gap-1.5 text-xs font-bold text-muted-foreground bg-muted hover:bg-muted/80 hover:text-primary px-3 py-2 rounded-xl transition-colors">
@@ -545,10 +545,10 @@ export default function ProductDetailPage() {
             )}
 
             {/* Price block + currency toggle */}
-            <div className="bg-gradient-to-br from-muted/60 to-muted/30 border border-border rounded-2xl p-4 space-y-2">
+            <div className="bg-gradient-to-br from-muted/60 to-muted/30 border border-border rounded-xl p-4 space-y-2">
               <div className="flex items-start justify-between gap-3 flex-wrap">
                 <div className="flex items-end gap-3 flex-wrap">
-                  <span className="text-4xl font-black text-foreground tracking-tight">
+                  <span className="text-4xl font-bold text-foreground tracking-tight">
                     {fmtPrice(currentPrice, showUsd, exchangeRate)}
                   </span>
                   {currentCompare && currentCompare > currentPrice && (
@@ -557,7 +557,7 @@ export default function ProductDetailPage() {
                     </span>
                   )}
                   {discount > 0 && (
-                    <span className="text-sm font-black text-white bg-red-500 px-2.5 py-1 rounded-lg shadow">
+                    <span className="text-sm font-bold text-white bg-red-500 px-2.5 py-1 rounded-lg shadow">
                       -{discount}% OFF
                     </span>
                   )}
@@ -683,7 +683,7 @@ export default function ProductDetailPage() {
                     className="w-11 h-11 flex items-center justify-center hover:bg-muted transition-colors active:bg-muted/80">
                     <Minus className="w-4 h-4" />
                   </button>
-                  <span className="w-12 text-center text-sm font-black select-none">{qty}</span>
+                  <span className="w-12 text-center text-sm font-bold select-none">{qty}</span>
                   <button onClick={() => !outOfStock && setQty(q => Math.min(q + 1, stock > 0 ? stock : 99))}
                     className="w-11 h-11 flex items-center justify-center hover:bg-muted transition-colors active:bg-muted/80">
                     <Plus className="w-4 h-4" />
@@ -699,7 +699,7 @@ export default function ProductDetailPage() {
                   <Share2 className="w-4 h-4" />
                 </button>
                 <button onClick={toggleCompare}
-                  className={cn('hidden sm:flex w-11 h-11 rounded-xl border-2 items-center justify-center transition-all text-xs font-black',
+                  className={cn('hidden sm:flex w-11 h-11 rounded-xl border-2 items-center justify-center transition-all text-xs font-bold',
                     compareList.includes(product.id) ? 'border-primary bg-primary/10 text-primary' : 'border-border text-muted-foreground hover:border-primary/40')}>
                   VS
                 </button>
@@ -707,13 +707,13 @@ export default function ProductDetailPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 <button onClick={handleBuyNow} disabled={outOfStock}
-                  className={cn('flex items-center justify-center gap-2 py-4 rounded-2xl font-black text-sm transition-all',
+                  className={cn('flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-sm transition-all',
                     outOfStock ? 'bg-muted text-muted-foreground cursor-not-allowed' : 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20 active:scale-[0.98]')}>
                   <Zap className="w-4 h-4" />
                   {outOfStock ? 'Sin stock' : 'Comprar ahora'}
                 </button>
                 <button onClick={handleAdd} disabled={outOfStock}
-                  className={cn('flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-sm border-2 transition-all',
+                  className={cn('flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-sm border-2 transition-all',
                     addedToCart ? 'border-green-500 text-green-600 bg-green-50 dark:bg-green-900/20' :
                     outOfStock ? 'border-border text-muted-foreground cursor-not-allowed' :
                     'border-primary text-primary hover:bg-primary/5 active:scale-[0.98]')}>
@@ -732,7 +732,7 @@ export default function ProductDetailPage() {
 
               {product.is_digital && (product as any).digital_demo_url && (
                 <button onClick={() => setShowDemo(true)}
-                  className="w-full flex items-center justify-center gap-2 py-3 border-2 border-blue-500/30 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 rounded-2xl font-bold text-sm hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors">
+                  className="w-full flex items-center justify-center gap-2 py-3 border-2 border-primary/30 text-primary bg-primary/5 rounded-xl font-bold text-sm hover:bg-primary/10 transition-colors">
                   <Eye className="w-4 h-4" />
                   Ver demostración gratuita
                 </button>
@@ -749,7 +749,7 @@ export default function ProductDetailPage() {
         </div>
 
         {/* ── TABS ── */}
-        <div className="mt-8 bg-card border border-border rounded-2xl overflow-hidden">
+        <div className="mt-8 bg-card border border-border rounded-xl overflow-hidden">
           <div className="flex border-b border-border overflow-x-auto">
             {[
               { id: 'description', label: 'Descripción', icon: Info },
@@ -811,7 +811,7 @@ export default function ProductDetailPage() {
                 )}
                 {(product as any).digital_demo_url && (
                   <button onClick={() => setShowDemo(true)}
-                    className="flex items-center gap-2 px-5 py-3 bg-blue-500 text-white rounded-xl font-bold text-sm hover:bg-blue-600 transition-colors">
+                    className="flex items-center gap-2 px-5 py-3 bg-primary text-primary-foreground rounded-xl font-bold text-sm hover:bg-primary/90 transition-colors">
                     <Play className="w-4 h-4" /> Ver demostración gratuita
                   </button>
                 )}
@@ -823,9 +823,9 @@ export default function ProductDetailPage() {
               <div className="space-y-6">
                 {/* Rating overview */}
                 {reviews.length > 0 && (
-                  <div className="grid grid-cols-1 sm:grid-cols-5 gap-4 p-5 bg-muted/30 rounded-2xl border border-border">
+                  <div className="grid grid-cols-1 sm:grid-cols-5 gap-4 p-5 bg-muted/30 rounded-xl border border-border">
                     <div className="sm:col-span-2 flex flex-col items-center justify-center gap-2 py-2">
-                      <span className="text-6xl font-black text-foreground leading-none">{avgRating.toFixed(1)}</span>
+                      <span className="text-6xl font-bold text-foreground leading-none">{avgRating.toFixed(1)}</span>
                       <StarsDisplay value={avgRating} size={20} />
                       <span className="text-sm text-muted-foreground font-medium">{reviews.length} reseñas</span>
                     </div>
@@ -849,10 +849,10 @@ export default function ProductDetailPage() {
                 {/* Review list */}
                 <div className="space-y-3">
                   {reviews.slice(0, reviewsPage).map(r => (
-                    <div key={r.id} className="border border-border rounded-2xl p-4 sm:p-5 space-y-3">
+                    <div key={r.id} className="border border-border rounded-xl p-4 sm:p-5 space-y-3">
                       <div className="flex items-start justify-between gap-3 flex-wrap">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-black text-sm flex-shrink-0">
+                          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm flex-shrink-0">
                             {((r.profile as any)?.full_name || 'U')[0].toUpperCase()}
                           </div>
                           <div>
@@ -921,9 +921,9 @@ export default function ProductDetailPage() {
                 </div>
 
                 {/* ── Write review — MercadoLibre style ── */}
-                <div className="border border-border rounded-2xl overflow-hidden">
+                <div className="border border-border rounded-xl overflow-hidden">
                   <div className="bg-muted/40 px-5 py-4 border-b border-border">
-                    <h3 className="text-base font-black text-foreground">¿Ya compraste este producto?</h3>
+                    <h3 className="text-base font-bold text-foreground">¿Ya compraste este producto?</h3>
                     <p className="text-sm text-muted-foreground mt-0.5">Comparte tu opinión con otros compradores</p>
                   </div>
 
@@ -940,7 +940,7 @@ export default function ProductDetailPage() {
                     <div className="p-5 space-y-5">
                       {/* Step 1: Rating */}
                       <div>
-                        <p className="text-sm font-black text-foreground mb-3">1. ¿Cómo calificarías este producto? *</p>
+                        <p className="text-sm font-bold text-foreground mb-3">1. ¿Cómo calificarías este producto? *</p>
                         <StarPicker value={reviewForm.rating} onChange={v => setReviewForm(p => ({ ...p, rating: v }))} />
                       </div>
 
@@ -948,7 +948,7 @@ export default function ProductDetailPage() {
                         <>
                           {/* Step 2: Title */}
                           <div>
-                            <p className="text-sm font-black text-foreground mb-2">2. Ponle un título a tu reseña</p>
+                            <p className="text-sm font-bold text-foreground mb-2">2. Ponle un título a tu reseña</p>
                             <input value={reviewForm.title}
                               onChange={e => setReviewForm(p => ({ ...p, title: e.target.value }))}
                               placeholder={reviewForm.rating >= 4 ? 'Ej: Excelente calidad, muy recomendado' : reviewForm.rating === 3 ? 'Ej: Bueno pero mejorable' : 'Ej: No cumplió mis expectativas'}
@@ -958,7 +958,7 @@ export default function ProductDetailPage() {
 
                           {/* Step 3: Body */}
                           <div>
-                            <p className="text-sm font-black text-foreground mb-2">3. Cuéntanos más</p>
+                            <p className="text-sm font-bold text-foreground mb-2">3. Cuéntanos más</p>
                             <textarea value={reviewForm.body}
                               onChange={e => setReviewForm(p => ({ ...p, body: e.target.value }))}
                               placeholder="¿Qué te gustó? ¿Qué no te gustó? ¿Volvería a comprarlo? Sé específico para ayudar a otros compradores."
@@ -969,13 +969,13 @@ export default function ProductDetailPage() {
 
                           {/* Step 4: Photos */}
                           <div>
-                            <p className="text-sm font-black text-foreground mb-2">4. Agrega fotos <span className="font-normal text-muted-foreground">(opcional)</span></p>
+                            <p className="text-sm font-bold text-foreground mb-2">4. Agrega fotos <span className="font-normal text-muted-foreground">(opcional)</span></p>
                             <div className="flex gap-2 flex-wrap">
                               {reviewForm.images.map((img, i) => (
                                 <div key={i} className="relative">
                                   <img src={img} alt="" className="w-20 h-20 rounded-xl object-cover border-2 border-primary/30" />
                                   <button onClick={() => setReviewForm(p => ({ ...p, images: p.images.filter((_, j) => j !== i) }))}
-                                    className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-black shadow-md">×</button>
+                                    className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold shadow-md">×</button>
                                 </div>
                               ))}
                               {reviewForm.images.length < 5 && (
@@ -996,7 +996,7 @@ export default function ProductDetailPage() {
 
                           <button onClick={submitReview}
                             disabled={submittingReview || reviewForm.rating === 0}
-                            className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3.5 bg-primary text-primary-foreground rounded-xl text-sm font-black hover:bg-primary/90 disabled:opacity-50 active:scale-[0.98] transition-all">
+                            className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3.5 bg-primary text-primary-foreground rounded-xl text-sm font-bold hover:bg-primary/90 disabled:opacity-50 active:scale-[0.98] transition-all">
                             {submittingReview
                               ? <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Publicando...</>
                               : 'Publicar reseña'}
@@ -1014,7 +1014,7 @@ export default function ProductDetailPage() {
         {/* Related products */}
         {related.length > 0 && (
           <div className="mt-8 sm:mt-10">
-            <h2 className="text-xl font-black text-foreground mb-4">También te puede interesar</h2>
+            <h2 className="text-xl font-bold text-foreground mb-4">También te puede interesar</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
               {related.map(p => (
                 <ProductCard key={p.id} product={p} />
@@ -1055,21 +1055,21 @@ export default function ProductDetailPage() {
         return (
           <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4" onClick={() => setShowDemo(false)}>
             <div
-              className={cn('bg-card rounded-2xl overflow-hidden shadow-2xl w-full', isWebPage ? 'max-w-sm' : 'max-w-3xl')}
+              className={cn('bg-card rounded-xl overflow-hidden shadow-2xl w-full', isWebPage ? 'max-w-sm' : 'max-w-3xl')}
               onClick={e => e.stopPropagation()}
             >
               <div className="flex items-center justify-between px-5 py-4 border-b border-border">
                 <div className="flex items-center gap-2">
                   <Eye className="w-5 h-5 text-blue-500" />
                   <span className="font-bold text-foreground">Demostración — {product.name}</span>
-                  <span className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-full font-semibold ml-1">GRATIS</span>
+                  <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-semibold ml-1">GRATIS</span>
                 </div>
                 <button onClick={() => setShowDemo(false)} className="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-muted text-muted-foreground">✕</button>
               </div>
 
               {isWebPage ? (
                 <div className="p-6 text-center space-y-4">
-                  <div className="w-14 h-14 rounded-2xl bg-blue-500/10 flex items-center justify-center mx-auto">
+                  <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mx-auto">
                     <ExternalLink className="w-7 h-7 text-blue-500" />
                   </div>
                   <div>

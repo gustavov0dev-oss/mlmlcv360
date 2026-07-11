@@ -104,7 +104,7 @@ export default function CategoriesAdminPage() {
     <div className="space-y-5 pb-10">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-black text-foreground">Categorías de Productos</h1>
+          <h1 className="text-2xl font-bold text-foreground">Categorías de Productos</h1>
           <p className="text-sm text-muted-foreground mt-0.5">{categories.length} categorías — aparecen en el carrusel de la tienda</p>
         </div>
         <button onClick={() => { setForm(EMPTY); setShowForm(true); }}
@@ -114,18 +114,18 @@ export default function CategoriesAdminPage() {
       </div>
 
       {/* Preview carousel */}
-      <div className="bg-card border border-border rounded-2xl p-5">
+      <div className="bg-card border border-border rounded-xl p-5">
         <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3">Vista previa del carrusel</p>
         <div className="flex gap-3 overflow-x-auto pb-2">
           <div className="flex-shrink-0 w-24 flex flex-col items-center gap-2">
-            <div className="w-16 h-16 rounded-2xl bg-primary/15 border-2 border-primary flex items-center justify-center">
+            <div className="w-16 h-16 rounded-xl bg-primary/15 border-2 border-primary flex items-center justify-center">
               <span className="text-lg">🏪</span>
             </div>
             <span className="text-[11px] font-bold text-primary">Todos</span>
           </div>
           {rootCategories.map(c => (
             <div key={c.id} className="flex-shrink-0 w-24 flex flex-col items-center gap-2">
-              <div className="w-16 h-16 rounded-2xl bg-muted overflow-hidden border border-border">
+              <div className="w-16 h-16 rounded-xl bg-muted overflow-hidden border border-border">
                 {c.image_url
                   ? <img src={c.image_url} alt={c.name} className="w-full h-full object-cover" />
                   : <div className="w-full h-full flex items-center justify-center"><FolderOpen className="w-6 h-6 text-muted-foreground" /></div>}
@@ -138,14 +138,14 @@ export default function CategoriesAdminPage() {
 
       {/* Category list */}
       {loading ? (
-        <div className="bg-card border border-border rounded-2xl overflow-hidden">
+        <div className="bg-card border border-border rounded-xl overflow-hidden">
           <table className="w-full text-sm">
             <thead><tr className="border-b border-border bg-muted/30">{['Imagen','Nombre','Slug','Orden','Estado','Acciones'].map(h=><th key={h} className="text-left px-4 py-3 text-xs font-bold text-muted-foreground uppercase">{h}</th>)}</tr></thead>
             <tbody>{Array.from({length:5}).map((_,i)=>(<tr key={i} className="border-b border-border/40"><td className="px-4 py-3"><Skeleton className="w-10 h-10 rounded-xl" /></td><td className="px-4 py-3"><Skeleton className="h-4 w-28" /></td><td className="px-4 py-3"><Skeleton className="h-4 w-24" /></td><td className="px-4 py-3"><Skeleton className="h-7 w-16 rounded-lg" /></td><td className="px-4 py-3"><Skeleton className="h-6 w-16 rounded-full" /></td><td className="px-4 py-3"><div className="flex gap-1"><Skeleton className="w-7 h-7 rounded-lg" /><Skeleton className="w-7 h-7 rounded-lg" /></div></td></tr>))}</tbody>
           </table>
         </div>
       ) : (
-        <div className="bg-card border border-border rounded-2xl overflow-hidden">
+        <div className="bg-card border border-border rounded-xl overflow-hidden">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-muted/30">
@@ -232,7 +232,7 @@ export default function CategoriesAdminPage() {
       {/* Form modal */}
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-card border border-border rounded-2xl w-full max-w-md p-5 space-y-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-card border border-border rounded-xl w-full max-w-md p-5 space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-bold text-foreground">{form.id ? 'Editar categoría' : 'Nueva categoría'}</h3>
               <button onClick={() => setShowForm(false)} className="text-muted-foreground hover:text-foreground"><X className="w-4 h-4" /></button>
@@ -242,7 +242,7 @@ export default function CategoriesAdminPage() {
             <div>
               <label className="block text-xs font-bold text-foreground mb-2">Imagen de categoría</label>
               <div className="flex items-center gap-3">
-                <div className="w-20 h-20 rounded-2xl bg-muted overflow-hidden border-2 border-dashed border-border flex items-center justify-center flex-shrink-0">
+                <div className="w-20 h-20 rounded-xl bg-muted overflow-hidden border-2 border-dashed border-border flex items-center justify-center flex-shrink-0">
                   {form.image_url
                     ? <img src={form.image_url} alt="" className="w-full h-full object-cover" />
                     : <Image className="w-6 h-6 text-muted-foreground" />}

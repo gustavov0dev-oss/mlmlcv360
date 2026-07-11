@@ -448,8 +448,8 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes slideInLeft {
@@ -522,7 +522,11 @@
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.3s ease-out both;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.dashboard-page {
+  animation: fadeIn 0.15s ease-out;
 }
 
 .animate-slide-in-left {
@@ -1063,6 +1067,14 @@ input:focus,
 textarea:focus,
 select:focus {
   outline: none !important;
+}
+
+/* Dashboard input focus — always gold, never blue */
+.dashboard-input:focus,
+input.themed:focus {
+  outline: none;
+  border-color: hsl(var(--primary) / 0.6) !important;
+  box-shadow: 0 0 0 3px hsl(var(--primary) / 0.12) !important;
 }
 
 /* Remove default browser focus ring on buttons */

@@ -267,7 +267,7 @@ export default function MyPlanPage() {
         <div className="space-y-1.5"><Skeleton className="h-8 w-28" /><Skeleton className="h-4 w-48" /></div>
         <Skeleton className="h-10 w-48 rounded-xl" />
         {/* Current plan card */}
-        <div className="bg-card border border-border rounded-2xl p-6 space-y-4">
+        <div className="bg-card border border-border rounded-xl p-6 space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
             <div className="flex items-start gap-4">
               <Skeleton className="w-12 h-12 rounded-xl flex-shrink-0" />
@@ -281,7 +281,7 @@ export default function MyPlanPage() {
           </div>
         </div>
         {/* Features card */}
-        <div className="bg-card border border-border rounded-2xl p-5 space-y-3">
+        <div className="bg-card border border-border rounded-xl p-5 space-y-3">
           <Skeleton className="h-4 w-40" />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {Array.from({length:6}).map((_,i)=>(<div key={i} className="flex items-center gap-2"><Skeleton className="w-3.5 h-3.5 rounded-full flex-shrink-0" /><Skeleton className="h-4 w-40" /></div>))}
@@ -319,7 +319,7 @@ export default function MyPlanPage() {
       {tab === 'current' && (
         <div className="space-y-5">
           {/* Current plan card */}
-          <div className="bg-card border-2 border-primary/30 rounded-2xl p-6">
+          <div className="bg-card border border-primary/30 rounded-xl p-6">
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-4">
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -330,7 +330,7 @@ export default function MyPlanPage() {
                   <span className={cn(
                     'inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full mt-1',
                     isFree ? 'bg-green-500/10 text-green-600' :
-                    isActive ? 'bg-blue-500/10 text-blue-600' :
+                    isActive ? 'bg-primary/10 text-primary' :
                     'bg-red-500/10 text-red-500'
                   )}>
                     {isFree ? 'Gratuito · Activo' : isActive ? 'Activo' : 'Vencido / Cancelado'}
@@ -412,7 +412,7 @@ export default function MyPlanPage() {
 
           {/* Current plan features */}
           {(currentPlan?.features?.length ?? 0) > 0 && (
-            <div className="bg-card border border-border rounded-2xl p-5">
+            <div className="bg-card border border-border rounded-xl p-5">
               <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
                 <Zap className="w-4 h-4 text-primary" /> Lo que incluye tu plan
               </h3>
@@ -436,7 +436,7 @@ export default function MyPlanPage() {
           <div className="lg:col-span-3 space-y-5">
 
             {/* Plan selector */}
-            <div className="bg-card border border-border rounded-2xl p-5">
+            <div className="bg-card border border-border rounded-xl p-5">
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Elige tu nuevo plan</p>
               <div className="space-y-2">
                 {activePlans.map(p => {
@@ -476,7 +476,7 @@ export default function MyPlanPage() {
 
             {/* Currency — only for paid plans */}
             {targetPlan && !targetIsFree && (
-              <div className="bg-card border border-border rounded-2xl p-5">
+              <div className="bg-card border border-border rounded-xl p-5">
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Moneda</p>
                 <div className="grid grid-cols-2 gap-3">
                   {(['PEN', 'USD'] as Currency[]).map(c => (
@@ -506,7 +506,7 @@ export default function MyPlanPage() {
 
             {/* Gateway selector — only for paid plans */}
             {targetPlan && !targetIsFree && (
-              <div className="bg-card border border-border rounded-2xl p-5">
+              <div className="bg-card border border-border rounded-xl p-5">
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Método de pago</p>
                 {gatewaysForCurrency.length === 0 ? (
                   <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4">
@@ -533,7 +533,7 @@ export default function MyPlanPage() {
                             <div className="flex items-center gap-2 flex-wrap">
                               <span className={cn('text-sm font-semibold', isSelected ? 'text-primary' : 'text-foreground')}>{g.name}</span>
                               {!ready && <span className="text-xs bg-amber-500/10 text-amber-600 px-1.5 py-0.5 rounded-full">No disponible</span>}
-                              {g.test_mode && ready && <span className="text-xs bg-blue-500/10 text-blue-600 px-1.5 py-0.5 rounded-full">Prueba</span>}
+                              {g.test_mode && ready && <span className="text-xs bg-amber-500/10 text-amber-600 px-1.5 py-0.5 rounded-full">Prueba</span>}
                             </div>
                             <p className="text-xs text-muted-foreground truncate mt-0.5">{g.description}</p>
                           </div>
@@ -560,7 +560,7 @@ export default function MyPlanPage() {
                     )}
                     {(selectedGateway.slug === 'paypal' || selectedGateway.slug === 'mercadopago') && (
                       <p className="text-xs text-muted-foreground flex items-start gap-2">
-                        <ExternalLink className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-blue-500" />
+                        <ExternalLink className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-primary" />
                         Serás redirigido a {selectedGateway.name} para completar el pago de forma segura.
                       </p>
                     )}
@@ -578,7 +578,7 @@ export default function MyPlanPage() {
 
           {/* Right: Summary + CTA */}
           <div className="lg:col-span-2">
-            <div className="bg-card border border-border rounded-2xl p-5 sticky top-24">
+            <div className="bg-card border border-border rounded-xl p-5 sticky top-24">
               <h3 className="text-sm font-bold text-foreground mb-4">Resumen</h3>
 
               {!targetPlan ? (
@@ -658,7 +658,7 @@ export default function MyPlanPage() {
       {/* Cancel modal */}
       {showCancel && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-card border border-border rounded-2xl w-full max-w-sm p-6 shadow-2xl">
+          <div className="bg-card border border-border rounded-xl w-full max-w-sm p-6 shadow-2xl">
             <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4">
               <X className="w-6 h-6 text-red-500" />
             </div>

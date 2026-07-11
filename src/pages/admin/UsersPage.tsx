@@ -194,7 +194,7 @@ function UserModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="bg-card border border-border rounded-2xl w-full max-w-xl shadow-2xl flex flex-col max-h-[92vh]">
+      <div className="bg-card border border-border rounded-xl w-full max-w-xl shadow-2xl flex flex-col max-h-[92vh]">
 
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border flex-shrink-0">
@@ -208,7 +208,7 @@ function UserModal({
         <div className="overflow-y-auto flex-1 p-6 space-y-5">
 
           {mode === 'create' && (
-            <div className="flex items-start gap-2.5 bg-primary/10 border border-blue-500/20 rounded-xl p-3.5">
+            <div className="flex items-start gap-2.5 bg-primary/10 border border-primary/20 rounded-xl p-3.5">
               <Info className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
               <p className="text-xs text-primary">
                 Se creará la cuenta con contraseña temporal <strong>Temp123456!</strong>. El usuario deberá cambiarla al iniciar sesión.
@@ -231,7 +231,7 @@ function UserModal({
                     </div>
                   )}
                   <label className="absolute bottom-0 right-0 w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center cursor-pointer hover:bg-primary/90 transition-colors shadow-md">
-                    <span className="text-xs font-black">+</span>
+                    <span className="text-xs font-bold">+</span>
                     <input type="file" accept="image/*" className="hidden"
                       onChange={e => {
                         const f = e.target.files?.[0];
@@ -268,7 +268,7 @@ function UserModal({
                   <label className={cn('absolute bottom-0 right-0 w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center cursor-pointer hover:bg-primary/90 transition-colors shadow-md', avatarUploading && 'opacity-50 cursor-not-allowed')}>
                     {avatarUploading
                       ? <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      : <span className="text-xs font-black">+</span>}
+                      : <span className="text-xs font-bold">+</span>}
                     <input type="file" accept="image/*" className="hidden" disabled={avatarUploading} onChange={handleAvatarUpload} />
                   </label>
                 </div>

@@ -64,19 +64,24 @@ function MaintenancePage() {
   );
 }
 
+function AppSkeleton() {
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="flex flex-col items-center gap-5">
+        <div className="w-12 h-12 rounded-2xl bg-muted animate-pulse" />
+        <div className="space-y-2 text-center">
+          <div className="h-2.5 w-32 bg-muted rounded-full animate-pulse mx-auto" />
+          <div className="h-2 w-20 bg-muted rounded-full animate-pulse mx-auto" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ProtectedRoute({ children }: { children: ReactNode }) {
   const { session, loading } = useAuthStore();
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="text-muted-foreground text-sm">Cargando...</p>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <AppSkeleton />;
   if (!session) return <Navigate to="/login" />;
   return <>{children}</>;
 }
@@ -116,13 +121,7 @@ function AppRoutes() {
     return () => clearTimeout(t);
   }, []);
 
-  if (loading && !forcedReady) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
+  if (loading && !forcedReady) return <AppSkeleton />;
   return (
     <MaintenanceGate>
       <Routes>

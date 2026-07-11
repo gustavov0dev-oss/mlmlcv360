@@ -274,7 +274,7 @@ export default function ProductFormPage() {
           <ChevronLeft className="w-5 h-5 text-muted-foreground" />
         </button>
         <div className="flex-1 min-w-0">
-          <h1 className="text-xl font-black text-foreground truncate">{productId ? `Editar: ${form.name || 'Producto'}` : 'Nuevo Producto'}</h1>
+          <h1 className="text-xl font-bold text-foreground truncate">{productId ? `Editar: ${form.name || 'Producto'}` : 'Nuevo Producto'}</h1>
           <p className="text-xs text-muted-foreground">{productId ? 'Modificar datos del producto' : 'Crear un nuevo producto en el catálogo'}</p>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
@@ -307,7 +307,7 @@ export default function ProductFormPage() {
       {tab === 'general' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div className="lg:col-span-2 space-y-4">
-            <div className="bg-card border border-border rounded-2xl p-5 space-y-4">
+            <div className="bg-card border border-border rounded-xl p-5 space-y-4">
               <div>
                 <label className="block text-xs font-bold text-foreground mb-1.5">Nombre del producto *</label>
                 <input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
@@ -335,7 +335,7 @@ export default function ProductFormPage() {
             </div>
 
             {/* Pricing */}
-            <div className="bg-card border border-border rounded-2xl p-5 space-y-4">
+            <div className="bg-card border border-border rounded-xl p-5 space-y-4">
               <h3 className="text-sm font-bold text-foreground">Precios</h3>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 <div>
@@ -368,7 +368,7 @@ export default function ProductFormPage() {
             </div>
 
             {/* Inventory */}
-            <div className="bg-card border border-border rounded-2xl p-5 space-y-4">
+            <div className="bg-card border border-border rounded-xl p-5 space-y-4">
               <h3 className="text-sm font-bold text-foreground">Inventario</h3>
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -412,7 +412,7 @@ export default function ProductFormPage() {
 
           {/* Right column */}
           <div className="space-y-4">
-            <div className="bg-card border border-border rounded-2xl p-5 space-y-4">
+            <div className="bg-card border border-border rounded-xl p-5 space-y-4">
               <h3 className="text-sm font-bold text-foreground">Organización</h3>
               <div>
                 <label className="block text-xs font-bold text-foreground mb-1.5">Categoría</label>
@@ -443,7 +443,7 @@ export default function ProductFormPage() {
             </div>
 
             {media[0] && (
-              <div className="bg-card border border-border rounded-2xl overflow-hidden">
+              <div className="bg-card border border-border rounded-xl overflow-hidden">
                 <img src={media[0].url} alt={form.name} className="w-full aspect-square object-cover" />
                 <div className="p-3">
                   <p className="text-xs font-semibold text-foreground truncate">{media[0].alt || 'Portada'}</p>
@@ -457,7 +457,7 @@ export default function ProductFormPage() {
 
       {/* ── MEDIA TAB ── */}
       {tab === 'media' && (
-        <div className="bg-card border border-border rounded-2xl p-5 space-y-4">
+        <div className="bg-card border border-border rounded-xl p-5 space-y-4">
           <h3 className="text-sm font-bold text-foreground">Imágenes y videos</h3>
           <div className="flex gap-2 flex-wrap">
             <label className={cn('flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-bold cursor-pointer hover:bg-primary/90 transition-colors', uploading && 'opacity-50 cursor-not-allowed')}>
@@ -481,7 +481,7 @@ export default function ProductFormPage() {
           </div>
           {uploading && <p className="text-xs text-primary animate-pulse">Subiendo archivo...</p>}
           {media.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground text-sm border-2 border-dashed border-border rounded-2xl">
+            <div className="text-center py-8 text-muted-foreground text-sm border-2 border-dashed border-border rounded-xl">
               <Image className="w-8 h-8 mx-auto mb-2 opacity-40" />
               Sin imágenes ni videos — la primera imagen será la portada
             </div>
@@ -512,7 +512,7 @@ export default function ProductFormPage() {
                       <img src={m.url} alt={m.alt || ''} className="w-full h-full object-cover"
                         onError={e => { (e.target as HTMLImageElement).src = ''; }} />
                     )}
-                    {i === 0 && <span className="absolute top-1.5 left-1.5 bg-primary text-primary-foreground text-[9px] font-black px-1.5 py-0.5 rounded-full">PORTADA</span>}
+                    {i === 0 && <span className="absolute top-1.5 left-1.5 bg-primary text-primary-foreground text-[9px] font-bold px-1.5 py-0.5 rounded-full">PORTADA</span>}
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
                       <div className="opacity-0 group-hover:opacity-100 absolute top-1 right-1 flex gap-1">
                         <button onClick={() => setMedia(prev => prev.filter((_, j) => j !== i))}
@@ -535,7 +535,7 @@ export default function ProductFormPage() {
       {/* ── VARIANTS TAB ── */}
       {tab === 'variants' && (
         <div className="space-y-4">
-          <div className="bg-card border border-border rounded-2xl p-5 space-y-3">
+          <div className="bg-card border border-border rounded-xl p-5 space-y-3">
             <h3 className="text-sm font-bold text-foreground">Configuración de variantes</h3>
             <div className="flex gap-2 flex-wrap">
               <div>
@@ -566,7 +566,7 @@ export default function ProductFormPage() {
           </div>
 
           {variants.length === 0 ? (
-            <div className="text-center py-12 border-2 border-dashed border-border rounded-2xl text-muted-foreground">
+            <div className="text-center py-12 border-2 border-dashed border-border rounded-xl text-muted-foreground">
               <Box className="w-10 h-10 mx-auto mb-3 opacity-30" />
               <p className="text-sm font-semibold">Sin variantes</p>
               <p className="text-xs mt-1">Agrega variantes de color, talla u otros atributos</p>
@@ -585,7 +585,7 @@ export default function ProductFormPage() {
                     setVariants(newV);
                     setDraggedVariantIdx(null);
                   }}
-                  className="bg-card border border-border rounded-2xl p-4 space-y-3">
+                  className="bg-card border border-border rounded-xl p-4 space-y-3">
                   <div className="flex items-center gap-2">
                     <GripVertical className="w-4 h-4 text-muted-foreground cursor-grab flex-shrink-0" />
                     <input value={v.name} onChange={e => setVariants(p => p.map((x, j) => j === i ? { ...x, name: e.target.value } : x))}
@@ -683,7 +683,7 @@ export default function ProductFormPage() {
 
       {/* ── SPECS TAB ── */}
       {tab === 'specs' && (
-        <div className="bg-card border border-border rounded-2xl p-5 space-y-3">
+        <div className="bg-card border border-border rounded-xl p-5 space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-bold text-foreground">Especificaciones técnicas</h3>
             <button onClick={() => setSpecs(p => [...p, { key: '', value: '' }])}
@@ -718,7 +718,7 @@ export default function ProductFormPage() {
 
       {/* ── COMMISSIONS TAB ── */}
       {tab === 'commissions' && (
-        <div className="bg-card border border-border rounded-2xl p-5 space-y-3">
+        <div className="bg-card border border-border rounded-xl p-5 space-y-3">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-sm font-bold text-foreground">Comisiones MLM por nivel</h3>
@@ -759,7 +759,7 @@ export default function ProductFormPage() {
 
       {/* ── SEO TAB ── */}
       {tab === 'seo' && (
-        <div className="bg-card border border-border rounded-2xl p-5 space-y-4">
+        <div className="bg-card border border-border rounded-xl p-5 space-y-4">
           <h3 className="text-sm font-bold text-foreground">SEO y metadatos</h3>
           <div>
             <label className="block text-xs font-bold text-foreground mb-1.5">Meta título</label>
@@ -778,8 +778,8 @@ export default function ProductFormPage() {
 
       {/* ── DIGITAL TAB ── */}
       {tab === 'digital' && form.is_digital && (
-        <div className="bg-card border border-border rounded-2xl p-5 space-y-4">
-          <div className="flex items-start gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl">
+        <div className="bg-card border border-border rounded-xl p-5 space-y-4">
+          <div className="flex items-start gap-3 p-3 bg-primary/8 border border-primary/20 rounded-xl">
             <Download className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
             <div className="text-xs text-primary">
               <p className="font-bold">Producto digital</p>

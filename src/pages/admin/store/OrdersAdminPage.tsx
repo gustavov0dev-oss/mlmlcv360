@@ -83,10 +83,10 @@ export default function OrdersAdminPage() {
 
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 animate-fade-in">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-black text-foreground">Gestión de Pedidos</h1>
+          <h1 className="text-2xl font-bold text-foreground">Gestión de Pedidos</h1>
           <p className="text-sm text-muted-foreground mt-0.5">{orders.length} pedidos</p>
         </div>
         <button onClick={load} className="p-2 border border-border rounded-xl hover:bg-muted transition-colors self-start">
@@ -108,7 +108,7 @@ export default function OrdersAdminPage() {
       </div>
 
       {loading ? (
-        <div className="bg-card border border-border rounded-2xl overflow-hidden">
+        <div className="bg-card border border-border rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead><tr className="border-b border-border bg-muted/30">{['Pedido','Cliente','Productos','Total','Estado','Pago','Acciones'].map(h => <th key={h} className="text-left px-4 py-3 text-xs font-bold text-muted-foreground uppercase whitespace-nowrap">{h}</th>)}</tr></thead>
@@ -129,7 +129,7 @@ export default function OrdersAdminPage() {
           </div>
         </div>
       ) : (
-        <div className="bg-card border border-border rounded-2xl overflow-hidden">
+        <div className="bg-card border border-border rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
@@ -147,7 +147,7 @@ export default function OrdersAdminPage() {
                     <tr key={o.id} className="border-b border-border/40 hover:bg-muted/20 transition-colors">
                       <td className="px-4 py-3">
                         <button onClick={() => navigate(`/dashboard/admin/pedidos/${o.id}`)}
-                          className="font-black text-primary hover:underline">{o.order_number}</button>
+                          className="font-bold text-primary hover:underline">{o.order_number}</button>
                         <p className="text-xs text-muted-foreground">{new Date(o.created_at).toLocaleDateString('es-PE')}</p>
                       </td>
                       <td className="px-4 py-3">
@@ -164,7 +164,7 @@ export default function OrdersAdminPage() {
                           {(o.items || []).length > 3 && <span className="text-xs text-muted-foreground pl-2">+{(o.items || []).length - 3}</span>}
                         </div>
                       </td>
-                      <td className="px-4 py-3 font-black text-foreground">{fmt(o.total)}</td>
+                      <td className="px-4 py-3 font-bold text-foreground">{fmt(o.total)}</td>
                       <td className="px-4 py-3">
                         <select
                           value={o.status}

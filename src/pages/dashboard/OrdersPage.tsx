@@ -43,7 +43,7 @@ export default function OrdersPage() {
       <div className="space-y-1.5"><Skeleton className="h-8 w-36" /><Skeleton className="h-4 w-28" /></div>
       <div className="space-y-3">
         {Array.from({length:5}).map((_,i)=>(
-          <div key={i} className="bg-card border border-border rounded-2xl p-4 flex items-center gap-4">
+          <div key={i} className="bg-card border border-border rounded-xl p-4 flex items-center gap-4">
             <Skeleton className="w-14 h-14 rounded-xl flex-shrink-0" />
             <div className="flex-1 space-y-1.5">
               <div className="flex items-center gap-2"><Skeleton className="h-4 w-28" /><Skeleton className="h-5 w-16 rounded-full" /></div>
@@ -59,19 +59,19 @@ export default function OrdersPage() {
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-2xl font-black text-foreground">Mis Pedidos</h1>
-        <p className="text-muted-foreground text-sm mt-0.5">{orders.length} pedido{orders.length !== 1 ? 's' : ''} en total</p>
+        <h1 className="text-2xl font-bold text-foreground">Mis Pedidos</h1>
+        <p className="text-muted-foreground text-sm mt-1">{orders.length} pedido{orders.length !== 1 ? 's' : ''} en total</p>
       </div>
 
       {orders.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 gap-4 bg-card border border-border rounded-2xl">
+        <div className="flex flex-col items-center justify-center py-20 gap-4 bg-card border border-border rounded-xl">
           <ShoppingBag className="w-12 h-12 text-muted-foreground/30" />
           <div className="text-center">
             <p className="font-semibold text-foreground">No tienes pedidos aún</p>
             <p className="text-sm text-muted-foreground mt-1">Explora la tienda y realiza tu primera compra</p>
           </div>
           <button onClick={() => navigate('/tienda')}
-            className="px-5 py-2.5 bg-primary text-primary-foreground rounded-xl font-bold text-sm hover:bg-primary/90 transition-colors">
+            className="px-5 py-2.5 bg-primary text-white rounded-xl font-bold text-sm hover:bg-primary/90 transition-colors">
             Ir a la tienda
           </button>
         </div>
@@ -84,7 +84,7 @@ export default function OrdersPage() {
               <button
                 key={order.id}
                 onClick={() => navigate(`/dashboard/pedidos/${order.id}`)}
-                className="w-full bg-card border border-border rounded-2xl p-4 flex items-center gap-4 hover:border-primary/40 hover:shadow-md transition-all text-left"
+                className="w-full bg-card border border-border rounded-xl p-4 flex items-center gap-4 hover:border-primary/40 hover:shadow-md transition-all text-left"
               >
                 <div className="w-14 h-14 rounded-xl bg-muted overflow-hidden flex-shrink-0">
                   {img ? <img src={img} alt="" className="w-full h-full object-cover" /> :
@@ -92,14 +92,14 @@ export default function OrdersPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-sm font-black text-foreground">{order.order_number}</span>
+                    <span className="text-sm font-bold text-foreground">{order.order_number}</span>
                     <span className={cn('text-[11px] font-bold px-2 py-0.5 rounded-full', sc.color, sc.bg)}>{sc.label}</span>
                   </div>
                   <p className="text-xs text-muted-foreground mt-0.5">
                     {new Date(order.created_at).toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' })}
                     {' · '}{order.items?.length || 0} producto{(order.items?.length || 0) !== 1 ? 's' : ''}
                   </p>
-                  <p className="text-sm font-black text-foreground mt-0.5">S/ {order.total.toFixed(2)}</p>
+                  <p className="text-sm font-bold text-foreground mt-0.5">S/ {order.total.toFixed(2)}</p>
                 </div>
                 <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
               </button>

@@ -355,16 +355,16 @@ function StatsBar({ tree }: { tree: NetProfile | null; profiles?: Profile[] }) {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
       {[
-        { label: 'Total en red', value: total, icon: Users, color: 'from-blue-500/20 to-blue-600/10', iconColor: 'text-blue-500' },
+        { label: 'Total en red', value: total, icon: Users, color: 'from-primary/20 to-primary/10', iconColor: 'text-primary' },
         { label: 'Activos',       value: activos, icon: UserCheck, color: 'from-green-500/20 to-green-600/10', iconColor: 'text-green-500' },
         { label: 'Directos',      value: directos, icon: Star, color: 'from-yellow-500/20 to-yellow-600/10', iconColor: 'text-yellow-500' },
         { label: 'Profundidad',   value: profundidad + 1, icon: TrendingDown, color: 'from-purple-500/20 to-purple-600/10', iconColor: 'text-purple-500' },
       ].map(s => (
-        <div key={s.label} className={cn('relative bg-gradient-to-br rounded-2xl p-4 border border-border overflow-hidden', s.color)}>
+        <div key={s.label} className={cn('relative bg-gradient-to-br rounded-xl p-4 border border-border overflow-hidden', s.color)}>
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs font-medium text-muted-foreground mb-1">{s.label}</p>
-              <p className="text-2xl font-black text-foreground leading-none">{s.value}</p>
+              <p className="text-2xl font-bold text-foreground leading-none">{s.value}</p>
             </div>
             <div className={cn('w-10 h-10 rounded-xl bg-background/60 flex items-center justify-center', s.iconColor)}>
               <s.icon className="w-5 h-5" />
@@ -485,7 +485,7 @@ function AddMemberModal({
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-card border border-border rounded-t-3xl sm:rounded-2xl w-full sm:max-w-lg shadow-2xl flex flex-col max-h-[90vh] z-10">
+      <div className="relative bg-card border border-border rounded-t-3xl sm:rounded-xl w-full sm:max-w-lg shadow-2xl flex flex-col max-h-[90vh] z-10">
 
         <div className="flex justify-center pt-3 pb-1 sm:hidden">
           <div className="w-10 h-1 bg-muted-foreground/30 rounded-full" />
@@ -555,7 +555,7 @@ function AddMemberModal({
                           'flex-1 py-3 rounded-xl text-xs font-bold border-2 transition-all',
                           form.position === pos.v
                             ? pos.color === 'blue'
-                              ? 'border-blue-500 bg-blue-500/15 text-blue-600 dark:text-blue-400'
+                              ? 'border-primary bg-primary/15 text-primary'
                               : 'border-orange-500 bg-orange-500/15 text-orange-600 dark:text-orange-400'
                             : 'border-border text-muted-foreground hover:border-muted-foreground/50',
                         )}
@@ -595,8 +595,8 @@ function AddMemberModal({
 
           {mode === 'existing' && (
             <div className="space-y-4">
-              <div className="bg-blue-500/8 border border-blue-500/20 rounded-xl p-3">
-                <p className="text-xs text-blue-700 dark:text-blue-400">
+              <div className="bg-primary/8 border border-primary/20 rounded-xl p-3">
+                <p className="text-xs text-primary">
                   Usuarios ya registrados sin patrocinador asignado. Asígnalos a la red de <strong>{sponsorName}</strong>.
                 </p>
               </div>
@@ -666,7 +666,7 @@ function AddMemberModal({
                         'py-3 rounded-xl text-sm font-bold border-2 transition-all',
                         form.position === pos.v
                           ? pos.color === 'blue'
-                            ? 'border-blue-500 bg-blue-500/15 text-blue-600 dark:text-blue-400'
+                            ? 'border-primary bg-primary/15 text-primary'
                             : 'border-orange-500 bg-orange-500/15 text-orange-600 dark:text-orange-400'
                           : 'border-border text-muted-foreground',
                       )}
@@ -867,7 +867,7 @@ function NodeDrawer({
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-card border border-border rounded-t-3xl sm:rounded-2xl w-full sm:max-w-md shadow-2xl flex flex-col max-h-[90vh] z-10">
+      <div className="relative bg-card border border-border rounded-t-3xl sm:rounded-xl w-full sm:max-w-md shadow-2xl flex flex-col max-h-[90vh] z-10">
 
         <div className="flex justify-center pt-3 pb-1 sm:hidden">
           <div className="w-10 h-1 bg-muted-foreground/30 rounded-full" />
@@ -1010,8 +1010,8 @@ function NodeDrawer({
 
           {tab === 'move' && (
             <div className="space-y-3">
-              <div className="bg-blue-500/8 border border-blue-500/20 rounded-xl p-3">
-                <p className="text-xs text-blue-700 dark:text-blue-400">
+              <div className="bg-primary/8 border border-primary/20 rounded-xl p-3">
+                <p className="text-xs text-primary">
                   Reubicar <strong>{node.full_name || node.username}</strong> bajo un nuevo patrocinador. Sus referidos se mueven con él.
                 </p>
               </div>
@@ -1053,7 +1053,7 @@ function NodeDrawer({
                     <button key={pos.v} onClick={() => setMovePos(pos.v as 'left' | 'right')}
                       className={cn('py-3 rounded-xl text-sm font-bold border-2 transition-all',
                         movePos === pos.v
-                          ? pos.color === 'blue' ? 'border-blue-500 bg-blue-500/15 text-blue-600 dark:text-blue-400' : 'border-orange-500 bg-orange-500/15 text-orange-600 dark:text-orange-400'
+                          ? pos.color === 'blue' ? 'border-primary bg-primary/15 text-primary' : 'border-orange-500 bg-orange-500/15 text-orange-600 dark:text-orange-400'
                           : 'border-border text-muted-foreground',
                       )}>
                       {pos.label}
@@ -1119,7 +1119,7 @@ function NodeDrawer({
             <div className="flex gap-2">
               <button onClick={onClose} className="flex-1 border border-border rounded-xl py-2.5 text-sm font-semibold hover:bg-muted transition-colors text-muted-foreground">Cancelar</button>
               <button onClick={move} disabled={saving || !newSponsorId}
-                className="flex-1 bg-blue-600 text-white rounded-xl py-2.5 text-sm font-bold hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+                className="flex-1 bg-primary text-white rounded-xl py-2.5 text-sm font-bold hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Move className="w-4 h-4" />} Reubicar
               </button>
             </div>
@@ -1164,7 +1164,7 @@ function ListView({
             <button
               key={node.id}
               onClick={() => onSelect(node)}
-              className="w-full flex items-center gap-3 p-3.5 bg-card border border-border rounded-2xl hover:border-primary/40 hover:shadow-md transition-all text-left group"
+              className="w-full flex items-center gap-3 p-3.5 bg-card border border-border rounded-xl hover:border-primary/40 hover:shadow-md transition-all text-left group"
             >
               <div className="relative flex-shrink-0">
                 <Avatar p={node} size={40} />
@@ -1340,7 +1340,7 @@ export default function NetworkPage() {
         </div>
 
         {/* Tree canvas skeleton – simplified node/edge representation */}
-        <div className="bg-card border border-border rounded-2xl overflow-hidden" style={{ height: 480 }}>
+        <div className="bg-card border border-border rounded-xl overflow-hidden" style={{ height: 480 }}>
           <div className="flex items-center justify-between px-4 py-3 border-b border-border">
             <Skeleton className="h-4 w-32" />
             <div className="flex gap-1">
@@ -1387,7 +1387,7 @@ export default function NetworkPage() {
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-black text-foreground tracking-tight">Red Genealógica</h1>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">Red Genealógica</h1>
           <p className="text-muted-foreground text-sm mt-0.5">
             {isAdmin && viewAllNet ? 'Vista completa de toda la red.' : `Red de ${myName}.`}
           </p>
@@ -1463,8 +1463,8 @@ export default function NetworkPage() {
       </div>
 
       {!tree ? (
-        <div className="flex flex-col items-center justify-center py-24 gap-5 bg-card border border-border rounded-2xl">
-          <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center">
+        <div className="flex flex-col items-center justify-center py-24 gap-5 bg-card border border-border rounded-xl">
+          <div className="w-16 h-16 rounded-xl bg-muted flex items-center justify-center">
             <Network className="w-8 h-8 text-muted-foreground" />
           </div>
           <div className="text-center">
@@ -1479,7 +1479,7 @@ export default function NetworkPage() {
           </button>
         </div>
       ) : viewMode === 'tree' ? (
-        <div className="bg-card border border-border rounded-2xl overflow-hidden">
+        <div className="bg-card border border-border rounded-xl overflow-hidden">
           <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/30 gap-2 flex-wrap">
             <p className="text-xs text-muted-foreground hidden sm:block">
               Arrastra · Scroll para zoom · Toca un nodo para ver detalle
@@ -1543,7 +1543,7 @@ export default function NetworkPage() {
           </div>
         </div>
       ) : (
-        <div className="bg-card border border-border rounded-2xl p-4 sm:p-5">
+        <div className="bg-card border border-border rounded-xl p-4 sm:p-5">
           <ListView tree={tree} onSelect={setSelected} />
         </div>
       )}

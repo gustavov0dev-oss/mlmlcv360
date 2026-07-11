@@ -108,7 +108,7 @@ export default function ReviewsAdminPage() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-black text-foreground">Reseñas de productos</h1>
+          <h1 className="text-2xl font-bold text-foreground">Reseñas de productos</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
             Modera y gestiona las valoraciones de tus clientes
           </p>
@@ -122,9 +122,9 @@ export default function ReviewsAdminPage() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {TABS.map(t => (
           <button key={t.id} onClick={() => setTab(t.id)}
-            className={cn('p-4 rounded-2xl border text-left transition-all',
+            className={cn('p-4 rounded-xl border text-left transition-all',
               tab === t.id ? 'border-primary bg-primary/5 shadow-sm' : 'border-border bg-card hover:border-primary/40')}>
-            <p className={cn('text-3xl font-black', t.color)}>{counts[t.id]}</p>
+            <p className={cn('text-3xl font-bold', t.color)}>{counts[t.id]}</p>
             <p className="text-xs text-muted-foreground mt-1 font-medium">{t.label}</p>
           </button>
         ))}
@@ -145,7 +145,7 @@ export default function ReviewsAdminPage() {
               className={cn('px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors',
                 tab === t.id ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground')}>
               {t.label}
-              <span className={cn('ml-1.5 text-[10px] font-black', t.color)}>{counts[t.id]}</span>
+              <span className={cn('ml-1.5 text-[10px] font-bold', t.color)}>{counts[t.id]}</span>
             </button>
           ))}
         </div>
@@ -153,19 +153,19 @@ export default function ReviewsAdminPage() {
 
       {/* Reviews table / list */}
       {loading ? (
-        <div className="bg-card border border-border rounded-2xl overflow-hidden">
+        <div className="bg-card border border-border rounded-xl overflow-hidden">
           <table className="w-full text-sm min-w-[700px]">
             <thead><tr className="border-b border-border bg-muted/30">{['Producto','Cliente','Calificación','Reseña','Estado','Fecha','Acciones'].map(h=><th key={h} className="text-left px-4 py-3 text-xs font-bold text-muted-foreground uppercase">{h}</th>)}</tr></thead>
             <tbody>{Array.from({length:7}).map((_,i)=>(<tr key={i} className="border-b border-border/50"><td className="px-4 py-3"><div className="flex items-center gap-2.5"><Skeleton className="w-9 h-9 rounded-lg flex-shrink-0" /><Skeleton className="h-4 w-28" /></div></td><td className="px-4 py-3"><div className="flex items-center gap-2"><Skeleton className="w-7 h-7 rounded-full flex-shrink-0" /><Skeleton className="h-4 w-20" /></div></td><td className="px-4 py-3"><Skeleton className="h-4 w-20" /></td><td className="px-4 py-3"><Skeleton className="h-4 w-32" /></td><td className="px-4 py-3"><Skeleton className="h-6 w-20 rounded-full" /></td><td className="px-4 py-3"><Skeleton className="h-4 w-20" /></td><td className="px-4 py-3"><div className="flex gap-1"><Skeleton className="w-7 h-7 rounded-lg" /><Skeleton className="w-7 h-7 rounded-lg" /><Skeleton className="w-7 h-7 rounded-lg" /></div></td></tr>))}</tbody>
           </table>
         </div>
       ) : filteredReviews.length === 0 ? (
-        <div className="text-center py-16 border border-dashed border-border rounded-2xl">
+        <div className="text-center py-16 border border-dashed border-border rounded-xl">
           <MessageSquare className="w-12 h-12 mx-auto mb-3 text-muted-foreground/20" />
           <p className="font-semibold text-foreground">No hay reseñas en esta categoría</p>
         </div>
       ) : (
-        <div className="bg-card border border-border rounded-2xl overflow-hidden">
+        <div className="bg-card border border-border rounded-xl overflow-hidden">
           <table className="w-full text-sm min-w-[700px]">
             <thead>
               <tr className="border-b border-border bg-muted/30">
@@ -269,7 +269,7 @@ export default function ReviewsAdminPage() {
       {/* Preview modal */}
       {preview && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setPreview(null)}>
-          <div className="bg-card border border-border rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
+          <div className="bg-card border border-border rounded-xl w-full max-w-lg shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-border">
               <div className="flex items-center gap-3">

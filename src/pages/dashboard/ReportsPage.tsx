@@ -113,7 +113,7 @@ export default function ReportsPage() {
           <Skeleton className="h-10 w-28 rounded-xl" />
         </div>
         {/* 4 stat cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="bg-card border border-border rounded-xl p-4 flex items-center gap-3">
               <Skeleton className="w-9 h-9 rounded-xl flex-shrink-0" />
@@ -138,7 +138,7 @@ export default function ReportsPage() {
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 animate-fade-in">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Reportes</h1>
@@ -150,9 +150,9 @@ export default function ReportsPage() {
       </div>
 
       {/* Summary */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Ingresos totales', value: `S/ ${stats.total.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, icon: DollarSign, color: 'text-blue-500 bg-blue-500/10' },
+          { label: 'Ingresos totales', value: `S/ ${stats.total.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, icon: DollarSign, color: 'text-primary bg-primary/10' },
           { label: 'Transacciones', value: String(stats.count), icon: TrendingUp, color: 'text-green-500 bg-green-500/10' },
           { label: 'Afiliados', value: String(stats.referrals), icon: Users, color: 'text-purple-500 bg-purple-500/10' },
           { label: 'Crecimiento', value: `+${stats.growth}%`, icon: Award, color: 'text-orange-500 bg-orange-500/10' },
@@ -178,15 +178,15 @@ export default function ReportsPage() {
             <AreaChart data={commissionData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorArea" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#1d4ed8" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#1d4ed8" stopOpacity={0} />
+                  <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
               <XAxis dataKey="name" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
               <Tooltip content={<CustomTooltip />} />
-              <Area type="monotone" dataKey="comisiones" name="Ingresos" stroke="#1d4ed8" strokeWidth={2} fill="url(#colorArea)" />
+              <Area type="monotone" dataKey="comisiones" name="Ingresos" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#colorArea)" />
             </AreaChart>
           </ResponsiveContainer>
         </div>
@@ -200,7 +200,7 @@ export default function ReportsPage() {
               <XAxis dataKey="name" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
               <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="afiliados" name="Afiliados" fill="#1d4ed8" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="afiliados" name="Afiliados" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -234,7 +234,7 @@ export default function ReportsPage() {
               <XAxis dataKey="name" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
               <Tooltip content={<CustomTooltip />} />
-              <Line type="monotone" dataKey="comisiones" name="Comisiones" stroke="#1d4ed8" strokeWidth={2} dot={{ r: 4, fill: '#1d4ed8' }} />
+              <Line type="monotone" dataKey="comisiones" name="Comisiones" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4, fill: 'hsl(var(--primary))' }} />
             </LineChart>
           </ResponsiveContainer>
         </div>

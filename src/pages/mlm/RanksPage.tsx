@@ -39,7 +39,7 @@ function RanksSkeleton() {
       {/* Current rank progress card */}
       <div className="bg-card border border-border rounded-xl p-5 sm:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-5">
-          <Skeleton className="w-16 h-16 rounded-2xl flex-shrink-0" />
+          <Skeleton className="w-16 h-16 rounded-xl flex-shrink-0" />
           <div className="flex-1 space-y-2">
             <Skeleton className="h-3 w-24" />
             <Skeleton className="h-6 w-32" />
@@ -100,7 +100,7 @@ export default function RanksPage() {
       {/* Current rank + progress */}
       <div className="bg-card border border-border rounded-xl p-5 sm:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-5">
-          <div className={cn('w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0 border-2', currentRank?.bg_color, currentRank?.border_color)}>
+          <div className={cn('w-16 h-16 rounded-xl flex items-center justify-center flex-shrink-0 border-2', currentRank?.bg_color, currentRank?.border_color)}>
             <RankIcon icon={currentRank?.icon} className={cn('w-8 h-8', currentRank?.color)} />
           </div>
           <div className="flex-1">

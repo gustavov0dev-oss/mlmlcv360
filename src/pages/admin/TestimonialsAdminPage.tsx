@@ -131,7 +131,7 @@ function TestimonialFormModal({ testimonial, onSave, onClose, saving }: {
       className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm"
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="bg-card border border-border rounded-2xl w-full max-w-xl shadow-2xl flex flex-col max-h-[90dvh]">
+      <div className="bg-card border border-border rounded-xl w-full max-w-xl shadow-2xl flex flex-col max-h-[90dvh]">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border flex-shrink-0">
           <div>
@@ -451,7 +451,7 @@ export default function TestimonialsAdminPage() {
           </div>
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center px-4">
-            <div className="w-10 h-10 rounded-2xl bg-muted/50 flex items-center justify-center mb-3">
+            <div className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center mb-3">
               <Quote className="h-5 w-5 text-muted-foreground/40" />
             </div>
             <p className="text-sm font-medium text-foreground mb-0.5">
@@ -487,7 +487,7 @@ export default function TestimonialsAdminPage() {
       </div>
 
       {/* Hint */}
-      <div className="bg-primary/10 border border-blue-500/20 rounded-xl p-4">
+      <div className="bg-primary/10 border border-primary/20 rounded-xl p-4">
         <div className="flex items-center gap-2 text-primary font-semibold text-sm mb-1">
           <Eye className="w-4 h-4" /> Visibilidad en el landing
         </div>

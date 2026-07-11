@@ -58,7 +58,7 @@ export default function WishlistPage() {
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {Array.from({length:10}).map((_,i)=>(
-            <div key={i} className="bg-card border border-border rounded-2xl overflow-hidden">
+            <div key={i} className="bg-card border border-border rounded-xl overflow-hidden">
               <Skeleton className="aspect-square w-full" />
               <div className="p-3 space-y-2"><Skeleton className="h-3 w-1/3" /><Skeleton className="h-4 w-full" /><Skeleton className="h-5 w-1/2" /><div className="flex gap-2 mt-2"><Skeleton className="flex-1 h-9 rounded-xl" /><Skeleton className="w-9 h-9 rounded-xl" /></div></div>
             </div>
@@ -77,7 +77,7 @@ export default function WishlistPage() {
       <div className="pt-20 max-w-7xl mx-auto px-4 sm:px-6 py-8">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-black text-foreground">Mis Favoritos</h1>
+            <h1 className="text-2xl font-bold text-foreground">Mis Favoritos</h1>
             <p className="text-sm text-muted-foreground">{products.length} productos guardados</p>
           </div>
           <div className="flex bg-card border border-border rounded-xl p-1 gap-0.5">
@@ -109,7 +109,7 @@ export default function WishlistPage() {
               const outOfStock = p.track_stock && stock === 0;
 
               return (
-                <div key={p.id} className={cn('group relative bg-card border border-border rounded-2xl overflow-hidden hover:shadow-xl transition-all', viewMode === 'grid' ? '' : 'flex items-center gap-4 p-4')}>
+                <div key={p.id} className={cn('group relative bg-card border border-border rounded-xl overflow-hidden hover:shadow-xl transition-all', viewMode === 'grid' ? '' : 'flex items-center gap-4 p-4')}>
                   <div onClick={() => navigate(`/tienda/${p.slug}`)} className={cn('cursor-pointer', viewMode === 'grid' ? 'aspect-square overflow-hidden bg-muted' : 'w-24 h-24 rounded-xl overflow-hidden flex-shrink-0')}>
                     {img ? <img src={img} alt={p.name} className="w-full h-full object-cover" /> : <Package className="w-full h-full text-muted-foreground/20 p-8" />}
                   </div>
@@ -124,7 +124,7 @@ export default function WishlistPage() {
                     )}
                     {outOfStock && <span className="text-[10px] text-red-500 font-bold">Sin stock</span>}
                     <div className="flex items-end gap-2">
-                      <span className="text-base font-black text-foreground">{fmt(price, p.currency)}</span>
+                      <span className="text-base font-bold text-foreground">{fmt(price, p.currency)}</span>
                       {p.compare_price && p.compare_price > price && <span className="text-xs text-muted-foreground line-through">{fmt(p.compare_price, p.currency)}</span>}
                     </div>
                     <div className="flex gap-2 mt-2">

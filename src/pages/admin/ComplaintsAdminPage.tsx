@@ -102,7 +102,7 @@ function DetailPanel({
         <DialogHeader className="px-5 py-4 border-b border-border/50 shrink-0 space-y-0 pr-12">
           <div className="flex items-center justify-between">
             <div>
-              <DialogTitle className="text-base font-black font-mono tracking-widest text-foreground">
+              <DialogTitle className="text-base font-bold font-mono tracking-widest text-foreground">
                 {complaint.correlativo || '—'}
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground/60 mt-0.5">
@@ -472,7 +472,7 @@ export default function ComplaintsAdminPage() {
       <div className="border border-border/60 rounded-xl overflow-hidden bg-card">
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center px-4">
-            <div className="w-10 h-10 rounded-2xl bg-muted/50 flex items-center justify-center mb-3">
+            <div className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center mb-3">
               <FileText className="h-5 w-5 text-muted-foreground/40" />
             </div>
             <p className="text-sm font-medium text-foreground mb-0.5">

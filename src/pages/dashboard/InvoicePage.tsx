@@ -78,7 +78,7 @@ export default function InvoicePage() {
             <Skeleton className="h-10 w-28 rounded-xl" />
             <Skeleton className="h-10 w-36 rounded-xl" />
           </div>
-          <div className="bg-card rounded-2xl border border-border overflow-hidden">
+          <div className="bg-card rounded-xl border border-border overflow-hidden">
             <Skeleton className="h-32 w-full" />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
               <Skeleton className="h-32" />
@@ -126,7 +126,7 @@ export default function InvoicePage() {
         </div>
 
         {/* Invoice Document */}
-        <div className="bg-card rounded-2xl shadow-xl overflow-hidden print:shadow-none print:rounded-none border border-border">
+        <div className="bg-card rounded-xl shadow-xl overflow-hidden print:shadow-none print:rounded-none border border-border">
 
           {/* ── Header ── */}
           <div className="bg-primary text-primary-foreground p-6 print:bg-white print:text-foreground print:border-b-2 print:border-primary">
@@ -138,7 +138,7 @@ export default function InvoicePage() {
                     <Building2 className="w-6 h-6 print:text-primary" />
                   </div>
                   <div>
-                    <h1 className="text-xl font-black uppercase tracking-tight print:text-primary">{company.company_name || 'Mi Empresa'}</h1>
+                    <h1 className="text-xl font-bold uppercase tracking-tight print:text-primary">{company.company_name || 'Mi Empresa'}</h1>
                     <p className="text-xs font-semibold opacity-90 print:text-muted-foreground">EMPRESA COMERCIAL</p>
                   </div>
                 </div>
@@ -153,10 +153,10 @@ export default function InvoicePage() {
               <div className="text-right space-y-2">
                 <div className="inline-block bg-primary-foreground/10 px-4 py-2 rounded-lg print:bg-primary print:text-white">
                   <p className="text-[10px] font-bold opacity-70 uppercase tracking-widest">Documento</p>
-                  <p className="text-lg font-black leading-tight">{docType}</p>
+                  <p className="text-lg font-bold leading-tight">{docType}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-2xl font-mono font-black tracking-wide">{docSeries}-{docNumber}</p>
+                  <p className="text-2xl font-mono font-bold tracking-wide">{docSeries}-{docNumber}</p>
                 </div>
               </div>
             </div>
@@ -290,7 +290,7 @@ export default function InvoicePage() {
                     <span className="text-foreground">{fmt(order.shipping_amount, order.currency)}</span>
                   </div>
                 )}
-                <div className="flex justify-between text-lg font-black border-t-2 border-border pt-3 mt-3 print:border-black">
+                <div className="flex justify-between text-lg font-bold border-t-2 border-border pt-3 mt-3 print:border-black">
                   <span className="text-foreground">TOTAL</span>
                   <span className="text-primary text-xl">{fmt(order.total, order.currency)}</span>
                 </div>

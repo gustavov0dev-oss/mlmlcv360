@@ -171,7 +171,7 @@ export default function RolesAdminPage() {
         <div className="flex items-center justify-between"><div className="space-y-1.5"><Skeleton className="h-8 w-44" /><Skeleton className="h-4 w-48" /></div><Skeleton className="h-10 w-28 rounded-xl" /></div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
           <div className="space-y-2">{Array.from({length:5}).map((_,i)=>(<div key={i} className="bg-card border border-border rounded-xl p-3.5 flex items-center gap-3"><Skeleton className="w-9 h-9 rounded-xl flex-shrink-0" /><div className="flex-1 space-y-1"><Skeleton className="h-4 w-24" /><Skeleton className="h-3 w-32" /></div></div>))}</div>
-          <div className="lg:col-span-2 bg-card border border-border rounded-2xl p-5 sm:p-6 space-y-5">
+          <div className="lg:col-span-2 bg-card border border-border rounded-xl p-5 sm:p-6 space-y-5">
             <div className="flex items-center gap-3"><Skeleton className="w-12 h-12 rounded-xl" /><div className="space-y-1.5"><Skeleton className="h-5 w-32" /><Skeleton className="h-3 w-20" /></div></div>
             {Array.from({length:3}).map((_,i)=>(<div key={i} className="space-y-1.5"><Skeleton className="h-3 w-32" /><Skeleton className="h-11 w-full rounded-xl" /></div>))}
             <div className="space-y-2"><Skeleton className="h-3 w-20" /><div className="flex flex-wrap gap-2">{Array.from({length:12}).map((_,j)=>(<Skeleton key={j} className="w-7 h-7 rounded-lg" />))}</div></div>
@@ -198,7 +198,7 @@ export default function RolesAdminPage() {
       </div>
 
       {/* Callout: permissions matrix lives in AdminPage */}
-      <div className="flex items-center justify-between gap-4 p-4 bg-primary/8 border border-blue-500/20 rounded-xl">
+      <div className="flex items-center justify-between gap-4 p-4 bg-primary/8 border border-primary/20 rounded-xl">
         <div className="flex items-start gap-3">
           <Shield className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
           <div>
@@ -218,7 +218,7 @@ export default function RolesAdminPage() {
       {/* Create modal */}
       {showCreate && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-card border border-border rounded-2xl w-full max-w-md shadow-2xl p-6">
+          <div className="bg-card border border-border rounded-xl w-full max-w-md shadow-2xl p-6">
             <div className="flex items-center justify-between mb-5">
               <h3 className="text-lg font-bold text-foreground">Crear nuevo rol</h3>
               <button onClick={() => setShowCreate(false)}
@@ -301,7 +301,7 @@ export default function RolesAdminPage() {
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-sm font-bold text-foreground truncate">{role.label}</span>
                     {role.is_system && (
-                      <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-muted text-muted-foreground uppercase tracking-wide flex-shrink-0">
+                      <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-muted text-muted-foreground uppercase tracking-wide flex-shrink-0">
                         sistema
                       </span>
                     )}
@@ -334,7 +334,7 @@ export default function RolesAdminPage() {
 
         {/* Right: editor */}
         {selectedRole ? (
-          <div className="lg:col-span-2 bg-card border border-border rounded-2xl p-5 sm:p-6 space-y-5">
+          <div className="lg:col-span-2 bg-card border border-border rounded-xl p-5 sm:p-6 space-y-5">
             {/* Role header */}
             <div className="flex items-center justify-between flex-wrap gap-3">
               <div className="flex items-center gap-3">
@@ -411,7 +411,7 @@ export default function RolesAdminPage() {
             </div>
           </div>
         ) : (
-          <div className="lg:col-span-2 flex items-center justify-center h-48 border-2 border-dashed border-border rounded-2xl text-muted-foreground">
+          <div className="lg:col-span-2 flex items-center justify-center h-48 border-2 border-dashed border-border rounded-xl text-muted-foreground">
             <div className="text-center">
               <Shield className="w-10 h-10 mx-auto mb-2 opacity-20" />
               <p className="text-sm">Selecciona un rol para editarlo</p>

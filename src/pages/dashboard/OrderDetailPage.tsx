@@ -11,7 +11,7 @@ function fmt(n: number) { return `S/ ${n.toFixed(2)}`; }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; icon: React.FC<any> }> = {
   pending:    { label: 'Pendiente',   color: 'text-yellow-600', bg: 'bg-yellow-500/10', icon: Clock    },
-  confirmed:  { label: 'Confirmado',  color: 'text-blue-600',   bg: 'bg-blue-500/10',   icon: CheckCircle },
+  confirmed:  { label: 'Confirmado',  color: 'text-primary',    bg: 'bg-primary/10',    icon: CheckCircle },
   processing: { label: 'En proceso',  color: 'text-purple-600', bg: 'bg-purple-500/10', icon: Package  },
   shipped:    { label: 'Enviado',     color: 'text-cyan-600',   bg: 'bg-cyan-500/10',   icon: Truck    },
   delivered:  { label: 'Entregado',   color: 'text-green-600',  bg: 'bg-green-500/10',  icon: CheckCircle },
@@ -35,15 +35,15 @@ function Invoice({ order, company }: { order: Order; company: any }) {
       <div className="border border-black">
         <div className="flex border-b border-black">
           <div className="flex-1 p-4 border-r border-black">
-            <p className="font-black text-base">{company.company_name || 'MLM360'}</p>
+            <p className="font-bold text-base">{company.company_name || 'MLM360'}</p>
             <p className="text-xs">RUC: {company.company_ruc || '20000000001'}</p>
             <p className="text-xs">{company.company_address || ''}</p>
           </div>
           <div className="w-48 p-4 text-center">
-            <p className="font-black text-sm border-b border-black pb-1 mb-2">
+            <p className="font-bold text-sm border-b border-black pb-1 mb-2">
               {isFactura ? 'FACTURA ELECTRÓNICA' : 'BOLETA DE VENTA'}
             </p>
-            <p className="font-black">{series}-{docNum}</p>
+            <p className="font-bold">{series}-{docNum}</p>
           </div>
         </div>
         <div className="p-4 border-b border-black space-y-1 text-xs">
@@ -85,7 +85,7 @@ function Invoice({ order, company }: { order: Order; company: any }) {
             <div className="flex justify-between p-1.5 border-b border-gray-200"><span>Op. Gravada:</span><span>{fmt(base)}</span></div>
             <div className="flex justify-between p-1.5 border-b border-gray-200"><span>IGV (18%):</span><span>{fmt(igv)}</span></div>
             {order.discount_amount > 0 && <div className="flex justify-between p-1.5 border-b border-gray-200 text-red-600"><span>Descuento:</span><span>-{fmt(order.discount_amount)}</span></div>}
-            <div className="flex justify-between p-2 font-black text-sm"><span>TOTAL:</span><span>{fmt(order.total)}</span></div>
+            <div className="flex justify-between p-2 font-bold text-sm"><span>TOTAL:</span><span>{fmt(order.total)}</span></div>
           </div>
         </div>
         <div className="p-3 text-center text-[10px] text-gray-500 border-t border-black">
@@ -138,15 +138,15 @@ export default function OrderDetailPage() {
   if (loading) return (
     <div className="space-y-5">
       <div className="flex items-center gap-3"><Skeleton className="w-5 h-5 rounded" /><div className="space-y-1"><Skeleton className="h-6 w-36" /><Skeleton className="h-3 w-40" /></div></div>
-      <Skeleton className="h-20 w-full rounded-2xl" />
+      <Skeleton className="h-20 w-full rounded-xl" />
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <div className="lg:col-span-2 bg-card border border-border rounded-2xl p-5 space-y-3">
+        <div className="lg:col-span-2 bg-card border border-border rounded-xl p-5 space-y-3">
           <Skeleton className="h-4 w-24 mb-2" />
           {Array.from({length:3}).map((_,i)=>(<div key={i} className="flex items-center gap-3"><Skeleton className="w-12 h-12 rounded-xl flex-shrink-0" /><div className="flex-1 space-y-1.5"><Skeleton className="h-4 w-40" /><Skeleton className="h-3 w-16" /></div><Skeleton className="h-4 w-16" /></div>))}
         </div>
         <div className="space-y-4">
-          <div className="bg-card border border-border rounded-2xl p-5 space-y-2">{Array.from({length:5}).map((_,i)=>(<div key={i} className="flex justify-between"><Skeleton className="h-4 w-20" /><Skeleton className="h-4 w-16" /></div>))}</div>
-          <div className="bg-card border border-border rounded-2xl p-5 space-y-2">{Array.from({length:4}).map((_,i)=>(<Skeleton key={i} className="h-4 w-full" />))}</div>
+          <div className="bg-card border border-border rounded-xl p-5 space-y-2">{Array.from({length:5}).map((_,i)=>(<div key={i} className="flex justify-between"><Skeleton className="h-4 w-20" /><Skeleton className="h-4 w-16" /></div>))}</div>
+          <div className="bg-card border border-border rounded-xl p-5 space-y-2">{Array.from({length:4}).map((_,i)=>(<Skeleton key={i} className="h-4 w-full" />))}</div>
         </div>
       </div>
     </div>
@@ -173,7 +173,7 @@ export default function OrderDetailPage() {
           <ChevronLeft className="w-5 h-5" />
         </button>
         <div>
-          <h1 className="text-xl font-black text-foreground">{order.order_number}</h1>
+          <h1 className="text-xl font-bold text-foreground">{order.order_number}</h1>
           <p className="text-xs text-muted-foreground">{new Date(order.created_at).toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
         </div>
         <span className={cn('ml-auto text-xs font-bold px-3 py-1.5 rounded-full', sc.color, sc.bg)}>{sc.label}</span>
@@ -181,7 +181,7 @@ export default function OrderDetailPage() {
 
       {/* Progress stepper */}
       {order.status !== 'cancelled' && order.status !== 'refunded' && (
-        <div className="bg-card border border-border rounded-2xl p-5">
+        <div className="bg-card border border-border rounded-xl p-5">
           <h2 className="text-sm font-bold text-foreground mb-4">Estado del pedido</h2>
           <div className="flex items-center">
             {ORDER_STEPS.map((s, i) => {
@@ -209,7 +209,7 @@ export default function OrderDetailPage() {
 
       {/* Tracking timeline */}
       {tracking.length > 0 && (
-        <div className="bg-card border border-border rounded-2xl p-5">
+        <div className="bg-card border border-border rounded-xl p-5">
           <h2 className="text-sm font-bold text-foreground mb-4">Historial de seguimiento</h2>
           <div className="space-y-3">
             {[...tracking].reverse().map((t, i) => (
@@ -231,11 +231,11 @@ export default function OrderDetailPage() {
 
       {/* Tracking number */}
       {order.tracking_number && (
-        <div className="bg-card border border-border rounded-2xl p-4 flex items-center gap-3">
+        <div className="bg-card border border-border rounded-xl p-4 flex items-center gap-3">
           <Truck className="w-5 h-5 text-primary flex-shrink-0" />
           <div className="flex-1">
             <p className="text-xs text-muted-foreground">Número de rastreo</p>
-            <p className="text-sm font-black text-foreground">{order.tracking_number}</p>
+            <p className="text-sm font-bold text-foreground">{order.tracking_number}</p>
           </div>
           {order.tracking_url && (
             <a href={order.tracking_url} target="_blank" rel="noreferrer" className="p-2 hover:bg-muted rounded-lg transition-colors">
@@ -247,7 +247,7 @@ export default function OrderDetailPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Items */}
-        <div className="lg:col-span-2 bg-card border border-border rounded-2xl p-5">
+        <div className="lg:col-span-2 bg-card border border-border rounded-xl p-5">
           <h2 className="text-sm font-bold text-foreground mb-4">Productos</h2>
           <div className="space-y-3">
             {(order.items || []).map(i => (
@@ -260,7 +260,7 @@ export default function OrderDetailPage() {
                   {i.variant_name && <p className="text-xs text-muted-foreground">{i.variant_name}</p>}
                   <p className="text-xs text-muted-foreground">× {i.quantity}</p>
                 </div>
-                <p className="text-sm font-black text-foreground">{fmt(i.total)}</p>
+                <p className="text-sm font-bold text-foreground">{fmt(i.total)}</p>
               </div>
             ))}
           </div>
@@ -269,17 +269,17 @@ export default function OrderDetailPage() {
         {/* Summary */}
         <div className="space-y-4">
           {/* Totals */}
-          <div className="bg-card border border-border rounded-2xl p-5 space-y-2 text-sm">
+          <div className="bg-card border border-border rounded-xl p-5 space-y-2 text-sm">
             <h2 className="font-bold text-foreground mb-3">Resumen</h2>
             <div className="flex justify-between text-muted-foreground"><span>Subtotal</span><span>{fmt(order.subtotal)}</span></div>
             {order.discount_amount > 0 && <div className="flex justify-between text-green-600"><span>Descuento</span><span>-{fmt(order.discount_amount)}</span></div>}
             <div className="flex justify-between text-muted-foreground"><span>Envío</span><span>{order.shipping_amount === 0 ? 'Gratis' : fmt(order.shipping_amount)}</span></div>
             <div className="flex justify-between text-muted-foreground text-xs"><span>IGV (18%)</span><span>{fmt(igv)}</span></div>
-            <div className="flex justify-between font-black text-foreground border-t border-border pt-2"><span>Total</span><span>{fmt(order.total)}</span></div>
+            <div className="flex justify-between font-bold text-foreground border-t border-border pt-2"><span>Total</span><span>{fmt(order.total)}</span></div>
           </div>
 
           {/* Address */}
-          <div className="bg-card border border-border rounded-2xl p-5 text-sm space-y-1">
+          <div className="bg-card border border-border rounded-xl p-5 text-sm space-y-1">
             <h2 className="font-bold text-foreground mb-2 flex items-center gap-1.5"><MapPin className="w-4 h-4 text-primary" /> Entrega</h2>
             <p className="font-semibold text-foreground">{addr?.full_name}</p>
             <p className="text-muted-foreground">{addr?.address}</p>
@@ -289,7 +289,7 @@ export default function OrderDetailPage() {
 
           {/* Print invoice */}
           <button onClick={() => window.print()}
-            className="w-full flex items-center justify-center gap-2 border border-border rounded-2xl py-3 text-sm font-semibold hover:bg-muted transition-colors">
+            className="w-full flex items-center justify-center gap-2 border border-border rounded-xl py-3 text-sm font-semibold hover:bg-muted transition-colors">
             <Printer className="w-4 h-4 text-primary" /> Imprimir {addr?.invoice_type === 'factura' ? 'factura' : 'boleta'}
           </button>
         </div>

@@ -43,7 +43,7 @@ function CompareBar({ products, onRemove, onClear }: {
   if (products.length === 0) return null;
   return (
     <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[calc(100vw-2rem)] max-w-sm">
-      <div className="bg-card border-2 border-primary rounded-2xl shadow-2xl p-3 flex items-center gap-3">
+      <div className="bg-card border-2 border-primary rounded-xl shadow-2xl p-3 flex items-center gap-3">
         <div className="flex gap-2 flex-1 overflow-x-auto">
           {products.map(p => (
             <div key={p.id} className="relative flex-shrink-0 w-12 h-12 rounded-xl overflow-hidden border border-border">
@@ -51,7 +51,7 @@ function CompareBar({ products, onRemove, onClear }: {
                 ? <img src={p.images[0].url} alt={p.name} className="w-full h-full object-cover" />
                 : <Package className="w-full h-full p-2 text-muted-foreground/30" />}
               <button onClick={() => onRemove(p.id)}
-                className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-black">×</button>
+                className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold">×</button>
             </div>
           ))}
           {Array.from({ length: Math.max(0, 3 - products.length) }).map((_, i) => (
@@ -221,7 +221,7 @@ export default function StorePage() {
                   <LayoutGrid className="w-5 h-5 opacity-70" />
                   <span className="text-sm font-semibold opacity-80">Catálogo</span>
                 </div>
-                <h1 className="text-2xl sm:text-3xl font-black">{storeName}</h1>
+                <h1 className="text-2xl sm:text-3xl font-bold">{storeName}</h1>
                 <p className="text-primary-foreground/70 text-sm mt-1">
                   {loading ? 'Cargando productos...' : `${filtered.length} productos disponibles${activeCat ? ` · ${activeCat.name}` : ''}`}
                 </p>
@@ -238,7 +238,7 @@ export default function StorePage() {
                   className="relative flex items-center gap-1.5 px-4 py-2.5 bg-background/15 hover:bg-background/25 backdrop-blur rounded-xl font-bold text-sm transition-colors flex-shrink-0">
                   <ShoppingCart className="w-4 h-4" />
                   <span className="hidden sm:inline">{itemCount > 0 ? `(${itemCount})` : 'Carrito'}</span>
-                  {itemCount > 0 && <span className="sm:hidden absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white text-xs font-black rounded-full flex items-center justify-center">{itemCount > 9 ? '9+' : itemCount}</span>}
+                  {itemCount > 0 && <span className="sm:hidden absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">{itemCount > 9 ? '9+' : itemCount}</span>}
                 </button>
                 {/* Currency toggle */}
                 <button onClick={() => setShowUsd(!showUsd)}
@@ -283,7 +283,7 @@ export default function StorePage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6">
             <div className="flex items-center gap-2 mb-4">
               <Sparkles className="w-4 h-4 text-amber-500" />
-              <h2 className="text-base font-black text-foreground uppercase tracking-wide">Productos destacados</h2>
+              <h2 className="text-base font-bold text-foreground uppercase tracking-wide">Productos destacados</h2>
             </div>
             <MiniProductRow products={featured.slice(0, 8)} onCompare={toggleCompare} compareIds={compareIds} wishlist={wishlist} onWishlist={handleWishlist} />
           </div>
@@ -294,7 +294,7 @@ export default function StorePage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6">
             <div className="flex items-center gap-2 mb-4">
               <TrendingUp className="w-4 h-4 text-green-500" />
-              <h2 className="text-base font-black text-foreground uppercase tracking-wide">Más vendidos este mes</h2>
+              <h2 className="text-base font-bold text-foreground uppercase tracking-wide">Más vendidos este mes</h2>
             </div>
             <MiniProductRow products={bestsellers} onCompare={toggleCompare} compareIds={compareIds} wishlist={wishlist} onWishlist={handleWishlist} />
           </div>
@@ -305,7 +305,7 @@ export default function StorePage() {
           {showHomeSections && (
             <div className="flex items-center gap-2 mb-4">
               <LayoutGrid className="w-4 h-4 text-muted-foreground" />
-              <h2 className="text-base font-black text-foreground uppercase tracking-wide">Todos los productos</h2>
+              <h2 className="text-base font-bold text-foreground uppercase tracking-wide">Todos los productos</h2>
             </div>
           )}
 

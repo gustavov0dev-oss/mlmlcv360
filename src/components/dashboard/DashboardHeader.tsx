@@ -346,7 +346,7 @@ export default function DashboardHeader() {
   return (
     <>
       <header className={cn(
-        'h-16 border-b border-border bg-background/95 backdrop-blur-md flex items-center px-3 sm:px-4 lg:px-6 sticky top-0 z-30 transition-all duration-300',
+        'h-16 border-b border-border bg-background/98 backdrop-blur-sm flex items-center px-3 sm:px-4 lg:px-6 sticky top-0 z-30 transition-all duration-300',
         searchOpen && 'lg:pr-2'
       )}>
 
@@ -386,7 +386,7 @@ export default function DashboardHeader() {
 
           {/* Results dropdown */}
           {searchOpen && query.length >= 2 && (
-            <div className="absolute left-0 right-0 top-full mt-2 bg-card border border-border rounded-2xl shadow-2xl overflow-hidden z-50">
+            <div className="absolute left-0 right-0 top-full mt-2 bg-card border border-border rounded-xl shadow-2xl overflow-hidden z-50">
               <SearchResultsList />
             </div>
           )}
@@ -398,7 +398,7 @@ export default function DashboardHeader() {
           {/* Mobile search icon */}
           <button
             onClick={() => { setSearchOpen(v => !v); setSidebarOpen(false); setTimeout(() => inputRef.current?.focus(), 50); }}
-            className="lg:hidden w-10 h-10 sm:w-9 sm:h-9 rounded-xl sm:rounded-full flex items-center justify-center hover:bg-muted/60 active:bg-muted text-muted-foreground active:text-foreground transition-colors"
+            className="lg:hidden w-10 h-10 sm:w-9 sm:h-9 rounded-xl sm:rounded-full flex items-center justify-center hover:bg-muted/50 active:bg-muted text-muted-foreground active:text-foreground transition-colors"
             aria-label="Buscar"
           >
             <Search className="w-5 h-5" />
@@ -406,7 +406,7 @@ export default function DashboardHeader() {
 
           {/* Link to public site */}
           <Link to="/"
-            className="w-10 h-10 sm:w-9 sm:h-9 rounded-xl sm:rounded-full flex items-center justify-center hover:bg-muted/60 active:bg-muted text-muted-foreground hover:text-foreground transition-colors hidden sm:flex"
+            className="w-10 h-10 sm:w-9 sm:h-9 rounded-xl sm:rounded-full flex items-center justify-center hover:bg-muted/50 active:bg-muted text-muted-foreground hover:text-foreground transition-colors hidden sm:flex"
           >
             <ExternalLink className="w-5 h-5" />
           </Link>
@@ -414,7 +414,7 @@ export default function DashboardHeader() {
           {/* Theme toggle */}
           <button
             onClick={() => setTheme(isDark ? 'light' : 'dark')}
-            className="w-10 h-10 sm:w-9 sm:h-9 rounded-xl sm:rounded-full flex items-center justify-center hover:bg-muted/60 active:bg-muted text-muted-foreground hover:text-foreground transition-colors hidden sm:flex"
+            className="w-10 h-10 sm:w-9 sm:h-9 rounded-xl sm:rounded-full flex items-center justify-center hover:bg-muted/50 active:bg-muted text-muted-foreground hover:text-foreground transition-colors hidden sm:flex"
           >
             {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
           </button>
@@ -424,7 +424,7 @@ export default function DashboardHeader() {
             <button
               id="bell-btn"
               onClick={() => { setNotifOpen(v => !v); if (!notifOpen) fetchNotifications(); }}
-              className="relative w-10 h-10 sm:w-9 sm:h-9 rounded-xl sm:rounded-full flex items-center justify-center hover:bg-muted/60 active:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+              className="relative w-10 h-10 sm:w-9 sm:h-9 rounded-xl sm:rounded-full flex items-center justify-center hover:bg-muted/50 active:bg-muted text-muted-foreground hover:text-foreground transition-colors"
             >
               <Bell className="w-5 h-5" />
               {unread > 0 && (
@@ -434,7 +434,7 @@ export default function DashboardHeader() {
               )}
             </button>
             {notifOpen && (
-              <div id="notif-panel" className="absolute right-0 top-full mt-2 w-80 bg-card border border-border rounded-2xl shadow-2xl overflow-hidden z-50">
+              <div id="notif-panel" className="absolute right-0 top-full mt-2 w-80 bg-card border border-border rounded-xl shadow-2xl overflow-hidden z-50">
                 <div className="flex items-center justify-between px-4 py-3 border-b border-border">
                   <span className="font-semibold text-sm">Notificaciones</span>
                   <div className="flex items-center gap-2">
@@ -460,7 +460,7 @@ export default function DashboardHeader() {
                       <div className={cn('w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0',
                         n.type === 'success' ? 'bg-green-500/20 text-green-500' :
                         n.type === 'warning' ? 'bg-yellow-500/20 text-yellow-500' :
-                        n.type === 'error' ? 'bg-red-500/20 text-red-500' : 'bg-blue-500/20 text-blue-500')}>
+                        n.type === 'error' ? 'bg-red-500/20 text-red-500' : 'bg-primary/15 text-primary')}>
                         <Bell className="w-3.5 h-3.5" />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -516,11 +516,11 @@ export default function DashboardHeader() {
             </button>
 
             {userMenuOpen && (
-              <div className="absolute right-0 top-full mt-2 w-64 bg-card border border-border rounded-2xl shadow-2xl overflow-hidden z-50">
+              <div className="absolute right-0 top-full mt-2 w-64 bg-card border border-border rounded-xl shadow-2xl overflow-hidden z-50">
                 {/* User header card — clickable to profile */}
                 <button
                   onClick={() => { navigate('/dashboard/perfil'); setUserMenuOpen(false); }}
-                  className="w-full p-4 bg-muted/30 border-b border-border flex items-center gap-3 hover:bg-muted/50 transition-colors text-left"
+                  className="w-full p-4 bg-muted/40 border-b border-border flex items-center gap-3 hover:bg-muted/60 transition-colors text-left"
                 >
                   <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center flex-shrink-0">
                     {user?.avatar_url ? (
@@ -596,7 +596,7 @@ export default function DashboardHeader() {
                 value={query}
                 onChange={e => setQuery(e.target.value)}
                 placeholder="Buscar usuarios, productos..."
-                className="w-full pl-12 pr-12 py-3.5 bg-muted/50 border border-border rounded-2xl text-base text-foreground outline-none focus:border-primary/40 focus:bg-card transition-colors"
+                className="w-full pl-12 pr-12 py-3.5 bg-muted/50 border border-border rounded-xl text-base text-foreground outline-none focus:border-primary/40 focus:bg-card transition-colors"
                 autoFocus
               />
               <button
@@ -608,7 +608,7 @@ export default function DashboardHeader() {
             </div>
             {/* Results */}
             {query.length >= 2 && (
-              <div className="mt-3 bg-card border border-border rounded-2xl overflow-hidden max-h-[70vh] overflow-y-auto shadow-xl">
+              <div className="mt-3 bg-card border border-border rounded-xl overflow-hidden max-h-[70vh] overflow-y-auto shadow-xl">
                 <SearchResultsList />
               </div>
             )}
@@ -619,7 +619,7 @@ export default function DashboardHeader() {
       {/* Logout confirmation dialog */}
       {showLogoutConfirm && (
         <div className="fixed inset-0 z-[70] bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-card border border-border rounded-2xl w-full max-w-sm shadow-2xl p-6">
+          <div className="bg-card border border-border rounded-xl w-full max-w-sm shadow-2xl p-6">
             <div className="flex flex-col items-center text-center mb-5">
               <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mb-3">
                 <LogOut className="w-6 h-6 text-red-500" />

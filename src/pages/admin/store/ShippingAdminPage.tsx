@@ -84,7 +84,7 @@ export default function ShippingAdminPage() {
     <div className="space-y-5">
       <div className="flex items-center justify-between"><div className="space-y-1.5"><Skeleton className="h-8 w-56" /><Skeleton className="h-4 w-48" /></div><Skeleton className="h-10 w-32 rounded-xl" /></div>
       {Array.from({length:2}).map((_,i) => (
-        <div key={i} className="bg-card border border-border rounded-2xl overflow-hidden">
+        <div key={i} className="bg-card border border-border rounded-xl overflow-hidden">
           <div className="flex items-center justify-between px-5 py-4 border-b border-border"><Skeleton className="h-4 w-40" /><div className="flex gap-2"><Skeleton className="h-4 w-12" /><Skeleton className="h-4 w-16" /></div></div>
           <div className="p-5 space-y-2">{Array.from({length:2}).map((_,j)=>(<Skeleton key={j} className="h-14 w-full rounded-xl" />))}</div>
         </div>
@@ -96,7 +96,7 @@ export default function ShippingAdminPage() {
     <div className="space-y-5 pb-10">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-black text-foreground">Zonas y Métodos de Envío</h1>
+          <h1 className="text-2xl font-bold text-foreground">Zonas y Métodos de Envío</h1>
           <p className="text-sm text-muted-foreground mt-0.5">Configura las tarifas de envío por zona geográfica</p>
         </div>
         <button onClick={() => setEditZone({ status: 'active', countries: [], regions: [] })}
@@ -106,11 +106,11 @@ export default function ShippingAdminPage() {
       </div>
 
       {zones.map(zone => (
-        <div key={zone.id} className="bg-card border border-border rounded-2xl overflow-hidden">
+        <div key={zone.id} className="bg-card border border-border rounded-xl overflow-hidden">
           <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-muted/20">
             <div className="flex items-center gap-2">
               <Globe className="w-4 h-4 text-primary" />
-              <h3 className="text-sm font-black text-foreground">{zone.name}</h3>
+              <h3 className="text-sm font-bold text-foreground">{zone.name}</h3>
               <span className={cn('text-xs font-semibold px-2 py-0.5 rounded-full',
                 zone.status === 'active' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-muted text-muted-foreground')}>
                 {zone.status === 'active' ? 'Activa' : 'Inactiva'}
@@ -153,7 +153,7 @@ export default function ShippingAdminPage() {
       ))}
 
       {zones.length === 0 && (
-        <div className="text-center py-16 text-muted-foreground bg-card border border-border rounded-2xl">
+        <div className="text-center py-16 text-muted-foreground bg-card border border-border rounded-xl">
           <Globe className="w-10 h-10 mx-auto mb-3 opacity-30" />
           <p>No hay zonas de envío configuradas</p>
         </div>
@@ -162,7 +162,7 @@ export default function ShippingAdminPage() {
       {/* Zone modal */}
       {editZone && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-card border border-border rounded-2xl w-full max-w-md p-5 space-y-4">
+          <div className="bg-card border border-border rounded-xl w-full max-w-md p-5 space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-bold text-foreground">{editZone.id ? 'Editar zona' : 'Nueva zona'}</h3>
               <button onClick={() => setEditZone(null)} className="text-muted-foreground hover:text-foreground"><X className="w-4 h-4" /></button>
@@ -192,7 +192,7 @@ export default function ShippingAdminPage() {
       {/* Method modal */}
       {editMethod && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-card border border-border rounded-2xl w-full max-w-md p-5 space-y-4">
+          <div className="bg-card border border-border rounded-xl w-full max-w-md p-5 space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-bold text-foreground">{editMethod.id ? 'Editar método' : 'Nuevo método'}</h3>
               <button onClick={() => setEditMethod(null)} className="text-muted-foreground"><X className="w-4 h-4" /></button>

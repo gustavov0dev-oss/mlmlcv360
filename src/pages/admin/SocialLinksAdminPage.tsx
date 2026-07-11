@@ -234,7 +234,7 @@ export default function SocialLinksAdminPage() {
 
       {/* Form panel */}
       {showForm && (
-        <div className="border border-border/60 bg-card rounded-2xl overflow-hidden shadow-sm">
+        <div className="border border-border/60 bg-card rounded-xl overflow-hidden shadow-sm">
           {/* Form header */}
           <div className="flex items-center justify-between px-5 py-4 border-b border-border/50 bg-muted/20">
             <div className="flex items-center gap-2.5">
@@ -374,7 +374,7 @@ export default function SocialLinksAdminPage() {
           </div>
         ) : links.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center px-4">
-            <div className="w-10 h-10 rounded-2xl bg-muted/50 flex items-center justify-center mb-3">
+            <div className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center mb-3">
               <Globe className="h-5 w-5 text-muted-foreground/40" />
             </div>
             <p className="text-sm font-medium text-foreground mb-0.5">Sin enlaces sociales</p>

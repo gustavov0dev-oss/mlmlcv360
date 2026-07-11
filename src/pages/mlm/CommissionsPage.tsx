@@ -122,7 +122,7 @@ export default function CommissionsPage() {
       {/* Summary */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {[
-          { label: 'Total', value: `S/ ${stats.total.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, icon: DollarSign, color: 'text-blue-500 bg-blue-500/10' },
+          { label: 'Total', value: `S/ ${stats.total.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, icon: DollarSign, color: 'text-primary bg-primary/10' },
           { label: 'Pagado', value: `S/ ${stats.paid.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, icon: CheckCircle, color: 'text-green-500 bg-green-500/10' },
           { label: 'Pendiente', value: `S/ ${stats.pending.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, icon: Clock, color: 'text-yellow-500 bg-yellow-500/10' },
           { label: 'Registros', value: String(stats.count), icon: DollarSign, color: 'text-purple-500 bg-purple-500/10' },
@@ -140,7 +140,7 @@ export default function CommissionsPage() {
       </div>
 
       {/* Chart — 12 semanas */}
-      <div className="bg-card border border-border rounded-2xl p-5 sm:p-6 overflow-hidden">
+      <div className="bg-card border border-border rounded-xl p-5 sm:p-6 overflow-hidden">
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-5">
           <div>
             <h3 className="text-base font-bold text-foreground">Comisiones — 12 semanas</h3>
@@ -148,7 +148,7 @@ export default function CommissionsPage() {
           </div>
           <div className="flex items-center gap-4">
             <div className="text-right">
-              <div className="text-2xl font-black text-foreground tabular-nums">
+              <div className="text-2xl font-bold text-foreground tabular-nums">
                 S/ {chartData.length > 0
                   ? chartData.reduce((s: number, d: any) => s + (d.comisiones || 0), 0).toLocaleString('es-PE', { minimumFractionDigits: 0 })
                   : '0'}
@@ -236,7 +236,7 @@ export default function CommissionsPage() {
             const last = arr.length > 0 ? arr[arr.length - 1] : 0;
             return [
               { label: 'Mejor semana', value: `S/ ${max.toLocaleString('es-PE', { minimumFractionDigits: 0 })}`, accent: 'text-emerald-500' },
-              { label: 'Promedio semanal', value: `S/ ${avg.toLocaleString('es-PE', { minimumFractionDigits: 0 })}`, accent: 'text-blue-500' },
+              { label: 'Promedio semanal', value: `S/ ${avg.toLocaleString('es-PE', { minimumFractionDigits: 0 })}`, accent: 'text-primary' },
               { label: 'Última semana', value: `S/ ${last.toLocaleString('es-PE', { minimumFractionDigits: 0 })}`, accent: 'text-foreground' },
             ];
           })().map(s => (

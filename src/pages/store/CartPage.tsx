@@ -102,11 +102,11 @@ export default function CartPage() {
             <ShoppingCart className="w-12 h-12 text-muted-foreground/30" />
           </div>
           <div className="text-center">
-            <h2 className="text-2xl font-black text-foreground">Tu carrito esta vacio</h2>
+            <h2 className="text-2xl font-bold text-foreground">Tu carrito esta vacio</h2>
             <p className="text-muted-foreground text-sm mt-1">Explora nuestra tienda y agrega los productos que te gusten</p>
           </div>
           <button onClick={() => navigate('/tienda')}
-            className="flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-2xl font-bold hover:bg-primary/90 transition-colors shadow-md shadow-primary/20">
+            className="flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-xl font-bold hover:bg-primary/90 transition-colors shadow-md shadow-primary/20">
             <ShoppingBag className="w-4 h-4" /> Explorar tienda
           </button>
         </div>
@@ -124,8 +124,8 @@ export default function CartPage() {
           <button onClick={() => navigate('/tienda')} className="text-muted-foreground hover:text-foreground transition-colors p-1 -ml-1">
             <ChevronLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-lg font-black text-foreground">Carrito de compras</h1>
-          <span className="bg-primary text-primary-foreground text-xs font-black px-2 py-0.5 rounded-full">{itemCount}</span>
+          <h1 className="text-lg font-bold text-foreground">Carrito de compras</h1>
+          <span className="bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full">{itemCount}</span>
           <button onClick={() => navigate('/tienda')} className="ml-auto text-sm text-primary hover:underline font-semibold hidden sm:block">
             Seguir comprando
           </button>
@@ -143,7 +143,7 @@ export default function CartPage() {
             {items.map(item => {
               const img = item.variant?.images?.[0]?.url || item.product.images?.[0]?.url;
               return (
-                <div key={item.id} className="bg-card border border-border rounded-2xl p-4 flex items-center gap-3 sm:gap-4 hover:border-primary/20 transition-colors">
+                <div key={item.id} className="bg-card border border-border rounded-xl p-4 flex items-center gap-3 sm:gap-4 hover:border-primary/20 transition-colors">
                   <button onClick={() => navigate(`/tienda/${item.product.slug}`)}
                     className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-muted flex-shrink-0 border border-border hover:opacity-80 transition-opacity">
                     {img ? <img src={img} alt={item.product.name} className="w-full h-full object-cover" /> :
@@ -154,7 +154,7 @@ export default function CartPage() {
                       <p className="text-sm font-bold text-foreground hover:text-primary transition-colors line-clamp-2">{item.product.name}</p>
                     </button>
                     {item.variant && <p className="text-xs text-muted-foreground mt-0.5">{item.variant.name}</p>}
-                    <p className="text-sm font-black text-primary mt-1">{fmt(item.price)}</p>
+                    <p className="text-sm font-bold text-primary mt-1">{fmt(item.price)}</p>
                   </div>
                   <div className="flex flex-col items-end gap-2 flex-shrink-0">
                     <button onClick={() => removeItem(item.id)}
@@ -166,13 +166,13 @@ export default function CartPage() {
                         className="w-8 h-8 flex items-center justify-center hover:bg-muted transition-colors">
                         <Minus className="w-3 h-3" />
                       </button>
-                      <span className="w-8 text-center text-xs font-black text-foreground">{item.quantity}</span>
+                      <span className="w-8 text-center text-xs font-bold text-foreground">{item.quantity}</span>
                       <button onClick={() => updateQty(item.id, item.quantity + 1)}
                         className="w-8 h-8 flex items-center justify-center hover:bg-muted transition-colors">
                         <Plus className="w-3 h-3" />
                       </button>
                     </div>
-                    <p className="text-xs font-black text-foreground">{fmt(item.price * item.quantity)}</p>
+                    <p className="text-xs font-bold text-foreground">{fmt(item.price * item.quantity)}</p>
                   </div>
                 </div>
               );
@@ -180,7 +180,7 @@ export default function CartPage() {
           </div>
 
           {/* Shipping selector */}
-          <div className="bg-card border border-border rounded-2xl p-5">
+          <div className="bg-card border border-border rounded-xl p-5">
             <h3 className="text-sm font-bold text-foreground flex items-center gap-2 mb-3">
               <Truck className="w-4 h-4 text-primary" /> Estimación de envío
             </h3>
@@ -201,7 +201,7 @@ export default function CartPage() {
                         <p className="text-sm font-semibold text-foreground">{m.name}</p>
                         {m.estimated_days_min != null && <p className="text-xs text-muted-foreground">{m.estimated_days_min}–{m.estimated_days_max} días hábiles</p>}
                       </div>
-                      <span className={cn('text-sm font-black', cost === 0 ? 'text-green-500' : 'text-foreground')}>
+                      <span className={cn('text-sm font-bold', cost === 0 ? 'text-green-500' : 'text-foreground')}>
                         {cost === 0 ? 'Gratis' : fmt(cost)}
                       </span>
                     </label>
@@ -215,8 +215,8 @@ export default function CartPage() {
 
         {/* ── Order Summary ── */}
         <div>
-          <div className="bg-card border border-border rounded-2xl p-5 space-y-4 sticky top-[73px]">
-            <h2 className="text-base font-black text-foreground">Resumen del pedido</h2>
+          <div className="bg-card border border-border rounded-xl p-5 space-y-4 sticky top-[73px]">
+            <h2 className="text-base font-bold text-foreground">Resumen del pedido</h2>
 
             {/* Smart coupons */}
             {availableCoupons.length > 0 && !coupon && (
@@ -283,14 +283,14 @@ export default function CartPage() {
                 <span>IGV incluido (18%)</span>
                 <span>{fmt(igv)}</span>
               </div>
-              <div className="flex justify-between font-black text-foreground text-base border-t border-border pt-2">
+              <div className="flex justify-between font-bold text-foreground text-base border-t border-border pt-2">
                 <span>Total estimado</span>
                 <span>{fmt(total)}</span>
               </div>
             </div>
 
             <button onClick={() => navigate('/checkout')}
-              className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground py-4 rounded-2xl font-black text-base hover:bg-primary/90 active:scale-[0.98] transition-all shadow-lg shadow-primary/20">
+              className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground py-4 rounded-xl font-bold text-base hover:bg-primary/90 active:scale-[0.98] transition-all shadow-lg shadow-primary/20">
               Finalizar compra <ArrowRight className="w-5 h-5" />
             </button>
             <button onClick={() => navigate('/tienda')}

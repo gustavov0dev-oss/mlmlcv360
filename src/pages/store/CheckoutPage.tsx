@@ -73,7 +73,7 @@ const EMPTY_ADDR: AddressForm = {
 // Skeleton for step
 function StepSkeleton() {
   return (
-    <div className="bg-card border border-border rounded-2xl p-5 space-y-4">
+    <div className="bg-card border border-border rounded-xl p-5 space-y-4">
       {Array.from({length: 5}).map((_, i) => (
         <div key={i} className="space-y-1.5">
           <div className="h-3 w-24 bg-muted rounded animate-pulse" />
@@ -285,17 +285,17 @@ export default function CheckoutPage() {
             <CheckCircle className="w-10 h-10 text-green-500" />
           </div>
           <div>
-            <h2 className="text-2xl font-black text-foreground">¡Pedido realizado!</h2>
+            <h2 className="text-2xl font-bold text-foreground">¡Pedido realizado!</h2>
             <p className="text-muted-foreground text-sm mt-1">Gracias por tu compra. Te notificaremos al confirmar el pago.</p>
           </div>
-          <div className="bg-muted rounded-2xl p-4 space-y-2 text-sm">
+          <div className="bg-muted rounded-xl p-4 space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-muted-foreground">Número de pedido</span>
-              <span className="font-black text-foreground font-mono">{placedOrder.order_number}</span>
+              <span className="font-bold text-foreground font-mono">{placedOrder.order_number}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Total</span>
-              <span className="font-black text-foreground">{fmt(placedOrder.total)}</span>
+              <span className="font-bold text-foreground">{fmt(placedOrder.total)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Pago</span>
@@ -316,11 +316,11 @@ export default function CheckoutPage() {
           )}
           <div className="flex gap-3">
             <button onClick={() => navigate('/dashboard/pedidos')}
-              className="flex-1 bg-primary text-primary-foreground py-3 rounded-2xl font-bold text-sm hover:bg-primary/90 transition-colors">
+              className="flex-1 bg-primary text-primary-foreground py-3 rounded-xl font-bold text-sm hover:bg-primary/90 transition-colors">
               Ver mis pedidos
             </button>
             <button onClick={() => navigate('/tienda')}
-              className="flex-1 border border-border py-3 rounded-2xl font-bold text-sm hover:bg-muted transition-colors">
+              className="flex-1 border border-border py-3 rounded-xl font-bold text-sm hover:bg-muted transition-colors">
               Seguir comprando
             </button>
           </div>
@@ -349,7 +349,7 @@ export default function CheckoutPage() {
               className="text-muted-foreground hover:text-foreground transition-colors p-1 -ml-1">
               <ChevronLeft className="w-5 h-5" />
             </button>
-            <h1 className="text-lg font-black text-foreground">Finalizar compra</h1>
+            <h1 className="text-lg font-bold text-foreground">Finalizar compra</h1>
           </div>
           {/* Step bar */}
           <div className="flex items-center">
@@ -358,7 +358,7 @@ export default function CheckoutPage() {
                 <button onClick={() => step > s.id && setStep(s.id)}
                   className={cn('flex items-center gap-1.5 text-xs font-bold transition-colors',
                     step === s.id ? 'text-primary' : step > s.id ? 'text-green-500 cursor-pointer' : 'text-muted-foreground cursor-default')}>
-                  <div className={cn('w-7 h-7 rounded-full flex items-center justify-center text-xs font-black border-2 flex-shrink-0 transition-all',
+                  <div className={cn('w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border-2 flex-shrink-0 transition-all',
                     step === s.id ? 'border-primary bg-primary text-white shadow-md shadow-primary/30' :
                     step > s.id ? 'border-green-500 bg-green-500 text-white' : 'border-border text-muted-foreground')}>
                     {step > s.id ? '✓' : s.id}
@@ -382,7 +382,7 @@ export default function CheckoutPage() {
               {loadingAddresses ? (
                 <StepSkeleton />
               ) : savedAddresses.length > 0 && (
-                <div className="bg-card border border-border rounded-2xl p-5 space-y-3">
+                <div className="bg-card border border-border rounded-xl p-5 space-y-3">
                   <h2 className="text-sm font-bold text-foreground flex items-center gap-2">
                     <Home className="w-4 h-4 text-primary" /> Direcciones guardadas
                   </h2>
@@ -412,7 +412,7 @@ export default function CheckoutPage() {
               )}
 
               {/* Address form */}
-              <div className="bg-card border border-border rounded-2xl p-5 space-y-4">
+              <div className="bg-card border border-border rounded-xl p-5 space-y-4">
                 <h2 className="text-sm font-bold text-foreground flex items-center gap-2">
                   <MapPin className="w-4 h-4 text-primary" />
                   {savedAddresses.length > 0 ? 'Editar / Nueva dirección' : 'Dirección de entrega'}
@@ -585,7 +585,7 @@ export default function CheckoutPage() {
                 )}
 
                 <button onClick={() => validateAddr() && setStep(2)}
-                  className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground py-4 rounded-2xl font-bold hover:bg-primary/90 transition-colors">
+                  className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground py-4 rounded-xl font-bold hover:bg-primary/90 transition-colors">
                   Continuar al envío <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
@@ -594,7 +594,7 @@ export default function CheckoutPage() {
 
           {/* ── STEP 2: Shipping ── */}
           {step === 2 && (
-            <div className="bg-card border border-border rounded-2xl p-5 space-y-4">
+            <div className="bg-card border border-border rounded-xl p-5 space-y-4">
               <h2 className="text-sm font-bold text-foreground flex items-center gap-2">
                 <Truck className="w-4 h-4 text-primary" /> Método de envío
               </h2>
@@ -625,7 +625,7 @@ export default function CheckoutPage() {
                           <p className="text-xs text-muted-foreground">{m.estimated_days_min}–{m.estimated_days_max} días hábiles</p>
                         )}
                       </div>
-                      <span className={cn('text-sm font-black', cost === 0 ? 'text-green-500' : 'text-foreground')}>
+                      <span className={cn('text-sm font-bold', cost === 0 ? 'text-green-500' : 'text-foreground')}>
                         {cost === 0 ? '¡Gratis!' : `S/ ${cost.toFixed(2)}`}
                       </span>
                     </label>
@@ -633,10 +633,10 @@ export default function CheckoutPage() {
                 })
               )}
               <div className="flex gap-3">
-                <button onClick={() => setStep(1)} className="flex-1 border border-border rounded-2xl py-3 font-bold text-sm hover:bg-muted transition-colors">
+                <button onClick={() => setStep(1)} className="flex-1 border border-border rounded-xl py-3 font-bold text-sm hover:bg-muted transition-colors">
                   <ChevronLeft className="w-4 h-4 inline mr-1" /> Anterior
                 </button>
-                <button onClick={() => setStep(3)} className="flex-1 bg-primary text-primary-foreground rounded-2xl py-3 font-bold text-sm hover:bg-primary/90 transition-colors">
+                <button onClick={() => setStep(3)} className="flex-1 bg-primary text-primary-foreground rounded-xl py-3 font-bold text-sm hover:bg-primary/90 transition-colors">
                   Continuar <ChevronRight className="w-4 h-4 inline ml-1" />
                 </button>
               </div>
@@ -645,7 +645,7 @@ export default function CheckoutPage() {
 
           {/* ── STEP 3: Payment ── */}
           {step === 3 && (
-            <div className="bg-card border border-border rounded-2xl p-5 space-y-4">
+            <div className="bg-card border border-border rounded-xl p-5 space-y-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-sm font-bold text-foreground flex items-center gap-2">
                   <CreditCard className="w-4 h-4 text-primary" /> Método de pago
@@ -720,10 +720,10 @@ export default function CheckoutPage() {
               </div>
 
               <div className="flex gap-3">
-                <button onClick={() => setStep(2)} className="flex-1 border border-border rounded-2xl py-3 font-bold text-sm hover:bg-muted transition-colors">
+                <button onClick={() => setStep(2)} className="flex-1 border border-border rounded-xl py-3 font-bold text-sm hover:bg-muted transition-colors">
                   <ChevronLeft className="w-4 h-4 inline mr-1" /> Anterior
                 </button>
-                <button onClick={() => setStep(4)} className="flex-1 bg-primary text-primary-foreground rounded-2xl py-3 font-bold text-sm hover:bg-primary/90 transition-colors">
+                <button onClick={() => setStep(4)} className="flex-1 bg-primary text-primary-foreground rounded-xl py-3 font-bold text-sm hover:bg-primary/90 transition-colors">
                   Revisar pedido <ChevronRight className="w-4 h-4 inline ml-1" />
                 </button>
               </div>
@@ -732,7 +732,7 @@ export default function CheckoutPage() {
 
           {/* ── STEP 4: Review ── */}
           {step === 4 && (
-            <div className="bg-card border border-border rounded-2xl p-5 space-y-5">
+            <div className="bg-card border border-border rounded-xl p-5 space-y-5">
               <h2 className="text-sm font-bold text-foreground flex items-center gap-2">
                 <ClipboardList className="w-4 h-4 text-primary" /> Confirmar pedido
               </h2>
@@ -766,17 +766,17 @@ export default function CheckoutPage() {
                       {i.variant && <p className="text-xs text-muted-foreground">{i.variant.name}</p>}
                       <p className="text-xs text-muted-foreground">× {i.quantity}</p>
                     </div>
-                    <span className="text-sm font-black text-foreground">{fmt(i.price * i.quantity)}</span>
+                    <span className="text-sm font-bold text-foreground">{fmt(i.price * i.quantity)}</span>
                   </div>
                 ))}
               </div>
 
               <div className="flex gap-3">
-                <button onClick={() => setStep(3)} className="flex-1 border border-border rounded-2xl py-3 font-bold text-sm hover:bg-muted transition-colors">
+                <button onClick={() => setStep(3)} className="flex-1 border border-border rounded-xl py-3 font-bold text-sm hover:bg-muted transition-colors">
                   <ChevronLeft className="w-4 h-4 inline mr-1" /> Anterior
                 </button>
                 <button onClick={placeOrder} disabled={placing}
-                  className="flex-1 bg-primary text-primary-foreground rounded-2xl py-3 font-black text-sm hover:bg-primary/90 transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
+                  className="flex-1 bg-primary text-primary-foreground rounded-xl py-3 font-bold text-sm hover:bg-primary/90 transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
                   {placing ? <><Loader2 className="w-4 h-4 animate-spin" /> Procesando...</> : <><Package className="w-4 h-4" /> Confirmar pedido</>}
                 </button>
               </div>
@@ -786,8 +786,8 @@ export default function CheckoutPage() {
 
         {/* ── ORDER SUMMARY SIDEBAR ── */}
         <div>
-          <div className="bg-card border border-border rounded-2xl p-5 space-y-4 sticky top-20">
-            <h3 className="text-sm font-black text-foreground">Resumen del pedido</h3>
+          <div className="bg-card border border-border rounded-xl p-5 space-y-4 sticky top-20">
+            <h3 className="text-sm font-bold text-foreground">Resumen del pedido</h3>
 
             {/* Items mini list */}
             <div className="space-y-2 max-h-48 overflow-y-auto">
@@ -852,7 +852,7 @@ export default function CheckoutPage() {
                   <span>{fmt(taxAmount, displayCurrency, exchangeRate)}</span>
                 </div>
               )}
-              <div className="flex justify-between font-black text-foreground text-base border-t border-border pt-2">
+              <div className="flex justify-between font-bold text-foreground text-base border-t border-border pt-2">
                 <span>Total</span>
                 <span>{fmt(total, displayCurrency, exchangeRate)}</span>
               </div>

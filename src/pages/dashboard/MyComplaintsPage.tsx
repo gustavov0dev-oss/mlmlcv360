@@ -81,12 +81,12 @@ function DetailPanel({ complaint, onClose }: { complaint: Complaint; onClose: ()
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
 
       {/* Panel */}
-      <div className="relative z-10 w-full sm:max-w-lg bg-background border border-border/60 rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-200">
+      <div className="relative z-10 w-full sm:max-w-lg bg-background border border-border/60 rounded-t-xl sm:rounded-xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-200">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-border/50">
           <div>
             <p className="text-xs text-muted-foreground/60 uppercase tracking-wider font-semibold mb-0.5">Correlativo</p>
-            <p className="text-lg font-black font-mono tracking-widest text-foreground">{complaint.correlativo || '—'}</p>
+            <p className="text-lg font-bold font-mono tracking-widest text-foreground">{complaint.correlativo || '—'}</p>
           </div>
           <div className="flex items-center gap-2">
             <div className={cn('inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-semibold', sc.cls)}>
@@ -264,7 +264,7 @@ export default function MyComplaintsPage() {
         </div>
       ) : filtered.length === 0 ? (
         <div className="py-20 text-center">
-          <div className="w-12 h-12 rounded-2xl bg-muted/60 flex items-center justify-center mx-auto mb-4">
+          <div className="w-12 h-12 rounded-xl bg-muted/60 flex items-center justify-center mx-auto mb-4">
             <FileText className="w-6 h-6 text-muted-foreground/40" />
           </div>
           <p className="font-semibold text-foreground mb-1">

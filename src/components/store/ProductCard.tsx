@@ -100,7 +100,7 @@ export default function ProductCard({
 
           <div className="absolute top-2 left-2 flex flex-col gap-1 z-10 pointer-events-none">
             {discount > 0 && (
-              <span className="bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-md shadow leading-none">
+              <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow leading-none">
                 -{discount}%
               </span>
             )}
@@ -118,7 +118,7 @@ export default function ProductCard({
 
           <div className="absolute top-2 right-2 z-10 flex flex-col gap-1.5 items-end">
             {product.featured && (
-              <span className="bg-amber-400 text-amber-900 text-[9px] font-black px-1.5 py-0.5 rounded-md leading-none">
+              <span className="bg-amber-400 text-amber-900 text-[9px] font-bold px-1.5 py-0.5 rounded-md leading-none">
                 DEST
               </span>
             )}
@@ -129,7 +129,7 @@ export default function ProductCard({
             </button>
             {onCompareToggle && (
               <button onClick={handleCompare}
-                className={cn('hidden sm:flex w-7 h-7 rounded-lg items-center justify-center shadow transition-all backdrop-blur-sm text-xs font-black',
+                className={cn('hidden sm:flex w-7 h-7 rounded-lg items-center justify-center shadow transition-all backdrop-blur-sm text-xs font-bold',
                   isComparing ? 'bg-primary text-white' : 'bg-card/90 text-muted-foreground hover:bg-primary hover:text-white opacity-0 group-hover:opacity-100')}>
                 VS
               </button>
@@ -173,7 +173,7 @@ export default function ProductCard({
 
         <div className="mt-auto pt-1.5">
           <div className="flex items-baseline gap-1.5 flex-wrap">
-            <span className={cn('text-base font-black', outOfStock ? 'text-muted-foreground' : 'text-foreground')}>
+            <span className={cn('text-base font-bold', outOfStock ? 'text-muted-foreground' : 'text-foreground')}>
               {fmtPrice(price, showUsd, exchangeRate)}
             </span>
             {comparePrice && comparePrice > price && (

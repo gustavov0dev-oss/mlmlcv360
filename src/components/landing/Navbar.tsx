@@ -89,7 +89,7 @@ function DesktopUserMenu() {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-64 bg-card border border-border rounded-2xl shadow-2xl overflow-hidden z-50">
+        <div className="absolute right-0 top-full mt-2 w-64 bg-card border border-border rounded-xl shadow-2xl overflow-hidden z-50">
           <div className="p-4 bg-muted/30 border-b border-border flex items-center gap-3">
             <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center flex-shrink-0">
               {user.avatar_url ? (
@@ -146,7 +146,7 @@ function DesktopUserMenu() {
       {/* Logout confirmation dialog */}
       {showLogoutConfirm && (
         <div className="fixed inset-0 z-[70] bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-card border border-border rounded-2xl w-full max-w-sm shadow-2xl p-6">
+          <div className="bg-card border border-border rounded-xl w-full max-w-sm shadow-2xl p-6">
             <div className="flex flex-col items-center text-center mb-5">
               <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mb-3">
                 <LogOut className="w-6 h-6 text-red-500" />
@@ -362,7 +362,7 @@ export default function Navbar() {
             {isLoggedIn && user && (
               <button
                 onClick={() => { navigate('/dashboard/perfil'); setMobileNavOpen(false); }}
-                className="w-full mb-4 p-4 bg-gradient-to-r from-primary/8 to-muted/30 border border-border/50 rounded-2xl flex items-center gap-3 text-left active:scale-[0.98] transition-transform"
+                className="w-full mb-4 p-4 bg-gradient-to-r from-primary/8 to-muted/30 border border-border/50 rounded-xl flex items-center gap-3 text-left active:scale-[0.98] transition-transform"
               >
                 <div className="w-12 h-12 rounded-full overflow-hidden bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center flex-shrink-0 ring-2 ring-primary/15">
                   {user.avatar_url ? (
@@ -456,7 +456,7 @@ export default function Navbar() {
       {/* Logout confirmation dialog */}
       {showLogoutConfirm && (
         <div className="fixed inset-0 z-[70] bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-card border border-border rounded-2xl w-full max-w-sm shadow-2xl p-6">
+          <div className="bg-card border border-border rounded-xl w-full max-w-sm shadow-2xl p-6">
             <div className="flex flex-col items-center text-center mb-5">
               <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mb-3">
                 <LogOut className="w-6 h-6 text-red-500" />

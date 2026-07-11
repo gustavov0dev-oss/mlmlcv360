@@ -85,7 +85,7 @@ export default function MlmCommissionsAdminPage() {
     <div className="space-y-5">
       <div className="space-y-1.5"><Skeleton className="h-8 w-44" /><Skeleton className="h-4 w-56" /></div>
       {['bronze','silver','gold','platinum','diamond','crown'].map(r => (
-        <div key={r} className="bg-card border border-border rounded-2xl overflow-hidden">
+        <div key={r} className="bg-card border border-border rounded-xl overflow-hidden">
           <div className="px-5 py-3 border-b border-border"><Skeleton className="h-4 w-32" /></div>
           <div className="p-4"><div className="flex flex-wrap gap-3">{Array.from({length:5}).map((_,i)=>(<div key={i} className="space-y-1.5"><Skeleton className="h-3 w-12" /><div className="flex gap-1"><Skeleton className="w-14 h-9 rounded-lg" /><Skeleton className="w-16 h-9 rounded-lg" /></div></div>))}</div></div>
         </div>
@@ -97,7 +97,7 @@ export default function MlmCommissionsAdminPage() {
     <div className="space-y-5 pb-10">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-black text-foreground">Comisiones MLM</h1>
+          <h1 className="text-2xl font-bold text-foreground">Comisiones MLM</h1>
           <p className="text-sm text-muted-foreground mt-0.5">Define la tasa de comisión por rango y nivel del árbol</p>
         </div>
         <button onClick={save} disabled={saving}
@@ -106,7 +106,7 @@ export default function MlmCommissionsAdminPage() {
         </button>
       </div>
 
-      <div className="bg-primary/8 border border-blue-500/20 rounded-xl p-3 flex items-start gap-2">
+      <div className="bg-primary/8 border border-primary/20 rounded-xl p-3 flex items-start gap-2">
         <Info className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
         <p className="text-xs text-primary">
           Las comisiones se calculan al nivel del rango del <strong>patrocinador</strong> en la posición del árbol. Nivel 1 = comprador directo, Nivel 2 = patrocinador del patrocinador, etc.
@@ -119,10 +119,10 @@ export default function MlmCommissionsAdminPage() {
           const maxLvl = MAX_LEVELS[rank];
           const color = RANK_COLORS[rank];
           return (
-            <div key={rank} className="bg-card border border-border rounded-2xl overflow-hidden">
+            <div key={rank} className="bg-card border border-border rounded-xl overflow-hidden">
               <div className="px-5 py-3 flex items-center gap-2 border-b border-border" style={{ background: color + '10' }}>
                 <div className="w-3 h-3 rounded-full" style={{ background: color }} />
-                <h3 className="text-sm font-black" style={{ color }}>{RANK_LABELS[rank]}</h3>
+                <h3 className="text-sm font-bold" style={{ color }}>{RANK_LABELS[rank]}</h3>
                 <span className="text-xs text-muted-foreground ml-1">(hasta nivel {maxLvl})</span>
               </div>
               <div className="p-4 overflow-x-auto">
@@ -154,8 +154,8 @@ export default function MlmCommissionsAdminPage() {
       </div>
 
       {/* Store config */}
-      <div className="bg-card border border-border rounded-2xl p-5 space-y-4">
-        <h2 className="text-sm font-black text-foreground">Configuración de tienda</h2>
+      <div className="bg-card border border-border rounded-xl p-5 space-y-4">
+        <h2 className="text-sm font-bold text-foreground">Configuración de tienda</h2>
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-bold text-foreground mb-1.5">Umbral envío gratis (S/)</label>
