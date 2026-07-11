@@ -77,21 +77,13 @@ const superAdminNav: NavItem[] = [
       { label: 'Páginas Legales', href: '/dashboard/admin/paginas', icon: ScrollText },
     ],
   },
-  {
-    label: 'Sistema', icon: Shield, children: [
-      { label: 'Panel de Admin', href: '/dashboard/admin', icon: Shield, exact: true },
-      { label: 'Configuración', href: '/dashboard/configuracion', icon: Settings },
-    ],
-  },
+  { label: 'Gestión Admin', href: '/dashboard/admin', icon: Shield, exact: true },
+  { label: 'Configuración', href: '/dashboard/configuracion', icon: Settings },
 ];
 
 const adminNav: NavItem[] = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  {
-    label: 'Usuarios', icon: Users, children: [
-      { label: 'Todos los usuarios', href: '/dashboard/usuarios', icon: Users },
-    ],
-  },
+  { label: 'Usuarios', href: '/dashboard/usuarios', icon: Users },
   {
     label: 'Red MLM', icon: GitBranch, children: [
       { label: 'Mi Red', href: '/dashboard/red', icon: GitBranch },
@@ -120,11 +112,7 @@ const adminNav: NavItem[] = [
       { label: 'Páginas Legales', href: '/dashboard/admin/paginas', icon: ScrollText },
     ],
   },
-  {
-    label: 'Sistema', icon: Shield, children: [
-      { label: 'Panel de Admin', href: '/dashboard/admin', icon: Shield, exact: true },
-    ],
-  },
+  { label: 'Gestión Admin', href: '/dashboard/admin', icon: Shield, exact: true },
 ];
 
 const userNav: NavItem[] = [

@@ -106,7 +106,7 @@ export default function MlmCommissionsAdminPage() {
         </button>
       </div>
 
-      <div className="bg-primary/8 border border-primary/20 rounded-xl p-3 flex items-start gap-2">
+      <div className="bg-primary/8 border border-blue-500/20 rounded-xl p-3 flex items-start gap-2">
         <Info className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
         <p className="text-xs text-primary">
           Las comisiones se calculan al nivel del rango del <strong>patrocinador</strong> en la posición del árbol. Nivel 1 = comprador directo, Nivel 2 = patrocinador del patrocinador, etc.

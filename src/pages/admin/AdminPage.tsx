@@ -552,7 +552,7 @@ export default function AdminPage() {
                   </div>
                 </div>
               </div>
-              <div className="bg-primary/10 border border-primary/20 rounded-lg p-3 text-xs text-primary">
+              <div className="bg-primary/10 border border-blue-500/20 rounded-lg p-3 text-xs text-primary">
                 <p className="font-medium mb-1">Instrucciones:</p>
                 <ol className="list-decimal list-inside space-y-0.5">
                   <li>Ve a Google Cloud Console → APIs & Services → Credentials</li>

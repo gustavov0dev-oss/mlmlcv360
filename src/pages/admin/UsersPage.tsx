@@ -208,7 +208,7 @@ function UserModal({
         <div className="overflow-y-auto flex-1 p-6 space-y-5">
 
           {mode === 'create' && (
-            <div className="flex items-start gap-2.5 bg-primary/10 border border-primary/20 rounded-xl p-3.5">
+            <div className="flex items-start gap-2.5 bg-primary/10 border border-blue-500/20 rounded-xl p-3.5">
               <Info className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
               <p className="text-xs text-primary">
                 Se creará la cuenta con contraseña temporal <strong>Temp123456!</strong>. El usuario deberá cambiarla al iniciar sesión.

@@ -487,7 +487,7 @@ export default function TestimonialsAdminPage() {
       </div>
 
       {/* Hint */}
-      <div className="bg-primary/10 border border-primary/20 rounded-xl p-4">
+      <div className="bg-primary/10 border border-blue-500/20 rounded-xl p-4">
         <div className="flex items-center gap-2 text-primary font-semibold text-sm mb-1">
           <Eye className="w-4 h-4" /> Visibilidad en el landing
         </div>
