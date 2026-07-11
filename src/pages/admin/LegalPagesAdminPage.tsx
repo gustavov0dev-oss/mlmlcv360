@@ -382,22 +382,17 @@ export default function LegalPagesAdminPage() {
 
                     {/* Action buttons — tamaño fijo para evitar layout shift al toglear published */}
                     <div className="flex items-center gap-1 shrink-0">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className={cn('h-8 w-8 p-0 transition-opacity', !p.is_published && 'opacity-0 pointer-events-none')}
-                        asChild={p.is_published}
-                        aria-hidden={!p.is_published}
-                        tabIndex={p.is_published ? 0 : -1}
-                      >
-                        {p.is_published ? (
+                      {p.is_published ? (
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0" asChild>
                           <Link to={`/legal/${p.slug}`} target="_blank" rel="noopener noreferrer">
                             <ExternalLink className="h-4 w-4" />
                           </Link>
-                        ) : (
-                          <span><ExternalLink className="h-4 w-4" /></span>
-                        )}
-                      </Button>
+                        </Button>
+                      ) : (
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 opacity-30 cursor-not-allowed" disabled aria-label="Página no publicada">
+                          <ExternalLink className="h-4 w-4" />
+                        </Button>
+                      )}
                       <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => openEdit(p)}>
                         <Pencil className="h-4 w-4" />
                       </Button>

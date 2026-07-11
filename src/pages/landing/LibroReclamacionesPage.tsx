@@ -169,7 +169,7 @@ function BookImage({ src, className }: { src?: string; className?: string }) {
   );
 }
 
-const inputCls = 'w-full px-3.5 py-2.5 rounded-xl border border-input bg-background text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-colors';
+const inputCls = 'w-full px-3.5 py-2.5 rounded-xl border border-input bg-background text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 focus:border-primary transition-colors';
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
 /*  Main Page                                                                  */
@@ -320,8 +320,8 @@ export default function LibroReclamacionesPage() {
               </div>
             </div>
 
-            {/* Company strip */}
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm bg-muted/40 border border-border/50 rounded-xl px-4 py-2.5">
+            {/* Company strip — plain, no card */}
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm">
               <span className="font-bold text-foreground">{companyName}</span>
               <span className="text-muted-foreground/40">·</span>
               <span className="text-muted-foreground text-xs">RUC: {companyRuc}</span>
@@ -333,17 +333,17 @@ export default function LibroReclamacionesPage() {
 
         <section className="max-w-3xl mx-auto px-4 sm:px-6 py-6 space-y-5">
           {/* ── Tab switcher ──────────────────────────────────────────── */}
-          <div className="flex rounded-2xl border border-border bg-muted/30 p-1.5 gap-1.5">
+          <div className="grid grid-cols-2 rounded-xl bg-muted/50 p-1 gap-1">
             {([['registrar', FileText, 'Registrar reclamo'], ['consultar', Search, 'Consultar estado']] as const).map(([t, Icon, label]) => (
               <button key={t} onClick={() => switchTab(t)}
                 className={cn(
-                  'flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold transition-all duration-200',
+                  'flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-sm font-semibold transition-all duration-200',
                   tab === t
-                    ? 'bg-card shadow-sm text-foreground border border-border/60'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
+                    ? 'bg-background shadow-sm text-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
                 )}>
                 <Icon className="w-4 h-4 shrink-0" />
-                {label}
+                <span className="truncate">{label}</span>
               </button>
             ))}
           </div>
@@ -720,7 +720,7 @@ function ConsultarTab({ queryCode, setQueryCode, querying, queryResult, queryErr
               onChange={e => { setQueryCode(e.target.value.toUpperCase()); }}
               onKeyDown={e => e.key === 'Enter' && onQuery()}
               placeholder="Ej: REC-2026-123456"
-              className="w-full pl-10 pr-4 py-3 rounded-xl border border-input bg-background text-sm font-mono text-foreground placeholder:text-muted-foreground placeholder:font-sans focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-colors"
+              className="w-full pl-10 pr-4 py-3 rounded-xl border border-input bg-background text-sm font-mono text-foreground placeholder:text-muted-foreground placeholder:font-sans focus:outline-none focus:ring-1 focus:ring-primary/40 focus:border-primary transition-colors"
             />
           </div>
           <button onClick={onQuery} disabled={querying}

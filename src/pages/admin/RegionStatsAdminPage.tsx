@@ -61,7 +61,7 @@ function ImageInput({ value, onChange }: { value: string; onChange: (v: string) 
       {mode === 'url' ? (
         <input type="url" value={value} onChange={e => onChange(e.target.value)}
           placeholder="https://images.pexels.com/..."
-          className="w-full px-3 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+          className="w-full px-3 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-all" />
       ) : (
         <label className={cn('flex items-center justify-center gap-2 w-full h-10 border-2 border-dashed rounded-lg cursor-pointer text-sm transition-colors',
           uploading ? 'opacity-50 pointer-events-none border-border' : 'border-border hover:border-primary/50 hover:bg-primary/5 text-muted-foreground hover:text-primary')}>
@@ -125,12 +125,12 @@ function RegionFormModal({ item, onSave, onClose, saving }: {
               <div>
                 <label className="block text-xs font-semibold text-foreground mb-1.5">Ciudad *</label>
                 <input value={form.city} onChange={e => set('city', e.target.value)} placeholder="Lima"
-                  className="w-full px-3 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+                  className="w-full px-3 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-all" />
               </div>
               <div>
                 <label className="block text-xs font-semibold text-foreground mb-1.5">Afiliados *</label>
                 <input value={form.members} onChange={e => set('members', e.target.value)} placeholder="4,820+"
-                  className="w-full px-3 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+                  className="w-full px-3 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-all" />
               </div>
             </div>
 

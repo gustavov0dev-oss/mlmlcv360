@@ -150,12 +150,12 @@ function TestimonialFormModal({ testimonial, onSave, onClose, saving }: {
               <div>
                 <label className="block text-xs font-semibold text-foreground mb-1.5">Nombre completo *</label>
                 <input value={form.name} onChange={e => set('name', e.target.value)} placeholder="Roberto Mendoza"
-                  className="w-full px-3 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+                  className="w-full px-3 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all" />
               </div>
               <div>
                 <label className="block text-xs font-semibold text-foreground mb-1.5">Cargo / Ciudad</label>
                 <input value={form.role} onChange={e => set('role', e.target.value)} placeholder="Emprendedor, Lima"
-                  className="w-full px-3 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+                  className="w-full px-3 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all" />
               </div>
             </div>
 
@@ -170,7 +170,7 @@ function TestimonialFormModal({ testimonial, onSave, onClose, saving }: {
               <label className="block text-xs font-semibold text-foreground mb-1.5">Testimonio *</label>
               <textarea value={form.content} onChange={e => set('content', e.target.value)} rows={4}
                 placeholder="Escribe aquí el testimonio del cliente..."
-                className="w-full px-3 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all resize-none" />
+                className="w-full px-3 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-all resize-none" />
               <p className="text-[10px] text-muted-foreground mt-1">{form.content.length} caracteres</p>
             </div>
 
@@ -179,7 +179,7 @@ function TestimonialFormModal({ testimonial, onSave, onClose, saving }: {
               <div>
                 <label className="block text-xs font-semibold text-foreground mb-1.5">Ingresos mostrados</label>
                 <input value={form.earnings} onChange={e => set('earnings', e.target.value)} placeholder="S/ 4,800/mes"
-                  className="w-full px-3 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+                  className="w-full px-3 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-all" />
               </div>
               <div>
                 <label className="block text-xs font-semibold text-foreground mb-1.5">Calificación</label>

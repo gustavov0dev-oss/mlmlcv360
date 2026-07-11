@@ -132,23 +132,23 @@ export default function ContactoPage() {
                       <div>
                         <label className="block text-xs font-medium text-muted-foreground mb-1.5">Nombre <span className="text-primary">*</span></label>
                         <input type="text" value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
-                          className="w-full px-3.5 py-2.5 bg-muted/40 border border-border/60 rounded-lg text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 focus:bg-card transition-all" placeholder="Tu nombre" />
+                          className="w-full px-3.5 py-2.5 bg-muted/40 border border-border/60 rounded-lg text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 focus:bg-card transition-all" placeholder="Tu nombre" />
                       </div>
                       <div>
                         <label className="block text-xs font-medium text-muted-foreground mb-1.5">Email <span className="text-primary">*</span></label>
                         <input type="email" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
-                          className="w-full px-3.5 py-2.5 bg-muted/40 border border-border/60 rounded-lg text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 focus:bg-card transition-all" placeholder="tu@email.com" />
+                          className="w-full px-3.5 py-2.5 bg-muted/40 border border-border/60 rounded-lg text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 focus:bg-card transition-all" placeholder="tu@email.com" />
                       </div>
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-muted-foreground mb-1.5">Asunto</label>
                       <input type="text" value={form.subject} onChange={e => setForm(p => ({ ...p, subject: e.target.value }))}
-                        className="w-full px-3.5 py-2.5 bg-muted/40 border border-border/60 rounded-lg text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 focus:bg-card transition-all" placeholder="¿Sobre qué nos escribes?" />
+                        className="w-full px-3.5 py-2.5 bg-muted/40 border border-border/60 rounded-lg text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 focus:bg-card transition-all" placeholder="¿Sobre qué nos escribes?" />
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-muted-foreground mb-1.5">Mensaje <span className="text-primary">*</span></label>
                       <textarea rows={5} value={form.message} onChange={e => setForm(p => ({ ...p, message: e.target.value }))}
-                        className="w-full px-3.5 py-2.5 bg-muted/40 border border-border/60 rounded-lg text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 focus:bg-card transition-all resize-none" placeholder="Cuéntanos en qué podemos ayudarte..." />
+                        className="w-full px-3.5 py-2.5 bg-muted/40 border border-border/60 rounded-lg text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 focus:bg-card transition-all resize-none" placeholder="Cuéntanos en qué podemos ayudarte..." />
                     </div>
                     <button type="submit" disabled={loading}
                       className="w-full bg-primary text-white py-3 rounded-lg font-semibold text-sm hover:bg-primary/90 transition-all flex items-center justify-center gap-2 disabled:opacity-50">
