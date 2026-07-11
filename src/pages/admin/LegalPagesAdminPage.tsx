@@ -179,15 +179,28 @@ export default function LegalPagesAdminPage() {
     dragIndex.current = null;
     if (fromIndex === null || fromIndex === dropIndex) return;
 
+    // Reordenar sobre el array filtered (que es lo que se muestra)
     const reordered = [...filtered];
     const [moved] = reordered.splice(fromIndex, 1);
     reordered.splice(dropIndex, 0, moved);
+
+    // Reasignar sort_order 0..n
     const withNewOrder = reordered.map((p, i) => ({ ...p, sort_order: i }));
 
-    // Optimistic update
+    // Actualización optimista: reemplazar las páginas filtradas en su posición dentro de `pages`
+    // manteniendo las páginas que no están en filtered intactas.
     setPages(prev => {
-      const map = new Map(withNewOrder.map(p => [p.id, p]));
-      return prev.map(p => map.get(p.id) ?? p);
+      const newOrderMap = new Map(withNewOrder.map(p => [p.id, p]));
+      // Reconstruir prev respetando el nuevo orden de filtered
+      const filteredIds = new Set(filtered.map(p => p.id));
+      const nonFiltered = prev.filter(p => !filteredIds.has(p.id));
+      // withNewOrder ya está en el orden correcto; mezclamos con nonFiltered por sort_order
+      return [...withNewOrder, ...nonFiltered].sort((a, b) => {
+        // Para los filtrados, usar su nuevo sort_order; para el resto, el original
+        const aOrder = newOrderMap.has(a.id) ? newOrderMap.get(a.id)!.sort_order : a.sort_order;
+        const bOrder = newOrderMap.has(b.id) ? newOrderMap.get(b.id)!.sort_order : b.sort_order;
+        return aOrder - bOrder;
+      });
     });
 
     setReordering(true);
@@ -367,15 +380,24 @@ export default function LegalPagesAdminPage() {
                       />
                     </div>
 
-                    {/* Action buttons */}
+                    {/* Action buttons — tamaño fijo para evitar layout shift al toglear published */}
                     <div className="flex items-center gap-1 shrink-0">
-                      {p.is_published && (
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0" asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className={cn('h-8 w-8 p-0 transition-opacity', !p.is_published && 'opacity-0 pointer-events-none')}
+                        asChild={p.is_published}
+                        aria-hidden={!p.is_published}
+                        tabIndex={p.is_published ? 0 : -1}
+                      >
+                        {p.is_published ? (
                           <Link to={`/legal/${p.slug}`} target="_blank" rel="noopener noreferrer">
                             <ExternalLink className="h-4 w-4" />
                           </Link>
-                        </Button>
-                      )}
+                        ) : (
+                          <span><ExternalLink className="h-4 w-4" /></span>
+                        )}
+                      </Button>
                       <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => openEdit(p)}>
                         <Pencil className="h-4 w-4" />
                       </Button>
