@@ -7,6 +7,7 @@ import {
   Plus, Trash2, Pencil, X, Save, RefreshCw, GripVertical,
   ToggleLeft, ToggleRight, Upload, Link as LinkIcon, MapPin, Lock,
 } from 'lucide-react';
+import { DeleteConfirmDialog } from '@/components/admin/DeleteConfirmDialog';
 
 interface RegionStat {
   id: string;
@@ -75,7 +76,7 @@ function ImageInput({ value, onChange }: { value: string; onChange: (v: string) 
           <img src={value} alt="preview" className="w-14 h-9 rounded-lg object-cover border border-border flex-shrink-0"
             onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
           <span className="text-xs text-muted-foreground truncate flex-1">{value}</span>
-          <button type="button" onClick={() => onChange('')} className="text-muted-foreground hover:text-red-500 transition-colors flex-shrink-0">
+          <button type="button" onClick={() => onChange('')} className="text-muted-foreground hover:text-destructive transition-colors flex-shrink-0">
             <X className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -169,25 +170,7 @@ function RegionFormModal({ item, onSave, onClose, saving }: {
   );
 }
 
-function DeleteConfirm({ name, onConfirm, onCancel }: { name: string; onConfirm: () => void; onCancel: () => void }) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-      onClick={e => { if (e.target === e.currentTarget) onCancel(); }}>
-      <div className="bg-card border border-border rounded-2xl w-full max-w-sm shadow-2xl p-6 text-center">
-        <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4">
-          <Trash2 className="w-6 h-6 text-red-500" />
-        </div>
-        <h3 className="text-base font-bold text-foreground mb-1">Eliminar ciudad</h3>
-        <p className="text-sm text-muted-foreground mb-6">¿Eliminar <span className="font-semibold text-foreground">{name}</span>? Esta acción no se puede deshacer.</p>
-        <div className="flex gap-3">
-          <button onClick={onCancel} className="flex-1 border border-border rounded-xl py-2.5 text-sm font-medium hover:bg-muted transition-colors">Cancelar</button>
-          <button onClick={onConfirm} className="flex-1 bg-red-600 text-white rounded-xl py-2.5 text-sm font-semibold hover:bg-red-700 transition-colors">Eliminar</button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
+// ── Main Page ───────────────────────────────────────────────────────────────────
 export default function RegionStatsAdminPage() {
   const database = useDatabase();
   const { user } = useAuthStore();
@@ -195,7 +178,8 @@ export default function RegionStatsAdminPage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<RegionStat | null>(null);
-  const [deleteItem, setDeleteItem] = useState<RegionStat | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<RegionStat | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [dragId, setDragId] = useState<string | null>(null);
   const [dragOverId, setDragOverId] = useState<string | null>(null);
@@ -232,11 +216,16 @@ export default function RegionStatsAdminPage() {
   };
 
   const handleDelete = async () => {
-    if (!deleteItem) return;
-    await database.delete('testimonial_region_stats', deleteItem.id);
-    toast.success('Ciudad eliminada');
-    setDeleteItem(null);
-    fetchAll();
+    if (!deleteTarget) return;
+    setDeletingId(deleteTarget.id);
+    try {
+      await database.delete('testimonial_region_stats', deleteTarget.id);
+      toast.success('Ciudad eliminada');
+      fetchAll();
+    } finally {
+      setDeletingId(null);
+      setDeleteTarget(null);
+    }
   };
 
   const toggleActive = async (item: RegionStat) => {
@@ -345,24 +334,24 @@ export default function RegionStatsAdminPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-semibold text-foreground text-sm">{item.city}</span>
-                    <span className="text-xs font-bold text-green-600 dark:text-green-400">{item.members} afiliados</span>
-                    {!item.is_active && <span className="text-[10px] text-red-500 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded-full">Inactiva</span>}
+                    <span className="text-xs font-bold text-emerald-600 dark:text-green-400">{item.members} afiliados</span>
+                    {!item.is_active && <span className="text-[10px] text-destructive bg-destructive/10 border border-red-500/20 px-2 py-0.5 rounded-full">Inactiva</span>}
                   </div>
                   <p className="text-xs text-muted-foreground mt-0.5">Posición #{items.indexOf(item) + 1}</p>
                 </div>
 
                 <div className="flex items-center gap-1 flex-shrink-0">
                   <button onClick={() => toggleActive(item)}
-                    className={cn('p-2 rounded-lg transition-colors', item.is_active ? 'text-green-500 hover:bg-green-500/10' : 'text-muted-foreground hover:bg-muted')}
+                    className={cn('p-2 rounded-lg transition-colors', item.is_active ? 'text-green-500 hover:bg-emerald-500/10' : 'text-muted-foreground hover:bg-muted')}
                     title={item.is_active ? 'Desactivar' : 'Activar'}>
                     {item.is_active ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
                   </button>
                   <button onClick={() => { setEditing(item); setShowForm(true); }}
-                    className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-blue-500 transition-colors" title="Editar">
+                    className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-primary transition-colors" title="Editar">
                     <Pencil className="w-4 h-4" />
                   </button>
-                  <button onClick={() => setDeleteItem(item)}
-                    className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-red-500 transition-colors" title="Eliminar">
+                  <button onClick={() => setDeleteTarget(item)}
+                    className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-destructive transition-colors" title="Eliminar">
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
@@ -372,8 +361,8 @@ export default function RegionStatsAdminPage() {
         </div>
       )}
 
-      <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
-        <p className="text-xs text-blue-700 dark:text-blue-300">
+      <div className="bg-primary/10 border border-blue-500/20 rounded-xl p-4">
+        <p className="text-xs text-primary">
           Solo los primeros <strong>4 activos</strong> aparecen en el bento del landing. La imagen se usa como fondo semitransparente detrás del número.
         </p>
       </div>
@@ -381,9 +370,15 @@ export default function RegionStatsAdminPage() {
       {showForm && (
         <RegionFormModal item={editing} onSave={handleSave} onClose={() => { setShowForm(false); setEditing(null); }} saving={saving} />
       )}
-      {deleteItem && (
-        <DeleteConfirm name={deleteItem.city} onConfirm={handleDelete} onCancel={() => setDeleteItem(null)} />
-      )}
+
+      <DeleteConfirmDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}
+        onConfirm={handleDelete}
+        title="Eliminar ciudad"
+        description={<>Se eliminará permanentemente <strong>{deleteTarget?.city}</strong>. Esta acción no se puede deshacer.</>}
+        loading={!!deletingId}
+      />
     </div>
   );
 }

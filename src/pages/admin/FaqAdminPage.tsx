@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
+import { DeleteConfirmDialog } from '@/components/admin/DeleteConfirmDialog';
 import { toast } from 'sonner';
 import { Plus, Trash2, Save, GripVertical, Loader as Loader2, RefreshCw, CircleHelp as HelpCircle, X, Pencil } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -158,16 +159,23 @@ export default function FaqAdminPage() {
   };
 
   // ── Delete ───────────────────────────────────────────────────────────────────
-  const handleDelete = async (id: string) => {
-    if (!confirm('¿Eliminar esta pregunta frecuente? Esta acción no se puede deshacer.')) return;
+  const [deleteTarget, setDeleteTarget] = useState<FaqItem | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeletingId(deleteTarget.id);
     try {
-      const { error } = await supabase.from('faq_items').delete().eq('id', id);
+      const { error } = await supabase.from('faq_items').delete().eq('id', deleteTarget.id);
       if (error) throw error;
       toast.success('Pregunta eliminada');
-      if (editingId === id) resetForm();
+      if (editingId === deleteTarget.id) resetForm();
       await fetchItems();
     } catch (err: any) {
       toast.error('Error al eliminar: ' + (err?.message || 'desconocido'));
+    } finally {
+      setDeletingId(null);
+      setDeleteTarget(null);
     }
   };
 
@@ -493,8 +501,8 @@ export default function FaqAdminPage() {
                       <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => startEdit(item)} disabled={saving || reordering} title="Editar">
                         <Pencil className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10" onClick={() => handleDelete(item.id)} disabled={saving || reordering} title="Eliminar">
-                        <Trash2 className="h-4 w-4" />
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10" onClick={() => setDeleteTarget(item)} disabled={saving || reordering || deletingId === item.id} title="Eliminar">
+                        {deletingId === item.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                       </Button>
                     </div>
                   </div>
@@ -504,6 +512,15 @@ export default function FaqAdminPage() {
           </>
         )}
       </div>
+
+      <DeleteConfirmDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}
+        onConfirm={handleDelete}
+        title="Eliminar pregunta frecuente"
+        description={<>Se eliminará permanentemente la pregunta <strong>{deleteTarget?.question}</strong>. Esta acción no se puede deshacer.</>}
+        loading={!!deletingId}
+      />
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { useAuthStore } from '@/store/authStore';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
+import { DeleteConfirmDialog } from '@/components/admin/DeleteConfirmDialog';
 import {
   Plus, Trash2, Pencil, X, Save, RefreshCw, Star, Eye,
   Upload, Link as LinkIcon, GripVertical, ToggleLeft, ToggleRight,
@@ -95,7 +96,7 @@ function AvatarInput({ value, onChange }: { value: string; onChange: (url: strin
           <img src={value} alt="preview" className="w-10 h-10 rounded-full object-cover border border-border flex-shrink-0"
             onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
           <span className="text-xs text-muted-foreground truncate flex-1">{value}</span>
-          <button type="button" onClick={() => onChange('')} className="text-muted-foreground hover:text-red-500 transition-colors flex-shrink-0">
+          <button type="button" onClick={() => onChange('')} className="text-muted-foreground hover:text-destructive transition-colors flex-shrink-0">
             <X className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -220,28 +221,6 @@ function TestimonialFormModal({ testimonial, onSave, onClose, saving }: {
   );
 }
 
-// ── Delete Confirm ─────────────────────────────────────────────────────────────
-function DeleteConfirm({ name, onConfirm, onCancel }: { name: string; onConfirm: () => void; onCancel: () => void }) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-      onClick={e => { if (e.target === e.currentTarget) onCancel(); }}>
-      <div className="bg-card border border-border rounded-2xl w-full max-w-sm shadow-2xl p-6 text-center">
-        <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4">
-          <Trash2 className="w-6 h-6 text-red-500" />
-        </div>
-        <h3 className="text-base font-bold text-foreground mb-1">Eliminar testimonio</h3>
-        <p className="text-sm text-muted-foreground mb-6">
-          ¿Eliminar el testimonio de <span className="font-semibold text-foreground">"{name}"</span>?<br />Esta acción no se puede deshacer.
-        </p>
-        <div className="flex gap-3">
-          <button onClick={onCancel} className="flex-1 border border-border rounded-xl py-2.5 text-sm font-medium hover:bg-muted transition-colors">Cancelar</button>
-          <button onClick={onConfirm} className="flex-1 bg-red-600 text-white rounded-xl py-2.5 text-sm font-semibold hover:bg-red-700 transition-colors">Eliminar</button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ── Draggable Row ─────────────────────────────────────────────────────────────
 function DraggableRow({
   t, onDragStart, onDragOver, onDrop, isDragOver,
@@ -296,10 +275,10 @@ function DraggableRow({
             ))}
           </div>
           {t.earnings && (
-            <span className="text-xs font-bold text-green-600 dark:text-green-400 bg-green-500/10 border border-green-500/20 px-2 py-0.5 rounded-full">{t.earnings}</span>
+            <span className="text-xs font-bold text-emerald-600 dark:text-green-400 bg-emerald-500/10 border border-green-500/20 px-2 py-0.5 rounded-full">{t.earnings}</span>
           )}
           {!t.is_active && (
-            <span className="text-[10px] font-medium text-red-500 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded-full">Inactivo</span>
+            <span className="text-[10px] font-medium text-destructive bg-destructive/10 border border-red-500/20 px-2 py-0.5 rounded-full">Inactivo</span>
           )}
         </div>
         <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">"{t.content}"</p>
@@ -308,16 +287,16 @@ function DraggableRow({
       {/* Actions */}
       <div className="flex flex-col sm:flex-row items-center gap-1 flex-shrink-0">
         <button onClick={() => onToggle(t)}
-          className={cn('p-2 rounded-lg transition-colors', t.is_active ? 'text-green-500 hover:bg-green-500/10' : 'text-muted-foreground hover:bg-muted')}
+          className={cn('p-2 rounded-lg transition-colors', t.is_active ? 'text-green-500 hover:bg-emerald-500/10' : 'text-muted-foreground hover:bg-muted')}
           title={t.is_active ? 'Desactivar' : 'Activar'}>
           {t.is_active ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
         </button>
         <button onClick={() => onEdit(t)}
-          className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-blue-500 transition-colors" title="Editar">
+          className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-primary transition-colors" title="Editar">
           <Pencil className="w-4 h-4" />
         </button>
         <button onClick={() => onDelete(t)}
-          className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-red-500 transition-colors" title="Eliminar">
+          className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-destructive transition-colors" title="Eliminar">
           <Trash2 className="w-4 h-4" />
         </button>
       </div>
@@ -333,7 +312,8 @@ export default function TestimonialsAdminPage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Testimonial | null>(null);
-  const [deleteItem, setDeleteItem] = useState<Testimonial | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Testimonial | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [filterActive, setFilterActive] = useState<'all' | 'active' | 'inactive'>('all');
   const [dragId, setDragId] = useState<string | null>(null);
@@ -371,11 +351,16 @@ export default function TestimonialsAdminPage() {
   };
 
   const handleDelete = async () => {
-    if (!deleteItem) return;
-    await database.delete('testimonials', deleteItem.id);
-    toast.success('Testimonio eliminado');
-    setDeleteItem(null);
-    fetchAll();
+    if (!deleteTarget) return;
+    setDeletingId(deleteTarget.id);
+    try {
+      await database.delete('testimonials', deleteTarget.id);
+      toast.success('Testimonio eliminado');
+      fetchAll();
+    } finally {
+      setDeletingId(null);
+      setDeleteTarget(null);
+    }
   };
 
   const toggleActive = async (t: Testimonial) => {
@@ -493,7 +478,7 @@ export default function TestimonialsAdminPage() {
                   isDragOver={dragOverId === t.id}
                   onToggle={toggleActive}
                   onEdit={t => { setEditing(t); setShowForm(true); }}
-                  onDelete={setDeleteItem}
+                  onDelete={setDeleteTarget}
                 />
               ))}
             </div>
@@ -502,11 +487,11 @@ export default function TestimonialsAdminPage() {
       </div>
 
       {/* Hint */}
-      <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
-        <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300 font-semibold text-sm mb-1">
+      <div className="bg-primary/10 border border-blue-500/20 rounded-xl p-4">
+        <div className="flex items-center gap-2 text-primary font-semibold text-sm mb-1">
           <Eye className="w-4 h-4" /> Visibilidad en el landing
         </div>
-        <p className="text-xs text-blue-700/80 dark:text-blue-300/80">
+        <p className="text-xs text-primary/80">
           Solo los testimonios <strong>Activos</strong> aparecen en la sección de testimonios. Arrastra las filas para cambiar el orden de aparición.
         </p>
       </div>
@@ -519,13 +504,15 @@ export default function TestimonialsAdminPage() {
           saving={saving}
         />
       )}
-      {deleteItem && (
-        <DeleteConfirm
-          name={deleteItem.name}
-          onConfirm={handleDelete}
-          onCancel={() => setDeleteItem(null)}
-        />
-      )}
+
+      <DeleteConfirmDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}
+        onConfirm={handleDelete}
+        title="Eliminar testimonio"
+        description={<>Se eliminará permanentemente el testimonio de <strong>{deleteTarget?.name}</strong>. Esta acción no se puede deshacer.</>}
+        loading={!!deletingId}
+      />
     </div>
   );
 }

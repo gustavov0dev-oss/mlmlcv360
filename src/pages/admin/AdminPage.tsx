@@ -4,9 +4,10 @@ import { useAuthStore } from '@/store/authStore';
 import { useSearchParams } from '@/lib/router';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import { Building2, Shield, Smartphone, Search, Mail, Save, ChevronRight, RefreshCw, MessageCircle, Eye, EyeOff, Lock, CreditCard, Award, Plus, Trash2, CreditCard as Edit2, X, CircleCheck as CheckCircle, DollarSign, Wrench, TriangleAlert as AlertTriangle, Image } from 'lucide-react';
+import { Building2, Shield, Smartphone, Search, Mail, Save, ChevronRight, RefreshCw, MessageCircle, Eye, EyeOff, Lock, CreditCard, Award, Plus, Trash2, Pencil, X, CircleCheck as CheckCircle, DollarSign, Wrench, TriangleAlert as AlertTriangle, Image } from 'lucide-react';
 import { useConfig, type Plan, type Rank } from '@/store/configStore';
 import { LogoWithText } from '@/components/Logo';
+import { DeleteConfirmDialog } from '@/components/admin/DeleteConfirmDialog';
 
 // Smart icon renderer: detects SVG markup, URL images, emoji, or plain text
 function RenderIcon({ value, className }: { value: string; className?: string }) {
@@ -551,13 +552,13 @@ export default function AdminPage() {
                   </div>
                 </div>
               </div>
-              <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 text-xs text-blue-700 dark:text-blue-300">
+              <div className="bg-primary/10 border border-blue-500/20 rounded-lg p-3 text-xs text-primary">
                 <p className="font-medium mb-1">Instrucciones:</p>
                 <ol className="list-decimal list-inside space-y-0.5">
                   <li>Ve a Google Cloud Console → APIs & Services → Credentials</li>
                   <li>Crea un OAuth 2.0 Client ID</li>
                   <li>Copia el Client ID y Client Secret aquí</li>
-                  <li>Configura la URL de redirección: <code className="bg-blue-500/10 px-1 rounded">https://tu-dominio.supabase.co/auth/v1/callback</code></li>
+                  <li>Configura la URL de redirección: <code className="bg-primary/10 px-1 rounded">https://tu-dominio.supabase.co/auth/v1/callback</code></li>
                 </ol>
               </div>
               <button onClick={() => saveConfigKeys(['google_oauth_enabled', 'google_client_id', 'google_client_secret'], 'auth')}
@@ -772,7 +773,7 @@ export default function AdminPage() {
                     'flex items-center justify-between p-4 rounded-xl border-2 transition-colors',
                     c('maintenance_mode') === 'true'
                       ? 'bg-amber-500/10 border-amber-500/30'
-                      : 'bg-green-500/10 border-green-500/20',
+                      : 'bg-emerald-500/10 border-green-500/20',
                   )}>
                     <div>
                       <div className="text-sm font-semibold text-foreground">
@@ -843,7 +844,8 @@ function PlansManager() {
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
   const [allPlans, setAllPlans] = useState<Plan[]>([]);
-  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Plan | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const fetchAll = async () => {
     const { data } = await database.select<Plan>('plans', { order: { column: 'sort_order' } });
@@ -869,12 +871,18 @@ function PlansManager() {
     toast.success(id ? 'Plan actualizado' : 'Plan creado');
   };
 
-  const handleDelete = async (id: string) => {
-    await database.delete('plans', id);
-    setDeleteId(null);
-    fetchAll();
-    refresh();
-    toast.success('Plan eliminado');
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeletingId(deleteTarget.id);
+    try {
+      await database.delete('plans', deleteTarget.id);
+      fetchAll();
+      refresh();
+      toast.success('Plan eliminado');
+    } finally {
+      setDeletingId(null);
+      setDeleteTarget(null);
+    }
   };
 
   const togglePopular = async (plan: Plan) => {
@@ -912,22 +920,22 @@ function PlansManager() {
                   <span className="text-sm font-bold text-foreground">{plan.name}</span>
                   {plan.badge && <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">{plan.badge}</span>}
                   {plan.is_popular && <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 font-medium">Popular</span>}
-                  {!plan.is_active && <span className="text-xs px-2 py-0.5 rounded-full bg-red-500/10 text-red-500 font-medium">Inactivo</span>}
+                  {!plan.is_active && <span className="text-xs px-2 py-0.5 rounded-full bg-destructive/10 text-destructive font-medium">Inactivo</span>}
                 </div>
                 <div className="text-xs text-muted-foreground">{plan.description}</div>
-                <div className="text-sm font-bold text-foreground mt-1">S/ {plan.price}{plan.trial_days > 0 && <span className="text-xs text-green-600 ml-2">{plan.trial_days} días gratis</span>}</div>
+                <div className="text-sm font-bold text-foreground mt-1">S/ {plan.price}{plan.trial_days > 0 && <span className="text-xs text-emerald-600 ml-2">{plan.trial_days} días gratis</span>}</div>
               </div>
               <div className="flex items-center gap-1 flex-shrink-0">
                 <button onClick={() => togglePopular(plan)} className={cn('p-2 rounded-lg transition-colors', plan.is_popular ? 'text-amber-500 hover:bg-amber-500/10' : 'text-muted-foreground hover:bg-muted')} title="Marcar como popular">
                   <Award className="w-4 h-4" />
                 </button>
-                <button onClick={() => toggleActive(plan)} className={cn('p-2 rounded-lg transition-colors', plan.is_active ? 'text-green-500 hover:bg-green-500/10' : 'text-red-500 hover:bg-red-500/10')} title="Activar/desactivar">
+                <button onClick={() => toggleActive(plan)} className={cn('p-2 rounded-lg transition-colors', plan.is_active ? 'text-green-500 hover:bg-emerald-500/10' : 'text-destructive hover:bg-destructive/10')} title="Activar/desactivar">
                   {plan.is_active ? <CheckCircle className="w-4 h-4" /> : <X className="w-4 h-4" />}
                 </button>
-                <button onClick={() => { setEditing(plan); setShowForm(true); }} className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-blue-500 transition-colors" title="Editar">
-                  <Edit2 className="w-4 h-4" />
+                <button onClick={() => { setEditing(plan); setShowForm(true); }} className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-primary transition-colors" title="Editar">
+                  <Pencil className="w-4 h-4" />
                 </button>
-                <button onClick={() => setDeleteId(plan.id)} className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-red-500 transition-colors" title="Eliminar">
+                <button onClick={() => setDeleteTarget(plan)} className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-destructive transition-colors" title="Eliminar">
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
@@ -937,18 +945,14 @@ function PlansManager() {
         </div>
       )}
 
-      {deleteId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-card border border-border rounded-2xl w-full max-w-sm shadow-2xl p-6">
-            <h3 className="text-lg font-bold text-foreground text-center mb-2">Eliminar plan</h3>
-            <p className="text-sm text-muted-foreground text-center mb-5">¿Estás seguro? Esta acción no se puede deshacer.</p>
-            <div className="flex gap-3">
-              <button onClick={() => setDeleteId(null)} className="flex-1 border border-border rounded-xl py-2.5 text-sm font-medium hover:bg-muted transition-colors">Cancelar</button>
-              <button onClick={() => handleDelete(deleteId)} className="flex-1 bg-red-600 text-white rounded-xl py-2.5 text-sm font-semibold hover:bg-red-700 transition-colors">Eliminar</button>
-            </div>
-          </div>
-        </div>
-      )}
+      <DeleteConfirmDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}
+        onConfirm={handleDelete}
+        title="Eliminar plan"
+        description={<>Se eliminará permanentemente <strong>{deleteTarget?.name}</strong>. Esta acción no se puede deshacer.</>}
+        loading={!!deletingId}
+      />
     </div>
   );
 }
@@ -1063,7 +1067,8 @@ function RanksManager() {
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
   const [allRanks, setAllRanks] = useState<Rank[]>([]);
-  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Rank | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const fetchAll = async () => {
     const { data } = await database.select<Rank>('ranks', { order: { column: 'sort_order' } });
@@ -1089,12 +1094,18 @@ function RanksManager() {
     toast.success(id ? 'Rango actualizado' : 'Rango creado');
   };
 
-  const handleDelete = async (id: string) => {
-    await database.delete('ranks', id);
-    setDeleteId(null);
-    fetchAll();
-    refresh();
-    toast.success('Rango eliminado');
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeletingId(deleteTarget.id);
+    try {
+      await database.delete('ranks', deleteTarget.id);
+      fetchAll();
+      refresh();
+      toast.success('Rango eliminado');
+    } finally {
+      setDeletingId(null);
+      setDeleteTarget(null);
+    }
   };
 
   const toggleActive = async (rank: Rank) => {
@@ -1125,18 +1136,18 @@ function RanksManager() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
                   <span className={cn('text-sm font-bold', rank.color)}>{rank.name}</span>
-                  {!rank.is_active && <span className="text-xs px-2 py-0.5 rounded-full bg-red-500/10 text-red-500 font-medium">Inactivo</span>}
+                  {!rank.is_active && <span className="text-xs px-2 py-0.5 rounded-full bg-destructive/10 text-destructive font-medium">Inactivo</span>}
                 </div>
                 <div className="text-xs text-muted-foreground">Bono: S/ {rank.bonus} · {rank.min_affiliates} afiliados · S/ {rank.min_volume} volumen</div>
               </div>
               <div className="flex items-center gap-1 flex-shrink-0">
-                <button onClick={() => toggleActive(rank)} className={cn('p-2 rounded-lg transition-colors', rank.is_active ? 'text-green-500 hover:bg-green-500/10' : 'text-red-500 hover:bg-red-500/10')} title="Activar/desactivar">
+                <button onClick={() => toggleActive(rank)} className={cn('p-2 rounded-lg transition-colors', rank.is_active ? 'text-green-500 hover:bg-emerald-500/10' : 'text-destructive hover:bg-destructive/10')} title="Activar/desactivar">
                   {rank.is_active ? <CheckCircle className="w-4 h-4" /> : <X className="w-4 h-4" />}
                 </button>
-                <button onClick={() => { setEditing(rank); setShowForm(true); }} className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-blue-500 transition-colors" title="Editar">
-                  <Edit2 className="w-4 h-4" />
+                <button onClick={() => { setEditing(rank); setShowForm(true); }} className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-primary transition-colors" title="Editar">
+                  <Pencil className="w-4 h-4" />
                 </button>
-                <button onClick={() => setDeleteId(rank.id)} className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-red-500 transition-colors" title="Eliminar">
+                <button onClick={() => setDeleteTarget(rank)} className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-destructive transition-colors" title="Eliminar">
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
@@ -1146,18 +1157,14 @@ function RanksManager() {
         </div>
       )}
 
-      {deleteId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-card border border-border rounded-2xl w-full max-w-sm shadow-2xl p-6">
-            <h3 className="text-lg font-bold text-foreground text-center mb-2">Eliminar rango</h3>
-            <p className="text-sm text-muted-foreground text-center mb-5">¿Estás seguro? Esta acción no se puede deshacer.</p>
-            <div className="flex gap-3">
-              <button onClick={() => setDeleteId(null)} className="flex-1 border border-border rounded-xl py-2.5 text-sm font-medium hover:bg-muted transition-colors">Cancelar</button>
-              <button onClick={() => handleDelete(deleteId)} className="flex-1 bg-red-600 text-white rounded-xl py-2.5 text-sm font-semibold hover:bg-red-700 transition-colors">Eliminar</button>
-            </div>
-          </div>
-        </div>
-      )}
+      <DeleteConfirmDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}
+        onConfirm={handleDelete}
+        title="Eliminar rango"
+        description={<>Se eliminará permanentemente <strong>{deleteTarget?.name}</strong>. Esta acción no se puede deshacer.</>}
+        loading={!!deletingId}
+      />
     </div>
   );
 }
@@ -1432,9 +1439,9 @@ function GatewaysManager() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-sm font-bold text-foreground">{gw.name}</span>
-                  <span className={cn('text-xs px-2 py-0.5 rounded-full font-medium', gw.currency === 'USD' ? 'bg-blue-500/10 text-blue-600' : 'bg-green-500/10 text-green-600')}>{gw.currency}</span>
-                  {hasCredentials && <span className="text-xs px-2 py-0.5 rounded-full bg-green-500/10 text-green-600">Configurado</span>}
-                  {!hasCredentials && <span className="text-xs px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-600">Sin configurar</span>}
+                  <span className={cn('text-xs px-2 py-0.5 rounded-full font-medium', gw.currency === 'USD' ? 'bg-primary/10 text-primary' : 'bg-emerald-500/10 text-emerald-600')}>{gw.currency}</span>
+                  {hasCredentials && <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600">Configurado</span>}
+                  {!hasCredentials && <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600">Sin configurar</span>}
                 </div>
                 <p className="text-xs text-muted-foreground mt-0.5">{gw.description}</p>
               </div>
@@ -1442,7 +1449,7 @@ function GatewaysManager() {
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-muted-foreground">Prueba</span>
                   <button onClick={() => toggleTestMode(gw)}
-                    className={cn('w-9 h-5 rounded-full relative transition-colors', gw.test_mode ? 'bg-blue-500' : 'bg-muted-foreground/30')}>
+                    className={cn('w-9 h-5 rounded-full relative transition-colors', gw.test_mode ? 'bg-primary' : 'bg-muted-foreground/30')}>
                     <div className={cn('w-3 h-3 bg-white rounded-full absolute top-1 transition-transform', gw.test_mode ? 'translate-x-5' : 'translate-x-1')} />
                   </button>
                 </div>

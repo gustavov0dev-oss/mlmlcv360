@@ -3,8 +3,9 @@ import { useDatabase, useStorage } from '@/lib/backend';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import type { ProductCategory } from '@/lib/storeTypes';
-import { Plus, Save, Loader as Loader2, Trash2, CreditCard as Edit2, X, Image, FolderOpen } from 'lucide-react';
+import { Plus, Save, Loader as Loader2, Trash2, Pencil, X, Image, FolderOpen } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { DeleteConfirmDialog } from '@/components/admin/DeleteConfirmDialog';
 
 const EMPTY: Partial<ProductCategory> = { name: '', slug: '', description: '', status: 'active', sort_order: 0 };
 
@@ -14,7 +15,8 @@ export default function CategoriesAdminPage() {
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<Partial<ProductCategory>>(EMPTY);
   const [showForm, setShowForm] = useState(false);
-  const [delId, setDelId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<ProductCategory | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
 
   const database = useDatabase();
@@ -76,10 +78,18 @@ export default function CategoriesAdminPage() {
     setForm(EMPTY); setShowForm(false); setSaving(false); load();
   };
 
-  const remove = async (id: string) => {
-    const { error } = await database.delete('product_categories', id);
-    if (error) { toast.error('No se puede eliminar — tiene productos asociados'); setDelId(null); return; }
-    toast.success('Categoría eliminada'); setDelId(null); load();
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeletingId(deleteTarget.id);
+    try {
+      const { error } = await database.delete('product_categories', deleteTarget.id);
+      if (error) { toast.error('No se puede eliminar — tiene productos asociados'); return; }
+      toast.success('Categoría eliminada');
+      load();
+    } finally {
+      setDeletingId(null);
+      setDeleteTarget(null);
+    }
   };
 
   const updateSortOrder = async (id: string, newOrder: number) => {
@@ -168,7 +178,7 @@ export default function CategoriesAdminPage() {
                     </td>
                     <td className="px-4 py-3">
                       <span className={cn('text-xs font-bold px-2 py-0.5 rounded-full',
-                        cat.status === 'active' ? 'bg-green-500/10 text-green-600' : 'bg-muted text-muted-foreground')}>
+                        cat.status === 'active' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-muted text-muted-foreground')}>
                         {cat.status === 'active' ? 'Activa' : 'Inactiva'}
                       </span>
                     </td>
@@ -176,19 +186,12 @@ export default function CategoriesAdminPage() {
                       <div className="flex items-center gap-1">
                         <button onClick={() => { setForm(cat); setShowForm(true); }}
                           className="p-1.5 hover:bg-muted rounded-lg text-muted-foreground hover:text-primary">
-                          <Edit2 className="w-3.5 h-3.5" />
+                          <Pencil className="w-3.5 h-3.5" />
                         </button>
-                        {delId === cat.id ? (
-                          <div className="flex gap-1">
-                            <button onClick={() => remove(cat.id)} className="px-2 py-1 bg-red-500 text-white rounded text-xs font-bold">Sí</button>
-                            <button onClick={() => setDelId(null)} className="px-2 py-1 bg-muted rounded text-xs">No</button>
-                          </div>
-                        ) : (
-                          <button onClick={() => setDelId(cat.id)}
-                            className="p-1.5 hover:bg-muted rounded-lg text-muted-foreground hover:text-red-500">
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        )}
+                        <button onClick={() => setDeleteTarget(cat)}
+                          className="p-1.5 hover:bg-muted rounded-lg text-muted-foreground hover:text-destructive">
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -204,14 +207,14 @@ export default function CategoriesAdminPage() {
                       <td className="px-4 py-2 text-muted-foreground text-xs">{child.sort_order}</td>
                       <td className="px-4 py-2">
                         <span className={cn('text-[10px] font-bold px-1.5 py-0.5 rounded-full',
-                          child.status === 'active' ? 'bg-green-500/10 text-green-600' : 'bg-muted text-muted-foreground')}>
+                          child.status === 'active' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-muted text-muted-foreground')}>
                           {child.status === 'active' ? 'Activa' : 'Inactiva'}
                         </span>
                       </td>
                       <td className="px-4 py-2">
                         <button onClick={() => { setForm(child); setShowForm(true); }}
                           className="p-1.5 hover:bg-muted rounded-lg text-muted-foreground hover:text-primary">
-                          <Edit2 className="w-3.5 h-3.5" />
+                          <Pencil className="w-3.5 h-3.5" />
                         </button>
                       </td>
                     </tr>
@@ -314,6 +317,15 @@ export default function CategoriesAdminPage() {
           </div>
         </div>
       )}
+
+      <DeleteConfirmDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}
+        onConfirm={handleDelete}
+        title="Eliminar categoría"
+        description={<>Se eliminará permanentemente <strong>{deleteTarget?.name}</strong>. Esta acción no se puede deshacer.</>}
+        loading={!!deletingId}
+      />
     </div>
   );
 }

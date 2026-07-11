@@ -3,8 +3,9 @@ import { useDatabase } from '@/lib/backend';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import type { Coupon, Product, ProductCategory } from '@/lib/storeTypes';
-import { Plus, Trash2, Save, Loader as Loader2, Tag, X, CreditCard as Edit2, Package, Check, Search, ChevronRight, ChevronDown, FolderOpen, Folder } from 'lucide-react';
+import { Plus, Trash2, Save, Loader as Loader2, Tag, X, Pencil, Package, Check, Search, ChevronRight, ChevronDown, FolderOpen, Folder } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { DeleteConfirmDialog } from '@/components/admin/DeleteConfirmDialog';
 
 function fmt(n: number) { return `S/ ${n.toFixed(2)}`; }
 
@@ -61,7 +62,8 @@ export default function CouponsAdminPage() {
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<Partial<Coupon>>(EMPTY);
   const [showForm, setShowForm] = useState(false);
-  const [delId, setDelId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Coupon | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
 
@@ -140,9 +142,17 @@ export default function CouponsAdminPage() {
     setForm(EMPTY); setShowForm(false); setSaving(false); load();
   };
 
-  const remove = async (id: string) => {
-    await database.delete('coupons', id);
-    toast.success('Cupon eliminado'); setDelId(null); load();
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeletingId(deleteTarget.id);
+    try {
+      await database.delete('coupons', deleteTarget.id);
+      toast.success('Cupon eliminado');
+      load();
+    } finally {
+      setDeletingId(null);
+      setDeleteTarget(null);
+    }
   };
 
   const toggleProduct = (prodId: string) => {
@@ -213,27 +223,20 @@ export default function CouponsAdminPage() {
                   <td className="px-4 py-3 text-muted-foreground">{c.min_order_amount ? fmt(c.min_order_amount) : '--'}</td>
                   <td className="px-4 py-3 text-xs">
                     {c.applies_to === 'all' && <span className="bg-muted px-2 py-0.5 rounded-full">Todos</span>}
-                    {c.applies_to === 'products' && <span className="bg-blue-500/10 text-blue-600 px-2 py-0.5 rounded-full">{(c.product_ids as string[])?.length || 0} productos</span>}
-                    {c.applies_to === 'categories' && <span className="bg-purple-500/10 text-purple-600 px-2 py-0.5 rounded-full">{(c.category_ids as string[])?.length || 0} categorias</span>}
+                    {c.applies_to === 'products' && <span className="bg-primary/10 text-primary px-2 py-0.5 rounded-full">{(c.product_ids as string[])?.length || 0} productos</span>}
+                    {c.applies_to === 'categories' && <span className="bg-primary/10 text-primary px-2 py-0.5 rounded-full">{(c.category_ids as string[])?.length || 0} categorias</span>}
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">{c.used_count}{c.usage_limit ? `/${c.usage_limit}` : ''}</td>
                   <td className="px-4 py-3 text-muted-foreground text-xs">{c.expires_at ? new Date(c.expires_at).toLocaleDateString('es-PE') : 'Sin venc.'}</td>
                   <td className="px-4 py-3">
-                    <span className={cn('text-xs font-bold px-2 py-0.5 rounded-full', c.status === 'active' ? 'bg-green-500/10 text-green-600' : 'bg-muted text-muted-foreground')}>
+                    <span className={cn('text-xs font-bold px-2 py-0.5 rounded-full', c.status === 'active' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-muted text-muted-foreground')}>
                       {c.status === 'active' ? 'Activo' : 'Inactivo'}
                     </span>
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-1">
-                      <button onClick={() => openForm(c)} className="p-1.5 hover:bg-muted rounded-lg text-muted-foreground hover:text-primary"><Edit2 className="w-3.5 h-3.5" /></button>
-                      {delId === c.id ? (
-                        <div className="flex gap-1">
-                          <button onClick={() => remove(c.id)} className="px-2 py-1 bg-red-500 text-white rounded text-xs font-bold">Si</button>
-                          <button onClick={() => setDelId(null)} className="px-2 py-1 bg-muted rounded text-xs">No</button>
-                        </div>
-                      ) : (
-                        <button onClick={() => setDelId(c.id)} className="p-1.5 hover:bg-muted rounded-lg text-muted-foreground hover:text-red-500"><Trash2 className="w-3.5 h-3.5" /></button>
-                      )}
+                      <button onClick={() => openForm(c)} className="p-1.5 hover:bg-muted rounded-lg text-muted-foreground hover:text-primary"><Pencil className="w-3.5 h-3.5" /></button>
+                      <button onClick={() => setDeleteTarget(c)} className="p-1.5 hover:bg-muted rounded-lg text-muted-foreground hover:text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>
                     </div>
                   </td>
                 </tr>
@@ -277,7 +280,7 @@ export default function CouponsAdminPage() {
                 <div>
                   <label className="block text-xs font-bold text-foreground mb-1.5">Estado</label>
                   <div className="flex gap-2">
-                    {[{ v: 'active', label: 'Activo', cl: 'bg-green-500/10 text-green-600 border-green-500/30' },
+                    {[{ v: 'active', label: 'Activo', cl: 'bg-emerald-500/10 text-emerald-600 border-green-500/30' },
                       { v: 'inactive', label: 'Inactivo', cl: 'bg-muted text-muted-foreground border-border' }].map(s => (
                       <button key={s.v} onClick={() => setForm(p => ({ ...p, status: s.v as any }))}
                         className={cn('flex-1 py-3 rounded-xl text-xs font-bold border-2 transition-colors',
@@ -385,7 +388,7 @@ export default function CouponsAdminPage() {
                         {selectedProducts.map(p => (
                           <span key={p.id} className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary/10 text-primary rounded-full text-xs font-semibold">
                             {p.name}
-                            <button onClick={() => toggleProduct(p.id)} className="hover:text-red-500"><X className="w-3 h-3" /></button>
+                            <button onClick={() => toggleProduct(p.id)} className="hover:text-destructive"><X className="w-3 h-3" /></button>
                           </span>
                         ))}
                       </div>
@@ -441,6 +444,15 @@ export default function CouponsAdminPage() {
           </div>
         </div>
       )}
+
+      <DeleteConfirmDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}
+        onConfirm={handleDelete}
+        title="Eliminar cupón"
+        description={<>Se eliminará permanentemente el cupón <strong>{deleteTarget?.code}</strong>. Esta acción no se puede deshacer.</>}
+        loading={!!deletingId}
+      />
     </div>
   );
 }

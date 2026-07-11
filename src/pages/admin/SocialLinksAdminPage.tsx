@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea'; // used in SVG custom icon input
+import { DeleteConfirmDialog } from '@/components/admin/DeleteConfirmDialog';
 import { toast } from 'sonner';
 import { Plus, Trash2, Pencil, GripVertical, Loader as Loader2, RefreshCw, Link2, X, Save, ExternalLink, Globe } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -164,14 +165,19 @@ export default function SocialLinksAdminPage() {
     finally { setSaving(false); }
   };
 
-  const handleDelete = async (l: SocialLink) => {
-    if (!confirm(`¿Eliminar el enlace de "${l.platform}"?`)) return;
+  const [deleteTarget, setDeleteTarget] = useState<SocialLink | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeletingId(deleteTarget.id);
     try {
-      const { error } = await supabase.from('social_links').delete().eq('id', l.id);
+      const { error } = await supabase.from('social_links').delete().eq('id', deleteTarget.id);
       if (error) throw error;
       toast.success('Enlace eliminado');
       await fetchLinks();
     } catch { toast.error('Error al eliminar'); }
+    finally { setDeletingId(null); setDeleteTarget(null); }
   };
 
   const handleToggle = async (l: SocialLink) => {
@@ -439,9 +445,9 @@ export default function SocialLinksAdminPage() {
                         className="w-8 h-8 flex items-center justify-center rounded-lg border border-border/60 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors" title="Editar">
                         <Pencil className="h-3.5 w-3.5" />
                       </button>
-                      <button onClick={() => handleDelete(link)}
+                      <button onClick={() => setDeleteTarget(link)}
                         className="w-8 h-8 flex items-center justify-center rounded-lg border border-border/60 text-muted-foreground hover:text-destructive hover:bg-destructive/10 hover:border-destructive/30 transition-colors" title="Eliminar">
-                        <Trash2 className="h-3.5 w-3.5" />
+                        {deletingId === link.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
                       </button>
                     </div>
                   </div>
@@ -451,6 +457,15 @@ export default function SocialLinksAdminPage() {
           </>
         )}
       </div>
+
+      <DeleteConfirmDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}
+        onConfirm={handleDelete}
+        title="Eliminar enlace social"
+        description={<>Se eliminará permanentemente el enlace de <strong>{deleteTarget?.platform}</strong>. Esta acción no se puede deshacer.</>}
+        loading={!!deletingId}
+      />
     </div>
   );
 }

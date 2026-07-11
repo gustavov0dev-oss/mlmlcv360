@@ -8,6 +8,7 @@ import {
   Search, Eye, ThumbsUp, RefreshCw, Package
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { DeleteConfirmDialog } from '@/components/admin/DeleteConfirmDialog';
 
 function StarsDisplay({ value, size = 14 }: { value: number; size?: number }) {
   return (
@@ -22,8 +23,8 @@ function StarsDisplay({ value, size = 14 }: { value: number; size?: number }) {
 
 const STATUS_CONFIG = {
   pending: { label: 'Pendiente', cls: 'bg-amber-500/10 text-amber-600 border-amber-500/20' },
-  approved: { label: 'Aprobada', cls: 'bg-green-500/10 text-green-600 border-green-500/20' },
-  rejected: { label: 'Rechazada', cls: 'bg-red-500/10 text-red-500 border-red-500/20' },
+  approved: { label: 'Aprobada', cls: 'bg-emerald-500/10 text-emerald-600 border-green-500/20' },
+  rejected: { label: 'Rechazada', cls: 'bg-destructive/10 text-destructive border-red-500/20' },
 };
 
 type Tab = 'pending' | 'approved' | 'rejected' | 'all';
@@ -34,7 +35,8 @@ export default function ReviewsAdminPage() {
   const [tab, setTab] = useState<Tab>('pending');
   const [search, setSearch] = useState('');
   const [preview, setPreview] = useState<(ProductReview & { product: any; profile: any }) | null>(null);
-  const [delId, setDelId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<(ProductReview & { product: any; profile: any }) | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const database = useDatabase();
 
@@ -59,12 +61,18 @@ export default function ReviewsAdminPage() {
     if (preview?.id === id) setPreview(prev => prev ? { ...prev, status } : null);
   };
 
-  const deleteReview = async (id: string) => {
-    await database.delete('product_reviews', id);
-    toast.success('Reseña eliminada');
-    setDelId(null);
-    setReviews(prev => prev.filter(r => r.id !== id));
-    if (preview?.id === id) setPreview(null);
+  const deleteReview = async () => {
+    if (!deleteTarget) return;
+    setDeletingId(deleteTarget.id);
+    try {
+      await database.delete('product_reviews', deleteTarget.id);
+      toast.success('Reseña eliminada');
+      setReviews(prev => prev.filter(r => r.id !== deleteTarget.id));
+      if (preview?.id === deleteTarget.id) setPreview(null);
+    } finally {
+      setDeletingId(null);
+      setDeleteTarget(null);
+    }
   };
 
   const filteredReviews = reviews.filter(r => {
@@ -90,8 +98,8 @@ export default function ReviewsAdminPage() {
 
   const TABS: { id: Tab; label: string; color: string }[] = [
     { id: 'pending', label: 'Pendientes', color: 'text-amber-600' },
-    { id: 'approved', label: 'Aprobadas', color: 'text-green-600' },
-    { id: 'rejected', label: 'Rechazadas', color: 'text-red-500' },
+    { id: 'approved', label: 'Aprobadas', color: 'text-emerald-600' },
+    { id: 'rejected', label: 'Rechazadas', color: 'text-destructive' },
     { id: 'all', label: 'Todas', color: 'text-foreground' },
   ];
 
@@ -215,7 +223,7 @@ export default function ReviewsAdminPage() {
                       <span className={cn('text-xs font-bold px-2 py-1 rounded-full border', cfg.cls)}>
                         {cfg.label}
                       </span>
-                      {r.verified_purchase && <p className="text-[10px] text-green-600 mt-1">✓ Verificada</p>}
+                      {r.verified_purchase && <p className="text-[10px] text-emerald-600 mt-1">✓ Verificada</p>}
                     </td>
                     {/* Date */}
                     <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
@@ -232,29 +240,22 @@ export default function ReviewsAdminPage() {
                         {/* Approve */}
                         {r.status !== 'approved' && (
                           <button onClick={() => setStatus(r.id, 'approved')} title="Aprobar"
-                            className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 text-muted-foreground hover:text-green-600 transition-colors">
+                            className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-emerald-500/10 text-muted-foreground hover:text-emerald-600 transition-colors">
                             <Check className="w-3.5 h-3.5" />
                           </button>
                         )}
                         {/* Reject */}
                         {r.status !== 'rejected' && (
                           <button onClick={() => setStatus(r.id, 'rejected')} title="Rechazar"
-                            className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-amber-50 dark:hover:bg-amber-900/20 text-muted-foreground hover:text-amber-600 transition-colors">
+                            className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-amber-500/10 text-muted-foreground hover:text-amber-600 transition-colors">
                             <X className="w-3.5 h-3.5" />
                           </button>
                         )}
                         {/* Delete */}
-                        {delId === r.id ? (
-                          <div className="flex gap-1">
-                            <button onClick={() => deleteReview(r.id)} className="px-2 py-0.5 bg-red-500 text-white rounded text-xs font-bold">Sí</button>
-                            <button onClick={() => setDelId(null)} className="px-2 py-0.5 bg-muted rounded text-xs">No</button>
-                          </div>
-                        ) : (
-                          <button onClick={() => setDelId(r.id)} title="Eliminar"
-                            className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-muted-foreground hover:text-red-500 transition-colors">
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        )}
+                        <button onClick={() => setDeleteTarget(r)} title="Eliminar"
+                          className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors">
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -307,7 +308,7 @@ export default function ReviewsAdminPage() {
               )}
               <div className="flex items-center gap-4 text-xs text-muted-foreground pt-2 border-t border-border">
                 <span>{new Date(preview.created_at).toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric' })}</span>
-                {preview.verified_purchase && <span className="text-green-600 font-semibold">✓ Compra verificada</span>}
+                {preview.verified_purchase && <span className="text-emerald-600 font-semibold">✓ Compra verificada</span>}
                 <span><ThumbsUp className="w-3 h-3 inline mr-0.5" />{preview.helpful_count ?? 0} útil</span>
               </div>
             </div>
@@ -316,7 +317,7 @@ export default function ReviewsAdminPage() {
             <div className="flex gap-2 px-5 py-4 border-t border-border">
               {preview.status !== 'approved' && (
                 <button onClick={() => setStatus(preview.id, 'approved')}
-                  className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-green-500 text-white rounded-xl text-sm font-bold hover:bg-green-600 transition-colors">
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-emerald-500 text-white rounded-xl text-sm font-bold hover:bg-emerald-600 transition-colors">
                   <Check className="w-4 h-4" /> Aprobar
                 </button>
               )}
@@ -326,14 +327,16 @@ export default function ReviewsAdminPage() {
                   <X className="w-4 h-4" /> Rechazar
                 </button>
               )}
-              {delId === preview.id ? (
-                <div className="flex gap-2 flex-1">
-                  <button onClick={() => deleteReview(preview.id)} className="flex-1 py-2.5 bg-red-500 text-white rounded-xl text-sm font-bold">Confirmar</button>
-                  <button onClick={() => setDelId(null)} className="flex-1 py-2.5 bg-muted rounded-xl text-sm font-semibold">Cancelar</button>
-                </div>
+              {deleteTarget?.id === preview.id ? (
+                <button onClick={() => setDeleteTarget(preview)}
+                  className="w-11 flex items-center justify-center border border-border rounded-xl hover:bg-destructive/10 hover:text-destructive hover:border-red-300 text-muted-foreground transition-colors"
+                  title="Eliminar reseña">
+                  <Trash2 className="w-4 h-4" />
+                </button>
               ) : (
-                <button onClick={() => setDelId(preview.id)}
-                  className="w-11 flex items-center justify-center border border-border rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 hover:border-red-300 text-muted-foreground transition-colors">
+                <button onClick={() => setDeleteTarget(preview)}
+                  className="w-11 flex items-center justify-center border border-border rounded-xl hover:bg-destructive/10 hover:text-destructive hover:border-red-300 text-muted-foreground transition-colors"
+                  title="Eliminar reseña">
                   <Trash2 className="w-4 h-4" />
                 </button>
               )}
@@ -341,6 +344,15 @@ export default function ReviewsAdminPage() {
           </div>
         </div>
       )}
+
+      <DeleteConfirmDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}
+        onConfirm={deleteReview}
+        title="Eliminar reseña"
+        description={<>Se eliminará permanentemente la reseña de <strong>{deleteTarget?.profile?.full_name || 'Anónimo'}</strong>. Esta acción no se puede deshacer.</>}
+        loading={!!deletingId}
+      />
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import type { ShippingZone, ShippingMethod } from '@/lib/storeTypes';
 import { Plus, Save, Loader as Loader2, Truck, Globe, X } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { DeleteConfirmDialog } from '@/components/admin/DeleteConfirmDialog';
 
 export default function ShippingAdminPage() {
   const [zones, setZones] = useState<ShippingZone[]>([]);
@@ -12,6 +13,8 @@ export default function ShippingAdminPage() {
   const [saving, setSaving] = useState(false);
   const [editZone, setEditZone] = useState<Partial<ShippingZone> | null>(null);
   const [editMethod, setEditMethod] = useState<Partial<ShippingMethod & { zone_id: string }> | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string; kind: 'zone' | 'method' } | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const database = useDatabase();
 
@@ -59,16 +62,22 @@ export default function ShippingAdminPage() {
     load();
   };
 
-  const deleteMethod = async (id: string) => {
-    await database.delete('shipping_methods', id);
-    toast.success('Método eliminado');
-    load();
-  };
-
-  const deleteZone = async (id: string) => {
-    await database.delete('shipping_zones', id);
-    toast.success('Zona eliminada');
-    load();
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeletingId(deleteTarget.id);
+    try {
+      if (deleteTarget.kind === 'zone') {
+        await database.delete('shipping_zones', deleteTarget.id);
+        toast.success('Zona eliminada');
+      } else {
+        await database.delete('shipping_methods', deleteTarget.id);
+        toast.success('Método eliminado');
+      }
+      load();
+    } finally {
+      setDeletingId(null);
+      setDeleteTarget(null);
+    }
   };
 
   if (loading) return (
@@ -103,13 +112,13 @@ export default function ShippingAdminPage() {
               <Globe className="w-4 h-4 text-primary" />
               <h3 className="text-sm font-black text-foreground">{zone.name}</h3>
               <span className={cn('text-xs font-semibold px-2 py-0.5 rounded-full',
-                zone.status === 'active' ? 'bg-green-500/10 text-green-600' : 'bg-muted text-muted-foreground')}>
+                zone.status === 'active' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-muted text-muted-foreground')}>
                 {zone.status === 'active' ? 'Activa' : 'Inactiva'}
               </span>
             </div>
             <div className="flex gap-2">
               <button onClick={() => setEditZone(zone)} className="text-xs font-semibold text-primary hover:underline">Editar</button>
-              <button onClick={() => deleteZone(zone.id)} className="text-xs font-semibold text-red-500 hover:underline">Eliminar</button>
+              <button onClick={() => setDeleteTarget({ id: zone.id, name: zone.name, kind: 'zone' })} className="text-xs font-semibold text-destructive hover:underline">Eliminar</button>
             </div>
           </div>
           <div className="p-5">
@@ -134,7 +143,7 @@ export default function ShippingAdminPage() {
                   </div>
                   <div className="flex gap-2">
                     <button onClick={() => setEditMethod({ ...m, zone_id: zone.id })} className="text-xs text-primary hover:underline">Editar</button>
-                    <button onClick={() => deleteMethod(m.id)} className="text-xs text-red-500 hover:underline">Eliminar</button>
+                    <button onClick={() => setDeleteTarget({ id: m.id, name: m.name, kind: 'method' })} className="text-xs text-destructive hover:underline">Eliminar</button>
                   </div>
                 </div>
               ))}
@@ -241,6 +250,15 @@ export default function ShippingAdminPage() {
           </div>
         </div>
       )}
+
+      <DeleteConfirmDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}
+        onConfirm={handleDelete}
+        title={deleteTarget?.kind === 'zone' ? 'Eliminar zona' : 'Eliminar método'}
+        description={<>Se eliminará permanentemente <strong>{deleteTarget?.name}</strong>. Esta acción no se puede deshacer.</>}
+        loading={!!deletingId}
+      />
     </div>
   );
 }

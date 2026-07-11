@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Plus, Trash2, Save, Shield, Users, X, Lock, ArrowRight, RefreshCw } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { DeleteConfirmDialog } from '@/components/admin/DeleteConfirmDialog';
 
 interface CustomRole {
   id: string;
@@ -70,7 +71,8 @@ export default function RolesAdminPage() {
   const [newRole, setNewRole] = useState({ name: '', label: '', color: '#3B82F6', description: '' });
   const [saving, setSaving] = useState(false);
   const [usageCounts, setUsageCounts] = useState<Record<string, number>>({});
-  const [deleteConfirm, setDeleteConfirm] = useState<CustomRole | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<CustomRole | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -122,21 +124,27 @@ export default function RolesAdminPage() {
     setSaving(false);
   };
 
-  const deleteRole = async (role: CustomRole) => {
-    if (role.is_system) { toast.error('Los roles del sistema no se pueden eliminar'); setDeleteConfirm(null); return; }
-    const count = usageCounts[role.name] || 0;
+  const deleteRole = async () => {
+    if (!deleteTarget) return;
+    if (deleteTarget.is_system) { toast.error('Los roles del sistema no se pueden eliminar'); setDeleteTarget(null); return; }
+    const count = usageCounts[deleteTarget.name] || 0;
     if (count > 0) {
       toast.error(`Este rol tiene ${count} usuario(s). Reasígnalos antes de eliminarlo.`);
-      setDeleteConfirm(null);
+      setDeleteTarget(null);
       return;
     }
-    const { error } = await database.delete('custom_roles', role.id);
-    if (error) { toast.error(error); return; }
-    toast.success('Rol eliminado');
-    const remaining = roles.filter(r => r.id !== role.id);
-    setRoles(remaining);
-    setSelectedRole(remaining[0] || null);
-    setDeleteConfirm(null);
+    setDeletingId(deleteTarget.id);
+    try {
+      const { error } = await database.delete('custom_roles', deleteTarget.id);
+      if (error) { toast.error(error); return; }
+      toast.success('Rol eliminado');
+      const remaining = roles.filter(r => r.id !== deleteTarget.id);
+      setRoles(remaining);
+      setSelectedRole(remaining[0] || null);
+    } finally {
+      setDeletingId(null);
+      setDeleteTarget(null);
+    }
   };
 
   const saveRole = async () => {
@@ -190,9 +198,9 @@ export default function RolesAdminPage() {
       </div>
 
       {/* Callout: permissions matrix lives in AdminPage */}
-      <div className="flex items-center justify-between gap-4 p-4 bg-blue-500/8 border border-blue-500/20 rounded-xl">
+      <div className="flex items-center justify-between gap-4 p-4 bg-primary/8 border border-blue-500/20 rounded-xl">
         <div className="flex items-start gap-3">
-          <Shield className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
+          <Shield className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
           <div>
             <p className="text-sm font-semibold text-foreground">Permisos por rol</p>
             <p className="text-xs text-muted-foreground mt-0.5">
@@ -202,7 +210,7 @@ export default function RolesAdminPage() {
         </div>
         <button
           onClick={() => navigate('/dashboard/admin?module=permisos')}
-          className="flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:underline whitespace-nowrap flex-shrink-0">
+          className="flex items-center gap-1.5 text-xs font-bold text-primary hover:underline whitespace-nowrap flex-shrink-0">
           Ir a permisos <ArrowRight className="w-3.5 h-3.5" />
         </button>
       </div>
@@ -258,29 +266,15 @@ export default function RolesAdminPage() {
         </div>
       )}
 
-      {/* Delete confirm */}
-      {deleteConfirm && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-card border border-border rounded-2xl w-full max-w-sm shadow-2xl p-6">
-            <h3 className="text-lg font-bold text-foreground text-center mb-2">Eliminar rol</h3>
-            <p className="text-sm text-muted-foreground text-center mb-5">
-              ¿Eliminar <strong>"{deleteConfirm.label}"</strong>? Esta acción no se puede deshacer.
-            </p>
-            <div className="flex gap-3">
-              <button onClick={() => setDeleteConfirm(null)}
-                className="flex-1 border border-border rounded-xl py-2.5 text-sm font-medium hover:bg-muted transition-colors">
-                Cancelar
-              </button>
-              <button onClick={() => deleteRole(deleteConfirm)}
-                className="flex-1 bg-red-600 text-white rounded-xl py-2.5 text-sm font-semibold hover:bg-red-700 transition-colors">
-                Eliminar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <DeleteConfirmDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}
+        onConfirm={deleteRole}
+        title="Eliminar rol"
+        description={<>Se eliminará permanentemente <strong>{deleteTarget?.label}</strong>. Esta acción no se puede deshacer.</>}
+        loading={!!deletingId}
+      />
 
-      {/* Two-column layout */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
         {/* Left: role list */}
@@ -322,8 +316,8 @@ export default function RolesAdminPage() {
                 {!role.is_system && (
                   <button
                     type="button"
-                    onClick={e => { e.stopPropagation(); setDeleteConfirm(role); }}
-                    className="w-7 h-7 flex items-center justify-center rounded-lg text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors flex-shrink-0">
+                    onClick={e => { e.stopPropagation(); setDeleteTarget(role); }}
+                    className="w-7 h-7 flex items-center justify-center rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors flex-shrink-0">
                     <Trash2 style={{ width: 13, height: 13 }} />
                   </button>
                 )}

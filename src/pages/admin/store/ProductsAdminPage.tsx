@@ -4,12 +4,13 @@ import { useNavigate } from '@/lib/router';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import type { Product, ProductCategory } from '@/lib/storeTypes';
-import { Plus, Search, CreditCard as Edit2, Trash2, Copy, Eye, EyeOff, Package, RefreshCw } from 'lucide-react';
+import { Plus, Search, Pencil, Trash2, Copy, Eye, EyeOff, Package, RefreshCw } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { DeleteConfirmDialog } from '@/components/admin/DeleteConfirmDialog';
 
 function fmt(n: number) { return `S/ ${n.toFixed(2)}`; }
 
-const STATUS_MAP = { active: { label: 'Activo', cl: 'text-green-600 bg-green-500/10' }, draft: { label: 'Borrador', cl: 'text-yellow-600 bg-yellow-500/10' }, archived: { label: 'Archivado', cl: 'text-muted-foreground bg-muted' } };
+const STATUS_MAP = { active: { label: 'Activo', cl: 'text-emerald-600 bg-emerald-500/10' }, draft: { label: 'Borrador', cl: 'text-amber-600 bg-amber-500/10' }, archived: { label: 'Archivado', cl: 'text-muted-foreground bg-muted' } };
 
 export default function ProductsAdminPage() {
   const navigate = useNavigate();
@@ -19,7 +20,8 @@ export default function ProductsAdminPage() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [catFilter, setCatFilter] = useState('');
-  const [delId, setDelId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const database = useDatabase();
 
@@ -98,10 +100,17 @@ export default function ProductsAdminPage() {
     else { toast.success(`Producto ${next === 'active' ? 'activado' : 'desactivado'}`); load(); }
   };
 
-  const remove = async (id: string) => {
-    const { error } = await database.delete('products', id);
-    if (error) toast.error(error);
-    else { toast.success('Producto eliminado'); setDelId(null); load(); }
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeletingId(deleteTarget.id);
+    try {
+      const { error } = await database.delete('products', deleteTarget.id);
+      if (error) toast.error(error);
+      else { toast.success('Producto eliminado'); load(); }
+    } finally {
+      setDeletingId(null);
+      setDeleteTarget(null);
+    }
   };
 
   return (
@@ -204,7 +213,7 @@ export default function ProductsAdminPage() {
                         {p.compare_price && <p className="text-xs text-muted-foreground line-through">{fmt(p.compare_price)}</p>}
                       </td>
                       <td className="px-4 py-3 hidden md:table-cell">
-                        <span className={cn('text-xs font-semibold', totalStock === 0 ? 'text-red-500' : totalStock <= 5 ? 'text-orange-500' : 'text-foreground')}>{totalStock}</span>
+                        <span className={cn('text-xs font-semibold', totalStock === 0 ? 'text-destructive' : totalStock <= 5 ? 'text-orange-500' : 'text-foreground')}>{totalStock}</span>
                       </td>
                       <td className="px-4 py-3">
                         <span className={cn('text-xs font-bold px-2.5 py-1 rounded-full', sc.cl)}>{sc.label}</span>
@@ -213,27 +222,20 @@ export default function ProductsAdminPage() {
                         <div className="flex items-center justify-end gap-1">
                           <button onClick={() => navigate(`/dashboard/admin/productos/${p.id}`)}
                             className="p-1.5 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-primary" title="Editar">
-                            <Edit2 className="w-3.5 h-3.5" />
+                            <Pencil className="w-3.5 h-3.5" />
                           </button>
                           <button onClick={() => duplicate(p)}
-                            className="p-1.5 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-blue-500" title="Duplicar">
+                            className="p-1.5 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-primary" title="Duplicar">
                             <Copy className="w-3.5 h-3.5" />
                           </button>
                           <button onClick={() => toggleStatus(p)}
-                            className="p-1.5 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-green-500" title="Activar/Desactivar">
+                            className="p-1.5 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-emerald-500" title="Activar/Desactivar">
                             {p.status === 'active' ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                           </button>
-                          {delId === p.id ? (
-                            <div className="flex items-center gap-1">
-                              <button onClick={() => remove(p.id)} className="p-1.5 bg-red-500 text-white rounded-lg text-xs font-bold">Sí</button>
-                              <button onClick={() => setDelId(null)} className="p-1.5 bg-muted rounded-lg text-xs font-bold">No</button>
-                            </div>
-                          ) : (
-                            <button onClick={() => setDelId(p.id)}
-                              className="p-1.5 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-red-500" title="Eliminar">
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          )}
+                          <button onClick={() => setDeleteTarget(p)}
+                            className="p-1.5 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-destructive" title="Eliminar">
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -247,6 +249,15 @@ export default function ProductsAdminPage() {
           </div>
         </div>
       )}
+
+      <DeleteConfirmDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}
+        onConfirm={handleDelete}
+        title="Eliminar producto"
+        description={<>Se eliminará permanentemente <strong>{deleteTarget?.name}</strong>. Esta acción no se puede deshacer.</>}
+        loading={!!deletingId}
+      />
     </div>
   );
 }

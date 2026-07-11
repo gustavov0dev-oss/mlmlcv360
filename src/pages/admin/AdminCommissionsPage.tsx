@@ -1,9 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-import { Search, Plus, Trash2, RefreshCw, Download, ChevronLeft, ChevronRight, CircleCheck as CheckCircle, X, DollarSign, Clock, TrendingUp, Filter, Eye, Save, Loader as Loader2, CreditCard as Edit2, Info } from 'lucide-react';
+import { Search, Plus, Trash2, RefreshCw, Download, ChevronLeft, ChevronRight, CircleCheck as CheckCircle, X, DollarSign, Clock, TrendingUp, Filter, Eye, Save, Loader as Loader2, Pencil, Info } from 'lucide-react';
 import { useCommissions, useCommissionsAdminPagination, TYPE_LABELS, TYPE_COLORS, STATUS_COLORS } from '@/modules/mlm';
 import type { Commission } from '@/modules/mlm';
+import { DeleteConfirmDialog } from '@/components/admin/DeleteConfirmDialog';
 
 type CommType = Commission['type'];
 type CommStatus = Commission['status'];
@@ -35,7 +36,7 @@ function Field({ label, required, hint, children }: { label: string; required?: 
   return (
     <div>
       <label className="block text-xs font-semibold text-foreground mb-1.5">
-        {label}{required && <span className="text-red-500 ml-0.5">*</span>}
+        {label}{required && <span className="text-destructive ml-0.5">*</span>}
       </label>
       {children}
       {hint && <p className="mt-1 text-xs text-muted-foreground">{hint}</p>}
@@ -136,7 +137,7 @@ function CommissionModal({
       <div className="bg-card border border-border rounded-2xl w-full max-w-lg shadow-2xl flex flex-col max-h-[90vh]">
         <div className="flex items-center justify-between px-6 py-4 border-b border-border flex-shrink-0">
           <div className="flex items-center gap-2">
-            {mode === 'create' ? <Plus className="w-4 h-4 text-primary" /> : <Edit2 className="w-4 h-4 text-primary" />}
+            {mode === 'create' ? <Plus className="w-4 h-4 text-primary" /> : <Pencil className="w-4 h-4 text-primary" />}
             <h3 className="text-base font-bold text-foreground">
               {mode === 'create' ? 'Nueva comisión' : 'Editar comisión'}
             </h3>
@@ -168,7 +169,7 @@ function CommissionModal({
                       return u ? (
                         <span key={uid} className="inline-flex items-center gap-1 bg-primary/10 text-primary text-xs px-2 py-1 rounded-full font-medium">
                           {u.full_name}
-                          <button onClick={() => toggleMultiUser(uid)} className="hover:text-red-500"><X className="w-3 h-3" /></button>
+                          <button onClick={() => toggleMultiUser(uid)} className="hover:text-destructive"><X className="w-3 h-3" /></button>
                         </span>
                       ) : null;
                     })}
@@ -200,7 +201,7 @@ function CommissionModal({
                     <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
                     <span className="text-sm text-foreground font-medium">{selectedUser.full_name}</span>
                     <span className="text-xs text-muted-foreground">({selectedUser.email})</span>
-                    <button onClick={() => setForm(p => ({ ...p, user_id: '' }))} className="ml-auto text-muted-foreground hover:text-red-500">
+                    <button onClick={() => setForm(p => ({ ...p, user_id: '' }))} className="ml-auto text-muted-foreground hover:text-destructive">
                       <X className="w-3.5 h-3.5" />
                     </button>
                   </div>
@@ -318,7 +319,7 @@ function CommissionModal({
                 <label className="block text-xs font-semibold text-foreground mb-1.5">Generada por</label>
                 <div className="flex items-center gap-2 bg-muted border border-border rounded-lg px-3 py-2">
                   <span className="text-sm text-foreground">{selectedFrom.full_name}</span>
-                  <button onClick={() => setForm(p => ({ ...p, from_user_id: '' }))} className="ml-auto text-muted-foreground hover:text-red-500">
+                  <button onClick={() => setForm(p => ({ ...p, from_user_id: '' }))} className="ml-auto text-muted-foreground hover:text-destructive">
                     <X className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -437,7 +438,8 @@ export default function AdminCommissionsPage() {
   } = useCommissionsAdminPagination(commissions, users, PAGE_SIZE);
 
   const [modal, setModal] = useState<{ mode: 'create' | 'edit'; data: typeof EMPTY_FORM & { id?: string } } | null>(null);
-  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Commission | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [updating, setUpdating] = useState<string | null>(null);
   const [viewRow, setViewRow] = useState<any | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -476,7 +478,19 @@ export default function AdminCommissionsPage() {
     setBulkWorking(false);
   };
 
-  const openEdit = (c: any) => {
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeletingId(deleteTarget.id);
+    try {
+      const result = await deleteCommission(deleteTarget.id);
+      if (result.success) toast.success('Comisión eliminada');
+    } finally {
+      setDeletingId(null);
+      setDeleteTarget(null);
+    }
+  };
+
+  const openEdit = (c: Commission) => {
     setModal({
       mode: 'edit',
       data: {
@@ -516,10 +530,10 @@ export default function AdminCommissionsPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
-          { label: 'Total comisiones', value: String(stats.count), icon: TrendingUp, color: 'text-blue-500 bg-blue-500/10' },
-          { label: 'Monto pagado', value: `S/ ${stats.paid.toFixed(2)}`, icon: DollarSign, color: 'text-green-500 bg-green-500/10' },
+          { label: 'Total comisiones', value: String(stats.count), icon: TrendingUp, color: 'text-primary bg-primary/10' },
+          { label: 'Monto pagado', value: `S/ ${stats.paid.toFixed(2)}`, icon: DollarSign, color: 'text-green-500 bg-emerald-500/10' },
           { label: 'Pendientes', value: `${stats.pending} · S/ ${(stats as any).pendingAmt?.toFixed(2) || '0.00'}`, icon: Clock, color: 'text-amber-500 bg-amber-500/10' },
-          { label: 'Aprobadas', value: String(stats.approved), icon: CheckCircle, color: 'text-purple-500 bg-purple-500/10' },
+          { label: 'Aprobadas', value: String(stats.approved), icon: CheckCircle, color: 'text-purple-500 bg-primary/10' },
         ].map(s => (
           <div key={s.label} className="bg-card border border-border rounded-xl p-4 flex items-start gap-3">
             <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0', s.color)}>
@@ -647,14 +661,14 @@ export default function AdminCommissionsPage() {
                       <button onClick={() => setViewRow(c)} className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors" title="Ver">
                         <Eye className="w-3.5 h-3.5" />
                       </button>
-                      <button onClick={() => openEdit(c)} className="p-1.5 rounded-lg hover:bg-blue-500/10 text-muted-foreground hover:text-blue-500 transition-colors" title="Editar">
-                        <Edit2 className="w-3.5 h-3.5" />
+                      <button onClick={() => openEdit(c)} className="p-1.5 rounded-lg hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors" title="Editar">
+                        <Pencil className="w-3.5 h-3.5" />
                       </button>
                       {c.status === 'pending' && (
                         <button
                           onClick={() => updateStatusHandler(c.id, 'approved')}
                           disabled={updating === c.id}
-                          className="p-1.5 rounded-lg hover:bg-blue-500/10 text-muted-foreground hover:text-blue-600 transition-colors disabled:opacity-40"
+                          className="p-1.5 rounded-lg hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors disabled:opacity-40"
                           title="Aprobar"
                         >
                           {updating === c.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
@@ -664,7 +678,7 @@ export default function AdminCommissionsPage() {
                         <button
                           onClick={() => updateStatusHandler(c.id, 'paid')}
                           disabled={updating === c.id}
-                          className="p-1.5 rounded-lg hover:bg-green-500/10 text-muted-foreground hover:text-green-600 transition-colors disabled:opacity-40"
+                          className="p-1.5 rounded-lg hover:bg-emerald-500/10 text-muted-foreground hover:text-emerald-600 transition-colors disabled:opacity-40"
                           title="Marcar pagada"
                         >
                           {updating === c.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <DollarSign className="w-3.5 h-3.5" />}
@@ -674,13 +688,13 @@ export default function AdminCommissionsPage() {
                         <button
                           onClick={() => updateStatusHandler(c.id, 'rejected')}
                           disabled={updating === c.id}
-                          className="p-1.5 rounded-lg hover:bg-red-500/10 text-muted-foreground hover:text-red-500 transition-colors disabled:opacity-40"
+                          className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors disabled:opacity-40"
                           title="Rechazar"
                         >
                           <X className="w-3.5 h-3.5" />
                         </button>
                       )}
-                      <button onClick={() => setDeleteId(c.id)} className="p-1.5 rounded-lg hover:bg-red-500/10 text-muted-foreground hover:text-red-500 transition-colors" title="Eliminar">
+                      <button onClick={() => setDeleteTarget(c)} className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors" title="Eliminar">
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
@@ -752,7 +766,7 @@ export default function AdminCommissionsPage() {
                 Cerrar
               </button>
               <button onClick={() => { openEdit(viewRow); setViewRow(null); }} className="flex-1 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 transition-colors flex items-center justify-center gap-2">
-                <Edit2 className="w-4 h-4" /> Editar
+                <Pencil className="w-4 h-4" /> Editar
               </button>
             </div>
           </div>
@@ -773,31 +787,14 @@ export default function AdminCommissionsPage() {
         />
       )}
 
-      {/* Delete confirm */}
-      {deleteId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-card border border-border rounded-2xl w-full max-w-sm shadow-2xl p-6">
-            <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mb-4 mx-auto">
-              <Trash2 className="w-6 h-6 text-red-500" />
-            </div>
-            <h3 className="text-base font-bold text-foreground text-center mb-2">Eliminar comisión</h3>
-            <p className="text-sm text-muted-foreground text-center mb-5">Esta acción no se puede deshacer.</p>
-            <div className="flex gap-3">
-              <button onClick={() => setDeleteId(null)} className="flex-1 border border-border rounded-xl py-2.5 text-sm font-medium hover:bg-muted transition-colors">Cancelar</button>
-              <button
-                onClick={async () => {
-                  const result = await deleteCommission(deleteId!);
-                  if (result.success) toast.success('Comisión eliminada');
-                  setDeleteId(null);
-                }}
-                className="flex-1 bg-red-600 text-white rounded-xl py-2.5 text-sm font-semibold hover:bg-red-700 transition-colors"
-              >
-                Eliminar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <DeleteConfirmDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}
+        onConfirm={handleDelete}
+        title="Eliminar comisión"
+        description={<>Se eliminará permanentemente la comisión de <strong>{deleteTarget ? (userOptions.find(u => u.id === deleteTarget.user_id)?.full_name || 'usuario') : ''}</strong>. Esta acción no se puede deshacer.</>}
+        loading={!!deletingId}
+      />
     </div>
   );
 }

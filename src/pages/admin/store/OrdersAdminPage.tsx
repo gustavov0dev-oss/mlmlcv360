@@ -10,13 +10,13 @@ import { useNavigate } from '@/lib/router';
 function fmt(n: number) { return `S/ ${n.toFixed(2)}`; }
 
 const STATUS_CONFIG: Record<string, { label: string; cl: string }> = {
-  pending:    { label: 'Pendiente',   cl: 'text-yellow-600 bg-yellow-500/10' },
-  confirmed:  { label: 'Confirmado',  cl: 'text-blue-600 bg-blue-500/10'     },
-  processing: { label: 'En proceso',  cl: 'text-purple-600 bg-purple-500/10' },
+  pending:    { label: 'Pendiente',   cl: 'text-amber-600 bg-amber-500/10' },
+  confirmed:  { label: 'Confirmado',  cl: 'text-primary bg-primary/10'     },
+  processing: { label: 'En proceso',  cl: 'text-primary bg-primary/10' },
   shipped:    { label: 'Enviado',     cl: 'text-cyan-600 bg-cyan-500/10'     },
-  delivered:  { label: 'Entregado',   cl: 'text-green-600 bg-green-500/10'   },
-  cancelled:  { label: 'Cancelado',   cl: 'text-red-600 bg-red-500/10'       },
-  refunded:   { label: 'Reembolsado', cl: 'text-orange-600 bg-orange-500/10' },
+  delivered:  { label: 'Entregado',   cl: 'text-emerald-600 bg-emerald-500/10'   },
+  cancelled:  { label: 'Cancelado',   cl: 'text-red-600 bg-destructive/10'       },
+  refunded:   { label: 'Reembolsado', cl: 'text-amber-600 bg-amber-500/10' },
 };
 
 const ALL_STATUSES = Object.keys(STATUS_CONFIG);
@@ -177,8 +177,8 @@ export default function OrdersAdminPage() {
                       </td>
                       <td className="px-4 py-3">
                         <span className={cn('text-xs font-bold px-2 py-0.5 rounded-full',
-                          o.payment_status === 'paid' ? 'bg-green-500/10 text-green-600' :
-                          o.payment_status === 'failed' ? 'bg-red-500/10 text-red-600' : 'bg-muted text-muted-foreground')}>
+                          o.payment_status === 'paid' ? 'bg-emerald-500/10 text-emerald-600' :
+                          o.payment_status === 'failed' ? 'bg-destructive/10 text-red-600' : 'bg-muted text-muted-foreground')}>
                           {o.payment_status === 'paid' ? 'Pagado' : o.payment_status === 'failed' ? 'Fallido' : 'Pendiente'}
                         </span>
                       </td>

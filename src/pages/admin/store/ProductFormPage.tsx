@@ -516,7 +516,7 @@ export default function ProductFormPage() {
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
                       <div className="opacity-0 group-hover:opacity-100 absolute top-1 right-1 flex gap-1">
                         <button onClick={() => setMedia(prev => prev.filter((_, j) => j !== i))}
-                          className="w-6 h-6 bg-red-500 rounded-lg flex items-center justify-center text-white hover:bg-red-600"><X className="w-3 h-3" /></button>
+                          className="w-6 h-6 bg-red-500 rounded-lg flex items-center justify-center text-white hover:bg-destructive"><X className="w-3 h-3" /></button>
                       </div>
                       <GripVertical className="w-5 h-5 text-white opacity-0 group-hover:opacity-100" />
                     </div>
@@ -597,7 +597,7 @@ export default function ProductFormPage() {
                       <option value="inactive">Inactiva</option>
                     </select>
                     <button onClick={() => setVariants(p => p.filter((_, j) => j !== i))}
-                      className="w-8 h-8 flex items-center justify-center text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
+                      className="w-8 h-8 flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors">
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
@@ -706,7 +706,7 @@ export default function ProductFormPage() {
                     placeholder="Valor (ej: 500g)"
                     className="flex-1 px-3 py-2 bg-muted border border-border rounded-xl text-sm text-foreground outline-none focus:border-primary" />
                   <button onClick={() => setSpecs(p => p.filter((_, j) => j !== i))}
-                    className="w-9 h-9 flex items-center justify-center text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
+                    className="w-9 h-9 flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors">
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
@@ -747,7 +747,7 @@ export default function ProductFormPage() {
                     placeholder="0" min="0" step="0.01"
                     className="flex-1 px-3 py-2 bg-muted border border-border rounded-xl text-sm text-foreground outline-none focus:border-primary" />
                   <button onClick={() => setCommissions(p => p.filter((_, j) => j !== i))}
-                    className="w-9 h-9 flex items-center justify-center text-muted-foreground hover:text-red-500 rounded-lg">
+                    className="w-9 h-9 flex items-center justify-center text-muted-foreground hover:text-destructive rounded-lg">
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
@@ -780,8 +780,8 @@ export default function ProductFormPage() {
       {tab === 'digital' && form.is_digital && (
         <div className="bg-card border border-border rounded-2xl p-5 space-y-4">
           <div className="flex items-start gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl">
-            <Download className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" />
-            <div className="text-xs text-blue-600 dark:text-blue-400">
+            <Download className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+            <div className="text-xs text-primary">
               <p className="font-bold">Producto digital</p>
               <p>El archivo se entrega automáticamente al cliente tras confirmar el pago.</p>
             </div>

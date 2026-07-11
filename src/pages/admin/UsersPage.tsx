@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useDatabase, useStorage } from '@/lib/backend';
+import { supabase } from '@/lib/backend/client';
 import { toast } from 'sonner';
+import { DeleteConfirmDialog } from '@/components/admin/DeleteConfirmDialog';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/authStore';
-import { Search, Plus, CreditCard as Edit2, Trash2, Eye, UserCheck, UserX, X, Save, RefreshCw, ChevronLeft, ChevronRight, CircleCheck as CheckCircle, Shield, Users, Loader as Loader2, KeyRound, Info, LogIn, Link2 } from 'lucide-react';
+import { Search, Plus, Pencil, Trash2, Eye, UserCheck, UserX, X, Save, RefreshCw, ChevronLeft, ChevronRight, CircleCheck as CheckCircle, Shield, Users, Loader as Loader2, KeyRound, Info, LogIn, Link2 } from 'lucide-react';
 
 interface UserRow {
   id: string;
@@ -30,22 +32,22 @@ const STATUSES = ['active', 'suspended', 'pending'];
 
 const rankColors: Record<string, string> = {
   bronze: 'text-amber-600 bg-amber-500/10', silver: 'text-slate-400 bg-slate-400/10',
-  gold: 'text-yellow-500 bg-yellow-500/10', platinum: 'text-slate-300 bg-slate-300/10',
+  gold: 'text-yellow-500 bg-amber-500/10', platinum: 'text-slate-300 bg-slate-300/10',
   diamond: 'text-cyan-400 bg-cyan-400/10', crown: 'text-yellow-400 bg-yellow-400/10',
 };
 const statusColors: Record<string, string> = {
-  active: 'text-green-600 bg-green-500/10',
-  suspended: 'text-red-500 bg-red-500/10',
-  pending: 'text-yellow-600 bg-yellow-500/10',
+  active: 'text-emerald-600 bg-emerald-500/10',
+  suspended: 'text-destructive bg-destructive/10',
+  pending: 'text-amber-600 bg-amber-500/10',
 };
 const statusLabels: Record<string, string> = { active: 'Activo', suspended: 'Suspendido', pending: 'Pendiente' };
 const roleLabels: Record<string, string> = {
   user: 'Usuario', inspector: 'Inspector', support: 'Soporte', admin: 'Admin', super_admin: 'Super Admin',
 };
 const roleColors: Record<string, string> = {
-  user: 'text-muted-foreground bg-muted', inspector: 'text-blue-600 bg-blue-500/10',
-  support: 'text-purple-600 bg-purple-500/10', admin: 'text-orange-600 bg-orange-500/10',
-  super_admin: 'text-red-600 bg-red-500/10',
+  user: 'text-muted-foreground bg-muted', inspector: 'text-primary bg-primary/10',
+  support: 'text-primary bg-primary/10', admin: 'text-amber-600 bg-amber-500/10',
+  super_admin: 'text-red-600 bg-destructive/10',
 };
 
 const PAGE_SIZE = 10;
@@ -206,9 +208,9 @@ function UserModal({
         <div className="overflow-y-auto flex-1 p-6 space-y-5">
 
           {mode === 'create' && (
-            <div className="flex items-start gap-2.5 bg-blue-500/10 border border-blue-500/20 rounded-xl p-3.5">
-              <Info className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" />
-              <p className="text-xs text-blue-700 dark:text-blue-300">
+            <div className="flex items-start gap-2.5 bg-primary/10 border border-blue-500/20 rounded-xl p-3.5">
+              <Info className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+              <p className="text-xs text-primary">
                 Se creará la cuenta con contraseña temporal <strong>Temp123456!</strong>. El usuario deberá cambiarla al iniciar sesión.
               </p>
             </div>
@@ -245,7 +247,7 @@ function UserModal({
                   {(form as any)._createAvatarPreview && (
                     <button type="button"
                       onClick={() => setForm(p => ({ ...p, _createAvatarFile: undefined, _createAvatarPreview: undefined }))}
-                      className="text-xs text-red-500 hover:underline mt-1">Quitar foto</button>
+                      className="text-xs text-destructive hover:underline mt-1">Quitar foto</button>
                   )}
                 </div>
               </div>
@@ -278,7 +280,7 @@ function UserModal({
                       await database.update('profiles', form.id as string, { avatar_url: null, updated_at: new Date().toISOString() });
                       setForm(p => ({ ...p, avatar_url: undefined }));
                       toast.success('Foto eliminada');
-                    }} className="text-xs text-red-500 hover:underline mt-1">
+                    }} className="text-xs text-destructive hover:underline mt-1">
                       Quitar foto
                     </button>
                   )}
@@ -558,14 +560,23 @@ export default function UsersPage() {
     }
   };
 
+  const [deletingUserId, setDeletingUserId] = useState(false);
+
   const deleteUser = async (user: UserRow) => {
-    const { error } = await database.delete('profiles', user.id);
-    if (!error) {
+    setDeletingUserId(true);
+    try {
+      const { error: rpcError } = await supabase.rpc('admin_delete_user', { p_user_id: user.id });
+      if (rpcError) {
+        const { error: dbError } = await supabase.from('profiles').delete().eq('id', user.id);
+        if (dbError) throw dbError;
+      }
       toast.success(`Usuario ${user.full_name} eliminado`);
       setDeleteConfirm(null);
       fetchUsers();
-    } else {
-      toast.error('Error al eliminar: ' + error);
+    } catch (e: any) {
+      toast.error('Error al eliminar: ' + (e?.message || 'desconocido'));
+    } finally {
+      setDeletingUserId(false);
     }
   };
 
@@ -592,9 +603,9 @@ export default function UsersPage() {
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
         {[
-          { label: 'Total usuarios', value: total, icon: Users, color: 'text-blue-500 bg-blue-500/10' },
-          { label: 'Activos', value: users.filter(u => u.status === 'active').length, icon: CheckCircle, color: 'text-green-500 bg-green-500/10' },
-          { label: 'Administradores', value: users.filter(u => ['admin', 'super_admin'].includes(u.role)).length, icon: Shield, color: 'text-orange-500 bg-orange-500/10' },
+          { label: 'Total usuarios', value: total, icon: Users, color: 'text-primary bg-primary/10' },
+          { label: 'Activos', value: users.filter(u => u.status === 'active').length, icon: CheckCircle, color: 'text-green-500 bg-emerald-500/10' },
+          { label: 'Administradores', value: users.filter(u => ['admin', 'super_admin'].includes(u.role)).length, icon: Shield, color: 'text-orange-500 bg-amber-500/10' },
         ].map(s => (
           <div key={s.label} className="bg-card border border-border rounded-xl p-4 flex items-center gap-3">
             <div className={cn('w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0', s.color)}>
@@ -725,14 +736,14 @@ export default function UsersPage() {
                       </button>
                       <button
                         onClick={() => setModal({ mode: 'edit', user })}
-                        className="p-1.5 rounded-lg hover:bg-blue-500/10 text-muted-foreground hover:text-blue-500 transition-colors"
+                        className="p-1.5 rounded-lg hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors"
                         title="Editar"
                       >
-                        <Edit2 className="w-3.5 h-3.5" />
+                        <Pencil className="w-3.5 h-3.5" />
                       </button>
                       <button
                         onClick={() => copyInviteLink(user)}
-                        className="p-1.5 rounded-lg hover:bg-green-500/10 text-muted-foreground hover:text-green-500 transition-colors"
+                        className="p-1.5 rounded-lg hover:bg-emerald-500/10 text-muted-foreground hover:text-emerald-500 transition-colors"
                         title="Copiar enlace de referido"
                       >
                         <Link2 className="w-3.5 h-3.5" />
@@ -740,7 +751,7 @@ export default function UsersPage() {
                       {isSuperAdmin && (
                         <button
                           onClick={() => toast.info(`Para impersonar a ${user.full_name}, usa Supabase Studio → Authentication → Users.`)}
-                          className="p-1.5 rounded-lg hover:bg-yellow-500/10 text-muted-foreground hover:text-yellow-600 transition-colors"
+                          className="p-1.5 rounded-lg hover:bg-amber-500/10 text-muted-foreground hover:text-amber-600 transition-colors"
                           title="Acceder como usuario (solo superadmin)"
                         >
                           <LogIn className="w-3.5 h-3.5" />
@@ -751,8 +762,8 @@ export default function UsersPage() {
                         className={cn(
                           'p-1.5 rounded-lg transition-colors',
                           user.status === 'active'
-                            ? 'hover:bg-red-500/10 text-muted-foreground hover:text-red-500'
-                            : 'hover:bg-green-500/10 text-green-500 hover:text-green-600',
+                            ? 'hover:bg-destructive/10 text-muted-foreground hover:text-destructive'
+                            : 'hover:bg-emerald-500/10 text-green-500 hover:text-emerald-600',
                         )}
                         title={user.status === 'active' ? 'Suspender' : 'Activar'}
                       >
@@ -760,7 +771,7 @@ export default function UsersPage() {
                       </button>
                       <button
                         onClick={() => setDeleteConfirm(user)}
-                        className="p-1.5 rounded-lg hover:bg-red-500/10 text-muted-foreground hover:text-red-500 transition-colors"
+                        className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
                         title="Eliminar"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -825,33 +836,14 @@ export default function UsersPage() {
       )}
 
       {/* Delete confirm */}
-      {deleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-card border border-border rounded-2xl w-full max-w-sm shadow-2xl p-6">
-            <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mb-4 mx-auto">
-              <Trash2 className="w-6 h-6 text-red-500" />
-            </div>
-            <h3 className="text-base font-bold text-foreground text-center mb-2">Eliminar usuario</h3>
-            <p className="text-sm text-muted-foreground text-center mb-5">
-              ¿Eliminar a <strong className="text-foreground">{deleteConfirm.full_name}</strong>? Esta acción no se puede deshacer.
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setDeleteConfirm(null)}
-                className="flex-1 border border-border rounded-xl py-2.5 text-sm font-medium hover:bg-muted transition-colors"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={() => deleteUser(deleteConfirm)}
-                className="flex-1 bg-red-600 text-white rounded-xl py-2.5 text-sm font-semibold hover:bg-red-700 transition-colors"
-              >
-                Eliminar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <DeleteConfirmDialog
+        open={!!deleteConfirm}
+        onOpenChange={(open) => { if (!open) setDeleteConfirm(null); }}
+        onConfirm={() => deleteConfirm && deleteUser(deleteConfirm)}
+        title="Eliminar usuario"
+        description={<>Se eliminará permanentemente a <strong className="text-foreground">{deleteConfirm?.full_name}</strong> y su cuenta de autenticación. Esta acción no se puede deshacer.</>}
+        loading={deletingUserId}
+      />
     </div>
   );
 }
