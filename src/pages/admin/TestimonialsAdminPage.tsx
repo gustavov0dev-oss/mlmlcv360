@@ -265,9 +265,9 @@ function DraggableRow({
       onDragOver={e => { e.preventDefault(); onDragOver(e, t.id); }}
       onDrop={e => onDrop(e, t.id)}
       className={cn(
-        'bg-card border rounded-2xl p-4 flex items-start gap-3 transition-all cursor-default select-none',
-        t.is_active ? 'border-border' : 'border-border/40 opacity-60',
-        isDragOver && 'border-primary/60 bg-primary/5 scale-[1.01] shadow-lg',
+        'flex items-start gap-3 px-4 py-3.5 transition-all cursor-default select-none',
+        isDragOver ? 'border-t-2 border-primary bg-primary/5' : 'hover:bg-muted/30',
+        !t.is_active && 'opacity-60',
       )}
     >
       {/* Drag handle */}
@@ -449,45 +449,57 @@ export default function TestimonialsAdminPage() {
       </div>
 
       {/* List */}
-      {loading ? (
-        <div className="space-y-3">
-          {[0,1,2].map(i => (
-            <div key={i} className="bg-card border border-border rounded-2xl p-4 flex gap-4 items-start">
-              <Skeleton className="w-14 h-14 rounded-xl shrink-0" />
-              <div className="flex-1 space-y-2">
-                <Skeleton className="h-4 w-1/3" />
-                <Skeleton className="h-3 w-3/4" />
-                <Skeleton className="h-3 w-1/2" />
+      <div className="border border-border/60 rounded-xl overflow-hidden bg-card">
+        {loading ? (
+          <div className="divide-y divide-border/50">
+            {[0,1,2].map(i => (
+              <div key={i} className="p-4 flex gap-4 items-start">
+                <Skeleton className="w-14 h-14 rounded-xl shrink-0" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-1/3" />
+                  <Skeleton className="h-3 w-3/4" />
+                  <Skeleton className="h-3 w-1/2" />
+                </div>
+                <Skeleton className="h-8 w-16 rounded-lg" />
               </div>
-              <Skeleton className="h-8 w-16 rounded-lg" />
+            ))}
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center px-4">
+            <div className="w-10 h-10 rounded-2xl bg-muted/50 flex items-center justify-center mb-3">
+              <Quote className="h-5 w-5 text-muted-foreground/40" />
             </div>
-          ))}
-        </div>
-      ) : filtered.length === 0 ? (
-        <div className="bg-card border border-border rounded-2xl py-16 text-center">
-          <Quote className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
-          <p className="text-muted-foreground font-medium">
-            {filterActive === 'all' ? 'Sin testimonios aún.' : `Sin testimonios ${filterActive === 'active' ? 'activos' : 'inactivos'}.`}
-          </p>
-          {filterActive === 'all' && <p className="text-sm text-muted-foreground mt-1">Crea el primero con el botón de arriba.</p>}
-        </div>
-      ) : (
-        <div className="space-y-2.5">
-          {filtered.map(t => (
-            <DraggableRow
-              key={t.id}
-              t={t}
-              onDragStart={handleDragStart}
-              onDragOver={handleDragOver}
-              onDrop={handleDrop}
-              isDragOver={dragOverId === t.id}
-              onToggle={toggleActive}
-              onEdit={t => { setEditing(t); setShowForm(true); }}
-              onDelete={setDeleteItem}
-            />
-          ))}
-        </div>
-      )}
+            <p className="text-sm font-medium text-foreground mb-0.5">
+              {filterActive === 'all' ? 'Sin testimonios aún' : 'Sin resultados'}
+            </p>
+            <p className="text-xs text-muted-foreground/60">
+              {filterActive === 'all' ? 'Crea el primero con el botón de arriba.' : 'Prueba con otro filtro.'}
+            </p>
+          </div>
+        ) : (
+          <>
+            <div className="flex items-center gap-2 px-4 py-2 border-b border-border/40 bg-muted/20">
+              <GripVertical className="w-3.5 h-3.5 text-muted-foreground/40" />
+              <p className="text-xs text-muted-foreground/50">Arrastra para reordenar</p>
+            </div>
+            <div className="divide-y divide-border/50">
+              {filtered.map(t => (
+                <DraggableRow
+                  key={t.id}
+                  t={t}
+                  onDragStart={handleDragStart}
+                  onDragOver={handleDragOver}
+                  onDrop={handleDrop}
+                  isDragOver={dragOverId === t.id}
+                  onToggle={toggleActive}
+                  onEdit={t => { setEditing(t); setShowForm(true); }}
+                  onDelete={setDeleteItem}
+                />
+              ))}
+            </div>
+          </>
+        )}
+      </div>
 
       {/* Hint */}
       <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">

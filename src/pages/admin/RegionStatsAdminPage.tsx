@@ -292,72 +292,83 @@ export default function RegionStatsAdminPage() {
       </div>
 
       {loading ? (
-        <div className="space-y-3">
+        <div className="border border-border/60 rounded-xl overflow-hidden bg-card divide-y divide-border/50">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="bg-card border border-border rounded-2xl p-4 animate-pulse h-16" />
+            <div key={i} className="px-4 py-3.5 animate-pulse h-16" />
           ))}
         </div>
       ) : items.length === 0 ? (
-        <div className="bg-card border border-border rounded-2xl py-16 text-center">
-          <MapPin className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
-          <p className="text-muted-foreground font-medium">No hay ciudades configuradas.</p>
+        <div className="border border-border/60 rounded-xl overflow-hidden bg-card">
+          <div className="flex flex-col items-center justify-center py-16 text-center px-4">
+            <div className="w-10 h-10 rounded-2xl bg-muted/50 flex items-center justify-center mb-3">
+              <MapPin className="h-5 w-5 text-muted-foreground/40" />
+            </div>
+            <p className="text-sm font-medium text-foreground mb-0.5">Sin ciudades configuradas</p>
+            <p className="text-xs text-muted-foreground/60">Agrega la primera ciudad destacada.</p>
+          </div>
         </div>
       ) : (
-        <div className="space-y-2.5">
-          {items.map(item => (
-            <div
-              key={item.id}
-              draggable
-              onDragStart={() => handleDragStart(item.id)}
-              onDragOver={e => { e.preventDefault(); handleDragOver(e, item.id); }}
-              onDrop={e => handleDrop(e, item.id)}
-              className={cn(
-                'bg-card border rounded-2xl p-4 flex items-center gap-3 transition-all cursor-default select-none',
-                item.is_active ? 'border-border' : 'border-border/40 opacity-60',
-                dragOverId === item.id && 'border-primary/60 bg-primary/5 scale-[1.01] shadow-lg',
-              )}
-            >
-              <div className="flex-shrink-0 text-muted-foreground/40 cursor-grab active:cursor-grabbing">
-                <GripVertical className="w-4 h-4" />
-              </div>
-
-              {item.image_url ? (
-                <div className="w-14 h-10 rounded-xl overflow-hidden border border-border flex-shrink-0">
-                  <img src={item.image_url} alt={item.city} className="w-full h-full object-cover"
-                    onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+        <div className="border border-border/60 rounded-xl overflow-hidden bg-card">
+          <div className="flex items-center gap-2 px-4 py-2 border-b border-border/40 bg-muted/20">
+            <GripVertical className="w-3.5 h-3.5 text-muted-foreground/40" />
+            <p className="text-xs text-muted-foreground/50">Arrastra para reordenar</p>
+          </div>
+          <div className="divide-y divide-border/50">
+            {items.map(item => (
+              <div
+                key={item.id}
+                draggable
+                onDragStart={() => handleDragStart(item.id)}
+                onDragOver={e => { e.preventDefault(); handleDragOver(e, item.id); }}
+                onDrop={e => handleDrop(e, item.id)}
+                className={cn(
+                  'flex items-center gap-3 px-4 py-3.5 transition-all cursor-default select-none',
+                  dragOverId === item.id ? 'border-t-2 border-primary bg-primary/5' : 'hover:bg-muted/30',
+                  !item.is_active && 'opacity-60',
+                )}
+              >
+                <div className="flex-shrink-0 text-muted-foreground/40 cursor-grab active:cursor-grabbing">
+                  <GripVertical className="w-4 h-4" />
                 </div>
-              ) : (
-                <div className="w-14 h-10 rounded-xl bg-muted border border-border flex-shrink-0 flex items-center justify-center">
-                  <MapPin className="w-4 h-4 text-muted-foreground/40" />
-                </div>
-              )}
 
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-semibold text-foreground text-sm">{item.city}</span>
-                  <span className="text-xs font-bold text-green-600 dark:text-green-400">{item.members} afiliados</span>
-                  {!item.is_active && <span className="text-[10px] text-red-500 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded-full">Inactiva</span>}
-                </div>
-                <p className="text-xs text-muted-foreground mt-0.5">Posición #{items.indexOf(item) + 1}</p>
-              </div>
+                {item.image_url ? (
+                  <div className="w-14 h-10 rounded-xl overflow-hidden border border-border flex-shrink-0">
+                    <img src={item.image_url} alt={item.city} className="w-full h-full object-cover"
+                      onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                  </div>
+                ) : (
+                  <div className="w-14 h-10 rounded-xl bg-muted border border-border flex-shrink-0 flex items-center justify-center">
+                    <MapPin className="w-4 h-4 text-muted-foreground/40" />
+                  </div>
+                )}
 
-              <div className="flex items-center gap-1 flex-shrink-0">
-                <button onClick={() => toggleActive(item)}
-                  className={cn('p-2 rounded-lg transition-colors', item.is_active ? 'text-green-500 hover:bg-green-500/10' : 'text-muted-foreground hover:bg-muted')}
-                  title={item.is_active ? 'Desactivar' : 'Activar'}>
-                  {item.is_active ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
-                </button>
-                <button onClick={() => { setEditing(item); setShowForm(true); }}
-                  className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-blue-500 transition-colors" title="Editar">
-                  <Pencil className="w-4 h-4" />
-                </button>
-                <button onClick={() => setDeleteItem(item)}
-                  className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-red-500 transition-colors" title="Eliminar">
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-semibold text-foreground text-sm">{item.city}</span>
+                    <span className="text-xs font-bold text-green-600 dark:text-green-400">{item.members} afiliados</span>
+                    {!item.is_active && <span className="text-[10px] text-red-500 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded-full">Inactiva</span>}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-0.5">Posición #{items.indexOf(item) + 1}</p>
+                </div>
+
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  <button onClick={() => toggleActive(item)}
+                    className={cn('p-2 rounded-lg transition-colors', item.is_active ? 'text-green-500 hover:bg-green-500/10' : 'text-muted-foreground hover:bg-muted')}
+                    title={item.is_active ? 'Desactivar' : 'Activar'}>
+                    {item.is_active ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
+                  </button>
+                  <button onClick={() => { setEditing(item); setShowForm(true); }}
+                    className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-blue-500 transition-colors" title="Editar">
+                    <Pencil className="w-4 h-4" />
+                  </button>
+                  <button onClick={() => setDeleteItem(item)}
+                    className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-red-500 transition-colors" title="Eliminar">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       )}
 

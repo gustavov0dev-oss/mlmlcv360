@@ -354,95 +354,103 @@ export default function SocialLinksAdminPage() {
       )}
 
       {/* Links list */}
-      {loading ? (
-        <div className="space-y-2.5">
-          {[0,1,2].map(i => (
-            <div key={i} className="flex items-center gap-3 p-4 border border-border rounded-2xl bg-card">
-              <Skeleton className="w-10 h-10 rounded-xl shrink-0" />
-              <div className="flex-1 space-y-2"><Skeleton className="h-4 w-1/3" /><Skeleton className="h-3 w-1/2" /></div>
-              <Skeleton className="w-10 h-5 rounded-full" />
-              <Skeleton className="w-8 h-8 rounded-lg" />
-            </div>
-          ))}
-        </div>
-      ) : links.length === 0 ? (
-        <div className="py-20 text-center border border-dashed border-border/60 rounded-2xl">
-          <div className="w-12 h-12 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
-            <Globe className="w-6 h-6 text-muted-foreground/40" />
-          </div>
-          <p className="font-semibold text-foreground mb-1">Sin enlaces sociales</p>
-          <p className="text-sm text-muted-foreground/60 mb-5">Agrega tus redes sociales para mostrarlas en el footer.</p>
-          <Button size="sm" onClick={openCreate}><Plus className="h-4 w-4 mr-1.5" />Agregar primero</Button>
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {links.map((link, index) => {
-            const color = getColor(link.icon, link.icon_svg);
-            const isDragged = isDragging && dragIndex.current === index;
-            const isDropTarget = dragOverIndex === index;
-            return (
-              <div
-                key={link.id}
-                draggable
-                onDragStart={e => onDragStart(e, index)}
-                onDragOver={e => onDragOver(e, index)}
-                onDragLeave={e => onDragLeave(e, index)}
-                onDrop={e => onDrop(e, index)}
-                onDragEnd={onDragEnd}
-                className={cn(
-                  'flex items-center gap-3 p-3.5 rounded-2xl border bg-card transition-all',
-                  isDragged ? 'opacity-40 scale-[0.98]' : '',
-                  isDropTarget ? 'border-t-2 border-t-primary border-primary/20 bg-primary/3' : 'border-border/60 hover:border-border',
-                  !link.is_active && 'opacity-60',
-                )}
-              >
-                {/* Drag handle */}
-                <button type="button" className="cursor-grab active:cursor-grabbing text-muted-foreground/30 hover:text-muted-foreground transition-colors touch-none shrink-0" aria-label="Reordenar">
-                  <GripVertical className="h-5 w-5" />
-                </button>
-
-                {/* Platform icon */}
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0 shadow-sm" style={{ backgroundColor: color }}>
-                  <PlatformIcon icon={link.icon} iconSvg={link.icon_svg} className="h-5 w-5" />
-                </div>
-
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-foreground">{link.platform}</span>
-                    {!link.is_active && (
-                      <span className="text-[10px] font-medium text-muted-foreground bg-muted/60 border border-border/50 px-1.5 py-0.5 rounded-full">Inactivo</span>
-                    )}
-                  </div>
-                  <a href={link.url} target="_blank" rel="noopener noreferrer"
-                    className="text-xs text-muted-foreground/60 hover:text-muted-foreground truncate block max-w-[240px] mt-0.5 transition-colors"
-                    onClick={e => e.stopPropagation()}>
-                    <span className="flex items-center gap-1"><Link2 className="w-3 h-3 inline" />{link.url}</span>
-                  </a>
-                </div>
-
-                {/* Actions */}
-                <div className="flex items-center gap-2 shrink-0">
-                  <Switch checked={link.is_active} onCheckedChange={() => handleToggle(link)} aria-label="Activar" />
-                  <a href={link.url} target="_blank" rel="noopener noreferrer"
-                    className="w-8 h-8 flex items-center justify-center rounded-lg border border-border/60 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
-                    onClick={e => e.stopPropagation()} title="Abrir enlace">
-                    <ExternalLink className="h-3.5 w-3.5" />
-                  </a>
-                  <button onClick={() => openEdit(link)}
-                    className="w-8 h-8 flex items-center justify-center rounded-lg border border-border/60 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors" title="Editar">
-                    <Pencil className="h-3.5 w-3.5" />
-                  </button>
-                  <button onClick={() => handleDelete(link)}
-                    className="w-8 h-8 flex items-center justify-center rounded-lg border border-border/60 text-muted-foreground hover:text-destructive hover:bg-destructive/10 hover:border-destructive/30 transition-colors" title="Eliminar">
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
-                </div>
+      <div className="border border-border/60 rounded-xl overflow-hidden bg-card">
+        {loading ? (
+          <div className="divide-y divide-border/50">
+            {[0,1,2].map(i => (
+              <div key={i} className="flex items-center gap-3 px-4 py-3.5">
+                <Skeleton className="w-10 h-10 rounded-xl shrink-0" />
+                <div className="flex-1 space-y-2"><Skeleton className="h-4 w-1/3" /><Skeleton className="h-3 w-1/2" /></div>
+                <Skeleton className="w-10 h-5 rounded-full" />
+                <Skeleton className="w-8 h-8 rounded-lg" />
               </div>
-            );
-          })}
-        </div>
-      )}
+            ))}
+          </div>
+        ) : links.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center px-4">
+            <div className="w-10 h-10 rounded-2xl bg-muted/50 flex items-center justify-center mb-3">
+              <Globe className="h-5 w-5 text-muted-foreground/40" />
+            </div>
+            <p className="text-sm font-medium text-foreground mb-0.5">Sin enlaces sociales</p>
+            <p className="text-xs text-muted-foreground/60 mb-4">Agrega tus redes sociales para mostrarlas en el footer.</p>
+            <Button size="sm" onClick={openCreate}><Plus className="h-4 w-4 mr-1.5" />Agregar primero</Button>
+          </div>
+        ) : (
+          <>
+            <div className="flex items-center gap-2 px-4 py-2 border-b border-border/40 bg-muted/20">
+              <GripVertical className="w-3.5 h-3.5 text-muted-foreground/40" />
+              <p className="text-xs text-muted-foreground/50">Arrastra para reordenar</p>
+            </div>
+            <div className="divide-y divide-border/50">
+              {links.map((link, index) => {
+                const color = getColor(link.icon, link.icon_svg);
+                const isDragged = isDragging && dragIndex.current === index;
+                const isDropTarget = dragOverIndex === index;
+                return (
+                  <div
+                    key={link.id}
+                    draggable
+                    onDragStart={e => onDragStart(e, index)}
+                    onDragOver={e => onDragOver(e, index)}
+                    onDragLeave={e => onDragLeave(e, index)}
+                    onDrop={e => onDrop(e, index)}
+                    onDragEnd={onDragEnd}
+                    className={cn(
+                      'flex items-center gap-3 px-4 py-3.5 transition-all group select-none',
+                      isDropTarget ? 'border-t-2 border-primary bg-primary/5' : 'hover:bg-muted/30',
+                      isDragged && 'opacity-40',
+                      !link.is_active && 'opacity-60',
+                    )}
+                  >
+                    {/* Drag handle */}
+                    <button type="button" className="cursor-grab active:cursor-grabbing text-muted-foreground/30 group-hover:text-muted-foreground transition-colors touch-none shrink-0" aria-label="Reordenar">
+                      <GripVertical className="h-4 w-4" />
+                    </button>
+
+                    {/* Platform icon */}
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0 shadow-sm" style={{ backgroundColor: color }}>
+                      <PlatformIcon icon={link.icon} iconSvg={link.icon_svg} className="h-5 w-5" />
+                    </div>
+
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold text-foreground">{link.platform}</span>
+                        {!link.is_active && (
+                          <span className="text-[10px] font-medium text-muted-foreground bg-muted/60 border border-border/50 px-1.5 py-0.5 rounded-full">Inactivo</span>
+                        )}
+                      </div>
+                      <a href={link.url} target="_blank" rel="noopener noreferrer"
+                        className="text-xs text-muted-foreground/60 hover:text-muted-foreground truncate block max-w-[240px] mt-0.5 transition-colors"
+                        onClick={e => e.stopPropagation()}>
+                        <span className="flex items-center gap-1"><Link2 className="w-3 h-3 inline" />{link.url}</span>
+                      </a>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center gap-2 shrink-0">
+                      <Switch checked={link.is_active} onCheckedChange={() => handleToggle(link)} aria-label="Activar" />
+                      <a href={link.url} target="_blank" rel="noopener noreferrer"
+                        className="w-8 h-8 flex items-center justify-center rounded-lg border border-border/60 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                        onClick={e => e.stopPropagation()} title="Abrir enlace">
+                        <ExternalLink className="h-3.5 w-3.5" />
+                      </a>
+                      <button onClick={() => openEdit(link)}
+                        className="w-8 h-8 flex items-center justify-center rounded-lg border border-border/60 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors" title="Editar">
+                        <Pencil className="h-3.5 w-3.5" />
+                      </button>
+                      <button onClick={() => handleDelete(link)}
+                        className="w-8 h-8 flex items-center justify-center rounded-lg border border-border/60 text-muted-foreground hover:text-destructive hover:bg-destructive/10 hover:border-destructive/30 transition-colors" title="Eliminar">
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }
