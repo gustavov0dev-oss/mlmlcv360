@@ -361,7 +361,7 @@ export default function RegionStatsAdminPage() {
         </div>
       )}
 
-      <div className="bg-primary/10 border border-blue-500/20 rounded-xl p-4">
+      <div className="bg-primary/10 border border-primary/20 rounded-xl p-4">
         <p className="text-xs text-primary">
           Solo los primeros <strong>4 activos</strong> aparecen en el bento del landing. La imagen se usa como fondo semitransparente detrás del número.
         </p>

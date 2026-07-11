@@ -460,7 +460,7 @@ export default function DashboardHeader() {
                       <div className={cn('w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0',
                         n.type === 'success' ? 'bg-green-500/20 text-green-500' :
                         n.type === 'warning' ? 'bg-yellow-500/20 text-yellow-500' :
-                        n.type === 'error' ? 'bg-red-500/20 text-red-500' : 'bg-blue-500/20 text-blue-500')}>
+                        n.type === 'error' ? 'bg-red-500/20 text-red-500' : 'bg-primary/15 text-primary')}>
                         <Bell className="w-3.5 h-3.5" />
                       </div>
                       <div className="flex-1 min-w-0">

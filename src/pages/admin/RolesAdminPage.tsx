@@ -198,7 +198,7 @@ export default function RolesAdminPage() {
       </div>
 
       {/* Callout: permissions matrix lives in AdminPage */}
-      <div className="flex items-center justify-between gap-4 p-4 bg-primary/8 border border-blue-500/20 rounded-xl">
+      <div className="flex items-center justify-between gap-4 p-4 bg-primary/8 border border-primary/20 rounded-xl">
         <div className="flex items-start gap-3">
           <Shield className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
           <div>

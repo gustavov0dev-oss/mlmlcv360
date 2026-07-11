@@ -1058,11 +1058,21 @@ select:-webkit-autofill:focus {
   transition: background-color 9999s ease-in-out 0s;
 }
 
-/* Input focus ring — use brand color, not browser blue */
+/* Input focus ring — use brand primary (gold), never browser blue */
 input:focus,
 textarea:focus,
 select:focus {
   outline: none !important;
+  box-shadow: 0 0 0 2px hsl(var(--ring) / 0.25) !important;
+  border-color: hsl(var(--ring)) !important;
+}
+
+/* Radix UI / shadcn focus-ring overrides — always gold */
+[data-radix-collection-item]:focus-visible,
+[role="option"]:focus-visible,
+[role="menuitem"]:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 1px;
 }
 
 /* Remove default browser focus ring on buttons */

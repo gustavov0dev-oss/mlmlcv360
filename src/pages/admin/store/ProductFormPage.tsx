@@ -779,7 +779,7 @@ export default function ProductFormPage() {
       {/* ── DIGITAL TAB ── */}
       {tab === 'digital' && form.is_digital && (
         <div className="bg-card border border-border rounded-2xl p-5 space-y-4">
-          <div className="flex items-start gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl">
+          <div className="flex items-start gap-3 p-3 bg-primary/8 border border-primary/20 rounded-xl">
             <Download className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
             <div className="text-xs text-primary">
               <p className="font-bold">Producto digital</p>
