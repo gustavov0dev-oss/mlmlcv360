@@ -52,6 +52,7 @@ export default function LegalPagesAdminPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [reordering, setReordering] = useState(false);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
 
   // Editor form state
   const [form, setForm] = useState({ slug: '', title: '', content: '', is_published: false, show_in_footer: true });
@@ -162,27 +163,40 @@ export default function LegalPagesAdminPage() {
   };
 
   const togglePublished = async (p: LegalPage) => {
+    setTogglingId(p.id);
     try {
-      const { error } = await supabase.from('legal_pages')
+      const { data, error } = await supabase.from('legal_pages')
         .update({ is_published: !p.is_published, updated_at: new Date().toISOString() })
-        .eq('id', p.id);
+        .eq('id', p.id)
+        .select('id,is_published').single();
       if (error) throw error;
+      if (!data) { toast.error('No se pudo actualizar: verifica que tienes permisos de administrador'); return; }
       setPages(prev => prev.map(x => x.id === p.id ? { ...x, is_published: !p.is_published } : x));
       toast.success(p.is_published ? 'Despublicado' : 'Publicado');
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : 'Error');
+      const msg = e instanceof Error ? e.message : 'Error al actualizar';
+      toast.error(msg.includes('row-level security') || msg.includes('rls') ? 'Sin permisos: tu cuenta no tiene rol de administrador' : msg);
+    } finally {
+      setTogglingId(null);
     }
   };
 
   const toggleFooter = async (p: LegalPage) => {
+    setTogglingId(p.id);
     try {
-      const { error } = await supabase.from('legal_pages')
+      const { data, error } = await supabase.from('legal_pages')
         .update({ show_in_footer: !p.show_in_footer, updated_at: new Date().toISOString() })
-        .eq('id', p.id);
+        .eq('id', p.id)
+        .select('id,show_in_footer').single();
       if (error) throw error;
+      if (!data) { toast.error('No se pudo actualizar: verifica que tienes permisos de administrador'); return; }
       setPages(prev => prev.map(x => x.id === p.id ? { ...x, show_in_footer: !p.show_in_footer } : x));
+      toast.success(p.show_in_footer ? 'Quitado del footer' : 'Agregado al footer');
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : 'Error');
+      const msg = e instanceof Error ? e.message : 'Error al actualizar';
+      toast.error(msg.includes('row-level security') || msg.includes('rls') ? 'Sin permisos: tu cuenta no tiene rol de administrador' : msg);
+    } finally {
+      setTogglingId(null);
     }
   };
 
@@ -276,8 +290,9 @@ export default function LegalPagesAdminPage() {
                 {/* Footer toggle */}
                 <button
                   onClick={() => toggleFooter(p)}
+                  disabled={togglingId === p.id}
                   className={cn(
-                    'hidden sm:flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border transition-colors shrink-0',
+                    'hidden sm:flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border transition-colors shrink-0 disabled:opacity-50',
                     p.show_in_footer
                       ? 'text-blue-700 dark:text-blue-400 bg-blue-500/10 border-blue-500/25'
                       : 'text-muted-foreground bg-muted/50 border-border/50'
@@ -289,7 +304,13 @@ export default function LegalPagesAdminPage() {
                 </button>
 
                 {/* Published toggle */}
-                <Switch checked={p.is_published} onCheckedChange={() => togglePublished(p)} aria-label="Publicar" className="shrink-0" />
+                <Switch 
+                  checked={p.is_published} 
+                  onCheckedChange={() => togglePublished(p)}
+                  disabled={togglingId === p.id}
+                  aria-label="Publicar" 
+                  className="shrink-0" 
+                />
 
                 {/* Actions */}
                 <div className="flex items-center gap-1 shrink-0">
