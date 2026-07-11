@@ -14,6 +14,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import { Plus, Trash2, Save, GripVertical, Loader as Loader2, RefreshCw, CircleHelp as HelpCircle, X, Pencil } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 interface FaqItem {
@@ -404,44 +405,36 @@ export default function FaqAdminPage() {
       )}
 
       {/* List */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg flex items-center justify-between text-foreground">
-            <span>Preguntas configuradas</span>
-            <span className="text-sm font-normal text-muted-foreground">
-              {items.length} {items.length === 1 ? 'pregunta' : 'preguntas'}
-            </span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="space-y-3 py-2">
-              {[0,1,2].map(i => (
-                <div key={i} className="flex items-start gap-3 p-3 border border-border rounded-xl">
-                  <Skeleton className="h-5 w-5 rounded mt-0.5 shrink-0" />
-                  <div className="flex-1 space-y-2"><Skeleton className="h-4 w-3/4" /><Skeleton className="h-3 w-full" /><Skeleton className="h-3 w-1/2" /></div>
-                </div>
-              ))}
+      <div className="border border-border/60 rounded-xl overflow-hidden bg-card">
+        {loading ? (
+          <div className="divide-y divide-border/50">
+            {[0,1,2].map(i => (
+              <div key={i} className="flex items-start gap-3 px-4 py-3.5">
+                <Skeleton className="h-5 w-5 rounded mt-0.5 shrink-0" />
+                <div className="flex-1 space-y-2"><Skeleton className="h-4 w-3/4" /><Skeleton className="h-3 w-full" /><Skeleton className="h-3 w-1/2" /></div>
+              </div>
+            ))}
+          </div>
+        ) : items.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center px-4">
+            <div className="w-10 h-10 rounded-2xl bg-muted/50 flex items-center justify-center mb-3">
+              <HelpCircle className="h-5 w-5 text-muted-foreground/40" />
             </div>
-          ) : items.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <HelpCircle className="w-10 h-10 text-muted-foreground/40 mb-3" />
-              <p className="text-sm text-muted-foreground">
-                No hay preguntas frecuentes configuradas.
-              </p>
-              <Button variant="outline" size="sm" className="mt-4" onClick={startAdd}>
-                <Plus className="w-4 h-4 mr-2" />
-                Crear la primera pregunta
-              </Button>
+            <p className="text-sm font-medium text-foreground mb-0.5">Sin preguntas frecuentes</p>
+            <p className="text-xs text-muted-foreground/60 mb-4">Crea la primera pregunta.</p>
+            <Button variant="outline" size="sm" onClick={startAdd}>
+              <Plus className="h-4 w-4 mr-2" />
+              Crear pregunta
+            </Button>
+          </div>
+        ) : (
+          <>
+            <div className="flex items-center gap-2 px-4 py-2 border-b border-border/40 bg-muted/20">
+              <GripVertical className="w-3.5 h-3.5 text-muted-foreground/40" />
+              <p className="text-xs text-muted-foreground/50">Arrastra para reordenar</p>
+              {reordering && <Loader2 className="w-3.5 h-3.5 text-muted-foreground animate-spin ml-auto" />}
             </div>
-          ) : (
-            <div className="space-y-3">
-              {reordering && (
-                <div className="flex items-center justify-center py-2 text-sm text-muted-foreground">
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Guardando nuevo orden...
-                </div>
-              )}
+            <div className="divide-y divide-border/50">
               {items.map((item, idx) => {
                 const isDragged = isDragging && dragIndex.current === idx;
                 const isDropTarget = dragOverIndex === idx;
@@ -454,22 +447,19 @@ export default function FaqAdminPage() {
                     onDragOver={e => handleDragOver(e, idx)}
                     onDragLeave={e => handleDragLeave(e, idx)}
                     onDrop={e => handleDrop(e, idx)}
-                    className={`group flex items-start gap-3 p-4 rounded-lg border bg-card transition-all ${
-                      isDropTarget
-                        ? 'border-t-2 border-t-primary border-primary'
-                        : 'border-border'
-                    } ${
-                      isDragged
-                        ? 'opacity-50'
-                        : 'hover:bg-accent/30'
-                    } ${!item.is_active ? 'opacity-70' : ''}`}
+                    className={cn(
+                      'flex items-start gap-3 px-4 py-3.5 transition-all group select-none',
+                      isDropTarget ? 'border-t-2 border-primary bg-primary/5' : 'hover:bg-muted/30',
+                      isDragged && 'opacity-40',
+                      !item.is_active && 'opacity-70',
+                    )}
                   >
                     {/* Drag handle */}
                     <div
-                      className="flex items-center justify-center pt-1 cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground transition-colors"
+                      className="flex items-center justify-center pt-1 cursor-grab active:cursor-grabbing text-muted-foreground/40 group-hover:text-muted-foreground transition-colors shrink-0"
                       title="Arrastra para reordenar"
                     >
-                      <GripVertical className="w-5 h-5" />
+                      <GripVertical className="w-4 h-4" />
                     </div>
 
                     {/* Content */}
@@ -493,41 +483,27 @@ export default function FaqAdminPage() {
                           className="focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none"
                         />
                       </div>
-                      <span className={`text-[10px] font-medium ${item.is_active ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground/50'}`}>
+                      <span className={cn('text-[10px] font-medium', item.is_active ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground/50')}>
                         {item.is_active ? 'Activa' : 'Inactiva'}
                       </span>
                     </div>
 
                     {/* Actions */}
                     <div className="flex items-center gap-1 shrink-0">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => startEdit(item)}
-                        disabled={saving || reordering}
-                        title="Editar"
-                      >
-                        <Pencil className="w-4 h-4" />
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => startEdit(item)} disabled={saving || reordering} title="Editar">
+                        <Pencil className="h-4 w-4" />
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-destructive hover:text-destructive"
-                        onClick={() => handleDelete(item.id)}
-                        disabled={saving || reordering}
-                        title="Eliminar"
-                      >
-                        <Trash2 className="w-4 h-4" />
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10" onClick={() => handleDelete(item.id)} disabled={saving || reordering} title="Eliminar">
+                        <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
                 );
               })}
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </>
+        )}
+      </div>
     </div>
   );
 }
