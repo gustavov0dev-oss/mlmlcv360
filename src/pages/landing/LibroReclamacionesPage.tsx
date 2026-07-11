@@ -13,6 +13,7 @@ import {
   MessageSquare, BookOpen, Info,
 } from 'lucide-react';
 
+/* ─── Constants ──────────────────────────────────────────────────────────── */
 const TIPO_BIEN = [
   { value: 'producto', label: 'Producto' },
   { value: 'servicio', label: 'Servicio' },
@@ -56,52 +57,73 @@ interface ComplaintResult {
   tipo_bien?: string; monto?: number; moneda?: string;
 }
 
-const STATUS_CONFIG: Record<ComplaintStatus, { label: string; color: string; bg: string; border: string; step: string; desc: string }> = {
-  pendiente:  { label: 'Pendiente',  color: 'text-amber-700 dark:text-amber-400',   bg: 'bg-amber-500/10',   border: 'border-amber-500/30',   step: 'bg-amber-500',     desc: 'Recibido, en espera de revisión' },
-  en_proceso: { label: 'En proceso', color: 'text-blue-700 dark:text-blue-400',     bg: 'bg-blue-500/10',    border: 'border-blue-500/30',    step: 'bg-blue-500',      desc: 'Siendo revisado por nuestro equipo' },
-  resuelto:   { label: 'Resuelto',   color: 'text-emerald-700 dark:text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', step: 'bg-emerald-500',   desc: 'Hemos dado respuesta a tu reclamo' },
-  cerrado:    { label: 'Cerrado',    color: 'text-muted-foreground',                bg: 'bg-muted/50',       border: 'border-border',         step: 'bg-muted-foreground', desc: 'Proceso concluido' },
+/* Status config — high-contrast colors that work in both modes */
+const STATUS_CONFIG: Record<ComplaintStatus, {
+  label: string;
+  textCls: string;
+  bgCls: string;
+  borderCls: string;
+  dotCls: string;
+  badgeCls: string;
+  desc: string;
+}> = {
+  pendiente: {
+    label: 'Pendiente',
+    textCls: 'text-amber-600 dark:text-amber-300',
+    bgCls: 'bg-amber-500/15 dark:bg-amber-500/20',
+    borderCls: 'border-amber-500/40 dark:border-amber-400/40',
+    dotCls: 'bg-amber-500 dark:bg-amber-400',
+    badgeCls: 'bg-amber-500/20 text-amber-700 dark:text-amber-300 border-amber-500/40',
+    desc: 'Tu reclamo fue recibido y está en espera de revisión',
+  },
+  en_proceso: {
+    label: 'En proceso',
+    textCls: 'text-sky-600 dark:text-sky-300',
+    bgCls: 'bg-sky-500/15 dark:bg-sky-500/20',
+    borderCls: 'border-sky-500/40 dark:border-sky-400/40',
+    dotCls: 'bg-sky-500 dark:bg-sky-400',
+    badgeCls: 'bg-sky-500/20 text-sky-700 dark:text-sky-300 border-sky-500/40',
+    desc: 'Estamos revisando tu caso',
+  },
+  resuelto: {
+    label: 'Resuelto',
+    textCls: 'text-emerald-600 dark:text-emerald-300',
+    bgCls: 'bg-emerald-500/15 dark:bg-emerald-500/20',
+    borderCls: 'border-emerald-500/40 dark:border-emerald-400/40',
+    dotCls: 'bg-emerald-500 dark:bg-emerald-400',
+    badgeCls: 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border-emerald-500/40',
+    desc: 'Hemos dado respuesta a tu reclamo',
+  },
+  cerrado: {
+    label: 'Cerrado',
+    textCls: 'text-foreground/50',
+    bgCls: 'bg-muted/40',
+    borderCls: 'border-border',
+    dotCls: 'bg-muted-foreground/40',
+    badgeCls: 'bg-muted text-muted-foreground border-border',
+    desc: 'El proceso ha concluido',
+  },
 };
 
 const STATUS_ORDER: ComplaintStatus[] = ['pendiente', 'en_proceso', 'resuelto', 'cerrado'];
 
+/* ─── Small helpers ──────────────────────────────────────────────────────── */
 function Field({ label, required, error, hint, children }: {
   label: string; required?: boolean; error?: string; hint?: string; children: React.ReactNode;
 }) {
   return (
     <div>
       <label className="block text-sm font-medium text-foreground mb-1.5">
-        {label}{required && <span className="text-red-500 ml-0.5">*</span>}
+        {label}{required && <span className="text-destructive ml-0.5">*</span>}
       </label>
       {children}
       {hint && !error && <p className="mt-1 text-xs text-muted-foreground">{hint}</p>}
       {error && (
-        <p className="mt-1 text-xs text-red-500 flex items-center gap-1">
+        <p className="mt-1 text-xs text-destructive flex items-center gap-1">
           <AlertCircle className="w-3 h-3 shrink-0" />{error}
         </p>
       )}
     </div>
-  );
-}
-
-const inputCls = 'w-full px-3.5 py-2.5 rounded-lg border border-input bg-background text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors';
-
-function TextInput({ value, onChange, placeholder, type = 'text', disabled }: {
-  value: string; onChange: (v: string) => void; placeholder?: string; type?: string; disabled?: boolean;
-}) {
-  return (
-    <input type={type} value={value} onChange={e => onChange(e.target.value)}
-      placeholder={placeholder} disabled={disabled} className={inputCls} />
-  );
-}
-
-function SelectInput({ value, onChange, options }: {
-  value: string; onChange: (v: string) => void; options: { value: string; label: string }[];
-}) {
-  return (
-    <select value={value} onChange={e => onChange(e.target.value)} className={inputCls}>
-      {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-    </select>
   );
 }
 
@@ -113,10 +135,13 @@ function TipoCard({ label, desc, icon: Icon, selected, onClick }: {
       className={cn(
         'flex items-start gap-3 p-4 rounded-xl border-2 text-left transition-all w-full',
         selected
-          ? 'border-primary bg-primary/5 ring-1 ring-primary/20'
+          ? 'border-primary bg-primary/8 ring-1 ring-primary/20'
           : 'border-border hover:border-border/80 hover:bg-muted/30'
       )}>
-      <div className={cn('w-9 h-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5', selected ? 'bg-primary/15' : 'bg-muted')}>
+      <div className={cn(
+        'w-9 h-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5',
+        selected ? 'bg-primary/15' : 'bg-muted'
+      )}>
         <Icon className={cn('w-4.5 h-4.5', selected ? 'text-primary' : 'text-muted-foreground')} />
       </div>
       <div>
@@ -127,31 +152,52 @@ function TipoCard({ label, desc, icon: Icon, selected, onClick }: {
   );
 }
 
+/* Inline SVG book icon — replicates the "Libro de Reclamaciones" official look */
+function BookIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+      <rect width="80" height="80" rx="16" fill="#1e40af" fillOpacity=".15" />
+      <rect x="12" y="18" width="34" height="44" rx="3" fill="#1d4ed8" />
+      <rect x="12" y="18" width="34" height="44" rx="3" fill="url(#bookGrad)" />
+      <rect x="44" y="18" width="24" height="44" rx="3" fill="#1e3a8a" />
+      <rect x="44" y="20" width="2" height="40" fill="#3b82f6" fillOpacity=".4" />
+      <line x1="18" y1="30" x2="40" y2="30" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeOpacity=".9" />
+      <line x1="18" y1="37" x2="40" y2="37" stroke="white" strokeWidth="2" strokeLinecap="round" strokeOpacity=".7" />
+      <line x1="18" y1="43" x2="33" y2="43" stroke="white" strokeWidth="2" strokeLinecap="round" strokeOpacity=".5" />
+      <defs>
+        <linearGradient id="bookGrad" x1="12" y1="18" x2="46" y2="62" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#2563eb" />
+          <stop offset="1" stopColor="#1d4ed8" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+}
+
+/* ─── Main component ─────────────────────────────────────────────────────── */
 export default function LibroReclamacionesPage() {
   const database = useDatabase();
   const { company } = useConfig();
   const [tab, setTab] = useState<'registrar' | 'consultar'>('registrar');
 
-  // Form state
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<FormData>(EMPTY);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [correlativo, setCorrelativo] = useState('');
 
-  // Consulta state
   const [queryCode, setQueryCode] = useState('');
   const [querying, setQuerying] = useState(false);
   const [queryResult, setQueryResult] = useState<ComplaintResult | null>(null);
   const [queryError, setQueryError] = useState('');
 
   const companyName = company.company_name || 'MLM 360';
-  const companyRuc = company.company_ruc || '20512345678';
+  const companyRuc = company.company_ruc || '73983766';
   const companyAddress = company.company_address || 'Av. Javier Prado Este 100, San Isidro, Lima, Perú';
 
   function update<K extends keyof FormData>(key: K, value: FormData[K]) {
     setForm(f => ({ ...f, [key]: value }));
-    setErrors(e => { if (!e[key]) return e; const { [key]: _, ...rest } = e; return rest; });
+    setErrors(e => { const { [key]: _, ...rest } = e; return rest; });
   }
 
   function validateStep0(): boolean {
@@ -180,9 +226,9 @@ export default function LibroReclamacionesPage() {
 
   function handleNext() {
     if (step === 0 && validateStep0()) { setStep(1); window.scrollTo({ top: 0, behavior: 'smooth' }); }
-    else if (step === 0) toast.error('Revisa los campos marcados');
+    else if (step === 0) toast.error('Revisa los campos marcados en rojo');
     else if (step === 1 && validateStep1()) { setStep(2); window.scrollTo({ top: 0, behavior: 'smooth' }); }
-    else if (step === 1) toast.error('Revisa los campos marcados');
+    else if (step === 1) toast.error('Revisa los campos marcados en rojo');
   }
 
   function handleBack() { setStep(s => Math.max(0, s - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }
@@ -191,7 +237,9 @@ export default function LibroReclamacionesPage() {
     if (!form.acepta) { toast.error('Debes aceptar los términos para continuar'); return; }
     setSubmitting(true);
     try {
-      const ref = `REC-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`;
+      const year = new Date().getFullYear();
+      const seq = String(Date.now()).slice(-6);
+      const ref = `REC-${year}-${seq}`;
       const payload = {
         correlativo: ref, tipo: form.tipo, tipo_bien: form.tipo_bien,
         tipo_doc: form.tipo_doc, num_doc: form.num_doc.trim(),
@@ -209,7 +257,6 @@ export default function LibroReclamacionesPage() {
       if (error) throw new Error(error);
       setCorrelativo(ref);
       setStep(3);
-      toast.success('Reclamo registrado exitosamente');
     } catch {
       toast.error('Error al registrar el reclamo. Intenta nuevamente.');
     } finally {
@@ -224,11 +271,10 @@ export default function LibroReclamacionesPage() {
     setQueryResult(null);
     setQueryError('');
     try {
-      const { data, error } = await supabase
-        .rpc('get_complaint_by_code', { p_code: code });
+      const { data, error } = await supabase.rpc('get_complaint_by_code', { p_code: code });
       if (error) throw error;
       const row = Array.isArray(data) ? data[0] : null;
-      if (!row) { setQueryError('No encontramos ningún reclamo con ese código. Verifica que lo hayas ingresado correctamente.'); }
+      if (!row) setQueryError('No encontramos ningún reclamo con ese código. Verifica que lo hayas ingresado correctamente.');
       else setQueryResult(row as ComplaintResult);
     } catch {
       setQueryError('Error al consultar. Intenta nuevamente.');
@@ -239,498 +285,621 @@ export default function LibroReclamacionesPage() {
 
   const steps = ['Datos Personales', 'Tu Reclamo', 'Confirmar'];
 
+  function switchTab(t: 'registrar' | 'consultar') {
+    setTab(t);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
 
       <main className="flex-1">
-        {/* Hero — sin fondo azul, limpio */}
-        <section className="border-b bg-muted/20 py-10 md:py-14">
-          <div className="max-w-4xl mx-auto px-4 text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-5">
-              <Scale className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium text-primary">D.S. 011-2011-PCM · Ley N° 29571 · Ley N° 29733</span>
-            </div>
-            <h1 className="text-3xl md:text-4xl font-bold mb-3 text-foreground">Libro de Reclamaciones</h1>
-            <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
-              Ejerce tu derecho como consumidor. Tu reclamo o queja será atendido en un plazo máximo de <strong>30 días calendario</strong>.
-            </p>
-          </div>
-        </section>
-
-        {/* Company Info Bar */}
-        <section className="border-b bg-muted/10">
-          <div className="max-w-4xl mx-auto px-4 py-2.5 flex flex-wrap items-center justify-center gap-x-6 gap-y-1 text-sm text-muted-foreground">
-            <span className="font-semibold text-foreground">{companyName}</span>
-            <span>RUC: {companyRuc}</span>
-            <span className="hidden sm:inline">{companyAddress}</span>
-          </div>
-        </section>
-
-        <section className="max-w-3xl mx-auto px-4 py-8 md:py-10">
-
-          {/* Tab switcher */}
-          <div className="flex rounded-xl border bg-muted/30 p-1 mb-8">
-            <button
-              onClick={() => setTab('registrar')}
-              className={cn(
-                'flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-medium transition-all',
-                tab === 'registrar'
-                  ? 'bg-card shadow-sm text-foreground border border-border/60'
-                  : 'text-muted-foreground hover:text-foreground'
-              )}>
-              <FileText className="w-4 h-4" />
-              Registrar reclamo
-            </button>
-            <button
-              onClick={() => setTab('consultar')}
-              className={cn(
-                'flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-medium transition-all',
-                tab === 'consultar'
-                  ? 'bg-card shadow-sm text-foreground border border-border/60'
-                  : 'text-muted-foreground hover:text-foreground'
-              )}>
-              <Search className="w-4 h-4" />
-              Consultar estado
-            </button>
-          </div>
-
-          {/* ── TAB: REGISTRAR ── */}
-          {tab === 'registrar' && (
-            <>
-              {/* Stepper */}
-              {step < 3 && (
-                <div className="flex items-center justify-center mb-7">
-                  {steps.map((s, i) => (
-                    <div key={i} className="flex items-center">
-                      <div className={cn(
-                        'flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-all',
-                        i < step ? 'bg-primary/80 text-white' : i === step ? 'bg-primary text-white shadow-md' : 'bg-muted text-muted-foreground'
-                      )}>
-                        <span className="w-5 h-5 rounded-full flex items-center justify-center text-xs bg-white/20">
-                          {i < step ? <CheckCircle className="w-3.5 h-3.5" /> : i + 1}
-                        </span>
-                        <span className="hidden sm:inline">{s}</span>
-                      </div>
-                      {i < steps.length - 1 && (
-                        <div className={cn('w-8 h-0.5 mx-1', i < step ? 'bg-primary' : 'bg-muted')} />
-                      )}
-                    </div>
-                  ))}
+        {/* ── Hero ─────────────────────────────────────────── */}
+        <section className="py-10 md:py-14 bg-background">
+          <div className="max-w-3xl mx-auto px-4">
+            {/* Book image + title */}
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 mb-6">
+              <BookIcon className="w-20 h-20 shrink-0" />
+              <div className="text-center sm:text-left">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/25 mb-3">
+                  <Scale className="w-3.5 h-3.5 text-primary" />
+                  <span className="text-xs font-semibold text-primary tracking-wide">
+                    D.S. 011-2011-PCM · Ley N° 29571 · Ley N° 29733
+                  </span>
                 </div>
-              )}
-
-              <div className="bg-card border rounded-2xl shadow-sm p-6 md:p-8">
-                {/* Step 0: Datos personales */}
-                {step === 0 && (
-                  <div className="space-y-5">
-                    <div className="flex items-center gap-2 mb-1">
-                      <User className="w-5 h-5 text-primary" />
-                      <h2 className="text-lg font-semibold">¿Quién eres?</h2>
-                    </div>
-                    <p className="text-sm text-muted-foreground -mt-3">Necesitamos tus datos para identificar tu reclamo y responderte.</p>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <Field label="Nombre" required error={errors.nombre}>
-                        <TextInput value={form.nombre} onChange={v => update('nombre', v)} placeholder="Tu nombre" />
-                      </Field>
-                      <Field label="Apellido" required error={errors.apellido}>
-                        <TextInput value={form.apellido} onChange={v => update('apellido', v)} placeholder="Tu apellido" />
-                      </Field>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                      <Field label="Tipo de documento" required>
-                        <SelectInput value={form.tipo_doc} onChange={v => update('tipo_doc', v)} options={TIPO_DOC} />
-                      </Field>
-                      <div className="sm:col-span-2">
-                        <Field label="Número de documento" required error={errors.num_doc}>
-                          <TextInput value={form.num_doc} onChange={v => update('num_doc', v)} placeholder="Ej: 12345678" />
-                        </Field>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <Field label="Correo electrónico" required error={errors.email}
-                        hint="Aquí recibirás la respuesta a tu reclamo">
-                        <TextInput value={form.email} onChange={v => update('email', v)} placeholder="tucorreo@email.com" type="email" />
-                      </Field>
-                      <Field label="Teléfono" error={errors.telefono}>
-                        <TextInput value={form.telefono} onChange={v => update('telefono', v)} placeholder="Opcional" />
-                      </Field>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <Field label="Dirección">
-                        <TextInput value={form.direccion} onChange={v => update('direccion', v)} placeholder="Opcional" />
-                      </Field>
-                      <Field label="Región" required>
-                        <select value={form.region} onChange={e => update('region', e.target.value)} className={inputCls}>
-                          {REGIONES_PERU.map(r => <option key={r} value={r}>{r}</option>)}
-                        </select>
-                      </Field>
-                    </div>
-
-                    <div className="flex justify-end pt-2">
-                      <button onClick={handleNext}
-                        className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors">
-                        Continuar <ChevronRight className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Step 1: Detalle del reclamo */}
-                {step === 1 && (
-                  <div className="space-y-5">
-                    <div className="flex items-center gap-2 mb-1">
-                      <FileText className="w-5 h-5 text-primary" />
-                      <h2 className="text-lg font-semibold">¿Qué pasó?</h2>
-                    </div>
-                    <p className="text-sm text-muted-foreground -mt-3">Cuéntanos con detalle lo que ocurrió para que podamos ayudarte mejor.</p>
-
-                    {/* Tipo de inconformidad */}
-                    <Field label="¿Cuál es el tipo de inconformidad?" required>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-0.5">
-                        <TipoCard label="Reclamo"
-                          desc="Insatisfacción con un producto o servicio adquirido"
-                          icon={AlertCircle} selected={form.tipo === 'reclamo'}
-                          onClick={() => update('tipo', 'reclamo')} />
-                        <TipoCard label="Queja"
-                          desc="Malestar por la atención o proceso de servicio"
-                          icon={MessageSquare} selected={form.tipo === 'queja'}
-                          onClick={() => update('tipo', 'queja')} />
-                      </div>
-                    </Field>
-
-                    <Field label="¿Es sobre un producto o servicio?" required>
-                      <div className="flex gap-3 mt-0.5">
-                        {TIPO_BIEN.map(o => (
-                          <button key={o.value} type="button" onClick={() => update('tipo_bien', o.value)}
-                            className={cn(
-                              'flex-1 py-2.5 rounded-lg border-2 text-sm font-medium transition-all',
-                              form.tipo_bien === o.value
-                                ? 'border-primary bg-primary/5 text-primary'
-                                : 'border-border hover:border-border/80 text-muted-foreground hover:text-foreground'
-                            )}>
-                            {o.label}
-                          </button>
-                        ))}
-                      </div>
-                    </Field>
-
-                    <Field label="¿Qué producto o servicio?" required error={errors.descripcion_bien}
-                      hint="Ejemplo: Teléfono Samsung Galaxy S24, Plan de suscripción mensual">
-                      <TextInput value={form.descripcion_bien} onChange={v => update('descripcion_bien', v)}
-                        placeholder="Describe el producto o servicio" />
-                    </Field>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <Field label="Monto reclamado" error={errors.monto} hint="Si aplica, ¿cuánto dinero está en juego?">
-                        <TextInput value={form.monto} onChange={v => update('monto', v)} placeholder="0.00" type="number" />
-                      </Field>
-                      <Field label="Moneda">
-                        <SelectInput value={form.moneda} onChange={v => update('moneda', v)} options={MONEDAS} />
-                      </Field>
-                    </div>
-
-                    <Field label="Cuéntanos qué pasó" required error={errors.detalle}
-                      hint="Sé específico: ¿cuándo ocurrió?, ¿qué prometieron y qué recibiste?">
-                      <textarea value={form.detalle} onChange={e => update('detalle', e.target.value)}
-                        placeholder="Describe los hechos con la mayor cantidad de detalles posibles..."
-                        rows={5} className={inputCls} />
-                      <p className="mt-1 text-xs text-muted-foreground">{form.detalle.length} caracteres (mínimo 20)</p>
-                    </Field>
-
-                    <Field label="¿Qué solución esperas?" hint="Ejemplo: devolución del dinero, cambio del producto, disculpas públicas">
-                      <TextInput value={form.pedido} onChange={v => update('pedido', v)}
-                        placeholder="¿Qué necesitas para que el problema sea resuelto?" />
-                    </Field>
-
-                    <div className="flex justify-between pt-2">
-                      <button onClick={handleBack}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 border rounded-lg font-medium hover:bg-muted transition-colors">
-                        <ChevronLeft className="w-4 h-4" /> Atrás
-                      </button>
-                      <button onClick={handleNext}
-                        className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors">
-                        Revisar y enviar <ChevronRight className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Step 2: Confirmación */}
-                {step === 2 && (
-                  <div className="space-y-5">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Shield className="w-5 h-5 text-primary" />
-                      <h2 className="text-lg font-semibold">Revisa tu reclamo antes de enviar</h2>
-                    </div>
-                    <p className="text-sm text-muted-foreground -mt-3">Asegúrate de que todo esté correcto. Una vez enviado no podrás modificarlo.</p>
-
-                    <div className="rounded-xl border bg-muted/20 overflow-hidden">
-                      <div className="px-4 py-3 border-b bg-muted/30">
-                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Tus datos</p>
-                      </div>
-                      <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                        <div><span className="text-muted-foreground">Nombre: </span><span className="font-medium">{form.nombre} {form.apellido}</span></div>
-                        <div><span className="text-muted-foreground">Documento: </span><span className="font-medium">{form.tipo_doc} {form.num_doc}</span></div>
-                        <div><span className="text-muted-foreground">Correo: </span><span className="font-medium">{form.email}</span></div>
-                        <div><span className="text-muted-foreground">Teléfono: </span><span className="font-medium">{form.telefono || '—'}</span></div>
-                        <div><span className="text-muted-foreground">Región: </span><span className="font-medium">{form.region}</span></div>
-                      </div>
-
-                      <div className="px-4 py-3 border-t border-b bg-muted/30">
-                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Tu reclamo</p>
-                      </div>
-                      <div className="p-4 space-y-3 text-sm">
-                        <div className="flex gap-2 flex-wrap">
-                          <span className="px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 text-xs font-semibold capitalize">{form.tipo}</span>
-                          <span className="px-2.5 py-1 rounded-full bg-muted border text-xs font-medium capitalize">{form.tipo_bien}</span>
-                          {form.monto && <span className="px-2.5 py-1 rounded-full bg-muted border text-xs font-medium">{form.moneda === 'PEN' ? 'S/' : '$'} {form.monto}</span>}
-                        </div>
-                        <div><span className="text-muted-foreground">Producto/Servicio: </span><span className="font-medium">{form.descripcion_bien}</span></div>
-                        <div className="bg-muted/40 rounded-lg p-3 text-foreground/80 leading-relaxed">{form.detalle}</div>
-                        {form.pedido && <div><span className="text-muted-foreground">Solución esperada: </span><span className="font-medium">{form.pedido}</span></div>}
-                      </div>
-                    </div>
-
-                    <label className="flex items-start gap-3 cursor-pointer p-4 rounded-xl border border-border/60 hover:bg-muted/20 transition-colors">
-                      <input type="checkbox" checked={form.acepta} onChange={e => update('acepta', e.target.checked)}
-                        className="mt-0.5 w-4 h-4 rounded border-input accent-primary" />
-                      <span className="text-sm text-muted-foreground leading-relaxed">
-                        Declaro que la información es verídica y acepto el tratamiento de mis datos personales conforme a la <strong>Ley N° 29733</strong> (Ley de Protección de Datos Personales).
-                      </span>
-                    </label>
-
-                    <div className="flex justify-between pt-2">
-                      <button onClick={handleBack}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 border rounded-lg font-medium hover:bg-muted transition-colors">
-                        <ChevronLeft className="w-4 h-4" /> Atrás
-                      </button>
-                      <button onClick={handleSubmit} disabled={submitting}
-                        className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors disabled:opacity-50">
-                        {submitting ? 'Enviando...' : <><Send className="w-4 h-4" /> Enviar reclamo</>}
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Step 3: Éxito */}
-                {step === 3 && correlativo && (
-                  <div className="text-center py-8 space-y-5">
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/20">
-                      <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
-                    </div>
-                    <div>
-                      <h2 className="text-xl font-bold mb-2">¡Reclamo Registrado!</h2>
-                      <p className="text-muted-foreground text-sm max-w-md mx-auto">
-                        Hemos recibido tu reclamo. Guarda este código — lo necesitarás para consultar el estado de tu caso.
-                      </p>
-                    </div>
-
-                    <div className="mx-auto max-w-xs">
-                      <p className="text-xs text-muted-foreground mb-2 font-medium uppercase tracking-wide">Tu código de seguimiento</p>
-                      <div className="px-6 py-4 rounded-xl bg-muted border-2 border-dashed border-primary/40">
-                        <span className="text-xl font-mono font-bold text-primary">{correlativo}</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-2">Úsalo en la pestaña "Consultar estado"</p>
-                    </div>
-
-                    <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900 rounded-xl p-4 text-sm text-amber-800 dark:text-amber-300 max-w-md mx-auto">
-                      <p className="font-medium mb-1">¿Qué sigue?</p>
-                      <p className="text-xs leading-relaxed">Te contactaremos al correo <strong>{form.email}</strong> en un plazo máximo de <strong>30 días calendario</strong>, conforme a la normativa vigente.</p>
-                    </div>
-
-                    <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
-                      <button onClick={() => { setForm(EMPTY); setStep(0); setCorrelativo(''); }}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 border rounded-lg font-medium hover:bg-muted transition-colors">
-                        Registrar otro reclamo
-                      </button>
-                      <button onClick={() => { setTab('consultar'); setQueryCode(correlativo); }}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors">
-                        <Search className="w-4 h-4" /> Consultar mi reclamo
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Info legal */}
-              {step < 3 && (
-                <div className="mt-5 rounded-xl border border-border/50 bg-muted/20 p-4 flex gap-3">
-                  <Info className="w-5 h-5 text-muted-foreground shrink-0 mt-0.5" />
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    El presente Libro de Reclamaciones se implementa conforme al D.S. 011-2011-PCM, Ley N° 29571 (Código de Protección y Defensa del Consumidor) y Ley N° 29733 (Ley de Protección de Datos Personales). La empresa atenderá tu reclamo en un plazo máximo de <strong>30 días calendario</strong>.
-                  </p>
-                </div>
-              )}
-            </>
-          )}
-
-          {/* ── TAB: CONSULTAR ── */}
-          {tab === 'consultar' && (
-            <div className="space-y-6">
-              <div className="bg-card border rounded-2xl shadow-sm p-6 md:p-8">
-                <div className="flex items-center gap-2 mb-1">
-                  <Search className="w-5 h-5 text-primary" />
-                  <h2 className="text-lg font-semibold">Consultar estado de tu reclamo</h2>
-                </div>
-                <p className="text-sm text-muted-foreground mb-5">
-                  Ingresa el código de seguimiento que recibiste al registrar tu reclamo.
+                <h1 className="text-3xl md:text-4xl font-black text-foreground mb-2">
+                  Libro de<br className="sm:hidden" /> Reclamaciones
+                </h1>
+                <p className="text-muted-foreground text-sm md:text-base leading-relaxed">
+                  Ejerce tu derecho como consumidor. Tu reclamo o queja será atendido<br className="hidden sm:block" />
+                  en un plazo máximo de <strong className="text-foreground">30 días calendario</strong>.
                 </p>
-
-                <div className="flex gap-3">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-                    <input
-                      value={queryCode}
-                      onChange={e => { setQueryCode(e.target.value.toUpperCase()); setQueryError(''); }}
-                      onKeyDown={e => e.key === 'Enter' && handleQuery()}
-                      placeholder="Ej: REC-2026-123456"
-                      className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-input bg-background text-sm font-mono text-foreground placeholder:text-muted-foreground placeholder:font-sans focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors"
-                    />
-                  </div>
-                  <button onClick={handleQuery} disabled={querying}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors disabled:opacity-60">
-                    {querying ? 'Buscando...' : <><ArrowRight className="w-4 h-4" /> Consultar</>}
-                  </button>
-                </div>
-
-                {queryError && (
-                  <div className="mt-4 flex items-start gap-2.5 p-4 rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900 text-sm text-red-700 dark:text-red-400">
-                    <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                    <p>{queryError}</p>
-                  </div>
-                )}
               </div>
-
-              {/* Resultado */}
-              {queryResult && (() => {
-                const cfg = STATUS_CONFIG[queryResult.status] ?? STATUS_CONFIG.pendiente;
-                const stepIdx = STATUS_ORDER.indexOf(queryResult.status);
-                return (
-                  <div className="space-y-4">
-                    {/* Estado principal */}
-                    <div className={cn('rounded-2xl border p-5', cfg.bg, cfg.border)}>
-                      <div className="flex items-start justify-between gap-3 mb-4">
-                        <div>
-                          <p className="text-xs text-muted-foreground uppercase tracking-wide font-semibold mb-1">Código de seguimiento</p>
-                          <p className="text-xl font-mono font-bold text-foreground">{queryResult.correlativo}</p>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            Registrado el {new Date(queryResult.created_at).toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric' })}
-                          </p>
-                        </div>
-                        <div className={cn('px-3 py-1.5 rounded-full border text-xs font-bold', cfg.color, cfg.bg, cfg.border)}>
-                          {cfg.label}
-                        </div>
-                      </div>
-
-                      {/* Info del reclamo */}
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm mb-4">
-                        <div>
-                          <p className="text-xs text-muted-foreground mb-0.5">Tipo</p>
-                          <p className="font-medium capitalize">{queryResult.tipo}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-muted-foreground mb-0.5">Solicitante</p>
-                          <p className="font-medium">{queryResult.nombre} {queryResult.apellido ?? ''}</p>
-                        </div>
-                        {queryResult.descripcion_bien && (
-                          <div>
-                            <p className="text-xs text-muted-foreground mb-0.5">Producto / Servicio</p>
-                            <p className="font-medium truncate">{queryResult.descripcion_bien}</p>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Progreso visual */}
-                      <div className="bg-background/60 rounded-xl p-4 border border-border/40">
-                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Progreso de tu reclamo</p>
-                        <div className="flex items-center">
-                          {STATUS_ORDER.map((s, i) => {
-                            const sCfg = STATUS_CONFIG[s];
-                            const done = i <= stepIdx;
-                            const active = i === stepIdx;
-                            return (
-                              <div key={s} className="flex items-center flex-1 last:flex-none">
-                                <div className="flex flex-col items-center gap-1.5">
-                                  <div className={cn(
-                                    'w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all',
-                                    done
-                                      ? `${sCfg.step} border-transparent text-white`
-                                      : 'border-border bg-background text-muted-foreground'
-                                  )}>
-                                    {done ? <CheckCircle className="w-4 h-4" /> : <span className="text-xs font-bold">{i + 1}</span>}
-                                  </div>
-                                  <div className="text-center">
-                                    <p className={cn('text-[10px] font-semibold whitespace-nowrap', active ? 'text-foreground' : done ? 'text-muted-foreground' : 'text-muted-foreground/40')}>
-                                      {sCfg.label}
-                                    </p>
-                                    {active && <p className="text-[9px] text-muted-foreground/60 max-w-[70px] text-center leading-tight mt-0.5 hidden sm:block">{sCfg.desc}</p>}
-                                  </div>
-                                </div>
-                                {i < STATUS_ORDER.length - 1 && (
-                                  <div className={cn('h-0.5 flex-1 mb-5 mx-1 rounded', i < stepIdx ? 'bg-primary' : 'bg-border')} />
-                                )}
-                              </div>
-                            );
-                          })}
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-3 text-center">{cfg.desc}</p>
-                      </div>
-                    </div>
-
-                    {/* Respuesta de la empresa */}
-                    {queryResult.respuesta ? (
-                      <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/5 p-5">
-                        <div className="flex items-center gap-2 mb-3">
-                          <div className="w-7 h-7 rounded-lg bg-emerald-500/15 flex items-center justify-center">
-                            <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                          </div>
-                          <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">Respuesta de la empresa</p>
-                          {queryResult.fecha_respuesta && (
-                            <p className="text-xs text-muted-foreground ml-auto">
-                              {new Date(queryResult.fecha_respuesta).toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric' })}
-                            </p>
-                          )}
-                        </div>
-                        <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">{queryResult.respuesta}</p>
-                      </div>
-                    ) : (
-                      <div className="rounded-2xl border border-border/50 bg-muted/20 p-5 flex items-start gap-3">
-                        <Clock className="w-5 h-5 text-muted-foreground shrink-0 mt-0.5" />
-                        <div>
-                          <p className="text-sm font-medium text-foreground mb-1">En espera de respuesta</p>
-                          <p className="text-xs text-muted-foreground leading-relaxed">
-                            Aún no hay respuesta de la empresa. Recuerda que tienes hasta <strong>30 días calendario</strong> desde el registro para recibir una respuesta.
-                          </p>
-                        </div>
-                      </div>
-                    )}
-
-                    <button onClick={() => { setQueryResult(null); setQueryCode(''); }}
-                      className="w-full py-2.5 text-sm text-muted-foreground hover:text-foreground border border-border/50 rounded-xl hover:bg-muted/30 transition-colors">
-                      Consultar otro reclamo
-                    </button>
-                  </div>
-                );
-              })()}
-
-              {/* No result yet — hint */}
-              {!queryResult && !queryError && (
-                <div className="text-center py-8 text-muted-foreground">
-                  <BookOpen className="w-10 h-10 mx-auto mb-3 opacity-30" />
-                  <p className="text-sm">Ingresa tu código de seguimiento para ver el estado de tu reclamo.</p>
-                </div>
-              )}
             </div>
-          )}
+
+            {/* Company info — inside hero, not a separator */}
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm bg-muted/40 border border-border/60 rounded-xl px-4 py-2.5 mb-0">
+              <span className="font-bold text-foreground">{companyName}</span>
+              <span className="text-muted-foreground/50">·</span>
+              <span className="text-muted-foreground">RUC: {companyRuc}</span>
+              <span className="text-muted-foreground/50 hidden sm:inline">·</span>
+              <span className="text-muted-foreground text-xs hidden sm:inline">{companyAddress}</span>
+            </div>
+          </div>
+        </section>
+
+        <section className="max-w-3xl mx-auto px-4 pb-12">
+
+          {/* ── Tab switcher ──────────────────────────────────── */}
+          <div className="flex rounded-xl border bg-muted/30 p-1 mb-7">
+            {(['registrar', 'consultar'] as const).map(t => (
+              <button key={t} onClick={() => switchTab(t)}
+                className={cn(
+                  'flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-200',
+                  tab === t
+                    ? 'bg-card shadow-sm text-foreground border border-border/60'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}>
+                {t === 'registrar' ? <FileText className="w-4 h-4" /> : <Search className="w-4 h-4" />}
+                {t === 'registrar' ? 'Registrar reclamo' : 'Consultar estado'}
+              </button>
+            ))}
+          </div>
+
+          {/* Both panels rendered — no height jump on tab switch */}
+          <div className={cn(tab === 'registrar' ? 'block' : 'hidden')}>
+            <RegisterTab
+              step={step} form={form} errors={errors} submitting={submitting}
+              correlativo={correlativo} steps={steps}
+              update={update} handleNext={handleNext} handleBack={handleBack}
+              handleSubmit={handleSubmit}
+              onConsultarClick={(code) => { setQueryCode(code); switchTab('consultar'); }}
+              onRestart={() => { setForm(EMPTY); setStep(0); setCorrelativo(''); }}
+            />
+          </div>
+
+          <div className={cn(tab === 'consultar' ? 'block' : 'hidden')}>
+            <ConsultarTab
+              queryCode={queryCode} setQueryCode={setQueryCode}
+              querying={querying} queryResult={queryResult} queryError={queryError}
+              onQuery={handleQuery}
+              onClear={() => { setQueryResult(null); setQueryCode(''); setQueryError(''); }}
+            />
+          </div>
         </section>
       </main>
 
       <Footer />
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/*  RegisterTab                                                                */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+function RegisterTab({ step, form, errors, submitting, correlativo, steps,
+  update, handleNext, handleBack, handleSubmit, onConsultarClick, onRestart }: {
+  step: number; form: FormData; errors: Record<string, string>; submitting: boolean;
+  correlativo: string; steps: string[];
+  update: <K extends keyof FormData>(k: K, v: FormData[K]) => void;
+  handleNext: () => void; handleBack: () => void; handleSubmit: () => void;
+  onConsultarClick: (code: string) => void; onRestart: () => void;
+}) {
+  const inputCls =
+    'w-full px-3.5 py-2.5 rounded-lg border border-input bg-background text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-colors';
+
+  return (
+    <div>
+      {/* Stepper */}
+      {step < 3 && (
+        <div className="flex items-center justify-center mb-6">
+          {steps.map((s, i) => (
+            <div key={i} className="flex items-center">
+              <div className={cn(
+                'flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold transition-all duration-200',
+                i < step ? 'bg-primary/70 text-primary-foreground' :
+                i === step ? 'bg-primary text-primary-foreground shadow' :
+                'bg-muted text-muted-foreground'
+              )}>
+                <span className={cn('w-5 h-5 rounded-full flex items-center justify-center text-xs bg-white/20')}>
+                  {i < step ? <CheckCircle className="w-3.5 h-3.5" /> : i + 1}
+                </span>
+                <span className="hidden sm:inline">{s}</span>
+              </div>
+              {i < steps.length - 1 && (
+                <div className={cn('w-8 h-0.5 mx-1 transition-colors', i < step ? 'bg-primary' : 'bg-muted')} />
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="bg-card border border-border/60 rounded-2xl shadow-sm p-6 md:p-8">
+
+        {/* Step 0 — Datos personales */}
+        {step === 0 && (
+          <div className="space-y-5">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center">
+                <User className="w-4 h-4 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-base font-bold text-foreground">¿Quién eres?</h2>
+                <p className="text-xs text-muted-foreground">Tus datos para identificar y responderte.</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Field label="Nombre" required error={errors.nombre}>
+                <input value={form.nombre} onChange={e => update('nombre', e.target.value)}
+                  placeholder="Tu nombre" className={cn(inputCls, errors.nombre && 'border-destructive focus:ring-destructive/30')} />
+              </Field>
+              <Field label="Apellido" required error={errors.apellido}>
+                <input value={form.apellido} onChange={e => update('apellido', e.target.value)}
+                  placeholder="Tu apellido" className={cn(inputCls, errors.apellido && 'border-destructive focus:ring-destructive/30')} />
+              </Field>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <Field label="Tipo de documento" required>
+                <select value={form.tipo_doc} onChange={e => update('tipo_doc', e.target.value)} className={inputCls}>
+                  {TIPO_DOC.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
+              </Field>
+              <div className="sm:col-span-2">
+                <Field label="Número de documento" required error={errors.num_doc}>
+                  <input value={form.num_doc} onChange={e => update('num_doc', e.target.value)}
+                    placeholder="Ej: 12345678"
+                    className={cn(inputCls, errors.num_doc && 'border-destructive focus:ring-destructive/30')} />
+                </Field>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Field label="Correo electrónico" required error={errors.email} hint="Aquí recibirás la respuesta">
+                <input type="email" value={form.email} onChange={e => update('email', e.target.value)}
+                  placeholder="tucorreo@email.com"
+                  className={cn(inputCls, errors.email && 'border-destructive focus:ring-destructive/30')} />
+              </Field>
+              <Field label="Teléfono" error={errors.telefono}>
+                <input value={form.telefono} onChange={e => update('telefono', e.target.value)}
+                  placeholder="Opcional" className={inputCls} />
+              </Field>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Field label="Dirección">
+                <input value={form.direccion} onChange={e => update('direccion', e.target.value)}
+                  placeholder="Opcional" className={inputCls} />
+              </Field>
+              <Field label="Región" required>
+                <select value={form.region} onChange={e => update('region', e.target.value)} className={inputCls}>
+                  {REGIONES_PERU.map(r => <option key={r} value={r}>{r}</option>)}
+                </select>
+              </Field>
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <button onClick={handleNext}
+                className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 active:scale-[.98] transition-all">
+                Continuar <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Step 1 — Detalle del reclamo */}
+        {step === 1 && (
+          <div className="space-y-5">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center">
+                <FileText className="w-4 h-4 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-base font-bold text-foreground">¿Qué pasó?</h2>
+                <p className="text-xs text-muted-foreground">Cuéntanos en detalle para ayudarte mejor.</p>
+              </div>
+            </div>
+
+            <Field label="¿Tipo de inconformidad?" required>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-0.5">
+                <TipoCard label="Reclamo"
+                  desc="Insatisfacción con un producto o servicio"
+                  icon={AlertCircle} selected={form.tipo === 'reclamo'}
+                  onClick={() => update('tipo', 'reclamo')} />
+                <TipoCard label="Queja"
+                  desc="Malestar por la atención o el proceso"
+                  icon={MessageSquare} selected={form.tipo === 'queja'}
+                  onClick={() => update('tipo', 'queja')} />
+              </div>
+            </Field>
+
+            <Field label="¿Es sobre un producto o servicio?" required>
+              <div className="flex gap-3 mt-0.5">
+                {TIPO_BIEN.map(o => (
+                  <button key={o.value} type="button" onClick={() => update('tipo_bien', o.value)}
+                    className={cn(
+                      'flex-1 py-2.5 rounded-lg border-2 text-sm font-semibold transition-all',
+                      form.tipo_bien === o.value
+                        ? 'border-primary bg-primary/8 text-primary'
+                        : 'border-border text-muted-foreground hover:border-border/80 hover:text-foreground'
+                    )}>
+                    {o.label}
+                  </button>
+                ))}
+              </div>
+            </Field>
+
+            <Field label="¿Qué producto o servicio?" required error={errors.descripcion_bien}
+              hint="Ej: Plan de suscripción mensual, Teléfono Samsung Galaxy">
+              <input value={form.descripcion_bien} onChange={e => update('descripcion_bien', e.target.value)}
+                placeholder="Nombre del producto o servicio"
+                className={cn(inputCls, errors.descripcion_bien && 'border-destructive focus:ring-destructive/30')} />
+            </Field>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Field label="Monto reclamado" error={errors.monto} hint="Si aplica">
+                <input type="number" value={form.monto} onChange={e => update('monto', e.target.value)}
+                  placeholder="0.00" className={inputCls} />
+              </Field>
+              <Field label="Moneda">
+                <select value={form.moneda} onChange={e => update('moneda', e.target.value)} className={inputCls}>
+                  {MONEDAS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
+              </Field>
+            </div>
+
+            <Field label="Cuéntanos qué pasó" required error={errors.detalle}
+              hint="¿Cuándo ocurrió? ¿Qué prometieron y qué recibiste?">
+              <textarea value={form.detalle} onChange={e => update('detalle', e.target.value)}
+                placeholder="Describe los hechos con el mayor detalle posible..."
+                rows={5}
+                className={cn(inputCls, 'resize-y', errors.detalle && 'border-destructive focus:ring-destructive/30')} />
+              <p className="mt-1 text-xs text-muted-foreground">{form.detalle.length} caracteres (mínimo 20)</p>
+            </Field>
+
+            <Field label="¿Qué solución esperas?" hint="Ej: devolución del dinero, cambio del producto">
+              <input value={form.pedido} onChange={e => update('pedido', e.target.value)}
+                placeholder="¿Qué necesitas para que el problema sea resuelto?"
+                className={inputCls} />
+            </Field>
+
+            <div className="flex justify-between pt-2">
+              <button onClick={handleBack}
+                className="inline-flex items-center gap-2 px-5 py-2.5 border border-border rounded-lg font-medium text-foreground hover:bg-muted transition-colors">
+                <ChevronLeft className="w-4 h-4" /> Atrás
+              </button>
+              <button onClick={handleNext}
+                className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 active:scale-[.98] transition-all">
+                Revisar y enviar <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Step 2 — Confirmar */}
+        {step === 2 && (
+          <div className="space-y-5">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center">
+                <Shield className="w-4 h-4 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-base font-bold text-foreground">Revisa antes de enviar</h2>
+                <p className="text-xs text-muted-foreground">Una vez enviado no podrás modificarlo.</p>
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-border/60 bg-muted/20 overflow-hidden">
+              <div className="px-4 py-2.5 border-b border-border/50 bg-muted/30">
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Tus datos</p>
+              </div>
+              <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-sm">
+                <Pair label="Nombre" value={`${form.nombre} ${form.apellido}`} />
+                <Pair label="Documento" value={`${form.tipo_doc} ${form.num_doc}`} />
+                <Pair label="Correo" value={form.email} />
+                <Pair label="Teléfono" value={form.telefono || '—'} />
+                <Pair label="Región" value={form.region} />
+              </div>
+              <div className="px-4 py-2.5 border-t border-b border-border/50 bg-muted/30">
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Tu reclamo</p>
+              </div>
+              <div className="p-4 space-y-3 text-sm">
+                <div className="flex gap-2 flex-wrap">
+                  <span className="px-2.5 py-1 rounded-full bg-primary/15 text-primary border border-primary/25 text-xs font-bold capitalize">{form.tipo}</span>
+                  <span className="px-2.5 py-1 rounded-full bg-muted border text-xs font-medium capitalize">{form.tipo_bien}</span>
+                  {form.monto && <span className="px-2.5 py-1 rounded-full bg-muted border text-xs font-medium">{form.moneda === 'PEN' ? 'S/' : '$'} {form.monto}</span>}
+                </div>
+                <Pair label="Producto/Servicio" value={form.descripcion_bien} />
+                <div className="bg-muted/50 rounded-lg p-3 text-foreground/80 leading-relaxed text-sm">{form.detalle}</div>
+                {form.pedido && <Pair label="Solución esperada" value={form.pedido} />}
+              </div>
+            </div>
+
+            <label className="flex items-start gap-3 cursor-pointer p-4 rounded-xl border border-border/50 hover:bg-muted/20 transition-colors">
+              <input type="checkbox" checked={form.acepta} onChange={e => update('acepta', e.target.checked)}
+                className="mt-0.5 w-4 h-4 rounded border-input accent-primary" />
+              <span className="text-sm text-muted-foreground leading-relaxed">
+                Declaro que la información es verídica y acepto el tratamiento de mis datos personales conforme a la <strong className="text-foreground">Ley N° 29733</strong>.
+              </span>
+            </label>
+
+            <div className="flex justify-between pt-2">
+              <button onClick={handleBack}
+                className="inline-flex items-center gap-2 px-5 py-2.5 border border-border rounded-lg font-medium text-foreground hover:bg-muted transition-colors">
+                <ChevronLeft className="w-4 h-4" /> Atrás
+              </button>
+              <button onClick={handleSubmit} disabled={submitting}
+                className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 active:scale-[.98] transition-all disabled:opacity-60 disabled:cursor-not-allowed">
+                {submitting ? 'Enviando...' : <><Send className="w-4 h-4" /> Enviar reclamo</>}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Step 3 — Éxito */}
+        {step === 3 && correlativo && (
+          <div className="text-center py-6 space-y-5">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-500/20 dark:bg-emerald-500/25 ring-4 ring-emerald-500/10">
+              <CheckCircle className="w-8 h-8 text-emerald-500 dark:text-emerald-400" />
+            </div>
+            <div>
+              <h2 className="text-xl font-black mb-2 text-foreground">¡Reclamo Registrado!</h2>
+              <p className="text-muted-foreground text-sm max-w-md mx-auto leading-relaxed">
+                Hemos recibido tu reclamo. Guarda este código — lo necesitarás para consultar el estado de tu caso.
+              </p>
+            </div>
+
+            <div className="mx-auto max-w-xs">
+              <p className="text-[10px] text-muted-foreground mb-2 font-bold uppercase tracking-widest">Tu código de seguimiento</p>
+              <div className="px-6 py-4 rounded-xl border-2 border-dashed border-primary/50 bg-primary/5">
+                <span className="text-xl font-mono font-black text-primary tracking-wider">{correlativo}</span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">Úsalo en la pestaña "Consultar estado"</p>
+            </div>
+
+            <div className="bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/30 dark:border-amber-400/30 rounded-xl p-4 text-sm text-amber-800 dark:text-amber-300 max-w-md mx-auto">
+              <p className="font-bold mb-1">¿Qué sigue?</p>
+              <p className="text-xs leading-relaxed opacity-90">
+                Te contactaremos en un plazo máximo de <strong>30 días calendario</strong>, conforme a la normativa vigente.
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+              <button onClick={onRestart}
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 border border-border rounded-lg font-medium text-foreground hover:bg-muted transition-colors">
+                Registrar otro reclamo
+              </button>
+              <button onClick={() => onConsultarClick(correlativo)}
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-colors">
+                <Search className="w-4 h-4" /> Consultar mi reclamo
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Legal footnote */}
+      {step < 3 && (
+        <div className="mt-4 flex gap-3 text-xs text-muted-foreground bg-muted/20 border border-border/40 rounded-xl p-3.5">
+          <Info className="w-4 h-4 shrink-0 mt-0.5 opacity-60" />
+          <p className="leading-relaxed">
+            Implementado conforme al D.S. 011-2011-PCM, Ley N° 29571 (Código de Protección y Defensa del Consumidor) y Ley N° 29733. La empresa atenderá tu reclamo en un plazo máximo de <strong>30 días calendario</strong>.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Pair({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <span className="text-muted-foreground">{label}: </span>
+      <span className="font-medium text-foreground">{value}</span>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/*  ConsultarTab                                                               */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+function ConsultarTab({ queryCode, setQueryCode, querying, queryResult, queryError, onQuery, onClear }: {
+  queryCode: string;
+  setQueryCode: (v: string) => void;
+  querying: boolean;
+  queryResult: ComplaintResult | null;
+  queryError: string;
+  onQuery: () => void;
+  onClear: () => void;
+}) {
+  return (
+    <div className="space-y-5">
+      {/* Search card */}
+      <div className="bg-card border border-border/60 rounded-2xl shadow-sm p-6">
+        <div className="flex items-center gap-2 mb-1">
+          <Search className="w-5 h-5 text-primary" />
+          <h2 className="text-base font-bold text-foreground">Consultar estado de tu reclamo</h2>
+        </div>
+        <p className="text-sm text-muted-foreground mb-5 ml-7">
+          Ingresa el código de seguimiento que recibiste al registrar tu reclamo.
+        </p>
+
+        <div className="flex gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+            <input
+              value={queryCode}
+              onChange={e => { setQueryCode(e.target.value.toUpperCase()); }}
+              onKeyDown={e => e.key === 'Enter' && onQuery()}
+              placeholder="Ej: REC-2026-123456"
+              className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-input bg-background text-sm font-mono text-foreground placeholder:text-muted-foreground placeholder:font-sans focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-colors"
+            />
+          </div>
+          <button onClick={onQuery} disabled={querying}
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 active:scale-[.98] transition-all disabled:opacity-60">
+            {querying ? 'Buscando...' : <><ArrowRight className="w-4 h-4" />Consultar</>}
+          </button>
+        </div>
+
+        {queryError && (
+          <div className="mt-4 flex items-start gap-2.5 p-3.5 rounded-xl bg-destructive/8 dark:bg-destructive/15 border border-destructive/30 text-sm text-destructive">
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+            <p>{queryError}</p>
+          </div>
+        )}
+      </div>
+
+      {/* Result */}
+      {queryResult && <ComplaintResultCard result={queryResult} onClear={onClear} />}
+
+      {!queryResult && !queryError && (
+        <div className="text-center py-12 text-muted-foreground">
+          <BookOpen className="w-10 h-10 mx-auto mb-3 opacity-25" />
+          <p className="text-sm">Ingresa tu código para ver el estado de tu reclamo.</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ComplaintResultCard({ result, onClear }: { result: ComplaintResult; onClear: () => void }) {
+  const stepIdx = STATUS_ORDER.indexOf(result.status);
+  const cfg = STATUS_CONFIG[result.status] ?? STATUS_CONFIG.pendiente;
+
+  const fmtDate = (v?: string | null) => {
+    if (!v) return '—';
+    try { return new Date(v).toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric' }); }
+    catch { return v; }
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Main result card */}
+      <div className={cn('rounded-2xl border p-5', cfg.bgCls, cfg.borderCls)}>
+        {/* Header row */}
+        <div className="flex items-start justify-between gap-3 mb-4">
+          <div>
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">
+              Código de seguimiento
+            </p>
+            <p className="text-2xl font-mono font-black text-foreground tracking-wider">
+              {result.correlativo}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Registrado el {fmtDate(result.created_at)}
+            </p>
+          </div>
+          <span className={cn('px-3 py-1.5 rounded-full border text-xs font-bold shrink-0', cfg.badgeCls)}>
+            {cfg.label}
+          </span>
+        </div>
+
+        {/* Meta info */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm mb-5">
+          <div>
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">Tipo</p>
+            <p className="font-semibold text-foreground capitalize">{result.tipo}</p>
+          </div>
+          <div>
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">Solicitante</p>
+            <p className="font-semibold text-foreground">{result.nombre} {result.apellido ?? ''}</p>
+          </div>
+          {result.descripcion_bien && (
+            <div>
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">Producto / Servicio</p>
+              <p className="font-semibold text-foreground truncate">{result.descripcion_bien}</p>
+            </div>
+          )}
+        </div>
+
+        {/* Progress stepper */}
+        <div className="bg-background/60 dark:bg-background/30 rounded-xl border border-border/40 p-4">
+          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">
+            Progreso de tu reclamo
+          </p>
+          <div className="flex items-center">
+            {STATUS_ORDER.map((s, i) => {
+              const sCfg = STATUS_CONFIG[s];
+              const done = i <= stepIdx;
+              const active = i === stepIdx;
+              return (
+                <div key={s} className="flex items-center flex-1 last:flex-none">
+                  <div className="flex flex-col items-center gap-1.5 relative">
+                    <div className={cn(
+                      'w-9 h-9 rounded-full flex items-center justify-center border-2 transition-all duration-300',
+                      done
+                        ? `${sCfg.dotCls} border-transparent text-white shadow-md`
+                        : 'border-border bg-background text-muted-foreground'
+                    )}>
+                      {done
+                        ? <CheckCircle className="w-4.5 h-4.5" />
+                        : <span className="text-xs font-bold">{i + 1}</span>
+                      }
+                    </div>
+                    <div className="text-center">
+                      <p className={cn(
+                        'text-[10px] font-bold whitespace-nowrap',
+                        active ? sCfg.textCls : done ? 'text-muted-foreground' : 'text-muted-foreground/30'
+                      )}>
+                        {sCfg.label}
+                      </p>
+                      {active && (
+                        <p className="text-[9px] text-muted-foreground/60 max-w-[72px] text-center leading-tight mt-0.5 hidden sm:block">
+                          {sCfg.desc}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  {i < STATUS_ORDER.length - 1 && (
+                    <div className={cn(
+                      'h-0.5 flex-1 mb-7 mx-1.5 rounded transition-all duration-300',
+                      i < stepIdx ? cfg.dotCls : 'bg-border'
+                    )} />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          <p className={cn('text-xs font-medium mt-3 text-center', cfg.textCls)}>{cfg.desc}</p>
+        </div>
+      </div>
+
+      {/* Respuesta de empresa */}
+      {result.respuesta ? (
+        <div className="rounded-2xl border border-emerald-500/30 dark:border-emerald-400/30 bg-emerald-500/8 dark:bg-emerald-500/12 p-5">
+          <div className="flex items-center justify-between gap-3 mb-3">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+                <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300">Respuesta de la empresa</p>
+            </div>
+            {result.fecha_respuesta && (
+              <p className="text-xs text-muted-foreground shrink-0">
+                {new Date(result.fecha_respuesta).toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric' })}
+              </p>
+            )}
+          </div>
+          <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">{result.respuesta}</p>
+        </div>
+      ) : (
+        <div className="rounded-2xl border border-border/50 bg-muted/20 p-4 flex items-start gap-3">
+          <Clock className="w-5 h-5 text-muted-foreground shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-semibold text-foreground mb-0.5">En espera de respuesta</p>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Aún no hay respuesta. Tienes hasta <strong>30 días calendario</strong> desde el registro para recibir una respuesta.
+            </p>
+          </div>
+        </div>
+      )}
+
+      <button onClick={onClear}
+        className="w-full py-2.5 text-sm text-muted-foreground hover:text-foreground border border-border/50 rounded-xl hover:bg-muted/30 transition-colors">
+        Consultar otro reclamo
+      </button>
     </div>
   );
 }

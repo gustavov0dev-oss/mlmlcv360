@@ -1,8 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/lib/backend/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-
 import { Switch } from '@/components/ui/switch';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
@@ -15,8 +14,8 @@ import {
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 import {
-  FileText, Plus, Search, RefreshCw, Trash2, Pencil, GripVertical,
-  ArrowUp, ArrowDown, ExternalLink, Loader as Loader2, Save,
+  FileText, Plus, Search, RefreshCw, Trash2, Pencil,
+  GripVertical, ExternalLink, Loader as Loader2, Save,
 } from 'lucide-react';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { cn } from '@/lib/utils';
@@ -54,6 +53,11 @@ export default function LegalPagesAdminPage() {
   const [reordering, setReordering] = useState(false);
   const [togglingId, setTogglingId] = useState<string | null>(null);
 
+  // Drag state
+  const dragIndex = useRef<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
   // Editor form state
   const [form, setForm] = useState({ slug: '', title: '', content: '', is_published: false, show_in_footer: true });
 
@@ -78,6 +82,7 @@ export default function LegalPagesAdminPage() {
     return !q || p.title.toLowerCase().includes(q) || p.slug.includes(q);
   });
 
+  // ── Editor helpers ────────────────────────────────────────────────────────
   const openNew = () => {
     setForm({ slug: '', title: '', content: '', is_published: false, show_in_footer: true });
     setIsNew(true);
@@ -90,10 +95,7 @@ export default function LegalPagesAdminPage() {
     setEditing(p);
   };
 
-  const closeEditor = () => {
-    setEditing(null);
-    setIsNew(false);
-  };
+  const closeEditor = () => { setEditing(null); setIsNew(false); };
 
   const handleSave = async () => {
     if (!form.title.trim()) { toast.error('El título es obligatorio'); return; }
@@ -143,39 +145,81 @@ export default function LegalPagesAdminPage() {
     }
   };
 
-  const movePage = async (index: number, dir: 'up' | 'down') => {
-    const swapIndex = dir === 'up' ? index - 1 : index + 1;
-    if (swapIndex < 0 || swapIndex >= filtered.length) return;
-    const a = filtered[index];
-    const b = filtered[swapIndex];
+  // ── Drag-and-drop reorder ─────────────────────────────────────────────────
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+    dragIndex.current = index;
+    setIsDragging(true);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', String(index));
+  };
+
+  const handleDragEnd = () => {
+    dragIndex.current = null;
+    setDragOverIndex(null);
+    setIsDragging(false);
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (dragIndex.current !== null && dragIndex.current !== index) {
+      setDragOverIndex(index);
+    }
+  };
+
+  const handleDragLeave = (_e: React.DragEvent<HTMLDivElement>, index: number) => {
+    if (dragOverIndex === index) setDragOverIndex(null);
+  };
+
+  const handleDrop = async (e: React.DragEvent<HTMLDivElement>, dropIndex: number) => {
+    e.preventDefault();
+    const fromIndex = dragIndex.current;
+    setDragOverIndex(null);
+    setIsDragging(false);
+    dragIndex.current = null;
+    if (fromIndex === null || fromIndex === dropIndex) return;
+
+    const reordered = [...filtered];
+    const [moved] = reordered.splice(fromIndex, 1);
+    reordered.splice(dropIndex, 0, moved);
+    const withNewOrder = reordered.map((p, i) => ({ ...p, sort_order: i }));
+
+    // Optimistic update
+    setPages(prev => {
+      const map = new Map(withNewOrder.map(p => [p.id, p]));
+      return prev.map(p => map.get(p.id) ?? p);
+    });
+
     setReordering(true);
     try {
-      await Promise.all([
-        supabase.from('legal_pages').update({ sort_order: b.sort_order }).eq('id', a.id),
-        supabase.from('legal_pages').update({ sort_order: a.sort_order }).eq('id', b.id),
-      ]);
-      load();
+      const updates = withNewOrder.map(p =>
+        supabase.from('legal_pages').update({ sort_order: p.sort_order }).eq('id', p.id)
+      );
+      const results = await Promise.all(updates);
+      for (const r of results) if (r.error) throw r.error;
+      toast.success('Orden actualizado');
     } catch {
       toast.error('Error al reordenar');
+      load();
     } finally {
       setReordering(false);
     }
   };
 
+  // ── Toggle helpers ────────────────────────────────────────────────────────
   const togglePublished = async (p: LegalPage) => {
     setTogglingId(p.id);
     try {
       const { data, error } = await supabase.from('legal_pages')
         .update({ is_published: !p.is_published, updated_at: new Date().toISOString() })
-        .eq('id', p.id)
-        .select('id,is_published').single();
+        .eq('id', p.id).select('id,is_published').single();
       if (error) throw error;
-      if (!data) { toast.error('No se pudo actualizar: verifica que tienes permisos de administrador'); return; }
+      if (!data) { toast.error('Sin permisos: verifica tu rol de administrador'); return; }
       setPages(prev => prev.map(x => x.id === p.id ? { ...x, is_published: !p.is_published } : x));
-      toast.success(p.is_published ? 'Despublicado' : 'Publicado');
+      toast.success(p.is_published ? 'Página despublicada' : 'Página publicada');
     } catch (e) {
-      const msg = e instanceof Error ? e.message : 'Error al actualizar';
-      toast.error(msg.includes('row-level security') || msg.includes('rls') ? 'Sin permisos: tu cuenta no tiene rol de administrador' : msg);
+      const msg = e instanceof Error ? e.message : 'Error';
+      toast.error(msg.includes('row-level') ? 'Sin permisos de administrador' : msg);
     } finally {
       setTogglingId(null);
     }
@@ -186,15 +230,14 @@ export default function LegalPagesAdminPage() {
     try {
       const { data, error } = await supabase.from('legal_pages')
         .update({ show_in_footer: !p.show_in_footer, updated_at: new Date().toISOString() })
-        .eq('id', p.id)
-        .select('id,show_in_footer').single();
+        .eq('id', p.id).select('id,show_in_footer').single();
       if (error) throw error;
-      if (!data) { toast.error('No se pudo actualizar: verifica que tienes permisos de administrador'); return; }
+      if (!data) { toast.error('Sin permisos: verifica tu rol de administrador'); return; }
       setPages(prev => prev.map(x => x.id === p.id ? { ...x, show_in_footer: !p.show_in_footer } : x));
       toast.success(p.show_in_footer ? 'Quitado del footer' : 'Agregado al footer');
     } catch (e) {
-      const msg = e instanceof Error ? e.message : 'Error al actualizar';
-      toast.error(msg.includes('row-level security') || msg.includes('rls') ? 'Sin permisos: tu cuenta no tiene rol de administrador' : msg);
+      const msg = e instanceof Error ? e.message : 'Error';
+      toast.error(msg.includes('row-level') ? 'Sin permisos de administrador' : msg);
     } finally {
       setTogglingId(null);
     }
@@ -254,84 +297,98 @@ export default function LegalPagesAdminPage() {
             </p>
           </div>
         ) : (
-          <div className="divide-y divide-border/50">
-            {filtered.map((p, i) => (
-              <div key={p.id} className="flex items-center gap-3 px-4 py-3.5 hover:bg-muted/30 transition-colors group">
-                {/* Order controls */}
-                <div className="flex flex-col items-center gap-0.5 shrink-0">
-                  <button
-                    onClick={() => movePage(i, 'up')}
-                    disabled={reordering || i === 0}
-                    className="w-5 h-5 rounded flex items-center justify-center text-muted-foreground/50 hover:text-foreground hover:bg-muted disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
-                  >
-                    <ArrowUp className="w-3.5 h-3.5" />
-                  </button>
-                  <GripVertical className="w-3.5 h-3.5 text-muted-foreground/30" />
-                  <button
-                    onClick={() => movePage(i, 'down')}
-                    disabled={reordering || i === filtered.length - 1}
-                    className="w-5 h-5 rounded flex items-center justify-center text-muted-foreground/50 hover:text-foreground hover:bg-muted disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
-                  >
-                    <ArrowDown className="w-3.5 h-3.5" />
-                  </button>
-                </div>
+          <>
+            {/* Header hint */}
+            <div className="flex items-center gap-2 px-4 py-2 border-b border-border/40 bg-muted/20">
+              <GripVertical className="w-3.5 h-3.5 text-muted-foreground/40" />
+              <p className="text-xs text-muted-foreground/50">Arrastra para reordenar</p>
+              {reordering && <Loader2 className="w-3.5 h-3.5 text-muted-foreground animate-spin ml-auto" />}
+            </div>
 
-                {/* Title + slug */}
-                <div className="flex-1 min-w-0 cursor-pointer" onClick={() => openEdit(p)}>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-sm font-semibold text-foreground truncate">{p.title}</span>
-                    {p.is_published
-                      ? <Badge variant="outline" className="text-[10px] h-5 px-1.5 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30">Publicado</Badge>
-                      : <Badge variant="outline" className="text-[10px] h-5 px-1.5 bg-muted text-muted-foreground border-border">Borrador</Badge>}
+            <div className="divide-y divide-border/50">
+              {filtered.map((p, i) => {
+                const isDragged = isDragging && dragIndex.current === i;
+                const isDropTarget = dragOverIndex === i;
+                return (
+                  <div
+                    key={p.id}
+                    draggable
+                    onDragStart={e => handleDragStart(e, i)}
+                    onDragEnd={handleDragEnd}
+                    onDragOver={e => handleDragOver(e, i)}
+                    onDragLeave={e => handleDragLeave(e, i)}
+                    onDrop={e => handleDrop(e, i)}
+                    className={cn(
+                      'flex items-center gap-3 px-4 py-3.5 transition-all group select-none',
+                      isDropTarget ? 'border-t-2 border-primary bg-primary/5' : 'hover:bg-muted/30',
+                      isDragged && 'opacity-40'
+                    )}
+                  >
+                    {/* Drag handle */}
+                    <div className="cursor-grab active:cursor-grabbing text-muted-foreground/40 group-hover:text-muted-foreground transition-colors shrink-0">
+                      <GripVertical className="w-4.5 h-4.5" />
+                    </div>
+
+                    {/* Title + slug */}
+                    <div className="flex-1 min-w-0 cursor-pointer" onClick={() => openEdit(p)}>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-sm font-semibold text-foreground truncate">{p.title}</span>
+                        {p.is_published
+                          ? <Badge variant="outline" className="text-[10px] h-5 px-1.5 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/30 shrink-0">Publicado</Badge>
+                          : <Badge variant="outline" className="text-[10px] h-5 px-1.5 bg-muted text-muted-foreground border-border shrink-0">Borrador</Badge>
+                        }
+                      </div>
+                      <p className="text-xs text-muted-foreground/50 mt-0.5 font-mono">/legal/{p.slug}</p>
+                    </div>
+
+                    {/* Footer toggle */}
+                    <button
+                      onClick={() => toggleFooter(p)}
+                      disabled={togglingId === p.id}
+                      className={cn(
+                        'hidden sm:flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border transition-colors shrink-0 disabled:pointer-events-none disabled:opacity-50',
+                        p.show_in_footer
+                          ? 'text-sky-700 dark:text-sky-300 bg-sky-500/10 border-sky-500/25'
+                          : 'text-muted-foreground bg-muted/50 border-border/50 hover:bg-muted'
+                      )}
+                    >
+                      <span className={cn('w-1.5 h-1.5 rounded-full shrink-0', p.show_in_footer ? 'bg-sky-500 dark:bg-sky-400' : 'bg-muted-foreground/30')} />
+                      Footer
+                    </button>
+
+                    {/* Published switch — fixed-width wrapper prevents layout shift */}
+                    <div className="w-9 h-5 shrink-0 flex items-center">
+                      <Switch
+                        checked={p.is_published}
+                        onCheckedChange={() => togglePublished(p)}
+                        disabled={togglingId === p.id}
+                        aria-label="Publicar"
+                        className="focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none"
+                      />
+                    </div>
+
+                    {/* Action buttons */}
+                    <div className="flex items-center gap-1 shrink-0">
+                      {p.is_published && (
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0" asChild>
+                          <Link to={`/legal/${p.slug}`} target="_blank" rel="noopener noreferrer">
+                            <ExternalLink className="h-4 w-4" />
+                          </Link>
+                        </Button>
+                      )}
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => openEdit(p)}>
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10"
+                        onClick={() => setDeleteTarget(p)} disabled={deletingId === p.id}>
+                        {deletingId === p.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                      </Button>
+                    </div>
                   </div>
-                  <p className="text-xs text-muted-foreground/50 mt-0.5 font-mono">/legal/{p.slug}</p>
-                </div>
-
-                {/* Footer toggle */}
-                <button
-                  onClick={() => toggleFooter(p)}
-                  disabled={togglingId === p.id}
-                  className={cn(
-                    'hidden sm:flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border transition-colors shrink-0 disabled:opacity-50',
-                    p.show_in_footer
-                      ? 'text-blue-700 dark:text-blue-400 bg-blue-500/10 border-blue-500/25'
-                      : 'text-muted-foreground bg-muted/50 border-border/50'
-                  )}
-                  title="Mostrar en footer"
-                >
-                  <span className={cn('w-1.5 h-1.5 rounded-full', p.show_in_footer ? 'bg-blue-500' : 'bg-muted-foreground/40')} />
-                  Footer
-                </button>
-
-                {/* Published toggle */}
-                <Switch 
-                  checked={p.is_published} 
-                  onCheckedChange={() => togglePublished(p)}
-                  disabled={togglingId === p.id}
-                  aria-label="Publicar" 
-                  className="shrink-0" 
-                />
-
-                {/* Actions */}
-                <div className="flex items-center gap-1 shrink-0">
-                  {p.is_published && (
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0" asChild>
-                      <Link to={`/legal/${p.slug}`} target="_blank" rel="noopener noreferrer">
-                        <ExternalLink className="h-4 w-4" />
-                      </Link>
-                    </Button>
-                  )}
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => openEdit(p)} title="Editar">
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10"
-                    onClick={() => setDeleteTarget(p)} disabled={deletingId === p.id}>
-                    {deletingId === p.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
+                );
+              })}
+            </div>
+          </>
         )}
       </div>
 
@@ -372,11 +429,7 @@ export default function LegalPagesAdminPage() {
 
               <div className="space-y-1.5">
                 <label className="text-sm font-medium text-foreground">Contenido</label>
-                <RichTextEditor
-                  value={form.content}
-                  onChange={html => setForm(f => ({ ...f, content: html }))}
-                  minHeight={280}
-                />
+                <RichTextEditor value={form.content} onChange={html => setForm(f => ({ ...f, content: html }))} minHeight={280} />
               </div>
 
               <div className="flex items-center gap-6 pt-2 border-t border-border/50">
@@ -414,7 +467,7 @@ export default function LegalPagesAdminPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>¿Eliminar esta página?</AlertDialogTitle>
             <AlertDialogDescription>
-              Se eliminará permanentemente la página <strong>{deleteTarget?.title}</strong>. Esta acción no se puede deshacer.
+              Se eliminará permanentemente <strong>{deleteTarget?.title}</strong>. Esta acción no se puede deshacer.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

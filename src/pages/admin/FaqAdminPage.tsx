@@ -170,6 +170,30 @@ export default function FaqAdminPage() {
     }
   };
 
+  // ── Toggle active inline (no need to enter edit mode) ──────────────────────
+  const [togglingId, setTogglingId] = useState<string | null>(null);
+
+  const handleToggleActive = async (item: FaqItem) => {
+    setTogglingId(item.id);
+    try {
+      const { data, error } = await supabase
+        .from('faq_items')
+        .update({ is_active: !item.is_active })
+        .eq('id', item.id)
+        .select('id,is_active')
+        .single();
+      if (error) throw error;
+      if (!data) { toast.error('Sin permisos: verifica tu rol de administrador'); return; }
+      setItems(prev => prev.map(it => it.id === item.id ? { ...it, is_active: !item.is_active } : it));
+      toast.success(item.is_active ? 'Pregunta desactivada' : 'Pregunta activada');
+    } catch (err: any) {
+      const msg = err?.message || 'Error al actualizar';
+      toast.error(msg.includes('row-level') ? 'Sin permisos de administrador' : msg);
+    } finally {
+      setTogglingId(null);
+    }
+  };
+
   // ── Drag and drop reorder ────────────────────────────────────────────────────
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>, index: number) => {
     dragIndex.current = index;
@@ -450,23 +474,28 @@ export default function FaqAdminPage() {
 
                     {/* Content */}
                     <div className="flex-1 min-w-0 space-y-1">
-                      <div className="flex items-start justify-between gap-2">
-                        <p className="font-medium text-foreground truncate">
-                          {item.question || 'Pregunta sin título'}
-                        </p>
-                        <span
-                          className={`shrink-0 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
-                            item.is_active
-                              ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
-                              : 'bg-muted text-muted-foreground'
-                          }`}
-                        >
-                          {item.is_active ? 'Activa' : 'Inactiva'}
-                        </span>
-                      </div>
+                      <p className="font-medium text-foreground truncate">
+                        {item.question || 'Pregunta sin título'}
+                      </p>
                       <p className="text-sm text-muted-foreground line-clamp-2">
                         {item.answer || 'Sin respuesta'}
                       </p>
+                    </div>
+
+                    {/* Active toggle — inline, no need to enter edit mode */}
+                    <div className="flex flex-col items-center gap-1 shrink-0 pt-1">
+                      <div className="w-9 h-5 flex items-center">
+                        <Switch
+                          checked={item.is_active}
+                          onCheckedChange={() => handleToggleActive(item)}
+                          disabled={togglingId === item.id}
+                          aria-label="Activar/desactivar"
+                          className="focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none"
+                        />
+                      </div>
+                      <span className={`text-[10px] font-medium ${item.is_active ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground/50'}`}>
+                        {item.is_active ? 'Activa' : 'Inactiva'}
+                      </span>
                     </div>
 
                     {/* Actions */}
