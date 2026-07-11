@@ -77,8 +77,12 @@ const superAdminNav: NavItem[] = [
       { label: 'Páginas Legales', href: '/dashboard/admin/paginas', icon: ScrollText },
     ],
   },
-  { label: 'Gestión Admin', href: '/dashboard/admin', icon: Shield, exact: true },
-  { label: 'Configuración', href: '/dashboard/configuracion', icon: Settings },
+  {
+    label: 'Sistema', icon: Shield, children: [
+      { label: 'Panel de Admin', href: '/dashboard/admin', icon: Shield, exact: true },
+      { label: 'Configuración', href: '/dashboard/configuracion', icon: Settings },
+    ],
+  },
 ];
 
 const adminNav: NavItem[] = [
@@ -112,7 +116,11 @@ const adminNav: NavItem[] = [
       { label: 'Páginas Legales', href: '/dashboard/admin/paginas', icon: ScrollText },
     ],
   },
-  { label: 'Gestión Admin', href: '/dashboard/admin', icon: Shield, exact: true },
+  {
+    label: 'Sistema', icon: Shield, children: [
+      { label: 'Panel de Admin', href: '/dashboard/admin', icon: Shield, exact: true },
+    ],
+  },
 ];
 
 const userNav: NavItem[] = [

@@ -258,21 +258,37 @@ export default function AdminPage() {
         <p className="text-muted-foreground text-sm mt-1">Configura todos los aspectos del sistema MLM 360.</p>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-6">
-        {/* Module list */}
+      <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
+        {/* Module selector — mobile: select dropdown; desktop: vertical list */}
         <div className="lg:w-56 flex-shrink-0">
-          <div className="bg-card border border-border rounded-xl overflow-hidden flex lg:flex-col flex-row overflow-x-auto">
+          {/* Mobile dropdown */}
+          <div className="lg:hidden relative">
+            <select
+              value={activeModule}
+              onChange={e => setActiveModule(e.target.value)}
+              className="w-full pl-3 pr-9 py-2.5 bg-card border border-border rounded-xl text-sm text-foreground outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/15 transition-colors appearance-none cursor-pointer"
+            >
+              {modules.map(mod => (
+                <option key={mod.id} value={mod.id}>{mod.label}</option>
+              ))}
+            </select>
+            <ChevronRight className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground rotate-90" />
+          </div>
+          {/* Desktop list */}
+          <div className="hidden lg:block bg-card border border-border rounded-xl overflow-hidden">
             {modules.map(mod => (
               <button key={mod.id} onClick={() => setActiveModule(mod.id)}
                 className={cn(
-                  'w-full flex items-center gap-3 px-4 py-3.5 text-left border-b border-border/50 last:border-0 transition-colors flex-shrink-0 lg:flex-shrink',
-                  activeModule === mod.id ? 'bg-primary/10 text-primary' : 'hover:bg-muted text-muted-foreground hover:text-foreground'
+                  'w-full flex items-center gap-3 px-4 py-3 text-left border-b border-border/50 last:border-0 transition-colors',
+                  activeModule === mod.id
+                    ? 'bg-primary/10 text-primary'
+                    : 'hover:bg-muted text-muted-foreground hover:text-foreground'
                 )}>
                 <mod.icon className="w-4 h-4 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium whitespace-nowrap">{mod.label}</div>
+                  <div className="text-sm font-medium">{mod.label}</div>
                 </div>
-                <ChevronRight className="w-3.5 h-3.5 flex-shrink-0 hidden lg:block" />
+                <ChevronRight className="w-3 h-3 flex-shrink-0 text-muted-foreground/50" />
               </button>
             ))}
           </div>
