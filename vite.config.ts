@@ -33,15 +33,6 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: [
-      '@tiptap/core',
-      '@tiptap/pm',
-      '@tiptap/react',
-      '@tiptap/starter-kit',
-      '@tiptap/extension-link',
-      '@tiptap/extension-text-align',
-      '@tiptap/extension-underline',
-    ],
     exclude: ['lucide-react'],
   },
 });
