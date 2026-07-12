@@ -170,7 +170,7 @@ function NavItemComponent({
     : false;
 
   const isActiveParent = item.children?.some(c =>
-    c.href && (pathname === c.href || pathname.startsWith(c.href + '/'))
+    c.href && (c.exact ? pathname === c.href : (pathname === c.href || pathname.startsWith(c.href + '/')))
   );
 
   const isActive = isActiveLeaf || isActiveParent;
@@ -232,7 +232,7 @@ function NavItemComponent({
         )}>
           {item.children.map(child => {
             const childActive = child.href
-              ? pathname === child.href || pathname.startsWith(child.href + '/')
+              ? (child.exact ? pathname === child.href : (pathname === child.href || pathname.startsWith(child.href + '/')))
               : false;
             return (
               <Link
@@ -299,7 +299,9 @@ function MobileExpandableSection({
   onNavigate: () => void;
   pathname: string;
 }) {
-  const isActiveParent = item.children?.some(c => c.href && pathname.startsWith(c.href));
+  const isActiveParent = item.children?.some(c =>
+    c.href && (c.exact ? pathname === c.href : (pathname === c.href || pathname.startsWith(c.href + '/')))
+  );
   const [expanded, setExpanded] = useState(Boolean(isActiveParent));
 
   return (
@@ -319,7 +321,9 @@ function MobileExpandableSection({
       {expanded && item.children && (
         <div className="grid grid-cols-2 gap-1.5 mt-1.5 px-1">
           {item.children.map(child => {
-            const childActive = child.href ? pathname.startsWith(child.href) : false;
+            const childActive = child.href
+              ? (child.exact ? pathname === child.href : (pathname === child.href || pathname.startsWith(child.href + '/')))
+              : false;
             return (
               <Link
                 key={child.href}

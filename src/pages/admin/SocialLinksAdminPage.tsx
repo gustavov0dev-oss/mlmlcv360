@@ -212,7 +212,7 @@ export default function SocialLinksAdminPage() {
   const activeCount = links.filter(l => l.is_active).length;
 
   return (
-    <div className="space-y-6 max-w-3xl">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>

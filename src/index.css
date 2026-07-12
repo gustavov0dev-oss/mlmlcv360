@@ -563,9 +563,10 @@
   background: hsl(var(--muted-foreground) / 0.5);
 }
 
-/* Dashboard scrollbar — subtle neutral, matches landing */
+/* Dashboard scrollbar — matches global frontend scrollbar */
 .dashboard-scroll::-webkit-scrollbar {
-  width: 4px;
+  width: 8px;
+  height: 8px;
 }
 
 .dashboard-scroll::-webkit-scrollbar-track {
@@ -573,12 +574,12 @@
 }
 
 .dashboard-scroll::-webkit-scrollbar-thumb {
-  background: hsl(var(--muted-foreground) / 0.2);
+  background: hsl(var(--border));
   border-radius: 4px;
 }
 
 .dashboard-scroll::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--muted-foreground) / 0.35);
+  background: hsl(var(--muted-foreground) / 0.5);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════

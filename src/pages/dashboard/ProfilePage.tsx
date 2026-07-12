@@ -51,7 +51,7 @@ export default function ProfilePage() {
 
   if (!user) {
     return (
-      <div className="space-y-6 max-w-3xl">
+      <div className="space-y-6">
         <div className="space-y-1.5">
           <div className="h-7 w-48 bg-muted rounded-lg animate-pulse" />
           <div className="h-4 w-64 bg-muted rounded animate-pulse" />
@@ -113,7 +113,7 @@ export default function ProfilePage() {
   const initials = (form.full_name || form.email || 'U').split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
 
   return (
-    <div className="space-y-5 max-w-3xl">
+    <div className="space-y-5">
       <div>
         <h1 className="text-2xl font-bold text-foreground">Mi Perfil</h1>
         <p className="text-muted-foreground text-sm mt-1">Gestiona tu información personal.</p>
