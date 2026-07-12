@@ -4,7 +4,7 @@ import { useThemeStore } from '@/store/themeStore';
 import { useAuthStore } from '@/store/authStore';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-import { DollarSign, Sun, Moon, Monitor, Save, RefreshCw, GitBranch, Building2, Bell, Lock } from 'lucide-react';
+import { DollarSign, Sun, Moon, Monitor, Save, RefreshCw, GitBranch, Building2, Bell, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 type Tab = 'general' | 'mlm' | 'appearance' | 'notifications' | 'email' | 'auth';
@@ -15,9 +15,12 @@ interface Config {
 }
 
 const tabs: { id: Tab; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+  { id: 'general',       label: 'General',       icon: Building2 },
   { id: 'mlm',           label: 'Red MLM',        icon: GitBranch },
   { id: 'appearance',    label: 'Apariencia',     icon: Sun },
   { id: 'notifications', label: 'Notificaciones', icon: Bell },
+  { id: 'email',         label: 'Correos',        icon: Mail },
+  { id: 'auth',          label: 'Auth Social',    icon: Lock },
 ];
 
 
@@ -34,11 +37,15 @@ function ToggleSwitch({ checked, onChange }: { checked: boolean; onChange: (v: b
 
 export default function SettingsPage() {
   const { theme, setTheme } = useThemeStore();
+  const { user } = useAuthStore();
   const database = useDatabase();
-  const [activeTab, setActiveTab] = useState<Tab>('mlm');
+  const [activeTab, setActiveTab] = useState<Tab>('general');
   const [config, setConfig] = useState<Config>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [showSecrets, setShowSecrets] = useState<Record<string, boolean>>({});
+
+  const isAdmin = user?.role === 'super_admin' || user?.role === 'admin';
 
   useEffect(() => {
     database.select<{ key: string; value: string }>('system_config').then(({ data }) => {
@@ -60,12 +67,18 @@ export default function SettingsPage() {
     setSaving(false);
   };
 
+  const saveConfigWithCategory = async (keys: string[], category: string) => {
+    return saveConfig(keys, category);
+  };
+
+
+
   const c = (key: string) => config[key] ?? '';
   const setC = (key: string, val: string) => setConfig(prev => ({ ...prev, [key]: val }));
 
   if (loading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 max-w-5xl">
         <div className="space-y-1.5"><Skeleton className="h-8 w-64" /><Skeleton className="h-4 w-56" /></div>
         <Skeleton className="h-12 w-full rounded-xl" />
         <div className="bg-card border border-border rounded-xl p-6 space-y-4">
@@ -80,7 +93,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-5xl">
       <div>
         <h1 className="text-2xl font-bold text-foreground">Configuración del Sistema</h1>
         <p className="text-muted-foreground text-sm mt-1">Administra todos los parámetros de MLM 360.</p>
@@ -103,20 +116,52 @@ export default function SettingsPage() {
         ))}
       </div>
 
-      {/* ── General (moved to Admin > Empresa / Mantenimiento / Registro) ── */}
+      {/* ── General ── */}
       {activeTab === 'general' && (
-        <div className="bg-card border border-border rounded-xl p-8 text-center">
-          <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
-            <Building2 className="w-6 h-6 text-primary" />
+        <div className="space-y-4">
+          <div className="bg-card border border-border rounded-xl p-6 space-y-4">
+            <h3 className="font-semibold text-foreground flex items-center gap-2"><Building2 className="w-4 h-4 text-primary" /> Datos de la Empresa</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {[
+                { k: 'company_name', label: 'Nombre de la empresa', placeholder: 'MLM 360' },
+                { k: 'company_email', label: 'Correo corporativo', placeholder: 'contacto@empresa.pe' },
+                { k: 'company_phone', label: 'Teléfono', placeholder: '+51 1 234 5678' },
+              ].map(f => (
+                <div key={f.k}>
+                  <label className="block text-xs font-medium text-foreground mb-1.5">{f.label}</label>
+                  <input
+                    value={c(f.k)}
+                    onChange={e => setC(f.k, e.target.value)}
+                    placeholder={f.placeholder}
+                    className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors placeholder:text-muted-foreground"
+                  />
+                </div>
+              ))}
+              <div className="sm:col-span-2">
+                <label className="block text-xs font-medium text-foreground mb-1.5">Dirección</label>
+                <input
+                  value={c('company_address')}
+                  onChange={e => setC('company_address', e.target.value)}
+                  placeholder="Av. Javier Prado Este 100, Lima"
+                  className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors placeholder:text-muted-foreground"
+                />
+              </div>
+            </div>
+            <div className="flex items-center gap-4 pt-2 border-t border-border">
+              <div className="flex items-center gap-3 flex-1">
+                <span className="text-sm text-foreground">Registro público habilitado</span>
+                <ToggleSwitch checked={c('reg_open') === 'true'} onChange={v => setC('reg_open', String(v))} />
+              </div>
+              <div className="flex items-center gap-3 flex-1">
+                <span className="text-sm text-foreground">Modo mantenimiento</span>
+                <ToggleSwitch checked={c('maintenance_mode') === 'true'} onChange={v => setC('maintenance_mode', String(v))} />
+              </div>
+            </div>
+            <button onClick={() => saveConfig(['company_name','company_email','company_phone','company_address','reg_open','maintenance_mode'])}
+              disabled={saving} className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-medium transition-colors disabled:opacity-50">
+              {saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Guardar
+            </button>
           </div>
-          <h3 className="text-base font-semibold text-foreground mb-2">Configuración General</h3>
-          <p className="text-sm text-muted-foreground mb-4">
-            Los datos de la empresa, modo mantenimiento y opciones de registro se gestionan en el Panel de Administración, donde la configuración es más completa.
-          </p>
-          <a href="/dashboard/admin" onClick={e => { e.preventDefault(); window.history.pushState({}, '', '/dashboard/admin'); window.dispatchEvent(new Event('locationchange')); }}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-sm font-medium hover:bg-primary/90 transition-colors">
-            Ir a Panel de Administración
-          </a>
         </div>
       )}
 
@@ -179,7 +224,8 @@ export default function SettingsPage() {
         </div>
       )}
 
-      {/* ── Payments (moved to Admin > Finanzas) ── */}
+      {/* ── Payments ── */}
+      {/* Payments and Currency config moved to Admin > Finanzas */}
       {((activeTab as string) === 'payments' || (activeTab as string) === 'currency') && (
         <div className="bg-card border border-border rounded-xl p-8 text-center">
           <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
@@ -243,37 +289,144 @@ export default function SettingsPage() {
         <NotificationPreferences />
       )}
 
-      {/* ── Email (moved to Admin > Correos) ── */}
-      {activeTab === 'email' && (
+      {/* ── Email Config ── */}
+      {activeTab === 'email' && !isAdmin && (
         <div className="bg-card border border-border rounded-xl p-8 text-center">
-          <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
-            <Building2 className="w-6 h-6 text-primary" />
-          </div>
-          <h3 className="text-base font-semibold text-foreground mb-2">Configuración de Correos</h3>
-          <p className="text-sm text-muted-foreground mb-4">
-            La configuración SMTP se gestiona en el Panel de Administración, donde la configuración es más completa.
-          </p>
-          <a href="/dashboard/admin" onClick={e => { e.preventDefault(); window.history.pushState({}, '', '/dashboard/admin'); window.dispatchEvent(new Event('locationchange')); }}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-sm font-medium hover:bg-primary/90 transition-colors">
-            Ir a Admin → Correos
-          </a>
+          <Lock className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-foreground mb-2">Acceso Restringido</h3>
+          <p className="text-sm text-muted-foreground">La configuración de correos solo está disponible para administradores.</p>
         </div>
       )}
 
-      {/* ── Auth Social (moved to Admin > Auth) ── */}
-      {activeTab === 'auth' && (
-        <div className="bg-card border border-border rounded-xl p-8 text-center">
-          <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
-            <Lock className="w-6 h-6 text-primary" />
+      {activeTab === 'email' && isAdmin && (
+        <div className="space-y-4">
+          <div className="bg-card border border-border rounded-xl p-5 sm:p-6">
+            <h3 className="font-semibold text-foreground flex items-center gap-2 mb-5"><Mail className="w-4 h-4 text-primary" /> Configuración SMTP</h3>
+            <div className="space-y-4 max-w-lg">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm font-medium text-foreground">Habilitar SMTP</div>
+                  <div className="text-xs text-muted-foreground">Activar envío de correos desde el sistema</div>
+                </div>
+                <ToggleSwitch checked={c('smtp_enabled') === 'true'} onChange={v => setC('smtp_enabled', String(v))} />
+              </div>
+              {[
+                { k: 'smtp_host', label: 'Servidor SMTP', placeholder: 'smtp.gmail.com' },
+                { k: 'smtp_port', label: 'Puerto', placeholder: '587' },
+                { k: 'smtp_user', label: 'Usuario SMTP', placeholder: 'usuario@gmail.com' },
+                { k: 'smtp_from_email', label: 'Email remitente', placeholder: 'no-reply@empresa.pe' },
+                { k: 'smtp_from_name', label: 'Nombre remitente', placeholder: 'MLM 360' },
+              ].map(f => (
+                <div key={f.k}>
+                  <label className="block text-sm font-medium text-foreground mb-1.5">{f.label}</label>
+                  <input
+                    value={c(f.k)}
+                    onChange={e => setC(f.k, e.target.value)}
+                    placeholder={f.placeholder}
+                    className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors placeholder:text-muted-foreground"
+                  />
+                </div>
+              ))}
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1.5">Contraseña SMTP</label>
+                <div className="relative">
+                  <input
+                    type={showSecrets['smtp_pass'] ? 'text' : 'password'}
+                    value={c('smtp_pass')}
+                    onChange={e => setC('smtp_pass', e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full px-3 py-2.5 pr-10 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowSecrets(p => ({ ...p, smtp_pass: !p.smtp_pass }))}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    {showSecrets['smtp_pass'] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <ToggleSwitch checked={c('smtp_secure') === 'true'} onChange={v => setC('smtp_secure', String(v))} />
+                <span className="text-sm text-foreground">Usar TLS/SSL</span>
+              </div>
+            </div>
+            <button
+              onClick={() => saveConfigWithCategory(['smtp_enabled', 'smtp_host', 'smtp_port', 'smtp_user', 'smtp_pass', 'smtp_from_email', 'smtp_from_name', 'smtp_secure'], 'email')}
+              disabled={saving}
+              className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-medium transition-colors disabled:opacity-50 mt-4"
+            >
+              {saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Guardar configuración
+            </button>
           </div>
-          <h3 className="text-base font-semibold text-foreground mb-2">Autenticación Social</h3>
-          <p className="text-sm text-muted-foreground mb-4">
-            La configuración de Google OAuth se gestiona en el Panel de Administración, donde la configuración es más completa.
-          </p>
-          <a href="/dashboard/admin" onClick={e => { e.preventDefault(); window.history.pushState({}, '', '/dashboard/admin'); window.dispatchEvent(new Event('locationchange')); }}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-sm font-medium hover:bg-primary/90 transition-colors">
-            Ir a Admin → Auth
-          </a>
+        </div>
+      )}
+
+      {/* ── Auth Social ── */}
+      {activeTab === 'auth' && !isAdmin && (
+        <div className="bg-card border border-border rounded-xl p-8 text-center">
+          <Lock className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-foreground mb-2">Acceso Restringido</h3>
+          <p className="text-sm text-muted-foreground">La configuración de autenticación social solo está disponible para administradores.</p>
+        </div>
+      )}
+
+      {activeTab === 'auth' && isAdmin && (
+        <div className="bg-card border border-border rounded-xl p-5 sm:p-6">
+          <h3 className="font-semibold text-foreground flex items-center gap-2 mb-5"><Lock className="w-4 h-4 text-primary" /> Google OAuth</h3>
+          <div className="space-y-4 max-w-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-sm font-medium text-foreground">Habilitar login con Google</div>
+                <div className="text-xs text-muted-foreground">Permite a los usuarios registrarse e iniciar sesión con Google</div>
+              </div>
+              <ToggleSwitch checked={c('google_oauth_enabled') === 'true'} onChange={v => setC('google_oauth_enabled', String(v))} />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-foreground mb-1.5">Google Client ID</label>
+              <input
+                value={c('google_client_id')}
+                onChange={e => setC('google_client_id', e.target.value)}
+                placeholder="xxxxxxxxxx.apps.googleusercontent.com"
+                className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors font-mono"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-foreground mb-1.5">Google Client Secret</label>
+              <div className="relative">
+                <input
+                  type={showSecrets['google_client_secret'] ? 'text' : 'password'}
+                  value={c('google_client_secret')}
+                  onChange={e => setC('google_client_secret', e.target.value)}
+                  placeholder="GOCSPX-xxxxxxxxxxxxx"
+                  className="w-full px-3 py-2.5 pr-10 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors font-mono"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowSecrets(p => ({ ...p, google_client_secret: !p.google_client_secret }))}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  {showSecrets['google_client_secret'] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+            <div className="bg-muted/60 border border-border/60 rounded-lg p-3 text-xs text-muted-foreground">
+              <p className="font-medium mb-1 text-foreground">Instrucciones:</p>
+              <ol className="list-decimal list-inside space-y-0.5">
+                <li>Ve a Google Cloud Console → APIs &amp; Services → Credentials</li>
+                <li>Crea un OAuth 2.0 Client ID</li>
+                <li>Copia el Client ID y Client Secret aquí</li>
+                <li>Configura la URL de redirección: <code className="bg-muted px-1 rounded border border-border/50">https://tu-dominio.supabase.co/auth/v1/callback</code></li>
+              </ol>
+            </div>
+          </div>
+          <button
+            onClick={() => saveConfigWithCategory(['google_oauth_enabled', 'google_client_id', 'google_client_secret'], 'auth')}
+            disabled={saving}
+            className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-medium transition-colors disabled:opacity-50 mt-4"
+          >
+            {saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Guardar configuración
+          </button>
         </div>
       )}
     </div>

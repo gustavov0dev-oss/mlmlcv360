@@ -668,7 +668,7 @@ export default function AdminPage() {
           {activeModule === 'pwa' && (
             <div className="bg-card border border-border rounded-xl p-5 sm:p-6">
               <h2 className="text-lg font-semibold text-foreground mb-5">Configuración PWA</h2>
-              <div className="space-y-4">
+              <div className="space-y-4 max-w-lg">
                 {[
                   { k: 'pwa_name', label: 'Nombre de la app', placeholder: 'MLM 360' },
                   { k: 'pwa_short_name', label: 'Nombre corto', placeholder: 'MLM360' },
@@ -698,7 +698,7 @@ export default function AdminPage() {
           {activeModule === 'seo' && (
             <div className="bg-card border border-border rounded-xl p-5 sm:p-6">
               <h2 className="text-lg font-semibold text-foreground mb-5">Configuración SEO</h2>
-              <div className="space-y-4">
+              <div className="space-y-4 max-w-lg">
                 {[
                   { k: 'seo_title', label: 'Título de la página', placeholder: 'MLM 360 - Sistema Empresarial Premium' },
                   { k: 'seo_keywords', label: 'Palabras clave', placeholder: 'mlm peru, red de mercadeo, afiliados' },
@@ -730,7 +730,7 @@ export default function AdminPage() {
           {activeModule === 'correos' && (
             <div className="bg-card border border-border rounded-xl p-5 sm:p-6">
               <h2 className="text-lg font-semibold text-foreground mb-5">Configuración de Correos</h2>
-              <div className="space-y-4">
+              <div className="space-y-4 max-w-lg">
                 {[
                   { k: 'smtp_host', label: 'Servidor SMTP', placeholder: 'smtp.gmail.com' },
                   { k: 'smtp_port', label: 'Puerto', placeholder: '587' },
@@ -818,7 +818,7 @@ export default function AdminPage() {
                   </div>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-4 max-w-lg">
                   <div className={cn(
                     'flex items-center justify-between p-4 rounded-xl border-2 transition-colors',
                     c('maintenance_mode') === 'true'

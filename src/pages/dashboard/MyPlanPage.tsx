@@ -263,7 +263,7 @@ export default function MyPlanPage() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 max-w-4xl">
         <div className="space-y-1.5"><Skeleton className="h-8 w-28" /><Skeleton className="h-4 w-48" /></div>
         <Skeleton className="h-10 w-48 rounded-xl" />
         {/* Current plan card */}
@@ -292,7 +292,7 @@ export default function MyPlanPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-4xl">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-foreground">Mi Plan</h1>
