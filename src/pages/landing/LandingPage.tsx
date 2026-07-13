@@ -855,14 +855,14 @@ export default function LandingPage() {
             <p className="text-base text-muted-foreground/80 mt-3 max-w-xl">Historias reales de emprendedores en toda Latinoamérica.</p>
           </div>
 
-          {/* ── Bento grid ── unified container, internal dividers only ─────── */}
+          {/* ── Bento grid — explicit placement, no divide-x/y ─────────────── */}
           {(regionStats.length > 0 || dbTestimonials.length > 0) && (
             <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 mb-10 sm:mb-14">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 rounded-2xl border border-border/40 overflow-hidden divide-y divide-border/40 sm:divide-y-0 sm:divide-x divide-border/40">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 rounded-2xl border border-border/40 overflow-hidden">
 
-                {/* ── Region stat 1 ── */}
+                {/* ── R1 — row1 col1 (all breakpoints) ── */}
                 {regionStats[0] && (
-                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden h-[150px] sm:border-b border-border/40">
+                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden h-[150px] border-b border-border/40">
                     {regionStats[0].image_url && <img src={regionStats[0].image_url} alt={regionStats[0].city} className="absolute inset-0 w-full h-full object-cover opacity-25 pointer-events-none" />}
                     <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/70 to-background/40 pointer-events-none" />
                     <div className="relative z-10 p-5">
@@ -872,9 +872,9 @@ export default function LandingPage() {
                   </div>
                 )}
 
-                {/* ── Region stat 2 ── */}
+                {/* ── R2 — row1 col2 on sm/lg; row2 col1 on mobile ── */}
                 {regionStats[1] && (
-                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden h-[150px] sm:border-b border-border/40">
+                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden h-[150px] border-b border-border/40 sm:border-l border-border/40">
                     {regionStats[1].image_url && <img src={regionStats[1].image_url} alt={regionStats[1].city} className="absolute inset-0 w-full h-full object-cover opacity-25 pointer-events-none" />}
                     <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/70 to-background/40 pointer-events-none" />
                     <div className="relative z-10 p-5">
@@ -884,14 +884,19 @@ export default function LandingPage() {
                   </div>
                 )}
 
-                {/* ── Main testimonial — tall on desktop ── */}
+                {/* ── T1 Roberto — lg: col3 rows1-2 forced; sm: col1 row2; mobile: stacked ── */}
                 {dbTestimonials[0] && (
-                  <div className="p-5 sm:p-7 flex flex-col bg-card/30 lg:row-span-2 min-h-[200px] lg:min-h-[300px]">
-                    <div className="flex gap-0.5 mb-3 flex-shrink-0">
-                      {Array.from({ length: dbTestimonials[0].rating }).map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />)}
+                  <div className="p-5 sm:p-7 flex flex-col justify-between bg-card/30 border-b border-border/40
+                    sm:border-l sm:border-b-0 sm:border-t
+                    lg:col-start-3 lg:row-start-1 lg:row-span-2 lg:border-t-0 lg:border-l lg:border-b-0
+                    min-h-[200px] lg:min-h-0">
+                    <div>
+                      <div className="flex gap-0.5 mb-3 flex-shrink-0">
+                        {Array.from({ length: dbTestimonials[0].rating }).map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />)}
+                      </div>
+                      <p className="text-foreground/80 leading-relaxed text-sm sm:text-base line-clamp-5">"{dbTestimonials[0].content}"</p>
                     </div>
-                    <p className="text-foreground/80 leading-relaxed text-sm sm:text-base line-clamp-5 mb-4">"{dbTestimonials[0].content}"</p>
-                    <div className="mt-auto flex items-center gap-3 pt-3 border-t border-border/40">
+                    <div className="flex items-center gap-3 pt-3 mt-4 border-t border-border/40">
                       <img
                         src={dbTestimonials[0].avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(dbTestimonials[0].name)}&background=e2e8f0&color=64748b`}
                         alt={dbTestimonials[0].name}
@@ -907,14 +912,19 @@ export default function LandingPage() {
                   </div>
                 )}
 
-                {/* ── Testimonial 2 — wide on desktop ── */}
+                {/* ── T2 Miguel — lg: col1-2 row2; sm: col2 row2; mobile: stacked ── */}
                 {dbTestimonials[1] && (
-                  <div className="p-5 sm:p-7 flex flex-col bg-card/30 lg:col-span-2 min-h-[200px]">
-                    <div className="flex gap-0.5 mb-3">
-                      {Array.from({ length: dbTestimonials[1].rating }).map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />)}
+                  <div className="p-5 sm:p-7 flex flex-col justify-between bg-card/30 border-b border-border/40
+                    sm:border-l sm:border-b
+                    lg:col-start-1 lg:col-span-2 lg:row-start-2 lg:border-l-0 lg:border-b-0
+                    min-h-[200px]">
+                    <div>
+                      <div className="flex gap-0.5 mb-3">
+                        {Array.from({ length: dbTestimonials[1].rating }).map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />)}
+                      </div>
+                      <p className="text-foreground/80 leading-relaxed text-sm sm:text-base line-clamp-3">"{dbTestimonials[1].content}"</p>
                     </div>
-                    <p className="text-foreground/80 leading-relaxed text-sm sm:text-base line-clamp-3 mb-4">"{dbTestimonials[1].content}"</p>
-                    <div className="mt-auto flex items-center gap-3 pt-3 border-t border-border/40">
+                    <div className="flex items-center gap-3 pt-3 mt-4 border-t border-border/40">
                       <img
                         src={dbTestimonials[1].avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(dbTestimonials[1].name)}&background=e2e8f0&color=64748b`}
                         alt={dbTestimonials[1].name}
@@ -930,9 +940,9 @@ export default function LandingPage() {
                   </div>
                 )}
 
-                {/* ── Region stat 3 ── */}
+                {/* ── R3 — lg: col1 row3; sm: col1 row3; mobile: stacked ── */}
                 {regionStats[2] && (
-                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden h-[150px] sm:border-t border-border/40">
+                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden h-[150px] border-b border-border/40 lg:border-b-0 lg:border-t lg:col-start-1 lg:row-start-3">
                     {regionStats[2].image_url && <img src={regionStats[2].image_url} alt={regionStats[2].city} className="absolute inset-0 w-full h-full object-cover opacity-25 pointer-events-none" />}
                     <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/70 to-background/40 pointer-events-none" />
                     <div className="relative z-10 p-5">
@@ -942,9 +952,9 @@ export default function LandingPage() {
                   </div>
                 )}
 
-                {/* ── Region stat 4 ── */}
+                {/* ── R4 — lg: col2 row3; sm: col2 row3; mobile: stacked ── */}
                 {regionStats[3] && (
-                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden h-[150px] sm:border-t border-border/40">
+                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden h-[150px] border-b border-border/40 sm:border-l lg:border-b-0 lg:border-t lg:col-start-2 lg:row-start-3">
                     {regionStats[3].image_url && <img src={regionStats[3].image_url} alt={regionStats[3].city} className="absolute inset-0 w-full h-full object-cover opacity-25 pointer-events-none" />}
                     <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/70 to-background/40 pointer-events-none" />
                     <div className="relative z-10 p-5">
@@ -954,14 +964,19 @@ export default function LandingPage() {
                   </div>
                 )}
 
-                {/* ── Testimonial 3 ── */}
+                {/* ── T3 Sandra — lg: col3 row3; sm: col1-2 row4 (full width); mobile: stacked ── */}
                 {dbTestimonials[2] && (
-                  <div className="p-5 sm:p-7 flex flex-col bg-card/30 min-h-[200px]">
-                    <div className="flex gap-0.5 mb-3">
-                      {Array.from({ length: dbTestimonials[2].rating }).map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />)}
+                  <div className="p-5 sm:p-7 flex flex-col justify-between bg-card/30
+                    sm:col-span-2
+                    lg:col-start-3 lg:col-span-1 lg:row-start-3 lg:border-l lg:border-t
+                    min-h-[200px]">
+                    <div>
+                      <div className="flex gap-0.5 mb-3">
+                        {Array.from({ length: dbTestimonials[2].rating }).map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />)}
+                      </div>
+                      <p className="text-foreground/80 leading-relaxed text-sm line-clamp-4">"{dbTestimonials[2].content}"</p>
                     </div>
-                    <p className="text-foreground/80 leading-relaxed text-sm line-clamp-4 mb-4">"{dbTestimonials[2].content}"</p>
-                    <div className="mt-auto flex items-center gap-3 pt-3 border-t border-border/40">
+                    <div className="flex items-center gap-3 pt-3 mt-4 border-t border-border/40">
                       <img
                         src={dbTestimonials[2].avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(dbTestimonials[2].name)}&background=e2e8f0&color=64748b`}
                         alt={dbTestimonials[2].name}
