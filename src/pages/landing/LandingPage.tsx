@@ -906,7 +906,7 @@ export default function LandingPage() {
           {/* ── Bento grid — explicit placement, no divide-x/y ─────────────── */}
           {(regionStats.length > 0 || dbTestimonials.length > 0) && (
             <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 mb-10 sm:mb-14">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 lg:grid-rows-[150px_1fr_200px] rounded-2xl border border-border/40 overflow-hidden">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 rounded-2xl border border-border/40 overflow-hidden">
 
                 {/* ── R1 — row1 col1 (all breakpoints) ── */}
                 {regionStats[0] && (
@@ -920,7 +920,7 @@ export default function LandingPage() {
                   </div>
                 )}
 
-                {/* ── R2 — row1 col2 on sm/lg; row2 col1 on mobile ── */}
+                {/* ── R2 — row1 col2 ── */}
                 {regionStats[1] && (
                   <div className="relative flex flex-col items-center justify-center text-center overflow-hidden min-h-[150px] border-b border-border/40 sm:border-l border-border/40">
                     {regionStats[1].image_url && <img src={regionStats[1].image_url} alt={regionStats[1].city} className="absolute inset-0 w-full h-full object-cover opacity-25 pointer-events-none" />}
@@ -932,19 +932,38 @@ export default function LandingPage() {
                   </div>
                 )}
 
-                {/* ── T1 Roberto — lg: col3 rows1-2 forced; sm: col1 row2; mobile: stacked ── */}
+                {/* ── R_extra — row1 col3: 3rd stat or platform total ── */}
+                <div className="relative flex flex-col items-center justify-center text-center overflow-hidden min-h-[150px] border-b border-border/40 sm:border-l border-border/40 lg:border-l">
+                  {regionStats[4]?.image_url && <img src={regionStats[4].image_url} alt={regionStats[4]?.city} className="absolute inset-0 w-full h-full object-cover opacity-25 pointer-events-none" />}
+                  <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/70 to-background/40 pointer-events-none" />
+                  <div className="relative z-10 p-5">
+                    {regionStats[4] ? (
+                      <>
+                        <div className="text-3xl sm:text-4xl font-black text-foreground">{regionStats[4].members}</div>
+                        <div className="text-xs sm:text-sm text-muted-foreground mt-1 font-medium">afiliados en {regionStats[4].city}</div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="text-3xl sm:text-4xl font-black text-foreground">{platformStats.totalAffiliates > 0 ? `${fmtNumber(platformStats.totalAffiliates)}+` : '10k+'}</div>
+                        <div className="text-xs sm:text-sm text-muted-foreground mt-1 font-medium">afiliados en Latinoamérica</div>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* ── T1 Roberto — row2 col3: same row as T2 → equal height, no gap ── */}
                 {dbTestimonials[0] && (
-                  <div className="p-5 sm:p-7 flex flex-col gap-0 bg-card/30 border-b border-border/40
-                    sm:border-l sm:border-b-0 sm:border-t
-                    lg:col-start-3 lg:row-start-1 lg:row-span-2 lg:border-t-0 lg:border-l lg:border-b-0
-                    min-h-[200px] lg:min-h-0 overflow-hidden">
+                  <div className="p-5 sm:p-7 flex flex-col justify-between bg-card/30 border-b border-border/40
+                    sm:border-l
+                    lg:col-start-3 lg:row-start-2 lg:border-l lg:border-b-0
+                    min-h-[150px]">
                     <div>
-                      <div className="flex gap-0.5 mb-3 flex-shrink-0">
+                      <div className="flex gap-0.5 mb-3">
                         {Array.from({ length: dbTestimonials[0].rating }).map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />)}
                       </div>
-                      <p className="text-foreground/80 leading-relaxed text-sm sm:text-base line-clamp-6">"{dbTestimonials[0].content}"</p>
+                      <p className="text-foreground/80 leading-relaxed text-sm sm:text-base line-clamp-4">"{dbTestimonials[0].content}"</p>
                     </div>
-                    <div className="flex items-center gap-3 pt-3 mt-auto border-t border-border/40">
+                    <div className="flex items-center gap-3 pt-3 mt-4 border-t border-border/40">
                       <img
                         src={dbTestimonials[0].avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(dbTestimonials[0].name)}&background=e2e8f0&color=64748b`}
                         alt={dbTestimonials[0].name}
@@ -965,7 +984,7 @@ export default function LandingPage() {
                   <div className="p-5 sm:p-7 flex flex-col justify-between bg-card/30 border-b border-border/40
                     sm:border-l sm:border-b
                     lg:col-start-1 lg:col-span-2 lg:row-start-2 lg:border-l-0 lg:border-b-0
-                    min-h-[200px]">
+                    min-h-[150px]">
                     <div>
                       <div className="flex gap-0.5 mb-3">
                         {Array.from({ length: dbTestimonials[1].rating }).map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />)}
@@ -1017,7 +1036,7 @@ export default function LandingPage() {
                   <div className="p-5 sm:p-7 flex flex-col justify-between bg-card/30
                     sm:col-span-2
                     lg:col-start-3 lg:col-span-1 lg:row-start-3 lg:border-l lg:border-t
-                    min-h-[200px]">
+                    min-h-[150px]">
                     <div>
                       <div className="flex gap-0.5 mb-3">
                         {Array.from({ length: dbTestimonials[2].rating }).map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />)}
