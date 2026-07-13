@@ -320,14 +320,15 @@ export default function LibroReclamacionesPage() {
               </div>
             </div>
 
-            {/* Company strip — stacks on mobile so full address is always visible */}
-            <div className="text-sm">
-              <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+            {/* Company strip — inline on desktop, stacked on mobile */}
+            <div className="text-sm flex flex-col sm:flex-row sm:items-center sm:gap-x-3 gap-y-0.5">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 shrink-0">
                 <span className="font-bold text-foreground">{companyName}</span>
                 <span className="text-muted-foreground/40">·</span>
                 <span className="text-muted-foreground text-xs">RUC: {companyRuc}</span>
               </div>
-              <div className="text-muted-foreground text-xs mt-0.5 leading-relaxed">
+              <span className="hidden sm:inline text-muted-foreground/30">·</span>
+              <div className="text-muted-foreground text-xs leading-relaxed">
                 {companyAddress}
               </div>
             </div>
