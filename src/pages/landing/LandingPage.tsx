@@ -4,7 +4,7 @@ import Footer from '@/components/landing/Footer';
 import {
   ArrowRight, Check, Star, ChevronDown, Zap, Globe, Award, DollarSign,
   TrendingUp, Users, Lock, ShoppingBag, Bell, Network, CreditCard, Sparkles,
-  ChartBar as BarChart3, Wallet, ExternalLink, Medal, Crown,
+  ChartBar as BarChart3, ExternalLink, Medal, Crown,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState, useEffect, useCallback } from 'react';
@@ -622,60 +622,80 @@ export default function LandingPage() {
             <p className="text-base text-muted-foreground/80 max-w-xl">Cada herramienta resuelve un problema real del negocio multinivel.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
-            {/* Card 1: Comisiones — wide */}
-            <div className="md:col-span-2">
-              <div className="h-full bg-card/50 border border-border/50 rounded-2xl p-5 sm:p-7 hover:border-emerald-500/20 group backdrop-blur-sm overflow-hidden transition-colors">
+          {/* Bento — one outer border, internal dividers only */}
+          <div className="rounded-2xl border border-border/40 overflow-hidden">
+
+            {/* Row 1: Reportes en tiempo real (2 cols) | Red genealógica (1 col) */}
+            <div className="grid grid-cols-1 lg:grid-cols-3">
+
+              {/* Reportes */}
+              <div className="lg:col-span-2 p-6 sm:p-8 border-b border-border/40 lg:border-b-0 lg:border-r border-border/40">
                 <div className="flex items-start justify-between gap-4 mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl icon-emerald flex items-center justify-center shrink-0">
-                      <Wallet className="w-5 h-5" />
+                    <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
+                      <BarChart3 className="w-5 h-5" />
                     </div>
-                    <h3 className="text-base sm:text-lg font-bold text-foreground">Comisiones automáticas</h3>
+                    <div>
+                      <div className="text-[10px] font-semibold text-emerald-500 dark:text-emerald-400 uppercase tracking-widest mb-0.5">Analítica</div>
+                      <h3 className="text-base sm:text-lg font-bold text-foreground">Reportes en tiempo real</h3>
+                    </div>
                   </div>
                   {platformStats.totalAffiliates > 0 && (
                     <div className="text-right shrink-0">
                       <div className="text-xl font-bold text-primary">{fmtNumber(platformStats.totalAffiliates)}</div>
-                      <div className="text-xs text-muted-foreground/60">afiliados</div>
+                      <div className="text-xs text-muted-foreground/60">afiliados activos</div>
                     </div>
                   )}
                 </div>
-                <p className="text-sm text-muted-foreground leading-relaxed mb-5">Comisiones directas, binarias y unilevel. Cálculo en tiempo real, pago quincenal automático sin trámites.</p>
-                <div className="flex items-end gap-1 h-14 mb-4 px-1">
-                  {[28, 45, 38, 62, 50, 74, 58, 82, 68, 90, 78, 100].map((h, i) => (
-                    <div key={i} className={cn('flex-1 rounded-sm', i === 11 ? 'bg-emerald-500 dark:bg-emerald-400' : 'bg-emerald-500/15 dark:bg-emerald-400/15')} style={{ height: `${h}%` }} />
+                <p className="text-sm text-muted-foreground leading-relaxed mb-5">Dashboard completo con métricas de red, volumen de ventas, historial de ganancias y proyecciones de crecimiento.</p>
+                {/* Mini stats grid */}
+                <div className="grid grid-cols-3 gap-3 mb-5">
+                  {[
+                    { label: 'Red activa', value: platformStats.totalAffiliates > 0 ? fmtNumber(platformStats.totalAffiliates) : '—' },
+                    { label: 'Productos', value: platformStats.totalProducts > 0 ? fmtNumber(platformStats.totalProducts) : '—' },
+                    { label: 'Crecimiento', value: '+28%' },
+                  ].map(s => (
+                    <div key={s.label} className="rounded-xl bg-emerald-500/5 border border-emerald-500/10 p-3 text-center">
+                      <div className="text-lg font-bold text-foreground">{s.value}</div>
+                      <div className="text-[10px] text-muted-foreground/60 mt-0.5">{s.label}</div>
+                    </div>
                   ))}
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  {['Comisión directa', 'Red binaria', 'Unilevel', 'Pago quincenal'].map(tag => (
-                    <span key={tag} className="px-2.5 py-1 bg-emerald-500/8 text-emerald-600 dark:text-emerald-400 rounded-full text-xs font-medium border border-emerald-500/15">{tag}</span>
+                <div className="flex items-end gap-1 h-12 px-1">
+                  {[40, 55, 45, 68, 58, 80, 65, 88, 72, 95, 82, 100].map((h, i) => (
+                    <div key={i} className={cn('flex-1 rounded-sm transition-all', i === 11 ? 'bg-emerald-500 dark:bg-emerald-400' : 'bg-emerald-500/15 dark:bg-emerald-400/15')} style={{ height: `${h}%` }} />
                   ))}
                 </div>
               </div>
-            </div>
 
-            {/* Card 2: Red genealógica */}
-            <div>
-              <div className="h-full bg-card/50 border border-border/50 rounded-2xl p-5 sm:p-7 hover:border-blue-500/20 group backdrop-blur-sm flex flex-col transition-colors">
+              {/* Red genealógica */}
+              <div className="p-6 sm:p-8 border-b border-border/40 flex flex-col">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-xl icon-blue flex items-center justify-center shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0">
                     <Network className="w-5 h-5" />
                   </div>
-                  <h3 className="text-base sm:text-lg font-bold text-foreground">Red genealógica</h3>
-                </div>
-                <p className="text-sm text-muted-foreground leading-relaxed mb-5 flex-1">Panel visual con árbol binario, zoom dinámico y estadísticas por nodo en tiempo real.</p>
-                <div className="relative flex flex-col items-center gap-3 py-2">
-                  <div className="w-8 h-8 rounded-full bg-blue-500/15 border-2 border-blue-500/40 flex items-center justify-center">
-                    <div className="w-3 h-3 rounded-full bg-blue-500" />
+                  <div>
+                    <div className="text-[10px] font-semibold text-blue-500 dark:text-blue-400 uppercase tracking-widest mb-0.5">Red multinivel</div>
+                    <h3 className="text-base sm:text-lg font-bold text-foreground">Red genealógica</h3>
                   </div>
-                  <div className="flex items-center gap-6">
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-5 flex-1">Panel visual con árbol binario interactivo, zoom dinámico y estadísticas por nodo en tiempo real.</p>
+                <div className="flex flex-col items-center gap-3 py-2">
+                  <div className="w-10 h-10 rounded-full bg-blue-500/15 border-2 border-blue-500/40 flex items-center justify-center">
+                    <div className="w-4 h-4 rounded-full bg-blue-500" />
+                  </div>
+                  <div className="flex items-center gap-8">
                     {[0, 1].map(k => (
-                      <div key={k} className="w-7 h-7 rounded-full bg-blue-500/10 border border-blue-500/30 flex items-center justify-center"><div className="w-2.5 h-2.5 rounded-full bg-blue-500/60" /></div>
+                      <div key={k} className="w-8 h-8 rounded-full bg-blue-500/10 border border-blue-500/30 flex items-center justify-center">
+                        <div className="w-3 h-3 rounded-full bg-blue-500/60" />
+                      </div>
                     ))}
                   </div>
                   <div className="flex items-center gap-2">
                     {Array.from({ length: 4 }).map((_, i) => (
-                      <div key={i} className="w-5 h-5 rounded-full bg-muted border border-border/60 flex items-center justify-center"><div className="w-2 h-2 rounded-full bg-muted-foreground/40" /></div>
+                      <div key={i} className="w-6 h-6 rounded-full bg-muted/60 border border-border/60 flex items-center justify-center">
+                        <div className="w-2.5 h-2.5 rounded-full bg-muted-foreground/40" />
+                      </div>
                     ))}
                   </div>
                   {platformStats.totalAffiliates > 0 && (
@@ -685,52 +705,52 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* Card 3: Sistema de rangos */}
-            <div>
-              <div className="h-full bg-card/50 border border-border/50 rounded-2xl p-5 sm:p-7 hover:border-amber-500/20 group backdrop-blur-sm flex flex-col transition-colors">
+            {/* Row 2: Sistema de rangos (1 col) | Tienda integrada (2 cols) */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 border-t border-border/40">
+
+              {/* Sistema de rangos */}
+              <div className="p-6 sm:p-8 border-b border-border/40 lg:border-b-0 lg:border-r border-border/40 flex flex-col">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-xl icon-amber flex items-center justify-center shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-sky-500/10 text-sky-500 flex items-center justify-center shrink-0">
                     <Award className="w-5 h-5" />
                   </div>
-                  <h3 className="text-base sm:text-lg font-bold text-foreground">Sistema de rangos</h3>
+                  <div>
+                    <div className="text-[10px] font-semibold text-sky-500 dark:text-sky-400 uppercase tracking-widest mb-0.5">Progresión</div>
+                    <h3 className="text-base sm:text-lg font-bold text-foreground">Sistema de rangos</h3>
+                  </div>
                 </div>
-                <p className="text-sm text-muted-foreground leading-relaxed mb-5 flex-1">Cada nivel desbloquea bonos y beneficios exclusivos. Tu esfuerzo tiene recompensa.</p>
-                <div className="space-y-1.5">
-                  {(ranks.filter(r => r.is_active !== false).length > 0
-                    ? ranks.filter(r => r.is_active !== false).slice(0, 5)
-                    : [{ name: 'Bronce', color: '#cd7f32' }, { name: 'Plata', color: '#c0c0c0' }, { name: 'Oro', color: '#ffd700' }, { name: 'Platino', color: '#e5e4e2' }, { name: 'Corona', color: '#ff6b35' }]
-                  ).map((r, idx, arr) => {
+                <p className="text-sm text-muted-foreground leading-relaxed mb-5 flex-1">Cada nivel desbloquea bonos y beneficios exclusivos. Tu esfuerzo siempre tiene recompensa.</p>
+                <div className="space-y-2.5">
+                  {ranks.filter(r => r.is_active !== false).slice(0, 5).map((r, idx, arr) => {
                     const pct = Math.round(((idx + 1) / arr.length) * 100);
-                    const rankColor = r.color?.startsWith('#') ? r.color : '#f59e0b';
+                    const rankColor = r.color?.startsWith('#') ? r.color : '#0ea5e9';
                     return (
-                      <div key={r.name} className="flex items-center gap-2">
-                        <div
-                          className="h-5 rounded-full flex items-center px-2.5 border"
-                          style={{
-                            width: `${pct}%`,
-                            backgroundColor: `${rankColor}22`,
-                            borderColor: `${rankColor}44`,
-                          }}
-                        >
-                          <span className="text-[10px] font-semibold truncate" style={{ color: rankColor }}>{r.name}</span>
+                      <div key={r.name} className="flex items-center gap-2.5">
+                        <div className="w-5 h-5 flex items-center justify-center shrink-0" style={{ color: rankColor }}>
+                          <RankIcon rank={r} className="w-4 h-4" />
+                        </div>
+                        <div className="flex-1 h-5 rounded-full relative overflow-hidden" style={{ background: `${rankColor}12`, border: `1px solid ${rankColor}28` }}>
+                          <div className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${pct}%`, background: `linear-gradient(90deg, ${rankColor}30, ${rankColor}55)` }} />
+                          <span className="absolute inset-y-0 left-2.5 flex items-center text-[10px] font-semibold" style={{ color: rankColor }}>{r.name}</span>
                         </div>
                       </div>
                     );
                   })}
                 </div>
               </div>
-            </div>
 
-            {/* Card 4: Tienda */}
-            <div className="md:col-span-2">
-              <div className="h-full bg-card/50 border border-border/50 rounded-2xl p-5 sm:p-7 hover:border-rose-500/20 group backdrop-blur-sm flex flex-col sm:flex-row gap-5 overflow-hidden transition-colors">
+              {/* Tienda integrada */}
+              <div className="lg:col-span-2 p-6 sm:p-8 flex flex-col sm:flex-row gap-5 overflow-hidden">
                 <div className="flex-1 flex flex-col min-w-0">
                   <div className="flex items-center justify-between gap-3 mb-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl icon-rose flex items-center justify-center shrink-0">
+                      <div className="w-10 h-10 rounded-xl bg-teal-500/10 text-teal-500 flex items-center justify-center shrink-0">
                         <ShoppingBag className="w-5 h-5" />
                       </div>
-                      <h3 className="text-base sm:text-lg font-bold text-foreground">Tienda integrada</h3>
+                      <div>
+                        <div className="text-[10px] font-semibold text-teal-500 dark:text-teal-400 uppercase tracking-widest mb-0.5">Catálogo</div>
+                        <h3 className="text-base sm:text-lg font-bold text-foreground">Tienda integrada</h3>
+                      </div>
                     </div>
                     {platformStats.totalProducts > 0 && (
                       <div className="text-right shrink-0">
@@ -739,10 +759,10 @@ export default function LandingPage() {
                       </div>
                     )}
                   </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed mb-4 flex-1">Catálogo completo. Cada compra activa comisiones automáticas en toda tu red de forma instantánea.</p>
+                  <p className="text-sm text-muted-foreground leading-relaxed mb-4 flex-1">Catálogo completo con categorías, filtros y carrito. Cada compra activa bonos automáticos en tu red.</p>
                   <div className="flex flex-wrap gap-2 mb-4">
-                    {(topCategories.length > 0 ? topCategories.map(c => c.name) : ['Vitaminas', 'Bienestar', 'Nutrición', 'Cuidado personal']).map(tag => (
-                      <span key={tag} className="px-2.5 py-1 bg-rose-500/8 text-rose-600 dark:text-rose-400 rounded-full text-xs font-medium border border-rose-500/15">{tag}</span>
+                    {(topCategories.length > 0 ? topCategories.map(c => c.name) : ['Vitaminas', 'Bienestar', 'Nutrición', 'Cuidado']).map(tag => (
+                      <span key={tag} className="px-2.5 py-1 bg-teal-500/8 text-teal-600 dark:text-teal-400 rounded-full text-xs font-medium border border-teal-500/15">{tag}</span>
                     ))}
                   </div>
                   <Link to="/tienda" className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:gap-2.5 transition-all group/link">
@@ -886,7 +906,7 @@ export default function LandingPage() {
           {/* ── Bento grid — explicit placement, no divide-x/y ─────────────── */}
           {(regionStats.length > 0 || dbTestimonials.length > 0) && (
             <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 mb-10 sm:mb-14">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 rounded-2xl border border-border/40 overflow-hidden">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 lg:grid-rows-[150px_1fr_200px] rounded-2xl border border-border/40 overflow-hidden">
 
                 {/* ── R1 — row1 col1 (all breakpoints) ── */}
                 {regionStats[0] && (
@@ -914,17 +934,17 @@ export default function LandingPage() {
 
                 {/* ── T1 Roberto — lg: col3 rows1-2 forced; sm: col1 row2; mobile: stacked ── */}
                 {dbTestimonials[0] && (
-                  <div className="p-5 sm:p-7 flex flex-col justify-between bg-card/30 border-b border-border/40
+                  <div className="p-5 sm:p-7 flex flex-col gap-0 bg-card/30 border-b border-border/40
                     sm:border-l sm:border-b-0 sm:border-t
                     lg:col-start-3 lg:row-start-1 lg:row-span-2 lg:border-t-0 lg:border-l lg:border-b-0
-                    min-h-[200px] lg:min-h-0">
+                    min-h-[200px] lg:min-h-0 overflow-hidden">
                     <div>
                       <div className="flex gap-0.5 mb-3 flex-shrink-0">
                         {Array.from({ length: dbTestimonials[0].rating }).map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />)}
                       </div>
-                      <p className="text-foreground/80 leading-relaxed text-sm sm:text-base line-clamp-5">"{dbTestimonials[0].content}"</p>
+                      <p className="text-foreground/80 leading-relaxed text-sm sm:text-base line-clamp-6">"{dbTestimonials[0].content}"</p>
                     </div>
-                    <div className="flex items-center gap-3 pt-3 mt-4 border-t border-border/40">
+                    <div className="flex items-center gap-3 pt-3 mt-auto border-t border-border/40">
                       <img
                         src={dbTestimonials[0].avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(dbTestimonials[0].name)}&background=e2e8f0&color=64748b`}
                         alt={dbTestimonials[0].name}
