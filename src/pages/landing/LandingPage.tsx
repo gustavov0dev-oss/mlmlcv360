@@ -517,9 +517,9 @@ export default function LandingPage() {
       </section>
 
       {/* ── STATS ─────────────────────────────────────────────────────────────── */}
-      <section className="py-10 sm:py-14 border-y border-border/40 bg-muted/5">
+      <section className="py-10 sm:py-14 bg-muted/5">
         <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 sm:grid-cols-4 divide-y-2 divide-x-0 sm:divide-y-0 sm:divide-x divide-border/30">
+          <div className="grid grid-cols-2 sm:grid-cols-4 rounded-2xl border border-border/40 overflow-hidden sm:border-y-0 sm:border-l-0 sm:border-r-0 sm:rounded-none sm:overflow-visible">
             {[
               {
                 value: !platformStats.loaded ? '—' : platformStats.totalAffiliates > 0 ? `${fmtNumber(platformStats.totalAffiliates)}+` : '0',
@@ -550,7 +550,7 @@ export default function LandingPage() {
                 iconClass: 'icon-sky',
               },
             ].map((stat) => (
-              <div key={stat.label} className="relative text-center sm:px-6 lg:px-10 py-6 sm:py-4 overflow-hidden group">
+              <div key={stat.label} className="relative text-center sm:px-6 lg:px-10 py-6 sm:py-4 overflow-hidden group border-border/30 [&:nth-child(odd)]:border-r [&:nth-child(1)]:border-b [&:nth-child(2)]:border-b sm:border-b-0 sm:[&:nth-child(odd)]:border-r sm:[&:nth-child(even)]:border-r-0 sm:last:border-r-0">
                 {/* Large icon as decorative background — ultra-faded */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden>
                   <stat.icon className="w-32 h-32 opacity-[0.025] text-foreground" />
@@ -844,7 +844,7 @@ export default function LandingPage() {
 
                 {/* ── Region stat 1 ── */}
                 {regionStats[0] && (
-                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden h-[160px] sm:border-r border-border/50 sm:border-b border-border/50">
+                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden h-[160px] order-1 sm:order-none sm:border-r border-border/50 sm:border-b border-border/50">
                     {regionStats[0].image_url && <img src={regionStats[0].image_url} alt={regionStats[0].city} className="absolute inset-0 w-full h-full object-cover opacity-25 pointer-events-none" />}
                     <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/70 to-background/40 pointer-events-none" />
                     <div className="relative z-10 p-5">
@@ -856,7 +856,7 @@ export default function LandingPage() {
 
                 {/* ── Region stat 2 ── */}
                 {regionStats[1] && (
-                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden h-[160px] sm:border-r border-border/50 sm:border-b border-border/50">
+                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden h-[160px] order-2 sm:order-none sm:border-r border-border/50 sm:border-b border-border/50">
                     {regionStats[1].image_url && <img src={regionStats[1].image_url} alt={regionStats[1].city} className="absolute inset-0 w-full h-full object-cover opacity-25 pointer-events-none" />}
                     <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/70 to-background/40 pointer-events-none" />
                     <div className="relative z-10 p-5">
@@ -868,7 +868,7 @@ export default function LandingPage() {
 
                 {/* ── Main testimonial card — tall on desktop ── */}
                 {dbTestimonials[0] && (
-                  <div className="p-5 sm:p-7 flex flex-col justify-between bg-card/40 sm:row-span-2 sm:border-b border-border/50 min-h-[200px] sm:min-h-[300px]">
+                  <div className="p-5 sm:p-7 flex flex-col justify-between bg-card/40 order-5 sm:order-none sm:row-span-2 sm:border-b border-border/50 min-h-[200px] sm:min-h-[300px]">
                     <div className="flex-1 flex flex-col justify-between min-h-0">
                       <div>
                         <div className="flex gap-0.5 mb-3 flex-shrink-0">
@@ -895,7 +895,7 @@ export default function LandingPage() {
 
                 {/* ── Testimonial 2 — wide ── */}
                 {dbTestimonials[1] && (
-                  <div className="p-5 sm:p-7 flex flex-col justify-between bg-card/40 sm:col-span-2 lg:col-span-2 border-t border-border/50 sm:border-t-0 sm:border-r-0 min-h-[200px]">
+                  <div className="p-5 sm:p-7 flex flex-col justify-between bg-card/40 order-6 sm:order-none sm:col-span-2 lg:col-span-2 sm:border-t-0 sm:border-r-0 min-h-[200px]">
                     <div>
                       <div className="flex gap-0.5 mb-3">
                         {Array.from({ length: dbTestimonials[1].rating }).map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />)}
@@ -920,7 +920,7 @@ export default function LandingPage() {
 
                 {/* ── Region stat 3 ── */}
                 {regionStats[2] && (
-                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden h-[160px] sm:border-r border-border/50 border-t border-border/50">
+                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden h-[160px] order-3 sm:order-none sm:border-r border-border/50 border-t border-border/50 sm:border-t-0">
                     {regionStats[2].image_url && <img src={regionStats[2].image_url} alt={regionStats[2].city} className="absolute inset-0 w-full h-full object-cover opacity-25 pointer-events-none" />}
                     <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/70 to-background/40 pointer-events-none" />
                     <div className="relative z-10 p-5">
@@ -932,7 +932,7 @@ export default function LandingPage() {
 
                 {/* ── Region stat 4 ── */}
                 {regionStats[3] && (
-                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden h-[160px] border-t border-border/50">
+                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden h-[160px] order-4 sm:order-none border-t border-border/50 sm:border-t-0">
                     {regionStats[3].image_url && <img src={regionStats[3].image_url} alt={regionStats[3].city} className="absolute inset-0 w-full h-full object-cover opacity-25 pointer-events-none" />}
                     <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/70 to-background/40 pointer-events-none" />
                     <div className="relative z-10 p-5">
@@ -944,7 +944,7 @@ export default function LandingPage() {
 
                 {/* ── Testimonial 3 ── */}
                 {dbTestimonials[2] && (
-                  <div className="p-5 sm:p-7 flex flex-col justify-between bg-card/40 border-t border-border/50 min-h-[200px]">
+                  <div className="p-5 sm:p-7 flex flex-col justify-between bg-card/40 order-7 sm:order-none border-t border-border/50 min-h-[200px]">
                     <div>
                       <div className="flex gap-0.5 mb-3">
                         {Array.from({ length: dbTestimonials[2].rating }).map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />)}
