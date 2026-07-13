@@ -559,7 +559,7 @@ export default function LandingPage() {
               >
                 {/* Watermark icon — free-floating, no box */}
                 <stat.icon
-                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 sm:w-16 sm:h-16 opacity-[0.04] text-foreground pointer-events-none select-none"
+                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 opacity-[0.05] text-foreground pointer-events-none select-none"
                   aria-hidden
                 />
                 <div className="relative">
@@ -673,13 +673,21 @@ export default function LandingPage() {
                 <div className="space-y-1.5">
                   {(ranks.filter(r => r.is_active !== false).length > 0
                     ? ranks.filter(r => r.is_active !== false).slice(0, 5)
-                    : [{ name: 'Bronce' }, { name: 'Plata' }, { name: 'Oro' }, { name: 'Platino' }, { name: 'Corona' }]
+                    : [{ name: 'Bronce', color: '#cd7f32' }, { name: 'Plata', color: '#c0c0c0' }, { name: 'Oro', color: '#ffd700' }, { name: 'Platino', color: '#e5e4e2' }, { name: 'Corona', color: '#ff6b35' }]
                   ).map((r, idx, arr) => {
                     const pct = Math.round(((idx + 1) / arr.length) * 100);
+                    const rankColor = r.color?.startsWith('#') ? r.color : '#f59e0b';
                     return (
                       <div key={r.name} className="flex items-center gap-2">
-                        <div className="h-5 rounded-full bg-amber-500/15 border border-amber-500/20 flex items-center px-2.5" style={{ width: `${pct}%` }}>
-                          <span className="text-[10px] font-semibold text-amber-600 dark:text-amber-400 truncate">{r.name}</span>
+                        <div
+                          className="h-5 rounded-full flex items-center px-2.5 border"
+                          style={{
+                            width: `${pct}%`,
+                            backgroundColor: `${rankColor}22`,
+                            borderColor: `${rankColor}44`,
+                          }}
+                        >
+                          <span className="text-[10px] font-semibold truncate" style={{ color: rankColor }}>{r.name}</span>
                         </div>
                       </div>
                     );
@@ -847,14 +855,14 @@ export default function LandingPage() {
             <p className="text-base text-muted-foreground/80 mt-3 max-w-xl">Historias reales de emprendedores en toda Latinoamérica.</p>
           </div>
 
-          {/* ── Bento grid ─────────────────────────────────────────── */}
+          {/* ── Bento grid ── unified container, internal dividers only ─────── */}
           {(regionStats.length > 0 || dbTestimonials.length > 0) && (
             <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 mb-10 sm:mb-14">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-4 lg:grid-flow-dense">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 rounded-2xl border border-border/40 overflow-hidden divide-y divide-border/40 sm:divide-y-0 sm:divide-x divide-border/40">
 
                 {/* ── Region stat 1 ── */}
                 {regionStats[0] && (
-                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden h-[140px] rounded-2xl border border-border/40">
+                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden h-[150px] sm:border-b border-border/40">
                     {regionStats[0].image_url && <img src={regionStats[0].image_url} alt={regionStats[0].city} className="absolute inset-0 w-full h-full object-cover opacity-25 pointer-events-none" />}
                     <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/70 to-background/40 pointer-events-none" />
                     <div className="relative z-10 p-5">
@@ -866,7 +874,7 @@ export default function LandingPage() {
 
                 {/* ── Region stat 2 ── */}
                 {regionStats[1] && (
-                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden h-[140px] rounded-2xl border border-border/40">
+                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden h-[150px] sm:border-b border-border/40">
                     {regionStats[1].image_url && <img src={regionStats[1].image_url} alt={regionStats[1].city} className="absolute inset-0 w-full h-full object-cover opacity-25 pointer-events-none" />}
                     <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/70 to-background/40 pointer-events-none" />
                     <div className="relative z-10 p-5">
@@ -876,43 +884,37 @@ export default function LandingPage() {
                   </div>
                 )}
 
-                {/* ── Main testimonial card — tall on desktop ── */}
+                {/* ── Main testimonial — tall on desktop ── */}
                 {dbTestimonials[0] && (
-                  <div className="p-5 sm:p-6 flex flex-col justify-between bg-card/40 rounded-2xl border border-border/40 lg:row-span-2 min-h-[180px] lg:min-h-[300px]">
-                    <div className="flex-1 flex flex-col justify-between min-h-0">
-                      <div>
-                        <div className="flex gap-0.5 mb-3 flex-shrink-0">
-                          {Array.from({ length: dbTestimonials[0].rating }).map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />)}
-                        </div>
-                        <p className="text-foreground/80 leading-relaxed text-sm sm:text-base line-clamp-5 mb-3">"{dbTestimonials[0].content}"</p>
+                  <div className="p-5 sm:p-7 flex flex-col bg-card/30 lg:row-span-2 min-h-[200px] lg:min-h-[300px]">
+                    <div className="flex gap-0.5 mb-3 flex-shrink-0">
+                      {Array.from({ length: dbTestimonials[0].rating }).map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />)}
+                    </div>
+                    <p className="text-foreground/80 leading-relaxed text-sm sm:text-base line-clamp-5 mb-4">"{dbTestimonials[0].content}"</p>
+                    <div className="mt-auto flex items-center gap-3 pt-3 border-t border-border/40">
+                      <img
+                        src={dbTestimonials[0].avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(dbTestimonials[0].name)}&background=e2e8f0&color=64748b`}
+                        alt={dbTestimonials[0].name}
+                        className="w-10 h-10 rounded-full object-cover flex-shrink-0 ring-2 ring-primary/20"
+                        onError={e => { (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(dbTestimonials[0].name)}&background=e2e8f0&color=64748b`; }}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-semibold text-foreground truncate">{dbTestimonials[0].name}</div>
+                        <div className="text-xs text-muted-foreground truncate">{dbTestimonials[0].role}</div>
                       </div>
-                      <div className="flex items-center gap-3 pt-3 border-t border-border/40">
-                        <img
-                          src={dbTestimonials[0].avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(dbTestimonials[0].name)}&background=e2e8f0&color=64748b`}
-                          alt={dbTestimonials[0].name}
-                          className="w-10 h-10 rounded-full object-cover flex-shrink-0 ring-2 ring-primary/20"
-                          onError={e => { (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(dbTestimonials[0].name)}&background=e2e8f0&color=64748b`; }}
-                        />
-                        <div className="flex-1 min-w-0">
-                          <div className="text-sm font-semibold text-foreground truncate">{dbTestimonials[0].name}</div>
-                          <div className="text-xs text-muted-foreground truncate">{dbTestimonials[0].role}</div>
-                        </div>
-                        {dbTestimonials[0].earnings && <div className="text-sm font-bold text-green-500 shrink-0 ml-2">{dbTestimonials[0].earnings}</div>}
-                      </div>
+                      {dbTestimonials[0].earnings && <div className="text-sm font-bold text-green-500 shrink-0 ml-2">{dbTestimonials[0].earnings}</div>}
                     </div>
                   </div>
                 )}
 
                 {/* ── Testimonial 2 — wide on desktop ── */}
                 {dbTestimonials[1] && (
-                  <div className="p-5 sm:p-6 flex flex-col justify-between bg-card/40 rounded-2xl border border-border/40 lg:col-span-2 min-h-[180px]">
-                    <div>
-                      <div className="flex gap-0.5 mb-3">
-                        {Array.from({ length: dbTestimonials[1].rating }).map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />)}
-                      </div>
-                      <p className="text-foreground/80 leading-relaxed text-sm sm:text-base line-clamp-3 mb-4">"{dbTestimonials[1].content}"</p>
+                  <div className="p-5 sm:p-7 flex flex-col bg-card/30 lg:col-span-2 min-h-[200px]">
+                    <div className="flex gap-0.5 mb-3">
+                      {Array.from({ length: dbTestimonials[1].rating }).map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />)}
                     </div>
-                    <div className="flex items-center gap-3 pt-3 border-t border-border/40">
+                    <p className="text-foreground/80 leading-relaxed text-sm sm:text-base line-clamp-3 mb-4">"{dbTestimonials[1].content}"</p>
+                    <div className="mt-auto flex items-center gap-3 pt-3 border-t border-border/40">
                       <img
                         src={dbTestimonials[1].avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(dbTestimonials[1].name)}&background=e2e8f0&color=64748b`}
                         alt={dbTestimonials[1].name}
@@ -930,7 +932,7 @@ export default function LandingPage() {
 
                 {/* ── Region stat 3 ── */}
                 {regionStats[2] && (
-                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden h-[140px] rounded-2xl border border-border/40">
+                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden h-[150px] sm:border-t border-border/40">
                     {regionStats[2].image_url && <img src={regionStats[2].image_url} alt={regionStats[2].city} className="absolute inset-0 w-full h-full object-cover opacity-25 pointer-events-none" />}
                     <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/70 to-background/40 pointer-events-none" />
                     <div className="relative z-10 p-5">
@@ -942,7 +944,7 @@ export default function LandingPage() {
 
                 {/* ── Region stat 4 ── */}
                 {regionStats[3] && (
-                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden h-[140px] rounded-2xl border border-border/40">
+                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden h-[150px] sm:border-t border-border/40">
                     {regionStats[3].image_url && <img src={regionStats[3].image_url} alt={regionStats[3].city} className="absolute inset-0 w-full h-full object-cover opacity-25 pointer-events-none" />}
                     <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/70 to-background/40 pointer-events-none" />
                     <div className="relative z-10 p-5">
@@ -954,14 +956,12 @@ export default function LandingPage() {
 
                 {/* ── Testimonial 3 ── */}
                 {dbTestimonials[2] && (
-                  <div className="p-5 sm:p-6 flex flex-col justify-between bg-card/40 rounded-2xl border border-border/40 min-h-[180px]">
-                    <div>
-                      <div className="flex gap-0.5 mb-3">
-                        {Array.from({ length: dbTestimonials[2].rating }).map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />)}
-                      </div>
-                      <p className="text-foreground/80 leading-relaxed text-sm line-clamp-4 mb-4">"{dbTestimonials[2].content}"</p>
+                  <div className="p-5 sm:p-7 flex flex-col bg-card/30 min-h-[200px]">
+                    <div className="flex gap-0.5 mb-3">
+                      {Array.from({ length: dbTestimonials[2].rating }).map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />)}
                     </div>
-                    <div className="flex items-center gap-3 pt-3 border-t border-border/40">
+                    <p className="text-foreground/80 leading-relaxed text-sm line-clamp-4 mb-4">"{dbTestimonials[2].content}"</p>
+                    <div className="mt-auto flex items-center gap-3 pt-3 border-t border-border/40">
                       <img
                         src={dbTestimonials[2].avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(dbTestimonials[2].name)}&background=e2e8f0&color=64748b`}
                         alt={dbTestimonials[2].name}
