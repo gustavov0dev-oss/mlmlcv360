@@ -415,6 +415,30 @@ function useTopCategories() {
   return categories;
 }
 
+// ─── feature product images ─────────────────────────────────────────────────
+function useFeatureProductImages() {
+  const [images, setImages] = useState<string[]>([]);
+  useEffect(() => {
+    supabase
+      .from('products')
+      .select('images')
+      .eq('status', 'active')
+      .order('sort_order')
+      .limit(6)
+      .then(({ data }) => {
+        if (data) {
+          const imgs = data
+            .flatMap((p: any) => Array.isArray(p.images) ? p.images : [])
+            .map((img: any) => (typeof img === 'string' ? img : img?.url || img?.src || ''))
+            .filter(Boolean)
+            .slice(0, 4);
+          if (imgs.length > 0) setImages(imgs);
+        }
+      });
+  }, []);
+  return images;
+}
+
 // ─── main ─────────────────────────────────────────────────────────────────────
 export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -425,6 +449,7 @@ export default function LandingPage() {
   const { user } = useAuthStore();
   const platformStats = usePlatformStats();
   const topCategories = useTopCategories();
+  const featureProductImages = useFeatureProductImages();
 
   // Dynamic FAQs from database
   const [faqItems, setFaqItems] = useState<{ id: string; question: string; answer: string }[]>([]);
@@ -725,14 +750,17 @@ export default function LandingPage() {
                   </Link>
                 </div>
                 <div className="grid grid-cols-2 gap-2 sm:w-44 shrink-0">
-                  {[
-                    'https://images.pexels.com/photos/3762879/pexels-photo-3762879.jpeg?auto=compress&cs=tinysrgb&w=200',
-                    'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=200',
-                    'https://images.pexels.com/photos/3997993/pexels-photo-3997993.jpeg?auto=compress&cs=tinysrgb&w=200',
-                    'https://images.pexels.com/photos/4041392/pexels-photo-4041392.jpeg?auto=compress&cs=tinysrgb&w=200',
-                  ].map((src, i) => (
-                    <div key={i} className="rounded-xl aspect-square border border-border/40 overflow-hidden bg-muted/30">
-                      <img src={src} alt="" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" />
+                  {(featureProductImages.length >= 4
+                    ? featureProductImages
+                    : [
+                        'https://images.pexels.com/photos/3762879/pexels-photo-3762879.jpeg?auto=compress&cs=tinysrgb&w=200',
+                        'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=200',
+                        'https://images.pexels.com/photos/3997993/pexels-photo-3997993.jpeg?auto=compress&cs=tinysrgb&w=200',
+                        'https://images.pexels.com/photos/4041392/pexels-photo-4041392.jpeg?auto=compress&cs=tinysrgb&w=200',
+                      ]
+                  ).slice(0, 4).map((src, i) => (
+                    <div key={i} className="rounded-xl aspect-square border border-border/30 overflow-hidden bg-muted/20">
+                      <img src={src} alt="" className="w-full h-full object-cover opacity-80 hover:opacity-100 hover:scale-105 transition-all duration-500" />
                     </div>
                   ))}
                 </div>
@@ -862,7 +890,7 @@ export default function LandingPage() {
 
                 {/* ── R1 — row1 col1 (all breakpoints) ── */}
                 {regionStats[0] && (
-                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden h-[150px] border-b border-border/40">
+                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden min-h-[150px] border-b border-border/40">
                     {regionStats[0].image_url && <img src={regionStats[0].image_url} alt={regionStats[0].city} className="absolute inset-0 w-full h-full object-cover opacity-25 pointer-events-none" />}
                     <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/70 to-background/40 pointer-events-none" />
                     <div className="relative z-10 p-5">
@@ -874,7 +902,7 @@ export default function LandingPage() {
 
                 {/* ── R2 — row1 col2 on sm/lg; row2 col1 on mobile ── */}
                 {regionStats[1] && (
-                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden h-[150px] border-b border-border/40 sm:border-l border-border/40">
+                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden min-h-[150px] border-b border-border/40 sm:border-l border-border/40">
                     {regionStats[1].image_url && <img src={regionStats[1].image_url} alt={regionStats[1].city} className="absolute inset-0 w-full h-full object-cover opacity-25 pointer-events-none" />}
                     <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/70 to-background/40 pointer-events-none" />
                     <div className="relative z-10 p-5">
@@ -942,7 +970,7 @@ export default function LandingPage() {
 
                 {/* ── R3 — lg: col1 row3; sm: col1 row3; mobile: stacked ── */}
                 {regionStats[2] && (
-                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden h-[150px] border-b border-border/40 lg:border-b-0 lg:border-t lg:col-start-1 lg:row-start-3">
+                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden min-h-[150px] border-b border-border/40 lg:border-b-0 lg:border-t lg:col-start-1 lg:row-start-3">
                     {regionStats[2].image_url && <img src={regionStats[2].image_url} alt={regionStats[2].city} className="absolute inset-0 w-full h-full object-cover opacity-25 pointer-events-none" />}
                     <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/70 to-background/40 pointer-events-none" />
                     <div className="relative z-10 p-5">
@@ -954,7 +982,7 @@ export default function LandingPage() {
 
                 {/* ── R4 — lg: col2 row3; sm: col2 row3; mobile: stacked ── */}
                 {regionStats[3] && (
-                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden h-[150px] border-b border-border/40 sm:border-l lg:border-b-0 lg:border-t lg:col-start-2 lg:row-start-3">
+                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden min-h-[150px] border-b border-border/40 sm:border-l lg:border-b-0 lg:border-t lg:col-start-2 lg:row-start-3">
                     {regionStats[3].image_url && <img src={regionStats[3].image_url} alt={regionStats[3].city} className="absolute inset-0 w-full h-full object-cover opacity-25 pointer-events-none" />}
                     <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/70 to-background/40 pointer-events-none" />
                     <div className="relative z-10 p-5">
