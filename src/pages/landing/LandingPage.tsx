@@ -338,11 +338,11 @@ function AppMockup() {
 function TestimonialCard({ t }: { t: DBTestimonial }) {
   const avatarFallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(t.name)}&background=e2e8f0&color=64748b`;
   return (
-    <div className="w-[280px] sm:w-[300px] shrink-0 bg-card/70 border border-border/60 rounded-2xl p-5 mx-2 backdrop-blur-sm flex flex-col" style={{ height: '190px' }}>
+    <div className="w-[280px] sm:w-[300px] shrink-0 bg-card/70 border border-border/60 rounded-2xl p-5 mx-2 backdrop-blur-sm flex flex-col">
       <div className="flex gap-0.5 mb-3 flex-shrink-0">
         {Array.from({ length: 5 }).map((_, i) => <Star key={i} className={cn('w-3.5 h-3.5', i < t.rating ? 'fill-amber-400 text-amber-400' : 'text-muted-foreground/20')} />)}
       </div>
-      <p className="text-sm text-foreground/75 leading-relaxed mb-4 flex-1 overflow-hidden" style={{ display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>&#8220;{t.content}&#8221;</p>
+      <p className="text-sm text-foreground/75 leading-relaxed mb-4 flex-1 overflow-hidden">&#8220;{t.content}&#8221;</p>
       <div className="flex items-center gap-3 pt-3 border-t border-border/50 flex-shrink-0">
         <img src={t.avatar_url || avatarFallback} alt={t.name} className="w-8 h-8 rounded-full object-cover ring-2 ring-primary/15 flex-shrink-0" onError={e => { (e.target as HTMLImageElement).src = avatarFallback; }} />
         <div className="flex-1 min-w-0">
@@ -384,11 +384,14 @@ function usePlatformStats() {
   useEffect(() => {
     const load = async () => {
       try {
-        const [affiliatesRes, productsRes] = await Promise.all([
-          supabase.from('profiles').select('*', { count: 'exact', head: true }),
-          supabase.from('products').select('*', { count: 'exact', head: true }).eq('status', 'active'),
-        ]);
-        setStats({ totalAffiliates: affiliatesRes.count ?? 0, totalProducts: productsRes.count ?? 0, loaded: true });
+        const { data, error } = await supabase.rpc('get_platform_stats');
+        if (error) throw error;
+        const result = (data ?? {}) as { total_affiliates?: number; total_products?: number };
+        setStats({
+          totalAffiliates: result.total_affiliates ?? 0,
+          totalProducts: result.total_products ?? 0,
+          loaded: true,
+        });
       } catch {
         setStats(s => ({ ...s, loaded: true }));
       }
@@ -551,9 +554,6 @@ export default function LandingPage() {
                 {/* Large icon as decorative background — ultra-faded */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden>
                   <stat.icon className="w-32 h-32 opacity-[0.025] text-foreground" />
-                </div>
-                <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3 opacity-80', stat.iconClass)}>
-                  <stat.icon className="w-5 h-5" />
                 </div>
                 <div className="text-3xl sm:text-4xl font-black text-foreground tracking-tight tabular-nums">{stat.value}</div>
                 <div className="text-sm font-semibold text-foreground/80 mt-1">{stat.label}</div>
@@ -844,7 +844,7 @@ export default function LandingPage() {
 
                 {/* ── Region stat 1 ── */}
                 {regionStats[0] && (
-                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden min-h-[130px] sm:border-r border-border/50 sm:border-b border-border/50">
+                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden h-[160px] sm:border-r border-border/50 sm:border-b border-border/50">
                     {regionStats[0].image_url && <img src={regionStats[0].image_url} alt={regionStats[0].city} className="absolute inset-0 w-full h-full object-cover opacity-25 pointer-events-none" />}
                     <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/70 to-background/40 pointer-events-none" />
                     <div className="relative z-10 p-5">
@@ -856,7 +856,7 @@ export default function LandingPage() {
 
                 {/* ── Region stat 2 ── */}
                 {regionStats[1] && (
-                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden min-h-[130px] sm:border-r border-border/50 sm:border-b border-border/50">
+                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden h-[160px] sm:border-r border-border/50 sm:border-b border-border/50">
                     {regionStats[1].image_url && <img src={regionStats[1].image_url} alt={regionStats[1].city} className="absolute inset-0 w-full h-full object-cover opacity-25 pointer-events-none" />}
                     <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/70 to-background/40 pointer-events-none" />
                     <div className="relative z-10 p-5">
@@ -875,11 +875,6 @@ export default function LandingPage() {
                           {Array.from({ length: dbTestimonials[0].rating }).map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />)}
                         </div>
                         <p className="text-foreground/80 leading-relaxed text-sm sm:text-base line-clamp-5 mb-3">"{dbTestimonials[0].content}"</p>
-                        <div className="flex gap-2 mb-4 flex-wrap">
-                          {['Comisiones auto', 'Red binaria'].map(tag => (
-                            <span key={tag} className="px-2.5 py-1 bg-primary/8 text-primary text-xs font-medium rounded-full border border-primary/15">{tag}</span>
-                          ))}
-                        </div>
                       </div>
                       <div className="flex items-center gap-3 pt-3 border-t border-border/40">
                         <img
@@ -925,7 +920,7 @@ export default function LandingPage() {
 
                 {/* ── Region stat 3 ── */}
                 {regionStats[2] && (
-                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden min-h-[130px] sm:border-r border-border/50 border-t border-border/50">
+                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden h-[160px] sm:border-r border-border/50 border-t border-border/50">
                     {regionStats[2].image_url && <img src={regionStats[2].image_url} alt={regionStats[2].city} className="absolute inset-0 w-full h-full object-cover opacity-25 pointer-events-none" />}
                     <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/70 to-background/40 pointer-events-none" />
                     <div className="relative z-10 p-5">
@@ -937,7 +932,7 @@ export default function LandingPage() {
 
                 {/* ── Region stat 4 ── */}
                 {regionStats[3] && (
-                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden min-h-[130px] border-t border-border/50">
+                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden h-[160px] border-t border-border/50">
                     {regionStats[3].image_url && <img src={regionStats[3].image_url} alt={regionStats[3].city} className="absolute inset-0 w-full h-full object-cover opacity-25 pointer-events-none" />}
                     <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/70 to-background/40 pointer-events-none" />
                     <div className="relative z-10 p-5">
