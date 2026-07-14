@@ -13,9 +13,9 @@ import { cn } from '@/lib/utils';
 import { LogoWithText } from '@/components/Logo';
 
 const step1Schema = z.object({
-  full_name: z.string().min(3, 'Minimo 3 caracteres'),
-  email: z.string().email('Correo invalido'),
-  password: z.string().min(8, 'Minimo 8 caracteres'),
+  full_name: z.string().min(3, 'Mínimo 3 caracteres'),
+  email: z.string().email('Correo inválido'),
+  password: z.string().min(8, 'Mínimo 8 caracteres'),
   confirm_password: z.string(),
   referral_code: z.string().optional(),
 }).refine(d => d.password === d.confirm_password, { message: 'No coinciden', path: ['confirm_password'] });
@@ -159,33 +159,35 @@ export default function RegisterPage() {
 
   // Password requirements
   const requirements = [
-    { label: '8 caracteres minimo', valid: pwdVal.length >= 8 },
-    { label: 'Una mayuscula', valid: /[A-Z]/.test(pwdVal) },
-    { label: 'Un numero', valid: /[0-9]/.test(pwdVal) },
+    { label: '8 caracteres mínimo', valid: pwdVal.length >= 8 },
+    { label: 'Una mayúscula', valid: /[A-Z]/.test(pwdVal) },
+    { label: 'Un número', valid: /[0-9]/.test(pwdVal) },
   ];
 
   const metCount = requirements.filter(r => r.valid).length;
   const strength = pwdVal.length === 0 ? 0 : metCount;
-  const strengthLabels = ['', 'Debil', 'Regular', 'Fuerte'];
+  const strengthLabels = ['', 'Débil', 'Regular', 'Fuerte'];
 
   return (
     <div className="min-h-screen bg-background flex flex-col lg:flex-row">
-      {/* Brand panel - desktop only with premium gradient mesh */}
-      <div className="hidden lg:flex lg:w-[45%] xl:w-1/2 bg-gradient-mesh flex-col justify-between p-10 relative overflow-hidden">
+      {/* Brand panel - desktop only */}
+      <div className="hidden lg:flex lg:w-[45%] xl:w-1/2 bg-gradient-mesh flex-col items-center justify-center p-10 relative overflow-hidden">
         <div className="absolute inset-0 bg-dots opacity-[0.03]" />
         <div className="absolute top-20 left-10 w-72 h-72 bg-primary/20 dark:bg-primary/15 rounded-full blur-[100px]" />
         <div className="absolute bottom-20 right-10 w-56 h-56 bg-primary/15 dark:bg-primary/10 rounded-full blur-[80px]" />
         <div className="absolute top-1/2 left-1/3 w-40 h-40 bg-primary/10 dark:bg-primary/5 rounded-full blur-[60px]" />
 
-        <div className="relative z-10">
-          <Link to="/" className="inline-flex items-center gap-2.5">
+        {/* Logo pinned top-left */}
+        <div className="absolute top-8 left-8 z-10">
+          <Link to="/">
             <LogoWithText value={logoValue} fallbackText={companyName} size="w-9 h-9" textClass="font-semibold text-foreground" />
           </Link>
         </div>
 
-        <div className="relative z-10 max-w-md">
-          <h1 className="text-3xl xl:text-4xl font-bold text-foreground leading-[1.1] mb-4 tracking-tight">
-            Unete a la<br />
+        {/* Centered brand text */}
+        <div className="relative z-10 max-w-xs w-full">
+          <h1 className="text-3xl xl:text-4xl font-bold text-foreground leading-[1.15] mb-4 tracking-tight">
+            Únete a la<br />
             <span className="text-primary">nueva era MLM.</span>
           </h1>
           <p className="text-muted-foreground text-sm leading-relaxed">
@@ -193,7 +195,7 @@ export default function RegisterPage() {
           </p>
         </div>
 
-        <div className="relative z-10 text-xs text-muted-foreground">
+        <div className="absolute bottom-6 left-8 z-10 text-xs text-muted-foreground">
           Powered by MLM 360
         </div>
       </div>
@@ -201,7 +203,13 @@ export default function RegisterPage() {
       {/* Form panel */}
       <div className="flex-1 flex flex-col min-h-screen lg:min-h-0">
         {/* Top bar with glass effect */}
-        <div className="flex items-center justify-end px-6 lg:px-10 py-5">
+        {/* Top bar */}
+        <div className="flex items-center justify-between px-6 lg:px-10 py-5">
+          {/* Logo visible on mobile only */}
+          <Link to="/" className="lg:hidden">
+            <LogoWithText value={logoValue} fallbackText={companyName} size="w-8 h-8" textClass="font-semibold text-foreground" />
+          </Link>
+          <div className="hidden lg:block" />
           <button
             onClick={() => setTheme(isDark ? 'light' : 'dark')}
             className="w-9 h-9 rounded-xl flex items-center justify-center bg-muted/50 hover:bg-muted/80 transition-colors text-muted-foreground"
@@ -243,7 +251,7 @@ export default function RegisterPage() {
               <>
                 <div className="mb-6">
                   <h2 className="text-xl font-bold text-foreground">Crear tu cuenta</h2>
-                  <p className="text-sm text-muted-foreground mt-1">Rapido, seguro y sin complicaciones.</p>
+                  <p className="text-sm text-muted-foreground mt-1">Rápido, seguro y sin complicaciones.</p>
                 </div>
 
                 {googleEnabled && (
@@ -317,7 +325,7 @@ export default function RegisterPage() {
 
                   {/* Email */}
                   <div>
-                    <label className="block text-xs font-medium text-foreground mb-2">Correo electronico</label>
+                    <label className="block text-xs font-medium text-foreground mb-2">Correo electrónico</label>
                     <div className="relative">
                       <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <input
@@ -345,13 +353,13 @@ export default function RegisterPage() {
 
                   {/* Password */}
                   <div>
-                    <label className="block text-xs font-medium text-foreground mb-2">Contrasena</label>
+                    <label className="block text-xs font-medium text-foreground mb-2">Contraseña</label>
                     <div className="relative">
                       <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <input
                         type={showPwd ? 'text' : 'password'}
                         {...register('password')}
-                        placeholder="Crea una contrasena"
+                        placeholder="Crea una contraseña"
                         className={cn(
                           "w-full pl-11 pr-12 py-3 rounded-xl text-sm bg-muted/30 border transition-all outline-none",
                           "placeholder:text-muted-foreground/60",
@@ -416,13 +424,13 @@ export default function RegisterPage() {
 
                   {/* Confirm password */}
                   <div>
-                    <label className="block text-xs font-medium text-foreground mb-2">Confirmar contrasena</label>
+                    <label className="block text-xs font-medium text-foreground mb-2">Confirmar contraseña</label>
                     <div className="relative">
                       <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <input
                         type={showConfirmPwd ? 'text' : 'password'}
                         {...register('confirm_password')}
-                        placeholder="Repite tu contrasena"
+                        placeholder="Repite tu contraseña"
                         className={cn(
                           "w-full pl-11 pr-12 py-3 rounded-xl text-sm bg-muted/30 border transition-all outline-none",
                           "placeholder:text-muted-foreground/60",
@@ -449,7 +457,7 @@ export default function RegisterPage() {
                     {!errors.confirm_password && confirmPwdVal && pwdVal === confirmPwdVal && (
                       <p className="text-xs text-primary mt-1.5 flex items-center gap-1">
                         <CheckCircle className="w-3 h-3" />
-                        Contrasenas coinciden
+                        Contraseñas coinciden
                       </p>
                     )}
                   </div>
@@ -457,7 +465,7 @@ export default function RegisterPage() {
                   {/* Referral code */}
                   <div>
                     <label className="block text-xs font-medium text-foreground mb-2">
-                      Codigo de referido <span className="text-muted-foreground font-normal">(opcional)</span>
+                      Código de referido <span className="text-muted-foreground font-normal">(opcional)</span>
                     </label>
                     <input
                       {...register('referral_code')}
@@ -544,7 +552,7 @@ export default function RegisterPage() {
                     className="flex-1 py-2.5 rounded-xl text-sm font-medium border border-border hover:bg-muted transition-colors flex items-center justify-center gap-1"
                   >
                     <ArrowLeft className="w-4 h-4" />
-                    Atras
+                    Atrás
                   </button>
                   <button
                     onClick={() => setStep(confirmStep)}
@@ -608,7 +616,7 @@ export default function RegisterPage() {
                     className="flex-1 py-2.5 rounded-xl text-sm font-medium border border-border hover:bg-muted transition-colors flex items-center justify-center gap-1"
                   >
                     <ArrowLeft className="w-4 h-4" />
-                    Atras
+                    Atrás
                   </button>
                   <button
                     onClick={handleFinal}

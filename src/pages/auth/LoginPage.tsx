@@ -113,42 +113,45 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col lg:flex-row">
-      {/* Brand panel - desktop only with premium gradient mesh */}
-      <div className="hidden lg:flex lg:w-[45%] xl:w-1/2 bg-gradient-mesh flex-col justify-between p-10 relative overflow-hidden">
-        {/* Subtle grid pattern */}
+      {/* Brand panel - desktop only */}
+      <div className="hidden lg:flex lg:w-[45%] xl:w-1/2 bg-gradient-mesh flex-col items-center justify-center p-10 relative overflow-hidden">
         <div className="absolute inset-0 bg-dots opacity-[0.03]" />
-
-        {/* Gradient orbs */}
         <div className="absolute top-20 left-10 w-72 h-72 bg-primary/20 dark:bg-primary/15 rounded-full blur-[100px]" />
         <div className="absolute bottom-20 right-10 w-56 h-56 bg-primary/15 dark:bg-primary/10 rounded-full blur-[80px]" />
         <div className="absolute top-1/2 left-1/3 w-40 h-40 bg-primary/10 dark:bg-primary/5 rounded-full blur-[60px]" />
 
-        <div className="relative z-10">
-          <Link to="/" className="inline-flex items-center gap-2.5">
+        {/* Logo pinned top-left */}
+        <div className="absolute top-8 left-8 z-10">
+          <Link to="/">
             <LogoWithText value={logoValue} fallbackText={companyName} size="w-9 h-9" textClass="font-semibold text-foreground" />
           </Link>
         </div>
 
-        <div className="relative z-10 max-w-md">
-          <h1 className="text-3xl xl:text-4xl font-bold text-foreground leading-[1.1] mb-4 tracking-tight">
+        {/* Centered brand text */}
+        <div className="relative z-10 max-w-xs w-full">
+          <h1 className="text-3xl xl:text-4xl font-bold text-foreground leading-[1.15] mb-4 tracking-tight">
             Gestiona tu red.<br />
-            <span className="text-primary">Crece sin limites.</span>
+            <span className="text-primary">Crece sin límites.</span>
           </h1>
           <p className="text-muted-foreground text-sm leading-relaxed">
             La plataforma MLM completa para gestionar tu negocio. Comisiones, genealogía, reportes y más.
           </p>
-
         </div>
 
-        <div className="relative z-10 text-xs text-muted-foreground">
+        <div className="absolute bottom-6 left-8 z-10 text-xs text-muted-foreground">
           Powered by MLM 360
         </div>
       </div>
 
       {/* Form panel */}
       <div className="flex-1 flex flex-col min-h-screen lg:min-h-0">
-        {/* Top bar with glass effect */}
-        <div className="flex items-center justify-end px-6 lg:px-10 py-5">
+        {/* Top bar */}
+        <div className="flex items-center justify-between px-6 lg:px-10 py-5">
+          {/* Logo visible on mobile only */}
+          <Link to="/" className="lg:hidden">
+            <LogoWithText value={logoValue} fallbackText={companyName} size="w-8 h-8" textClass="font-semibold text-foreground" />
+          </Link>
+          <div className="hidden lg:block" />
           <button
             onClick={() => setTheme(isDark ? 'light' : 'dark')}
             className="w-9 h-9 rounded-xl flex items-center justify-center bg-muted/50 hover:bg-muted/80 transition-colors text-muted-foreground"
@@ -162,7 +165,7 @@ export default function LoginPage() {
         <div className="flex-1 flex items-center justify-center px-6 py-10">
           <div className="w-full max-w-[360px] animate-fade-in-up">
             <div className="mb-7">
-              <h2 className="text-2xl font-bold text-foreground tracking-tight">Iniciar sesion</h2>
+              <h2 className="text-2xl font-bold text-foreground tracking-tight">Iniciar sesión</h2>
               <p className="text-sm text-muted-foreground mt-1.5">Ingresa tus credenciales para continuar.</p>
             </div>
 
@@ -187,7 +190,7 @@ export default function LoginPage() {
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
               <div>
-                <label className="block text-xs font-medium text-foreground mb-2">Correo electronico</label>
+                <label className="block text-xs font-medium text-foreground mb-2">Correo electrónico</label>
                 <div className="relative">
                   <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <input
@@ -213,13 +216,13 @@ export default function LoginPage() {
 
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-xs font-medium text-foreground">Contrasena</label>
+                  <label className="text-xs font-medium text-foreground">Contraseña</label>
                   <button
                     type="button"
                     onClick={() => setForgotOpen(true)}
                     className="text-xs text-primary font-medium hover:opacity-80 transition-opacity"
                   >
-                    Olvidaste?
+                    ¿Olvidaste?
                   </button>
                 </div>
                 <div className="relative">
@@ -314,7 +317,7 @@ export default function LoginPage() {
             aria-modal="true"
           >
             <div className="flex items-center justify-between mb-5">
-              <h3 className="font-semibold text-lg text-foreground">Recuperar contrasena</h3>
+              <h3 className="font-semibold text-lg text-foreground">Recuperar contraseña</h3>
               <button
                 onClick={() => { setForgotOpen(false); setForgotSent(false); }}
                 className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-muted transition-colors text-muted-foreground"
@@ -341,7 +344,7 @@ export default function LoginPage() {
             ) : (
               <>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Ingresa tu correo y te enviaremos un enlace para restablecer tu contrasena.
+                  Ingresa tu correo y te enviaremos un enlace para restablecer tu contraseña.
                 </p>
                 <input
                   type="email"
