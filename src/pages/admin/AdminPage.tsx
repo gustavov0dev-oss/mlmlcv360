@@ -1411,13 +1411,13 @@ function GatewaysManager() {
 
   const toggleActive = async (gw: any) => {
     await database.update('payment_gateways', gw.id, { is_active: !gw.is_active, updated_at: new Date().toISOString() });
-    fetchAll();
+    setGateways(prev => prev.map(g => g.id === gw.id ? { ...g, is_active: !g.is_active } : g));
     toast.success(`${gw.name} ${!gw.is_active ? 'activado' : 'desactivado'}`);
   };
 
   const toggleTestMode = async (gw: any) => {
     await database.update('payment_gateways', gw.id, { test_mode: !gw.test_mode, updated_at: new Date().toISOString() });
-    fetchAll();
+    setGateways(prev => prev.map(g => g.id === gw.id ? { ...g, test_mode: !g.test_mode } : g));
     toast.success(`${gw.name}: ${!gw.test_mode ? 'modo prueba' : 'modo producción'}`);
   };
 

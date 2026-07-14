@@ -4,7 +4,7 @@ import { useThemeStore } from '@/store/themeStore';
 import { useAuthStore } from '@/store/authStore';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-import { Sun, Moon, Monitor, Save, RefreshCw, GitBranch, Bell, Lock, ArrowRight } from 'lucide-react';
+import { Sun, Moon, Monitor, Save, RefreshCw, GitBranch, Bell } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 type Tab = 'mlm' | 'appearance' | 'notifications';
@@ -83,25 +83,46 @@ export default function SettingsPage() {
         <p className="text-muted-foreground text-sm mt-1">Preferencias de tu cuenta y parámetros de la red MLM.</p>
       </div>
 
-      {/* Tab strip */}
-      <div className="flex overflow-x-auto gap-1 bg-muted/50 rounded-xl p-1.5 scrollbar-hide">
-        {tabs.map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={cn(
-              'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors flex-shrink-0',
-              activeTab === tab.id ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
-            )}
-          >
-            <tab.icon className="w-4 h-4" />
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      {/* Tab navigation - vertical sidebar on desktop, horizontal pills on mobile */}
+      <div className="flex gap-6">
+        <aside className="hidden lg:block w-56 flex-shrink-0">
+          <nav className="space-y-1 bg-card border border-border rounded-xl p-2 sticky top-2">
+            {tabs.map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={cn(
+                  'w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left',
+                  activeTab === tab.id ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/70'
+                )}
+              >
+                <tab.icon className="w-4 h-4 flex-shrink-0" />
+                {tab.label}
+              </button>
+            ))}
+          </nav>
+        </aside>
 
-      {/* ── MLM Network ── */}
-      {activeTab === 'mlm' && (
+        <div className="flex-1 min-w-0 space-y-4">
+          {/* Mobile pill strip */}
+          <div className="lg:hidden flex overflow-x-auto gap-1 bg-muted/50 rounded-xl p-1.5 scrollbar-hide">
+            {tabs.map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={cn(
+                  'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors flex-shrink-0',
+                  activeTab === tab.id ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                <tab.icon className="w-4 h-4" />
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* ── MLM Network ── */}
+          {activeTab === 'mlm' && (
         <div className="space-y-4">
           <div className="bg-card border border-border rounded-xl p-6 space-y-4">
             <h3 className="font-semibold text-foreground flex items-center gap-2"><GitBranch className="w-4 h-4 text-primary" /> Configuración de la Red MLM</h3>
@@ -159,8 +180,8 @@ export default function SettingsPage() {
         </div>
       )}
 
-      {/* ── Appearance ── */}
-      {activeTab === 'appearance' && (
+          {/* ── Appearance ── */}
+          {activeTab === 'appearance' && (
         <div className="space-y-4">
           {/* Theme selector */}
           <div className="bg-card border border-border rounded-xl p-6">
@@ -184,27 +205,15 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {/* Logo configuration moved to Panel de Admin */}
-          <div className="bg-card border border-border rounded-xl p-6 text-center">
-            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
-              <Lock className="w-6 h-6 text-primary" />
-            </div>
-            <h3 className="text-base font-semibold text-foreground mb-2">Logo y Datos de la Empresa</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              El logo, RUC, tagline y datos de la empresa se gestionan en el Panel de Admin.
-            </p>
-            <a href="/dashboard/admin" onClick={e => { e.preventDefault(); window.history.pushState({}, '', '/dashboard/admin'); window.dispatchEvent(new Event('locationchange')); }}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-sm font-medium hover:bg-primary/90 transition-colors">
-              Ir a Panel de Admin <ArrowRight className="w-4 h-4" />
-            </a>
-          </div>
         </div>
       )}
 
-      {/* ── Notifications ── */}
-      {activeTab === 'notifications' && (
-        <NotificationPreferences />
-      )}
+          {/* ── Notifications ── */}
+          {activeTab === 'notifications' && (
+            <NotificationPreferences />
+          )}
+        </div>
+      </div>
     </div>
   );
 }
