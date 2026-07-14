@@ -19,6 +19,25 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>;
 
+function translateAuthError(msg: string): string {
+  const m = (msg || '').toLowerCase();
+  if (m.includes('email not confirmed')) return 'Tu correo no está confirmado. Revisa tu bandeja de entrada y confirma tu cuenta.';
+  if (m.includes('invalid login credentials') || m.includes('invalid credentials')) return 'Correo o contraseña incorrectos.';
+  if (m.includes('too many requests') || m.includes('rate limit')) return 'Demasiados intentos. Espera unos minutos e intenta de nuevo.';
+  if (m.includes('user not found')) return 'No existe una cuenta con este correo.';
+  if (m.includes('email rate limit')) return 'Demasiados correos enviados. Espera unos minutos.';
+  if (m.includes('forbidden') || m.includes('forbidden action')) return 'Acción no permitida. Contacta con soporte.';
+  if (m.includes('signup disabled') || m.includes('signups not allowed')) return 'El registro está deshabilitado temporalmente.';
+  if (m.includes('weak password')) return 'La contraseña es demasiado débil.';
+  if (m.includes('over request rate limit')) return 'Demasiadas solicitudes. Espera unos minutos.';
+  if (m.includes('reauthentication needed') || m.includes('reauthentication')) return 'Necesitas volver a iniciar sesión.';
+  if (m.includes('email address not authorized')) return 'Este correo no está autorizado para registrarse.';
+  if (m.includes('email already registered') || m.includes('already registered')) return 'Este correo ya está registrado.';
+  if (m.includes('invalid email')) return 'Correo electrónico inválido.';
+  if (m.includes('password should be at least')) return 'La contraseña debe tener al menos 6 caracteres.';
+  return msg || 'Ocurrió un error. Intenta de nuevo.';
+}
+
 function GoogleIcon() {
   return (
     <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -71,7 +90,7 @@ export default function LoginPage() {
     }
     const result = await backend.auth.signIn(data.email, data.password);
     if (result.error) {
-      toast.error(result.error === 'Invalid login credentials' ? 'Credenciales incorrectas' : result.error);
+      toast.error(translateAuthError(result.error));
       setLoading(false);
     } else {
       toast.success('Bienvenido!');
@@ -119,18 +138,6 @@ export default function LoginPage() {
             La plataforma MLM completa para gestionar tu negocio. Comisiones, genealogía, reportes y más.
           </p>
 
-          <div className="flex items-center gap-6 mt-8 pt-8 border-t border-border/50">
-            {[
-              { v: '12K+', l: 'Usuarios' },
-              { v: '99.9%', l: 'Uptime' },
-              { v: '4.9', l: 'Rating' },
-            ].map((s, i) => (
-              <div key={i}>
-                <div className="text-xl font-bold text-foreground">{s.v}</div>
-                <div className="text-xs text-muted-foreground">{s.l}</div>
-              </div>
-            ))}
-          </div>
         </div>
 
         <div className="relative z-10 text-xs text-muted-foreground">
@@ -141,26 +148,14 @@ export default function LoginPage() {
       {/* Form panel */}
       <div className="flex-1 flex flex-col min-h-screen lg:min-h-0">
         {/* Top bar with glass effect */}
-        <div className="flex items-center justify-between px-6 lg:px-10 py-5 border-b border-border/30 glass-subtle">
-          <Link to="/" className="lg:hidden">
-            <LogoWithText value={logoValue} fallbackText={companyName} size="w-8 h-8" textClass="font-semibold text-foreground" />
-          </Link>
-          <div className="hidden lg:block" />
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-muted-foreground hidden sm:block">
-              Sin cuenta?{' '}
-              <Link to="/registro" className="text-primary font-medium hover:opacity-80 transition-opacity">
-                Registrate
-              </Link>
-            </span>
-            <button
-              onClick={() => setTheme(isDark ? 'light' : 'dark')}
-              className="w-9 h-9 rounded-xl flex items-center justify-center bg-muted/50 hover:bg-muted/80 transition-colors text-muted-foreground"
-              aria-label="Toggle theme"
-            >
-              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </button>
-          </div>
+        <div className="flex items-center justify-end px-6 lg:px-10 py-5">
+          <button
+            onClick={() => setTheme(isDark ? 'light' : 'dark')}
+            className="w-9 h-9 rounded-xl flex items-center justify-center bg-muted/50 hover:bg-muted/80 transition-colors text-muted-foreground"
+            aria-label="Cambiar tema"
+          >
+            {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </button>
         </div>
 
         {/* Form with premium styling */}
@@ -297,12 +292,12 @@ export default function LoginPage() {
               </button>
             </form>
 
-            {/* Mobile footer */}
-            <div className="lg:hidden mt-8 pt-6 border-t border-border/50 text-center">
+            {/* Auth toggle */}
+            <div className="mt-8 pt-6 border-t border-border/50 text-center">
               <span className="text-sm text-muted-foreground">
-                Sin cuenta?{' '}
+                ¿Sin cuenta?{' '}
                 <Link to="/registro" className="text-primary font-medium hover:opacity-80 transition-opacity">
-                  Registrate
+                  Regístrate
                 </Link>
               </span>
             </div>

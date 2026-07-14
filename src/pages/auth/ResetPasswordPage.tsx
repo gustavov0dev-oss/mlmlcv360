@@ -41,28 +41,28 @@ export default function ResetPasswordPage() {
 
   // Password requirements
   const requirements = [
-    { label: '8 caracteres minimo', valid: password.length >= 8 },
-    { label: 'Una mayuscula', valid: /[A-Z]/.test(password) },
-    { label: 'Un numero', valid: /[0-9]/.test(password) },
+    { label: '8 caracteres mínimo', valid: password.length >= 8 },
+    { label: 'Una mayúscula', valid: /[A-Z]/.test(password) },
+    { label: 'Un número', valid: /[0-9]/.test(password) },
   ];
 
   const metCount = requirements.filter(r => r.valid).length;
   const strength = password.length === 0 ? 0 : metCount;
-  const strengthLabels = ['', 'Debil', 'Regular', 'Fuerte'];
+  const strengthLabels = ['', 'Débil', 'Regular', 'Fuerte'];
 
   const passwordsMatch = password === confirm && confirm.length > 0;
   const canSubmit = password.length >= 8 && passwordsMatch;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password.length < 8) { toast.error('Minimo 8 caracteres'); return; }
-    if (password !== confirm) { toast.error('No coinciden'); return; }
+    if (password.length < 8) { toast.error('Mínimo 8 caracteres'); return; }
+    if (password !== confirm) { toast.error('Las contraseñas no coinciden'); return; }
     setLoading(true);
     const { error } = await backend.auth.updatePassword(password);
     setLoading(false);
-    if (error) { toast.error('Error al actualizar'); return; }
+    if (error) { toast.error('Error al actualizar la contraseña'); return; }
     setDone(true);
-    toast.success('Contrasena actualizada');
+    toast.success('Contraseña actualizada');
     setTimeout(() => navigate('/dashboard'), 2000);
   };
 
@@ -94,7 +94,7 @@ export default function ResetPasswordPage() {
           /* Checking state */
           <div className="glass-card rounded-2xl p-8 text-center">
             <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-sm text-muted-foreground">Verificando enlace de recuperacion...</p>
+            <p className="text-sm text-muted-foreground">Verificando enlace de recuperación...</p>
           </div>
         ) : !valid ? (
           /* Invalid link state */
@@ -103,16 +103,16 @@ export default function ResetPasswordPage() {
               <div className="w-14 h-14 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-5">
                 <ShieldAlert className="w-6 h-6 text-destructive" />
               </div>
-              <h2 className="text-xl font-bold text-foreground mb-2">Enlace invalido</h2>
+              <h2 className="text-xl font-bold text-foreground mb-2">Enlace inválido</h2>
               <p className="text-sm text-muted-foreground mb-6">
-                Este enlace ha expirado o no es valido. Solicita uno nuevo desde la pagina de inicio de sesion.
+                Este enlace ha expirado o no es válido. Solicita uno nuevo desde la página de inicio de sesión.
               </p>
               <Link
                 to="/login"
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium bg-muted hover:bg-muted/80 transition-colors"
               >
                 <ArrowLeft className="w-4 h-4" />
-                Volver al inicio
+                Volver al inicio de sesión
               </Link>
             </div>
           </div>
@@ -123,9 +123,9 @@ export default function ResetPasswordPage() {
               <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-5">
                 <CheckCircle className="w-6 h-6 text-primary" />
               </div>
-              <h2 className="text-xl font-bold text-foreground mb-2">Contrasena actualizada</h2>
+              <h2 className="text-xl font-bold text-foreground mb-2">Contraseña actualizada</h2>
               <p className="text-sm text-muted-foreground mb-5">
-                Tu contrasena ha sido cambiada exitosamente.
+                Tu contraseña ha sido cambiada exitosamente.
               </p>
 
               {/* Progress bar */}
@@ -152,21 +152,21 @@ export default function ResetPasswordPage() {
               <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
                 <Lock className="w-5 h-5 text-primary" />
               </div>
-              <h2 className="text-xl font-bold text-foreground">Nueva contrasena</h2>
-              <p className="text-sm text-muted-foreground mt-1">Crea una contrasena segura para tu cuenta</p>
+              <h2 className="text-xl font-bold text-foreground">Nueva contraseña</h2>
+              <p className="text-sm text-muted-foreground mt-1">Crea una contraseña segura para tu cuenta</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Password field */}
               <div>
-                <label className="block text-xs font-medium text-foreground mb-2">Nueva contrasena</label>
+                <label className="block text-xs font-medium text-foreground mb-2">Nueva contraseña</label>
                 <div className="relative">
                   <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <input
                     type={showPwd ? 'text' : 'password'}
                     value={password}
                     onChange={e => setPassword(e.target.value)}
-                    placeholder="Crea una contrasena"
+                    placeholder="Crea una contraseña"
                     className={cn(
                       "w-full pl-11 pr-12 py-3 rounded-xl text-sm bg-muted/30 border border-border/50 transition-all outline-none",
                       "placeholder:text-muted-foreground/60",
@@ -223,14 +223,14 @@ export default function ResetPasswordPage() {
 
               {/* Confirm password */}
               <div>
-                <label className="block text-xs font-medium text-foreground mb-2">Confirmar contrasena</label>
+                <label className="block text-xs font-medium text-foreground mb-2">Confirmar contraseña</label>
                 <div className="relative">
                   <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <input
                     type={showConfirmPwd ? 'text' : 'password'}
                     value={confirm}
                     onChange={e => setConfirm(e.target.value)}
-                    placeholder="Repite la contrasena"
+                    placeholder="Repite la contraseña"
                     className={cn(
                       "w-full pl-11 pr-12 py-3 rounded-xl text-sm bg-muted/30 border transition-all outline-none",
                       "placeholder:text-muted-foreground/60",
@@ -251,13 +251,13 @@ export default function ResetPasswordPage() {
                 {confirm && !passwordsMatch && (
                   <p className="text-xs text-destructive mt-1.5 flex items-center gap-1.5">
                     <span className="w-1 h-1 rounded-full bg-destructive" />
-                    Las contrasenas no coinciden
+                    Las contraseñas no coinciden
                   </p>
                 )}
                 {passwordsMatch && (
                   <p className="text-xs text-primary mt-1.5 flex items-center gap-1">
                     <CheckCircle className="w-3 h-3" />
-                    Contrasenas coinciden
+                    Contraseñas coinciden
                   </p>
                 )}
               </div>
@@ -277,7 +277,7 @@ export default function ResetPasswordPage() {
                   <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
                 ) : (
                   <>
-                    <span>Actualizar contrasena</span>
+                    <span>Actualizar contraseña</span>
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}
@@ -290,7 +290,7 @@ export default function ResetPasswordPage() {
         <div className="mt-6 text-center">
           <Link to="/login" className="text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1">
             <ArrowLeft className="w-3.5 h-3.5" />
-            Volver al inicio
+            Volver al inicio de sesión
           </Link>
         </div>
       </div>

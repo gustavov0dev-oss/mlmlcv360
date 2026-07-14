@@ -34,11 +34,17 @@ function GoogleIcon() {
 }
 
 function translateError(msg: string): string {
-  const m = msg.toLowerCase();
-  if (m.includes('already registered')) return 'Este correo ya esta registrado';
-  if (m.includes('invalid email')) return 'Correo invalido';
-  if (m.includes('rate limit')) return 'Demasiados intentos. Espera unos minutos.';
-  return 'Error al crear cuenta. Intenta de nuevo.';
+  const m = (msg || '').toLowerCase();
+  if (m.includes('already registered') || m.includes('email already registered')) return 'Este correo ya está registrado.';
+  if (m.includes('email not confirmed')) return 'Tu correo no está confirmado. Revisa tu bandeja de entrada.';
+  if (m.includes('invalid email')) return 'Correo electrónico inválido.';
+  if (m.includes('rate limit') || m.includes('too many requests')) return 'Demasiados intentos. Espera unos minutos.';
+  if (m.includes('weak password')) return 'La contraseña es demasiado débil.';
+  if (m.includes('signup disabled') || m.includes('signups not allowed')) return 'El registro está deshabilitado temporalmente.';
+  if (m.includes('email address not authorized')) return 'Este correo no está autorizado para registrarse.';
+  if (m.includes('forbidden') || m.includes('forbidden action')) return 'Acción no permitida. Contacta con soporte.';
+  if (m.includes('user not found')) return 'No existe una cuenta con este correo.';
+  return 'Error al crear la cuenta. Intenta de nuevo.';
 }
 
 export default function RegisterPage() {
@@ -103,7 +109,7 @@ export default function RegisterPage() {
   const handleAvatar = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 3 * 1024 * 1024) { toast.error('Max 3MB'); return; }
+    if (file.size > 3 * 1024 * 1024) { toast.error('Máximo 3MB'); return; }
     setAvatarFile(file);
     setAvatarPreview(URL.createObjectURL(file));
   };
@@ -195,26 +201,14 @@ export default function RegisterPage() {
       {/* Form panel */}
       <div className="flex-1 flex flex-col min-h-screen lg:min-h-0">
         {/* Top bar with glass effect */}
-        <div className="flex items-center justify-between px-6 lg:px-10 py-5 border-b border-border/30 glass-subtle">
-          <Link to="/" className="lg:hidden">
-            <LogoWithText value={logoValue} fallbackText={companyName} size="w-8 h-8" textClass="font-semibold text-foreground" />
-          </Link>
-          <div className="hidden lg:block" />
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-muted-foreground hidden sm:block">
-              Ya tienes cuenta?{' '}
-              <Link to="/login" className="text-primary font-medium hover:opacity-80 transition-opacity">
-                Inicia sesion
-              </Link>
-            </span>
-            <button
-              onClick={() => setTheme(isDark ? 'light' : 'dark')}
-              className="w-9 h-9 rounded-xl flex items-center justify-center bg-muted/50 hover:bg-muted/80 transition-colors text-muted-foreground"
-              aria-label="Toggle theme"
-            >
-              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </button>
-          </div>
+        <div className="flex items-center justify-end px-6 lg:px-10 py-5">
+          <button
+            onClick={() => setTheme(isDark ? 'light' : 'dark')}
+            className="w-9 h-9 rounded-xl flex items-center justify-center bg-muted/50 hover:bg-muted/80 transition-colors text-muted-foreground"
+            aria-label="Cambiar tema"
+          >
+            {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </button>
         </div>
 
         {/* Form content with premium styling */}
@@ -639,12 +633,12 @@ export default function RegisterPage() {
               </>
             )}
 
-            {/* Mobile footer */}
-            <div className="lg:hidden mt-8 pt-6 border-t border-border/50 text-center">
+            {/* Auth toggle */}
+            <div className="mt-8 pt-6 border-t border-border/50 text-center">
               <span className="text-sm text-muted-foreground">
-                Ya tienes cuenta?{' '}
+                ¿Ya tienes cuenta?{' '}
                 <Link to="/login" className="text-primary font-medium hover:opacity-80 transition-opacity">
-                  Inicia sesion
+                  Inicia sesión
                 </Link>
               </span>
             </div>
