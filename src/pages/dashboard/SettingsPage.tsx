@@ -129,8 +129,8 @@ export default function SettingsPage() {
           {/* ── MLM Network ── */}
           {activeTab === 'mlm' && (
         <div className="space-y-4">
-          <div className="bg-card border border-border rounded-xl p-6 space-y-4">
-            <h3 className="font-semibold text-foreground flex items-center gap-2"><GitBranch className="w-4 h-4 text-primary" /> Configuración de la Red MLM</h3>
+          <div className="bg-card border border-border rounded-xl p-6">
+            <h3 className="font-semibold text-foreground flex items-center gap-2 mb-5"><GitBranch className="w-4 h-4 text-primary" /> Configuración de la Red MLM</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[
                 { k: 'max_levels', label: 'Niveles máximos de red', placeholder: '7', type: 'number' },
@@ -151,13 +151,15 @@ export default function SettingsPage() {
                 </div>
               ))}
             </div>
-            <button onClick={() => saveConfig(['max_levels','binary_cap','commission_direct','commission_binary','commission_unilevel'])}
-              disabled={saving} className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-medium transition-colors disabled:opacity-50">
-              {saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Guardar
-            </button>
+            <div className="mt-6 pt-4 border-t border-border flex justify-end">
+              <button onClick={() => saveConfig(['max_levels','binary_cap','commission_direct','commission_binary','commission_unilevel'])}
+                disabled={saving} className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-medium transition-colors disabled:opacity-50">
+                {saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Guardar
+              </button>
+            </div>
           </div>
-          <div className="bg-card border border-border rounded-xl p-6 space-y-4">
-            <h3 className="font-semibold text-foreground">Ciclos de Pago</h3>
+          <div className="bg-card border border-border rounded-xl p-6">
+            <h3 className="font-semibold text-foreground mb-5">Ciclos de Pago</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[
                 { k: 'payment_cycle', label: 'Días entre pagos', placeholder: '15' },
@@ -177,10 +179,12 @@ export default function SettingsPage() {
                 </div>
               ))}
             </div>
-            <button onClick={() => saveConfig(['payment_cycle','min_withdrawal','igv_rate'])}
-              disabled={saving} className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-medium transition-colors disabled:opacity-50">
-              {saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Guardar
-            </button>
+            <div className="mt-6 pt-4 border-t border-border flex justify-end">
+              <button onClick={() => saveConfig(['payment_cycle','min_withdrawal','igv_rate'])}
+                disabled={saving} className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-medium transition-colors disabled:opacity-50">
+                {saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Guardar
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -294,10 +298,12 @@ function NotificationPreferences() {
           </div>
         ))}
       </div>
-      <button onClick={save} disabled={saving}
-        className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-medium transition-colors disabled:opacity-50 mt-4">
-        {saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Guardar preferencias
-      </button>
+      <div className="mt-6 pt-4 border-t border-border flex justify-end">
+        <button onClick={save} disabled={saving}
+          className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-medium transition-colors disabled:opacity-50">
+          {saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Guardar preferencias
+        </button>
+      </div>
     </div>
   );
 }
