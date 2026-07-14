@@ -159,7 +159,7 @@ export default function ResetPasswordPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Password field */}
               <div>
-                <label className="block text-xs font-medium text-foreground mb-2">Nueva contraseña</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Nueva contraseña</label>
                 <div className="relative">
                   <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <input
@@ -168,8 +168,8 @@ export default function ResetPasswordPage() {
                     onChange={e => setPassword(e.target.value)}
                     placeholder="Crea una contraseña"
                     className={cn(
-                      "w-full pl-11 pr-12 py-3 rounded-xl text-sm bg-muted/30 border border-border/50 transition-all outline-none",
-                      "placeholder:text-muted-foreground/60",
+                      "w-full pl-11 pr-12 py-3.5 rounded-xl text-sm bg-muted/30 border border-border/50 transition-all outline-none",
+                      "placeholder:text-muted-foreground/50",
                       "focus:border-primary focus:bg-background hover:border-border"
                     )}
                   />
@@ -196,7 +196,7 @@ export default function ResetPasswordPage() {
                         ))}
                       </div>
                       <span className={cn(
-                        "text-xs font-medium min-w-[50px] text-right",
+                        "text-sm font-medium min-w-[55px] text-right",
                         strength === 3 ? "text-primary" : strength === 2 ? "text-warning" : "text-destructive"
                       )}>
                         {strengthLabels[strength]}
@@ -204,7 +204,7 @@ export default function ResetPasswordPage() {
                     </div>
                     <div className="space-y-1">
                       {requirements.map((req, i) => (
-                        <div key={i} className="flex items-center gap-2 text-xs">
+                        <div key={i} className="flex items-center gap-2 text-sm">
                           <div className={cn(
                             "w-3.5 h-3.5 rounded-full flex items-center justify-center transition-all",
                             req.valid ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
@@ -223,7 +223,7 @@ export default function ResetPasswordPage() {
 
               {/* Confirm password */}
               <div>
-                <label className="block text-xs font-medium text-foreground mb-2">Confirmar contraseña</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Confirmar contraseña</label>
                 <div className="relative">
                   <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <input
@@ -232,8 +232,8 @@ export default function ResetPasswordPage() {
                     onChange={e => setConfirm(e.target.value)}
                     placeholder="Repite la contraseña"
                     className={cn(
-                      "w-full pl-11 pr-12 py-3 rounded-xl text-sm bg-muted/30 border transition-all outline-none",
-                      "placeholder:text-muted-foreground/60",
+                      "w-full pl-11 pr-12 py-3.5 rounded-xl text-sm bg-muted/30 border transition-all outline-none",
+                      "placeholder:text-muted-foreground/50",
                       confirm && !passwordsMatch
                         ? "border-destructive focus:border-destructive"
                         : "border-border/50 focus:border-primary focus:bg-background hover:border-border"
@@ -267,7 +267,7 @@ export default function ResetPasswordPage() {
                 type="submit"
                 disabled={loading || !canSubmit}
                 className={cn(
-                  "w-full py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all",
+                  "w-full py-3.5 rounded-xl font-semibold text-base flex items-center justify-center gap-2 transition-all",
                   "bg-primary text-primary-foreground shadow-premium",
                   "hover:opacity-90 active:scale-[0.99]",
                   "disabled:opacity-50 disabled:cursor-not-allowed"

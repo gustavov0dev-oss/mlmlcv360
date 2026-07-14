@@ -190,7 +190,7 @@ export default function LoginPage() {
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
               <div>
-                <label className="block text-xs font-medium text-foreground mb-2">Correo electrónico</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Correo electrónico</label>
                 <div className="relative">
                   <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <input
@@ -198,8 +198,8 @@ export default function LoginPage() {
                     {...register('email')}
                     placeholder="tu@correo.com"
                     className={cn(
-                      "w-full pl-11 pr-4 py-3 rounded-xl text-sm bg-muted/30 border transition-all outline-none",
-                      "placeholder:text-muted-foreground/60",
+                      "w-full pl-11 pr-4 py-3.5 rounded-xl text-sm bg-muted/30 border transition-all outline-none",
+                      "placeholder:text-muted-foreground/50",
                       errors.email
                         ? "border-destructive focus:border-destructive"
                         : "border-border/50 focus:border-primary focus:bg-background hover:border-border"
@@ -216,11 +216,11 @@ export default function LoginPage() {
 
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-xs font-medium text-foreground">Contraseña</label>
+                  <label className="text-sm font-medium text-foreground">Contraseña</label>
                   <button
                     type="button"
                     onClick={() => setForgotOpen(true)}
-                    className="text-xs text-primary font-medium hover:opacity-80 transition-opacity"
+                    className="text-sm text-primary font-medium hover:opacity-80 transition-opacity"
                   >
                     ¿Olvidaste?
                   </button>
@@ -230,10 +230,10 @@ export default function LoginPage() {
                   <input
                     type={showPassword ? 'text' : 'password'}
                     {...register('password')}
-                    placeholder=""
+                    placeholder="Tu contraseña"
                     className={cn(
-                      "w-full pl-11 pr-12 py-3 rounded-xl text-sm bg-muted/30 border transition-all outline-none",
-                      "placeholder:text-muted-foreground/60",
+                      "w-full pl-11 pr-12 py-3.5 rounded-xl text-sm bg-muted/30 border transition-all outline-none",
+                      "placeholder:text-muted-foreground/50",
                       errors.password
                         ? "border-destructive focus:border-destructive"
                         : "border-border/50 focus:border-primary focus:bg-background hover:border-border"
@@ -257,28 +257,28 @@ export default function LoginPage() {
               </div>
 
               {/* Remember me */}
-              <div className="flex items-center gap-2.5">
-                <button
-                  type="button"
-                  onClick={() => setRememberMe(!rememberMe)}
+              <div
+                className="flex items-center gap-3 cursor-pointer select-none"
+                onClick={() => setRememberMe(!rememberMe)}
+              >
+                <div
                   className={cn(
-                    "w-4 h-4 rounded flex items-center justify-center transition-all border",
+                    "w-5 h-5 rounded-md flex items-center justify-center transition-all border-2 shrink-0",
                     rememberMe
                       ? "bg-primary border-primary text-primary-foreground"
-                      : "bg-background border-border hover:border-primary/50"
+                      : "bg-background border-border hover:border-primary/60"
                   )}
-                  aria-label="Recordarme"
                 >
-                  {rememberMe && <Check className="w-2.5 h-2.5" strokeWidth={3} />}
-                </button>
-                <label className="text-sm text-muted-foreground cursor-pointer select-none">Recordarme</label>
+                  {rememberMe && <Check className="w-3 h-3" strokeWidth={3} />}
+                </div>
+                <span className="text-sm text-foreground/80">Recordarme</span>
               </div>
 
               <button
                 type="submit"
                 disabled={loading}
                 className={cn(
-                  "w-full py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all",
+                  "w-full py-3.5 rounded-xl font-semibold text-base flex items-center justify-center gap-2 transition-all",
                   "bg-primary text-primary-foreground shadow-premium",
                   "hover:opacity-90 active:scale-[0.99]",
                   "disabled:opacity-50 disabled:cursor-not-allowed"

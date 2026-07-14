@@ -300,15 +300,15 @@ export default function RegisterPage() {
 
                   {/* Name */}
                   <div>
-                    <label className="block text-xs font-medium text-foreground mb-2">Nombre completo</label>
+                    <label className="block text-sm font-medium text-foreground mb-2">Nombre completo</label>
                     <div className="relative">
                       <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <input
                         {...register('full_name')}
                         placeholder="Tu nombre"
                         className={cn(
-                          "w-full pl-11 pr-4 py-3 rounded-xl text-sm bg-muted/30 border transition-all outline-none",
-                          "placeholder:text-muted-foreground/60",
+                          "w-full pl-11 pr-4 py-3.5 rounded-xl text-sm bg-muted/30 border transition-all outline-none",
+                          "placeholder:text-muted-foreground/50",
                           errors.full_name
                             ? "border-destructive focus:border-destructive"
                             : "border-border/50 focus:border-primary focus:bg-background hover:border-border"
@@ -325,15 +325,15 @@ export default function RegisterPage() {
 
                   {/* Email */}
                   <div>
-                    <label className="block text-xs font-medium text-foreground mb-2">Correo electrónico</label>
+                    <label className="block text-sm font-medium text-foreground mb-2">Correo electrónico</label>
                     <div className="relative">
                       <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <input
                         {...register('email')}
                         placeholder="tu@correo.com"
                         className={cn(
-                          "w-full pl-11 pr-10 py-3 rounded-xl text-sm bg-muted/30 border transition-all outline-none",
-                          "placeholder:text-muted-foreground/60",
+                          "w-full pl-11 pr-10 py-3.5 rounded-xl text-sm bg-muted/30 border transition-all outline-none",
+                          "placeholder:text-muted-foreground/50",
                           errors.email || dupError.email
                             ? "border-destructive focus:border-destructive"
                             : "border-border/50 focus:border-primary focus:bg-background hover:border-border"
@@ -353,7 +353,7 @@ export default function RegisterPage() {
 
                   {/* Password */}
                   <div>
-                    <label className="block text-xs font-medium text-foreground mb-2">Contraseña</label>
+                    <label className="block text-sm font-medium text-foreground mb-2">Contraseña</label>
                     <div className="relative">
                       <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <input
@@ -361,8 +361,8 @@ export default function RegisterPage() {
                         {...register('password')}
                         placeholder="Crea una contraseña"
                         className={cn(
-                          "w-full pl-11 pr-12 py-3 rounded-xl text-sm bg-muted/30 border transition-all outline-none",
-                          "placeholder:text-muted-foreground/60",
+                          "w-full pl-11 pr-12 py-3.5 rounded-xl text-sm bg-muted/30 border transition-all outline-none",
+                          "placeholder:text-muted-foreground/50",
                           errors.password
                             ? "border-destructive focus:border-destructive"
                             : "border-border/50 focus:border-primary focus:bg-background hover:border-border"
@@ -397,7 +397,7 @@ export default function RegisterPage() {
                             ))}
                           </div>
                           <span className={cn(
-                            "text-xs font-medium min-w-[50px] text-right",
+                            "text-sm font-medium min-w-[55px] text-right",
                             strength === 3 ? "text-primary" : strength === 2 ? "text-warning" : "text-destructive"
                           )}>
                             {strengthLabels[strength]}
@@ -405,7 +405,7 @@ export default function RegisterPage() {
                         </div>
                         <div className="space-y-1">
                           {requirements.map((req, i) => (
-                            <div key={i} className="flex items-center gap-2 text-xs">
+                            <div key={i} className="flex items-center gap-2 text-sm">
                               <div className={cn(
                                 "w-3.5 h-3.5 rounded-full flex items-center justify-center transition-all",
                                 req.valid ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
@@ -424,7 +424,7 @@ export default function RegisterPage() {
 
                   {/* Confirm password */}
                   <div>
-                    <label className="block text-xs font-medium text-foreground mb-2">Confirmar contraseña</label>
+                    <label className="block text-sm font-medium text-foreground mb-2">Confirmar contraseña</label>
                     <div className="relative">
                       <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <input
@@ -432,8 +432,8 @@ export default function RegisterPage() {
                         {...register('confirm_password')}
                         placeholder="Repite tu contraseña"
                         className={cn(
-                          "w-full pl-11 pr-12 py-3 rounded-xl text-sm bg-muted/30 border transition-all outline-none",
-                          "placeholder:text-muted-foreground/60",
+                          "w-full pl-11 pr-12 py-3.5 rounded-xl text-sm bg-muted/30 border transition-all outline-none",
+                          "placeholder:text-muted-foreground/50",
                           errors.confirm_password
                             ? "border-destructive focus:border-destructive"
                             : "border-border/50 focus:border-primary focus:bg-background hover:border-border"
@@ -464,15 +464,15 @@ export default function RegisterPage() {
 
                   {/* Referral code */}
                   <div>
-                    <label className="block text-xs font-medium text-foreground mb-2">
+                    <label className="block text-sm font-medium text-foreground mb-2">
                       Código de referido <span className="text-muted-foreground font-normal">(opcional)</span>
                     </label>
                     <input
                       {...register('referral_code')}
                       placeholder="Ej: GUST001"
                       className={cn(
-                        "w-full px-4 py-3 rounded-xl text-sm bg-muted/30 border border-border/50 transition-all outline-none",
-                        "placeholder:text-muted-foreground/60",
+                        "w-full px-4 py-3.5 rounded-xl text-sm bg-muted/30 border border-border/50 transition-all outline-none",
+                        "placeholder:text-muted-foreground/50",
                         "focus:border-primary focus:bg-background"
                       )}
                     />
@@ -482,7 +482,7 @@ export default function RegisterPage() {
                     type="submit"
                     disabled={validating || !!dupError.email}
                     className={cn(
-                      "w-full py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all",
+                      "w-full py-3.5 rounded-xl font-semibold text-base flex items-center justify-center gap-2 transition-all",
                       "bg-primary text-primary-foreground shadow-premium",
                       "hover:opacity-90 active:scale-[0.99]",
                       "disabled:opacity-50 disabled:cursor-not-allowed"
