@@ -258,7 +258,7 @@ export default function AdminPage() {
         <p className="text-muted-foreground text-sm mt-1">Configura todos los aspectos del sistema MLM 360.</p>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
+      <div className="flex flex-col lg:flex-row lg:items-start gap-4 lg:gap-6">
         {/* Module selector — mobile: scrollable pill strip; desktop: vertical list */}
         <div className="lg:w-56 flex-shrink-0">
           {/* Mobile pill strip */}
@@ -566,103 +566,115 @@ export default function AdminPage() {
 
           {/* Auth Social */}
           {activeModule === 'auth' && (
-            <div className="bg-card border border-border rounded-xl p-5 sm:p-6 space-y-5">
-              <div>
+            <div className="bg-card border border-border rounded-xl p-5 sm:p-6">
+              <div className="mb-5">
                 <h2 className="text-lg font-semibold text-foreground flex items-center gap-2"><Lock className="w-4 h-4 text-primary" /> Google OAuth</h2>
                 <p className="text-xs text-muted-foreground mt-0.5">Configura el login con Google. Los usuarios podrán iniciar sesión con su cuenta de Google.</p>
               </div>
-              <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
-                <div>
-                  <div className="text-sm font-medium text-foreground">Habilitar login con Google</div>
-                  <div className="text-xs text-muted-foreground">Permite a los usuarios registrarse e iniciar sesión con Google</div>
-                </div>
-                <ToggleSwitch checked={c('google_oauth_enabled') === 'true'} onChange={v => setC('google_oauth_enabled', String(v))} />
-              </div>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-xs font-medium text-foreground mb-1.5">Google Client ID</label>
-                  <div className="relative">
-                    <input type={showSecrets['google_client_id'] ? 'text' : 'password'} value={c('google_client_id')}
-                      onChange={e => setC('google_client_id', e.target.value)} placeholder="xxxxxxxxxx.apps.googleusercontent.com"
-                      className="w-full px-3 py-2.5 pr-10 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors font-mono" />
-                    <button type="button" onClick={() => setShowSecrets(p => ({ ...p, google_client_id: !p.google_client_id }))}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                      {showSecrets['google_client_id'] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
+                    <div>
+                      <div className="text-sm font-medium text-foreground">Habilitar login con Google</div>
+                      <div className="text-xs text-muted-foreground">Permite a los usuarios registrarse e iniciar sesión con Google</div>
+                    </div>
+                    <ToggleSwitch checked={c('google_oauth_enabled') === 'true'} onChange={v => setC('google_oauth_enabled', String(v))} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-foreground mb-1.5">Google Client ID</label>
+                    <div className="relative">
+                      <input type={showSecrets['google_client_id'] ? 'text' : 'password'} value={c('google_client_id')}
+                        onChange={e => setC('google_client_id', e.target.value)} placeholder="xxxxxxxxxx.apps.googleusercontent.com"
+                        className="w-full px-3 py-2.5 pr-10 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors font-mono" />
+                      <button type="button" onClick={() => setShowSecrets(p => ({ ...p, google_client_id: !p.google_client_id }))}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                        {showSecrets['google_client_id'] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-foreground mb-1.5">Google Client Secret</label>
+                    <div className="relative">
+                      <input type={showSecrets['google_client_secret'] ? 'text' : 'password'} value={c('google_client_secret')}
+                        onChange={e => setC('google_client_secret', e.target.value)} placeholder="GOCSPX-xxxxxxxxxxxxx"
+                        className="w-full px-3 py-2.5 pr-10 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors font-mono" />
+                      <button type="button" onClick={() => setShowSecrets(p => ({ ...p, google_client_secret: !p.google_client_secret }))}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                        {showSecrets['google_client_secret'] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
                   </div>
                 </div>
-                <div>
-                  <label className="block text-xs font-medium text-foreground mb-1.5">Google Client Secret</label>
-                  <div className="relative">
-                    <input type={showSecrets['google_client_secret'] ? 'text' : 'password'} value={c('google_client_secret')}
-                      onChange={e => setC('google_client_secret', e.target.value)} placeholder="GOCSPX-xxxxxxxxxxxxx"
-                      className="w-full px-3 py-2.5 pr-10 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors font-mono" />
-                    <button type="button" onClick={() => setShowSecrets(p => ({ ...p, google_client_secret: !p.google_client_secret }))}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                      {showSecrets['google_client_secret'] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
+                <div className="space-y-4">
+                  <div className="bg-primary/10 border border-primary/20 rounded-lg p-3 text-xs text-primary">
+                    <p className="font-medium mb-1">Instrucciones:</p>
+                    <ol className="list-decimal list-inside space-y-0.5">
+                      <li>Ve a Google Cloud Console → APIs & Services → Credentials</li>
+                      <li>Crea un OAuth 2.0 Client ID</li>
+                      <li>Copia el Client ID y Client Secret aquí</li>
+                      <li>Configura la URL de redirección: <code className="bg-primary/10 px-1 rounded">https://tu-dominio.supabase.co/auth/v1/callback</code></li>
+                    </ol>
                   </div>
                 </div>
               </div>
-              <div className="bg-primary/10 border border-primary/20 rounded-lg p-3 text-xs text-primary">
-                <p className="font-medium mb-1">Instrucciones:</p>
-                <ol className="list-decimal list-inside space-y-0.5">
-                  <li>Ve a Google Cloud Console → APIs & Services → Credentials</li>
-                  <li>Crea un OAuth 2.0 Client ID</li>
-                  <li>Copia el Client ID y Client Secret aquí</li>
-                  <li>Configura la URL de redirección: <code className="bg-primary/10 px-1 rounded">https://tu-dominio.supabase.co/auth/v1/callback</code></li>
-                </ol>
+              <div className="mt-6 pt-4 border-t border-border flex justify-end">
+                <button onClick={() => saveConfigKeys(['google_oauth_enabled', 'google_client_id', 'google_client_secret'], 'auth')}
+                  disabled={savingConfig}
+                  className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-medium transition-colors disabled:opacity-50">
+                  {savingConfig ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Guardar
+                </button>
               </div>
-              <button onClick={() => saveConfigKeys(['google_oauth_enabled', 'google_client_id', 'google_client_secret'], 'auth')}
-                disabled={savingConfig}
-                className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-medium transition-colors disabled:opacity-50">
-                {savingConfig ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Guardar configuración
-              </button>
             </div>
           )}
 
           {/* WhatsApp */}
           {activeModule === 'whatsapp' && (
-            <div className="bg-card border border-border rounded-xl p-5 sm:p-6 space-y-5">
-              <div>
+            <div className="bg-card border border-border rounded-xl p-5 sm:p-6">
+              <div className="mb-5">
                 <h2 className="text-lg font-semibold text-foreground flex items-center gap-2"><MessageCircle className="w-4 h-4 text-green-500" /> Configuración de WhatsApp</h2>
                 <p className="text-xs text-muted-foreground mt-0.5">Configura el botón flotante de WhatsApp que aparece en el sitio.</p>
               </div>
-              <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
-                <div>
-                  <div className="text-sm font-medium text-foreground">Botón de WhatsApp visible</div>
-                  <div className="text-xs text-muted-foreground">Muestra u oculta el botón flotante en el sitio público</div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
+                    <div>
+                      <div className="text-sm font-medium text-foreground">Botón de WhatsApp visible</div>
+                      <div className="text-xs text-muted-foreground">Muestra u oculta el botón flotante en el sitio público</div>
+                    </div>
+                    <ToggleSwitch checked={c('whatsapp_enabled') === 'true'} onChange={v => setC('whatsapp_enabled', String(v))} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-foreground mb-1.5">Número de WhatsApp</label>
+                    <input value={c('whatsapp_number')} onChange={e => setC('whatsapp_number', e.target.value)}
+                      placeholder="51987654321"
+                      className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors font-mono" />
+                    <p className="text-xs text-muted-foreground mt-1">Incluye el código de país sin "+". Ej: 51 para Perú, 34 para España.</p>
+                  </div>
                 </div>
-                <ToggleSwitch checked={c('whatsapp_enabled') === 'true'} onChange={v => setC('whatsapp_enabled', String(v))} />
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-medium text-foreground mb-1.5">Mensaje predeterminado</label>
+                    <textarea value={c('whatsapp_message')} onChange={e => setC('whatsapp_message', e.target.value)}
+                      placeholder="Hola, me gustaría más información sobre MLM 360" rows={3}
+                      className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors resize-none" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-foreground mb-1.5">Posición del botón</label>
+                    <select value={c('whatsapp_position')} onChange={e => setC('whatsapp_position', e.target.value)}
+                      className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary">
+                      <option value="bottom-right">Abajo a la derecha</option>
+                      <option value="bottom-left">Abajo a la izquierda</option>
+                    </select>
+                  </div>
+                </div>
               </div>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-xs font-medium text-foreground mb-1.5">Número de WhatsApp</label>
-                  <input value={c('whatsapp_number')} onChange={e => setC('whatsapp_number', e.target.value)}
-                    placeholder="51987654321"
-                    className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors font-mono" />
-                  <p className="text-xs text-muted-foreground mt-1">Incluye el código de país sin "+". Ej: 51 para Perú, 34 para España.</p>
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-foreground mb-1.5">Mensaje predeterminado</label>
-                  <textarea value={c('whatsapp_message')} onChange={e => setC('whatsapp_message', e.target.value)}
-                    placeholder="Hola, me gustaría más información sobre MLM 360" rows={3}
-                    className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors resize-none" />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-foreground mb-1.5">Posición del botón</label>
-                  <select value={c('whatsapp_position')} onChange={e => setC('whatsapp_position', e.target.value)}
-                    className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary">
-                    <option value="bottom-right">Abajo a la derecha</option>
-                    <option value="bottom-left">Abajo a la izquierda</option>
-                  </select>
-                </div>
+              <div className="mt-6 pt-4 border-t border-border flex justify-end">
+                <button onClick={() => saveConfigKeys(['whatsapp_enabled', 'whatsapp_number', 'whatsapp_message', 'whatsapp_position'], 'whatsapp')}
+                  disabled={savingConfig}
+                  className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-medium transition-colors disabled:opacity-50">
+                  {savingConfig ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Guardar
+                </button>
               </div>
-              <button onClick={() => saveConfigKeys(['whatsapp_enabled', 'whatsapp_number', 'whatsapp_message', 'whatsapp_position'], 'whatsapp')}
-                disabled={savingConfig}
-                className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-medium transition-colors disabled:opacity-50">
-                {savingConfig ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Guardar configuración
-              </button>
             </div>
           )}
 
@@ -670,27 +682,37 @@ export default function AdminPage() {
           {activeModule === 'pwa' && (
             <div className="bg-card border border-border rounded-xl p-5 sm:p-6">
               <h2 className="text-lg font-semibold text-foreground mb-5">Configuración PWA</h2>
-              <div className="space-y-4 max-w-lg">
-                {[
-                  { k: 'pwa_name', label: 'Nombre de la app', placeholder: 'MLM 360' },
-                  { k: 'pwa_short_name', label: 'Nombre corto', placeholder: 'MLM360' },
-                  { k: 'pwa_description', label: 'Descripción', placeholder: 'Sistema MLM empresarial premium' },
-                ].map(f => (
-                  <div key={f.k}>
-                    <label className="block text-sm font-medium text-foreground mb-1.5">{f.label}</label>
-                    <input value={c(f.k)} onChange={e => setC(f.k, e.target.value)} placeholder={f.placeholder}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  {[
+                    { k: 'pwa_name', label: 'Nombre de la app', placeholder: 'MLM 360' },
+                    { k: 'pwa_short_name', label: 'Nombre corto', placeholder: 'MLM360' },
+                  ].map(f => (
+                    <div key={f.k}>
+                      <label className="block text-xs font-medium text-foreground mb-1.5">{f.label}</label>
+                      <input value={c(f.k)} onChange={e => setC(f.k, e.target.value)} placeholder={f.placeholder}
+                        className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-foreground text-sm outline-none focus:border-primary transition-colors" />
+                    </div>
+                  ))}
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-medium text-foreground mb-1.5">Descripción</label>
+                    <input value={c('pwa_description')} onChange={e => setC('pwa_description', e.target.value)} placeholder="Sistema MLM empresarial premium"
                       className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-foreground text-sm outline-none focus:border-primary transition-colors" />
                   </div>
-                ))}
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1.5">Color del tema</label>
-                  <input type="color" value={c('pwa_theme_color') || '#1d4ed8'} onChange={e => setC('pwa_theme_color', e.target.value)}
-                    className="w-full h-10 px-2 py-1 bg-muted border border-border rounded-lg text-foreground text-sm outline-none focus:border-primary" />
+                  <div>
+                    <label className="block text-xs font-medium text-foreground mb-1.5">Color del tema</label>
+                    <input type="color" value={c('pwa_theme_color') || '#1d4ed8'} onChange={e => setC('pwa_theme_color', e.target.value)}
+                      className="w-full h-10 px-2 py-1 bg-muted border border-border rounded-lg text-foreground text-sm outline-none focus:border-primary" />
+                  </div>
                 </div>
+              </div>
+              <div className="mt-6 pt-4 border-t border-border flex justify-end">
                 <button onClick={() => saveConfigKeys(['pwa_name', 'pwa_short_name', 'pwa_description', 'pwa_theme_color'], 'pwa')}
                   disabled={savingConfig}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-medium transition-colors disabled:opacity-50">
-                  {savingConfig ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Guardar cambios
+                  className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-medium transition-colors disabled:opacity-50">
+                  {savingConfig ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Guardar
                 </button>
               </div>
             </div>
@@ -700,29 +722,43 @@ export default function AdminPage() {
           {activeModule === 'seo' && (
             <div className="bg-card border border-border rounded-xl p-5 sm:p-6">
               <h2 className="text-lg font-semibold text-foreground mb-5">Configuración SEO</h2>
-              <div className="space-y-4 max-w-lg">
-                {[
-                  { k: 'seo_title', label: 'Título de la página', placeholder: 'MLM 360 - Sistema Empresarial Premium' },
-                  { k: 'seo_keywords', label: 'Palabras clave', placeholder: 'mlm peru, red de mercadeo, afiliados' },
-                  { k: 'seo_og_image', label: 'Imagen Open Graph', placeholder: 'https://mlm360.pe/og-image.jpg' },
-                  { k: 'seo_ga_id', label: 'Google Analytics ID', placeholder: 'G-XXXXXXXXXX' },
-                ].map(f => (
-                  <div key={f.k}>
-                    <label className="block text-sm font-medium text-foreground mb-1.5">{f.label}</label>
-                    <input value={c(f.k)} onChange={e => setC(f.k, e.target.value)} placeholder={f.placeholder}
-                      className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-foreground text-sm outline-none focus:border-primary transition-colors" />
-                  </div>
-                ))}
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1.5">Descripción meta</label>
-                  <textarea value={c('seo_description')} onChange={e => setC('seo_description', e.target.value)} rows={3}
-                    placeholder="El sistema MLM empresarial más completo del Perú"
-                    className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-foreground text-sm outline-none focus:border-primary transition-colors resize-none" />
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  {[
+                    { k: 'seo_title', label: 'Título de la página', placeholder: 'MLM 360 - Sistema Empresarial Premium' },
+                    { k: 'seo_keywords', label: 'Palabras clave', placeholder: 'mlm peru, red de mercadeo, afiliados' },
+                  ].map(f => (
+                    <div key={f.k}>
+                      <label className="block text-xs font-medium text-foreground mb-1.5">{f.label}</label>
+                      <input value={c(f.k)} onChange={e => setC(f.k, e.target.value)} placeholder={f.placeholder}
+                        className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-foreground text-sm outline-none focus:border-primary transition-colors" />
+                    </div>
+                  ))}
                 </div>
+                <div className="space-y-4">
+                  {[
+                    { k: 'seo_og_image', label: 'Imagen Open Graph', placeholder: 'https://mlm360.pe/og-image.jpg' },
+                    { k: 'seo_ga_id', label: 'Google Analytics ID', placeholder: 'G-XXXXXXXXXX' },
+                  ].map(f => (
+                    <div key={f.k}>
+                      <label className="block text-xs font-medium text-foreground mb-1.5">{f.label}</label>
+                      <input value={c(f.k)} onChange={e => setC(f.k, e.target.value)} placeholder={f.placeholder}
+                        className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-foreground text-sm outline-none focus:border-primary transition-colors" />
+                    </div>
+                  ))}
+                  <div>
+                    <label className="block text-xs font-medium text-foreground mb-1.5">Descripción meta</label>
+                    <textarea value={c('seo_description')} onChange={e => setC('seo_description', e.target.value)} rows={3}
+                      placeholder="El sistema MLM empresarial más completo del Perú"
+                      className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-foreground text-sm outline-none focus:border-primary transition-colors resize-none" />
+                  </div>
+                </div>
+              </div>
+              <div className="mt-6 pt-4 border-t border-border flex justify-end">
                 <button onClick={() => saveConfigKeys(['seo_title', 'seo_description', 'seo_keywords', 'seo_og_image', 'seo_ga_id'], 'seo')}
                   disabled={savingConfig}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-medium transition-colors disabled:opacity-50">
-                  {savingConfig ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Guardar cambios
+                  className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-medium transition-colors disabled:opacity-50">
+                  {savingConfig ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Guardar
                 </button>
               </div>
             </div>
@@ -732,35 +768,49 @@ export default function AdminPage() {
           {activeModule === 'correos' && (
             <div className="bg-card border border-border rounded-xl p-5 sm:p-6">
               <h2 className="text-lg font-semibold text-foreground mb-5">Configuración de Correos</h2>
-              <div className="space-y-4 max-w-lg">
-                {[
-                  { k: 'smtp_host', label: 'Servidor SMTP', placeholder: 'smtp.gmail.com' },
-                  { k: 'smtp_port', label: 'Puerto', placeholder: '587' },
-                  { k: 'smtp_user', label: 'Correo de envío', placeholder: 'no-reply@mlm360.pe' },
-                  { k: 'smtp_name', label: 'Nombre del remitente', placeholder: 'MLM 360' },
-                ].map(f => (
-                  <div key={f.k}>
-                    <label className="block text-sm font-medium text-foreground mb-1.5">{f.label}</label>
-                    <input value={c(f.k)} onChange={e => setC(f.k, e.target.value)} placeholder={f.placeholder}
-                      className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-foreground text-sm outline-none focus:border-primary transition-colors" />
-                  </div>
-                ))}
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1.5">Contraseña SMTP</label>
-                  <div className="relative">
-                    <input type={showSecrets['smtp_pass'] ? 'text' : 'password'} value={c('smtp_pass')}
-                      onChange={e => setC('smtp_pass', e.target.value)} placeholder="••••••••"
-                      className="w-full px-3 py-2.5 pr-10 bg-muted border border-border rounded-lg text-foreground text-sm outline-none focus:border-primary transition-colors" />
-                    <button type="button" onClick={() => setShowSecrets(p => ({ ...p, smtp_pass: !p.smtp_pass }))}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                      {showSecrets['smtp_pass'] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  {[
+                    { k: 'smtp_host', label: 'Servidor SMTP', placeholder: 'smtp.gmail.com' },
+                    { k: 'smtp_port', label: 'Puerto', placeholder: '587' },
+                  ].map(f => (
+                    <div key={f.k}>
+                      <label className="block text-xs font-medium text-foreground mb-1.5">{f.label}</label>
+                      <input value={c(f.k)} onChange={e => setC(f.k, e.target.value)} placeholder={f.placeholder}
+                        className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-foreground text-sm outline-none focus:border-primary transition-colors" />
+                    </div>
+                  ))}
+                </div>
+                <div className="space-y-4">
+                  {[
+                    { k: 'smtp_user', label: 'Correo de envío', placeholder: 'no-reply@mlm360.pe' },
+                    { k: 'smtp_name', label: 'Nombre del remitente', placeholder: 'MLM 360' },
+                  ].map(f => (
+                    <div key={f.k}>
+                      <label className="block text-xs font-medium text-foreground mb-1.5">{f.label}</label>
+                      <input value={c(f.k)} onChange={e => setC(f.k, e.target.value)} placeholder={f.placeholder}
+                        className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-foreground text-sm outline-none focus:border-primary transition-colors" />
+                    </div>
+                  ))}
+                  <div>
+                    <label className="block text-xs font-medium text-foreground mb-1.5">Contraseña SMTP</label>
+                    <div className="relative">
+                      <input type={showSecrets['smtp_pass'] ? 'text' : 'password'} value={c('smtp_pass')}
+                        onChange={e => setC('smtp_pass', e.target.value)} placeholder="••••••••"
+                        className="w-full px-3 py-2.5 pr-10 bg-muted border border-border rounded-lg text-foreground text-sm outline-none focus:border-primary transition-colors" />
+                      <button type="button" onClick={() => setShowSecrets(p => ({ ...p, smtp_pass: !p.smtp_pass }))}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                        {showSecrets['smtp_pass'] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
                   </div>
                 </div>
+              </div>
+              <div className="mt-6 pt-4 border-t border-border flex justify-end">
                 <button onClick={() => saveConfigKeys(['smtp_host', 'smtp_port', 'smtp_user', 'smtp_name', 'smtp_pass'], 'email')}
                   disabled={savingConfig}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-medium transition-colors disabled:opacity-50">
-                  {savingConfig ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Guardar configuración
+                  className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-medium transition-colors disabled:opacity-50">
+                  {savingConfig ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Guardar
                 </button>
               </div>
             </div>
@@ -768,59 +818,65 @@ export default function AdminPage() {
 
           {/* ── REGISTRO ── */}
           {activeModule === 'registro' && (
-            <div className="bg-card border border-border rounded-xl p-5 sm:p-6 space-y-5">
-              <div>
+            <div className="bg-card border border-border rounded-xl p-5 sm:p-6">
+              <div className="mb-5">
                 <h2 className="text-lg font-semibold text-foreground">Configuración de Registro</h2>
                 <p className="text-xs text-muted-foreground mt-0.5">Decide cómo los usuarios se registran: con plan, sin plan, o plan obligatorio.</p>
               </div>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between p-4 bg-muted rounded-xl border border-border">
-                  <div>
-                    <div className="text-sm font-semibold text-foreground">Mostrar selección de plan</div>
-                    <div className="text-xs text-muted-foreground mt-0.5">El usuario puede elegir un plan durante el registro</div>
-                  </div>
-                  <ToggleSwitch checked={c('register_show_plans') !== 'false'} onChange={v => setC('register_show_plans', String(v))} />
-                </div>
-                {c('register_show_plans') !== 'false' && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="space-y-3">
                   <div className="flex items-center justify-between p-4 bg-muted rounded-xl border border-border">
                     <div>
-                      <div className="text-sm font-semibold text-foreground">Requerir selección de plan</div>
-                      <div className="text-xs text-muted-foreground mt-0.5">El usuario no puede avanzar sin elegir un plan</div>
+                      <div className="text-sm font-semibold text-foreground">Mostrar selección de plan</div>
+                      <div className="text-xs text-muted-foreground mt-0.5">El usuario puede elegir un plan durante el registro</div>
                     </div>
-                    <ToggleSwitch checked={c('register_require_plan') === 'true'} onChange={v => setC('register_require_plan', String(v))} />
+                    <ToggleSwitch checked={c('register_show_plans') !== 'false'} onChange={v => setC('register_show_plans', String(v))} />
                   </div>
-                )}
-                <div className="p-4 bg-muted rounded-xl border border-border">
-                  <label className="block text-sm font-semibold text-foreground mb-1">Plan por defecto <span className="font-normal text-muted-foreground">(slug)</span></label>
-                  <p className="text-xs text-muted-foreground mb-2">Si el usuario no elige plan, se asigna este automáticamente. Dejar vacío para no asignar ninguno.</p>
-                  <input value={c('register_default_plan')} onChange={e => setC('register_default_plan', e.target.value)}
-                    placeholder="ej: basico" className="w-full px-3 py-2.5 bg-background border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary font-mono" />
+                  {c('register_show_plans') !== 'false' && (
+                    <div className="flex items-center justify-between p-4 bg-muted rounded-xl border border-border">
+                      <div>
+                        <div className="text-sm font-semibold text-foreground">Requerir selección de plan</div>
+                        <div className="text-xs text-muted-foreground mt-0.5">El usuario no puede avanzar sin elegir un plan</div>
+                      </div>
+                      <ToggleSwitch checked={c('register_require_plan') === 'true'} onChange={v => setC('register_require_plan', String(v))} />
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-3">
+                  <div className="p-4 bg-muted rounded-xl border border-border">
+                    <label className="block text-sm font-semibold text-foreground mb-1">Plan por defecto <span className="font-normal text-muted-foreground">(slug)</span></label>
+                    <p className="text-xs text-muted-foreground mb-2">Si el usuario no elige plan, se asigna este automáticamente. Dejar vacío para no asignar ninguno.</p>
+                    <input value={c('register_default_plan')} onChange={e => setC('register_default_plan', e.target.value)}
+                      placeholder="ej: basico" className="w-full px-3 py-2.5 bg-background border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary font-mono" />
+                  </div>
                 </div>
               </div>
-              <button onClick={() => saveConfigKeys(['register_show_plans', 'register_require_plan', 'register_default_plan'], 'registration')}
-                disabled={savingConfig}
-                className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl hover:bg-primary/90 text-sm font-semibold transition-colors disabled:opacity-50">
-                {savingConfig ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Guardar configuración
-              </button>
+              <div className="mt-6 pt-4 border-t border-border flex justify-end">
+                <button onClick={() => saveConfigKeys(['register_show_plans', 'register_require_plan', 'register_default_plan'], 'registration')}
+                  disabled={savingConfig}
+                  className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-medium transition-colors disabled:opacity-50">
+                  {savingConfig ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Guardar
+                </button>
+              </div>
             </div>
           )}
 
                     {/* ── PLANES ── */}
           {activeModule === 'planes' && <PlansManager />}
           {activeModule === 'mantenimiento' && (
-            <div className="space-y-5">
-              <div className="bg-card border border-border rounded-xl p-5 sm:p-6">
-                <div className="flex items-center gap-3 mb-5">
-                  <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center flex-shrink-0">
-                    <Wrench className="w-5 h-5 text-amber-600" />
-                  </div>
-                  <div>
-                    <h2 className="text-lg font-semibold text-foreground">Modo Mantenimiento</h2>
-                    <p className="text-xs text-muted-foreground">Controla el acceso público al sistema</p>
-                  </div>
+            <div className="bg-card border border-border rounded-xl p-5 sm:p-6">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center flex-shrink-0">
+                  <Wrench className="w-5 h-5 text-amber-600" />
                 </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-foreground">Modo Mantenimiento</h2>
+                  <p className="text-xs text-muted-foreground">Controla el acceso público al sistema</p>
+                </div>
+              </div>
 
-                <div className="space-y-4 max-w-lg">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="space-y-4">
                   <div className={cn(
                     'flex items-center justify-between p-4 rounded-xl border-2 transition-colors',
                     c('maintenance_mode') === 'true'
@@ -850,9 +906,11 @@ export default function AdminPage() {
                       </p>
                     </div>
                   )}
+                </div>
 
+                <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-1.5">Mensaje para los usuarios</label>
+                    <label className="block text-xs font-medium text-foreground mb-1.5">Mensaje para los usuarios</label>
                     <textarea
                       value={c('maintenance_message')}
                       onChange={e => setC('maintenance_message', e.target.value)}
@@ -862,16 +920,18 @@ export default function AdminPage() {
                     />
                     <p className="text-xs text-muted-foreground mt-1">Este mensaje se mostrará en la página de mantenimiento.</p>
                   </div>
-
-                  <button
-                    onClick={() => saveConfigKeys(['maintenance_mode', 'maintenance_message'])}
-                    disabled={savingConfig}
-                    className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-medium transition-colors disabled:opacity-50"
-                  >
-                    {savingConfig ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                    Guardar configuración
-                  </button>
                 </div>
+              </div>
+
+              <div className="mt-6 pt-4 border-t border-border flex justify-end">
+                <button
+                  onClick={() => saveConfigKeys(['maintenance_mode', 'maintenance_message'])}
+                  disabled={savingConfig}
+                  className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-medium transition-colors disabled:opacity-50"
+                >
+                  {savingConfig ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  Guardar
+                </button>
               </div>
             </div>
           )}
@@ -1443,18 +1503,18 @@ function GatewaysManager() {
       </div>
 
       {/* Currency / Fixer.io */}
-      <div className="bg-card border border-border rounded-xl p-5 space-y-4">
-        <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+      <div className="bg-card border border-border rounded-xl p-5 sm:p-6">
+        <h3 className="text-sm font-semibold text-foreground flex items-center gap-2 mb-5">
           <DollarSign className="w-4 h-4 text-primary" /> Tipo de Cambio y Fixer.io
         </h3>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div>
             <label className="block text-xs font-medium text-foreground mb-1.5">Tasa PEN/USD</label>
             <div className="flex gap-2">
               <input value={exchangeRate} onChange={e => setExchangeRate(e.target.value)} placeholder="3.72"
-                className="flex-1 px-3 py-2 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary font-mono" />
+                className="flex-1 px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary font-mono" />
               <button onClick={refreshRate} disabled={refreshingRate} title="Actualizar desde Fixer.io"
-                className="p-2 border border-border rounded-lg hover:bg-muted text-muted-foreground transition-colors disabled:opacity-50">
+                className="p-2.5 border border-border rounded-lg hover:bg-muted text-muted-foreground transition-colors disabled:opacity-50">
                 <RefreshCw className={cn('w-4 h-4', refreshingRate && 'animate-spin')} />
               </button>
             </div>
@@ -1464,7 +1524,7 @@ function GatewaysManager() {
             <div className="relative">
               <input type={showSecrets['fixer'] ? 'text' : 'password'} value={fixerKey} onChange={e => setFixerKey(e.target.value)}
                 placeholder="Tu API key de fixer.io"
-                className="w-full px-3 py-2 pr-10 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary font-mono" />
+                className="w-full px-3 py-2.5 pr-10 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary font-mono" />
               <button type="button" onClick={() => toggleSecret('fixer')}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                 {showSecrets['fixer'] ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
@@ -1472,14 +1532,16 @@ function GatewaysManager() {
             </div>
           </div>
         </div>
-        <div className="bg-muted/50 rounded-lg p-3 text-xs text-muted-foreground">
+        <div className="mt-4 bg-muted/50 rounded-lg p-3 text-xs text-muted-foreground">
           Obtén tu API key gratuita en <span className="text-primary font-medium">fixer.io</span>. El tipo de cambio se actualiza automáticamente.
           Haz clic en el botón de recarga para obtener la tasa actual.
         </div>
-        <button onClick={saveCurrencyConfig} disabled={savingCurrency}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50">
-          {savingCurrency ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Guardar
-        </button>
+        <div className="mt-6 pt-4 border-t border-border flex justify-end">
+          <button onClick={saveCurrencyConfig} disabled={savingCurrency}
+            className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50">
+            {savingCurrency ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Guardar
+          </button>
+        </div>
       </div>
 
       {gateways.map(gw => {
@@ -1515,6 +1577,7 @@ function GatewaysManager() {
               </div>
             </div>
             <div className="p-4 space-y-3">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {Object.entries(gw.credentials || {}).map(([key]) => {
                 const secretKey = `${gw.id}-${key}`;
                 const isSecret = key.includes('secret') || key.includes('private') || key.includes('token') || key.includes('password');
@@ -1546,16 +1609,19 @@ function GatewaysManager() {
                     type="number" min="0" max="100" step="0.01"
                     value={commRates[gw.id] ?? '0'}
                     onChange={e => setCommRates(p => ({ ...p, [gw.id]: e.target.value }))}
-                    className="w-28 px-3 py-2 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary font-mono"
+                    className="w-28 px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary font-mono"
                   />
                   <span className="text-xs text-muted-foreground">% por transacción</span>
                 </div>
               </div>
-              <button onClick={() => saveCreds(gw)} disabled={saving === gw.id}
-                className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50">
-                {saving === gw.id ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                Guardar configuración
-              </button>
+              </div>
+              <div className="pt-4 border-t border-border flex justify-end">
+                <button onClick={() => saveCreds(gw)} disabled={saving === gw.id}
+                  className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50">
+                  {saving === gw.id ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  Guardar
+                </button>
+              </div>
             </div>
           </div>
         );

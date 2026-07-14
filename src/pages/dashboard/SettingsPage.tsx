@@ -64,13 +64,18 @@ export default function SettingsPage() {
     return (
       <div className="space-y-6 max-w-5xl">
         <div className="space-y-1.5"><Skeleton className="h-8 w-64" /><Skeleton className="h-4 w-56" /></div>
-        <Skeleton className="h-12 w-full rounded-xl" />
-        <div className="bg-card border border-border rounded-xl p-6 space-y-4">
-          <Skeleton className="h-5 w-40" />
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {Array.from({length:4}).map((_,i)=>(<div key={i} className="space-y-1.5"><Skeleton className="h-3 w-32" /><Skeleton className="h-11 w-full rounded-lg" /></div>))}
+        <div className="flex flex-col lg:flex-row lg:items-start gap-6">
+          <Skeleton className="hidden lg:block w-56 h-40 rounded-xl" />
+          <div className="flex-1 space-y-4">
+            <Skeleton className="lg:hidden h-12 w-full rounded-xl" />
+            <div className="bg-card border border-border rounded-xl p-6 space-y-4">
+              <Skeleton className="h-5 w-40" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {Array.from({length:4}).map((_,i)=>(<div key={i} className="space-y-1.5"><Skeleton className="h-3 w-32" /><Skeleton className="h-11 w-full rounded-lg" /></div>))}
+              </div>
+              <div className="pt-4 border-t border-border flex justify-end"><Skeleton className="h-10 w-28 rounded-lg" /></div>
+            </div>
           </div>
-          <Skeleton className="h-10 w-28 rounded-lg" />
         </div>
       </div>
     );
@@ -84,7 +89,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Tab navigation - vertical sidebar on desktop, horizontal pills on mobile */}
-      <div className="flex gap-6">
+      <div className="flex flex-col lg:flex-row lg:items-start gap-6">
         <aside className="hidden lg:block w-56 flex-shrink-0">
           <nav className="space-y-1 bg-card border border-border rounded-xl p-2 sticky top-2">
             {tabs.map(tab => (
