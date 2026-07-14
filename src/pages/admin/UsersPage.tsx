@@ -567,8 +567,9 @@ export default function UsersPage() {
     try {
       const { error: rpcError } = await supabase.rpc('admin_delete_user', { p_user_id: user.id });
       if (rpcError) {
+        // Fallback: try deleting profile directly (auth user may already be gone)
         const { error: dbError } = await supabase.from('profiles').delete().eq('id', user.id);
-        if (dbError) throw dbError;
+        if (dbError) throw new Error(rpcError.message || dbError.message);
       }
       toast.success(`Usuario ${user.full_name} eliminado`);
       setDeleteConfirm(null);

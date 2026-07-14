@@ -249,6 +249,12 @@
     caret-color: hsl(var(--foreground));
     accent-color: hsl(var(--primary));
   }
+
+  /* Force placeholder text to use muted color across all inputs */
+  input::placeholder, textarea::placeholder {
+    color: hsl(var(--muted-foreground));
+    opacity: 1;
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════

@@ -365,7 +365,7 @@ export default function DashboardHeader() {
               onChange={e => setQuery(e.target.value)}
               onFocus={() => setSearchOpen(true)}
               placeholder="Buscar usuarios, productos..."
-              className="w-full pl-10 pr-[5.5rem] py-2 bg-muted/50 border border-border rounded-xl text-sm text-foreground outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary/40 focus:bg-card transition-colors"
+              className="w-full pl-10 pr-[5.5rem] py-2 bg-muted/50 border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary/40 focus:bg-card transition-colors"
             />
             {/* Fixed-width right slot — prevents layout shift */}
             <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center">
@@ -596,7 +596,7 @@ export default function DashboardHeader() {
                 value={query}
                 onChange={e => setQuery(e.target.value)}
                 placeholder="Buscar usuarios, productos..."
-                className="w-full pl-12 pr-12 py-3.5 bg-muted/50 border border-border rounded-xl text-base text-foreground outline-none focus:border-primary/40 focus:bg-card transition-colors"
+                className="w-full pl-12 pr-12 py-3.5 bg-muted/50 border border-border rounded-xl text-base text-foreground placeholder:text-muted-foreground outline-none focus:border-primary/40 focus:bg-card transition-colors"
                 autoFocus
               />
               <button

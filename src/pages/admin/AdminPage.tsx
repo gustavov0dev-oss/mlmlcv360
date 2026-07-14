@@ -167,6 +167,13 @@ export default function AdminPage() {
         const map: Record<string, string> = {};
         (cfg as any[]).forEach((row: any) => { map[row.key] = row.value; });
         setConfig(map);
+        const savedPerms = map['role_permissions'];
+        if (savedPerms) {
+          try {
+            const parsed = JSON.parse(savedPerms);
+            setPermissions(prev => ({ ...prev, ...parsed }));
+          } catch { /* ignore malformed JSON */ }
+        }
       }
       if (cr && (cr as any[]).length > 0) setCustomRoles(cr as { name: string; label: string; color: string }[]);
       setLoadingConfig(false);
