@@ -259,20 +259,22 @@ export default function AdminPage() {
       </div>
 
       <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
-        {/* Module selector — mobile: select dropdown; desktop: vertical list */}
+        {/* Module selector — mobile: scrollable pill strip; desktop: vertical list */}
         <div className="lg:w-56 flex-shrink-0">
-          {/* Mobile dropdown */}
-          <div className="lg:hidden relative">
-            <select
-              value={activeModule}
-              onChange={e => setActiveModule(e.target.value)}
-              className="w-full pl-3 pr-9 py-2.5 bg-card border border-border rounded-xl text-sm text-foreground outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/15 transition-colors appearance-none cursor-pointer"
-            >
-              {modules.map(mod => (
-                <option key={mod.id} value={mod.id}>{mod.label}</option>
-              ))}
-            </select>
-            <ChevronRight className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground rotate-90" />
+          {/* Mobile pill strip */}
+          <div className="lg:hidden flex overflow-x-auto gap-1 bg-muted/50 rounded-xl p-1.5 scrollbar-hide">
+            {modules.map(mod => (
+              <button key={mod.id} onClick={() => setActiveModule(mod.id)}
+                className={cn(
+                  'flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors flex-shrink-0',
+                  activeModule === mod.id
+                    ? 'bg-card text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}>
+                <mod.icon className="w-4 h-4 flex-shrink-0" />
+                {mod.label}
+              </button>
+            ))}
           </div>
           {/* Desktop list */}
           <div className="hidden lg:block bg-card border border-border rounded-xl overflow-hidden">
