@@ -16,7 +16,7 @@ const ThemeContext = createContext<ThemeContextType>({
  * Apply theme to document with proper color-scheme sync
  * Updates meta theme-color for mobile browser chrome
  */
-function applyTheme(theme: Theme, animate = false) {
+function applyTheme(theme: Theme, _animate = false) {
   const root = document.documentElement;
 
   const isDark =
@@ -38,13 +38,19 @@ function applyTheme(theme: Theme, animate = false) {
     }
   };
 
-  if (animate && 'startViewTransition' in document) {
-    (document as any).startViewTransition(() => {
-      apply();
+  // Instant theme switch: disable ALL transitions during the swap
+  const css = document.createElement('style');
+  css.textContent = '*,*::before,*::after{transition:none!important;animation:none!important}';
+  document.head.appendChild(css);
+
+  apply();
+
+  // Remove the freeze on next frame so transitions resume for normal interactions
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      css.remove();
     });
-  } else {
-    apply();
-  }
+  });
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {

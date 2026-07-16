@@ -122,7 +122,7 @@ function SectionDivider() {
 function BrandBadge({ b }: { b: typeof paymentBrands[0] }) {
   return (
     <div className="shrink-0 mx-2 select-none">
-      <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-border/40 bg-card/50 backdrop-blur-sm cursor-default">
+      <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-border/30 bg-transparent dark:bg-white/[0.03] backdrop-blur-md cursor-default">
         <div className="w-6 h-6 rounded-md flex items-center justify-center text-[9px] font-black leading-none shrink-0" style={{ backgroundColor: b.bg, color: b.color }}>
           {b.abbr.slice(0, 2)}
         </div>
@@ -183,7 +183,7 @@ function StoreSection() {
               </h2>
               <p className="text-muted-foreground mt-2 max-w-md text-sm">Cada producto activa comisiones automáticas para toda tu red.</p>
             </div>
-            <Link to="/tienda" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-border/60 bg-background/60 backdrop-blur-sm text-sm font-medium hover:border-primary/50 hover:text-primary transition-all group shrink-0 self-start sm:self-auto">
+            <Link to="/tienda" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-border/30 bg-transparent dark:bg-white/[0.03] backdrop-blur-md text-sm font-medium hover:border-primary/50 hover:text-primary transition-all group shrink-0 self-start sm:self-auto">
               Ver tienda completa
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
               {itemCount > 0 && <span className="bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full">{itemCount}</span>}
@@ -197,8 +197,8 @@ function StoreSection() {
                 className={cn(
                   'shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all',
                   activeCat === ''
-                    ? 'bg-foreground/90 text-background backdrop-blur-sm'
-                    : 'border border-border/60 bg-background/50 backdrop-blur-sm text-muted-foreground hover:text-foreground hover:border-foreground/30',
+                    ? 'bg-foreground/90 text-background backdrop-blur-md'
+                    : 'border border-border/30 bg-transparent dark:bg-white/[0.03] backdrop-blur-md text-muted-foreground hover:text-foreground hover:border-foreground/30',
                 )}
               >
                 <ShoppingBag className="w-3.5 h-3.5" /> Todos
@@ -210,8 +210,8 @@ function StoreSection() {
                   className={cn(
                     'shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all',
                     activeCat === cat.id
-                      ? 'bg-foreground/90 text-background backdrop-blur-sm'
-                      : 'border border-border/60 bg-background/50 backdrop-blur-sm text-muted-foreground hover:text-foreground hover:border-foreground/30',
+                      ? 'bg-foreground/90 text-background backdrop-blur-md'
+                      : 'border border-border/30 bg-transparent dark:bg-white/[0.03] backdrop-blur-md text-muted-foreground hover:text-foreground hover:border-foreground/30',
                   )}
                 >
                   {cat.image_url && <img src={cat.image_url} alt="" className="w-4 h-4 rounded object-cover" />}
@@ -224,7 +224,7 @@ function StoreSection() {
           {loading ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
               {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="bg-card rounded-xl overflow-hidden border border-border/60"><Skeleton className="aspect-square" /></div>
+                <div key={i} className="bg-transparent dark:bg-white/[0.03] rounded-xl overflow-hidden border border-border/30"><Skeleton className="aspect-square" /></div>
               ))}
             </div>
           ) : filtered.length === 0 ? (
@@ -248,22 +248,22 @@ function AppMockup() {
   const appHost = typeof window !== 'undefined' ? window.location.host : 'app.cluv360.pe';
   return (
     <div className="relative w-full max-w-[780px] mx-auto">
-      <div className="bg-card/80 border border-border/60 rounded-2xl shadow-[0_24px_64px_-16px_rgba(0,0,0,0.12)] dark:shadow-[0_24px_64px_-16px_rgba(0,0,0,0.5)] overflow-hidden backdrop-blur-sm">
-        <div className="flex items-center gap-3 px-4 sm:px-5 py-3 border-b border-border/50 bg-muted/20">
+      <div className="bg-transparent border border-border/30 rounded-2xl shadow-[0_24px_64px_-16px_rgba(0,0,0,0.08)] dark:shadow-[0_24px_64px_-16px_rgba(0,0,0,0.3)] overflow-hidden backdrop-blur-md">
+        <div className="flex items-center gap-3 px-4 sm:px-5 py-3 border-b border-border/30 bg-muted/10 dark:bg-white/[0.02]">
           <div className="flex gap-1.5">
             <div className="w-3 h-3 rounded-full bg-[#ff5f57]" />
             <div className="w-3 h-3 rounded-full bg-[#febc2e]" />
             <div className="w-3 h-3 rounded-full bg-[#28c840]" />
           </div>
           <div className="flex-1 flex justify-center">
-            <div className="bg-background/80 border border-border/50 rounded-lg px-3 sm:px-4 py-1 text-[11px] sm:text-xs text-muted-foreground w-44 sm:w-56 text-center backdrop-blur-sm truncate">
+            <div className="bg-background/40 border border-border/30 rounded-lg px-3 sm:px-4 py-1 text-[11px] sm:text-xs text-muted-foreground w-44 sm:w-56 text-center backdrop-blur-md truncate">
               {appHost}/dashboard
             </div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-[160px_1fr] min-h-[280px] sm:min-h-[310px]">
-          <div className="border-r border-border/40 p-3 bg-muted/10 hidden sm:block">
+          <div className="border-r border-border/30 p-3 bg-transparent dark:bg-white/[0.02] hidden sm:block">
             <div className="text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-wider mb-3 px-2">Panel</div>
             {[
               { icon: BarChart3, label: 'Resumen', active: false },
@@ -284,14 +284,14 @@ function AppMockup() {
                 { label: 'Mi Red', value: '48', sub: 'afiliados' },
                 { label: 'Rango', value: 'Platino', sub: '→ Diamante' },
               ].map(s => (
-                <div key={s.label} className="bg-muted/30 rounded-xl p-2.5 sm:p-3 border border-border/40">
+                <div key={s.label} className="bg-muted/15 dark:bg-white/[0.03] rounded-xl p-2.5 sm:p-3 border border-border/20">
                   <div className="text-[9px] sm:text-[10px] text-muted-foreground/70 mb-1">{s.label}</div>
                   <div className="text-xs sm:text-sm font-bold text-foreground">{s.value}</div>
                   <div className="text-[9px] sm:text-[10px] font-medium mt-0.5 text-primary">{s.sub}</div>
                 </div>
               ))}
             </div>
-            <div className="bg-muted/20 rounded-xl p-3 border border-border/40">
+            <div className="bg-muted/10 dark:bg-white/[0.02] rounded-xl p-3 border border-border/20">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-[9px] sm:text-[10px] text-muted-foreground/70 font-medium">Comisiones — 12 semanas</span>
                 <span className="text-[9px] sm:text-[10px] font-semibold text-primary">+S/ 890</span>
@@ -307,7 +307,7 @@ function AppMockup() {
                 { icon: DollarSign, text: 'Comisión directa acreditada', val: '+S/ 120' },
                 { icon: TrendingUp, text: 'Bono de rango desbloqueado', val: '+S/ 80' },
               ].map((item, i) => (
-                <div key={i} className="flex items-center gap-2.5 p-2 sm:p-2.5 rounded-xl bg-muted/20 border border-border/40">
+                <div key={i} className="flex items-center gap-2.5 p-2 sm:p-2.5 rounded-xl bg-muted/10 dark:bg-white/[0.02] border border-border/20">
                   <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center flex-shrink-0 bg-primary/10 text-primary"><item.icon className="w-3 sm:w-3.5 h-3 sm:h-3.5" /></div>
                   <span className="text-xs text-foreground flex-1 truncate">{item.text}</span>
                   <span className="text-xs font-semibold text-primary shrink-0">{item.val}</span>
@@ -319,7 +319,7 @@ function AppMockup() {
       </div>
 
       {/* Floating notification card */}
-      <div className="absolute -top-4 sm:-top-5 -right-1 sm:-right-7 bg-card/90 border border-primary/20 rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2.5 shadow-xl shadow-primary/5 backdrop-blur-sm pointer-events-none">
+      <div className="absolute -top-4 sm:-top-5 -right-1 sm:-right-7 bg-transparent dark:bg-white/[0.05] border border-primary/20 rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2.5 shadow-xl shadow-primary/5 backdrop-blur-md pointer-events-none">
         <div className="flex items-center gap-2 sm:gap-2.5">
           <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-primary/10 flex items-center justify-center">
             <Bell className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
@@ -338,12 +338,12 @@ function AppMockup() {
 function TestimonialCard({ t }: { t: DBTestimonial }) {
   const avatarFallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(t.name)}&background=e2e8f0&color=64748b`;
   return (
-    <div className="w-[280px] sm:w-[300px] shrink-0 bg-card/70 border border-border/60 rounded-2xl p-5 mx-2 backdrop-blur-sm flex flex-col">
+    <div className="w-[280px] sm:w-[300px] shrink-0 bg-transparent dark:bg-white/[0.03] border border-border/30 rounded-2xl p-5 mx-2 backdrop-blur-md flex flex-col">
       <div className="flex gap-0.5 mb-3 flex-shrink-0">
         {Array.from({ length: 5 }).map((_, i) => <Star key={i} className={cn('w-3.5 h-3.5', i < t.rating ? 'fill-amber-400 text-amber-400' : 'text-muted-foreground/20')} />)}
       </div>
       <p className="text-sm text-foreground/75 leading-relaxed mb-4 flex-1 overflow-hidden">&#8220;{t.content}&#8221;</p>
-      <div className="flex items-center gap-3 pt-3 border-t border-border/50 flex-shrink-0">
+      <div className="flex items-center gap-3 pt-3 border-t border-border/30 flex-shrink-0">
         <img src={t.avatar_url || avatarFallback} alt={t.name} className="w-8 h-8 rounded-full object-cover ring-2 ring-primary/15 flex-shrink-0" onError={e => { (e.target as HTMLImageElement).src = avatarFallback; }} />
         <div className="flex-1 min-w-0">
           <div className="text-xs font-semibold text-foreground leading-tight truncate">{t.name}</div>
@@ -472,17 +472,17 @@ export default function LandingPage() {
 
       {/* ── HERO ──────────────────────────────────────────────────────────────── */}
       <section className="relative pt-20 pb-0 overflow-hidden">
-        {/* Grid - slightly more visible */}
-        <div className="absolute inset-0 bg-grid opacity-[0.6] mask-fade-top pointer-events-none" />
+        {/* Grid - subtle */}
+        <div className="absolute inset-0 bg-grid opacity-[0.35] mask-fade-top pointer-events-none" />
         {/* Auras */}
-        <div className="absolute top-20 left-1/4 w-[400px] h-[400px] rounded-full bg-primary/8 blur-[110px] pointer-events-none" />
+        <div className="absolute top-20 left-1/4 w-[400px] h-[400px] rounded-full bg-primary/8 blur-[120px] pointer-events-none" />
         <div className="absolute top-28 right-1/4 w-[320px] h-[320px] rounded-full bg-sky-500/6 blur-[100px] pointer-events-none" />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[350px] bg-gradient-radial from-primary/6 to-transparent blur-[100px] pointer-events-none" />
 
         <div className="relative z-10 max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <a
             href="#planes"
-            className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 bg-background/80 border border-border/60 rounded-full text-xs sm:text-sm text-foreground hover:border-primary/40 transition-all mb-7 sm:mb-8 group shadow-sm backdrop-blur-sm"
+            className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 bg-transparent dark:bg-white/[0.03] border border-border/30 rounded-full text-xs sm:text-sm text-foreground hover:border-primary/40 transition-all mb-7 sm:mb-8 group shadow-sm backdrop-blur-md"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shrink-0" />
             <span className="font-medium">Nuevo: Bonos de rango Corona disponibles</span>
@@ -504,14 +504,14 @@ export default function LandingPage() {
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 mb-8 sm:mb-10">
             <Link
               to={user ? '/dashboard' : '/registro'}
-              className="btn-gold-shimmer inline-flex items-center justify-center gap-2 px-7 sm:px-8 py-3.5 bg-foreground/90 backdrop-blur-sm text-background font-semibold rounded-xl hover:opacity-90 active:scale-[0.98] transition-all text-base shadow-lg"
+              className="btn-gold-shimmer inline-flex items-center justify-center gap-2 px-7 sm:px-8 py-3.5 bg-foreground/90 backdrop-blur-md text-background font-semibold rounded-xl hover:opacity-90 active:scale-[0.98] transition-all text-base shadow-lg"
             >
               {user ? 'Ir a mi Panel' : 'Empezar gratis'}
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
               to="/planes"
-              className="inline-flex items-center justify-center gap-2 px-7 sm:px-8 py-3.5 bg-background/60 border border-border/60 text-foreground font-medium rounded-xl hover:border-primary/40 hover:text-primary transition-all text-base backdrop-blur-sm"
+              className="inline-flex items-center justify-center gap-2 px-7 sm:px-8 py-3.5 bg-transparent dark:bg-white/[0.03] border border-border/30 text-foreground font-medium rounded-xl hover:border-primary/40 hover:text-primary transition-all text-base backdrop-blur-md"
             >
               Ver planes
             </Link>
@@ -612,7 +612,7 @@ export default function LandingPage() {
 
       {/* ── FEATURES BENTO ────────────────────────────────────────────────────── */}
       <section className="relative py-16 sm:py-24 overflow-hidden">
-        <div className="absolute inset-0 bg-grid opacity-[0.35] mask-fade-center pointer-events-none" />
+        <div className="absolute inset-0 bg-grid opacity-[0.2] mask-fade-center pointer-events-none" />
         <div className="relative max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-10 sm:mb-14">
             <span className="text-xs font-semibold text-sky-500 dark:text-sky-400 uppercase tracking-widest mb-3 block">Plataforma</span>
@@ -622,14 +622,14 @@ export default function LandingPage() {
             <p className="text-base text-muted-foreground/80 max-w-xl">Cada herramienta resuelve un problema real del negocio multinivel.</p>
           </div>
 
-          {/* Bento — one outer border, internal dividers only */}
-          <div className="rounded-2xl border border-border/40 overflow-hidden">
+          {/* Bento — transparent glass cards, internal dividers only */}
+          <div className="rounded-2xl border border-border/30 overflow-hidden bg-transparent">
 
             {/* Row 1: Reportes en tiempo real (2 cols) | Red genealógica (1 col) */}
             <div className="grid grid-cols-1 lg:grid-cols-3">
 
               {/* Reportes */}
-              <div className="lg:col-span-2 p-6 sm:p-8 border-b border-border/40 lg:border-b-0 lg:border-r border-border/40">
+              <div className="lg:col-span-2 p-6 sm:p-8 border-b border-border/30 lg:border-b-0 lg:border-r border-border/30">
                 <div className="flex items-start justify-between gap-4 mb-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
@@ -669,7 +669,7 @@ export default function LandingPage() {
               </div>
 
               {/* Red genealógica */}
-              <div className="p-6 sm:p-8 border-b border-border/40 flex flex-col">
+              <div className="p-6 sm:p-8 border-b border-border/30 flex flex-col">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0">
                     <Network className="w-5 h-5" />
@@ -693,7 +693,7 @@ export default function LandingPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     {Array.from({ length: 4 }).map((_, i) => (
-                      <div key={i} className="w-6 h-6 rounded-full bg-muted/60 border border-border/60 flex items-center justify-center">
+                      <div key={i} className="w-6 h-6 rounded-full bg-muted/30 dark:bg-white/[0.05] border border-border/30 flex items-center justify-center">
                         <div className="w-2.5 h-2.5 rounded-full bg-muted-foreground/40" />
                       </div>
                     ))}
@@ -706,10 +706,10 @@ export default function LandingPage() {
             </div>
 
             {/* Row 2: Sistema de rangos (1 col) | Tienda integrada (2 cols) */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 border-t border-border/40">
+            <div className="grid grid-cols-1 lg:grid-cols-3 border-t border-border/30">
 
               {/* Sistema de rangos */}
-              <div className="p-6 sm:p-8 border-b border-border/40 lg:border-b-0 lg:border-r border-border/40 flex flex-col">
+              <div className="p-6 sm:p-8 border-b border-border/30 lg:border-b-0 lg:border-r border-border/30 flex flex-col">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-10 h-10 rounded-xl bg-sky-500/10 text-sky-500 flex items-center justify-center shrink-0">
                     <Award className="w-5 h-5" />
@@ -796,14 +796,14 @@ export default function LandingPage() {
       <section className="relative py-20 sm:py-28 overflow-hidden section-dark">
         <div className="absolute top-0 left-0 right-0 h-20 bg-gradient-to-b from-background to-transparent z-10 pointer-events-none hidden dark:block" />
         <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-background to-transparent z-10 pointer-events-none hidden dark:block" />
-        <div className="absolute inset-0 bg-grid opacity-[0.25] mask-fade-center pointer-events-none" />
+        <div className="absolute inset-0 bg-grid opacity-[0.15] mask-fade-center pointer-events-none" />
         <div className="absolute -top-1/4 -left-1/4 w-[60%] h-[60%] rounded-full bg-primary/8 blur-[140px] pointer-events-none" />
         <div className="absolute -bottom-1/4 -right-1/4 w-[50%] h-[50%] rounded-full bg-sky-500/6 blur-[130px] pointer-events-none" />
 
         <div className="relative max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-10 sm:gap-12 lg:gap-16 items-center">
             <div>
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-muted/50 border border-border/60 rounded-full text-xs font-medium text-muted-foreground dark:bg-white/8 dark:border-white/15 dark:text-white/60 mb-5 sm:mb-6 backdrop-blur-sm">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-muted/20 border border-border/30 rounded-full text-xs font-medium text-muted-foreground dark:bg-white/5 dark:border-white/10 dark:text-white/60 mb-5 sm:mb-6 backdrop-blur-md">
                 <Sparkles className="w-3.5 h-3.5 text-primary" />
                 Sistema multinivel inteligente
               </div>
@@ -823,7 +823,7 @@ export default function LandingPage() {
                 </Link>
                 <Link
                   to="/contacto"
-                  className="inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-3.5 bg-muted/40 border border-border/60 text-foreground dark:bg-white/8 dark:border-white/15 dark:text-white font-medium rounded-xl hover:bg-muted/60 dark:hover:bg-white/12 transition-all backdrop-blur-sm text-base"
+                  className="inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-3.5 bg-muted/15 border border-border/30 text-foreground dark:bg-white/5 dark:border-white/10 dark:text-white font-medium rounded-xl hover:bg-muted/25 dark:hover:bg-white/8 transition-all backdrop-blur-md text-base"
                 >
                   Hablar con ventas
                 </Link>
@@ -844,7 +844,7 @@ export default function LandingPage() {
                 { icon: Globe, title: 'Red internacional', desc: 'Tus afiliados pueden estar en toda Latinoamérica.', iconClass: 'icon-blue' },
                 { icon: TrendingUp, title: 'Crecimiento probado', desc: '+340% anual. Números reales, no promesas.', iconClass: 'icon-sky' },
               ].map((item) => (
-                <div key={item.title} className="rounded-2xl p-4 sm:p-5 border bg-muted/25 border-border/40 dark:bg-white/5 dark:border-white/8 backdrop-blur-sm">
+                <div key={item.title} className="rounded-2xl p-4 sm:p-5 border border-border/30 bg-transparent dark:bg-white/[0.03] backdrop-blur-md">
                   <div className={cn('w-9 h-9 rounded-xl flex items-center justify-center mb-3', item.iconClass)}>
                     <item.icon className="w-5 h-5" />
                   </div>
@@ -859,7 +859,7 @@ export default function LandingPage() {
 
       {/* ── HOW IT WORKS ──────────────────────────────────────────────────────── */}
       <section className="relative py-16 sm:py-24 overflow-hidden">
-        <div className="absolute inset-0 bg-grid opacity-[0.3] mask-fade-center pointer-events-none" />
+        <div className="absolute inset-0 bg-grid opacity-[0.15] mask-fade-center pointer-events-none" />
         <div className="relative max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-10 sm:mb-14">
             <span className="text-xs font-semibold text-blue-500 dark:text-blue-400 uppercase tracking-widest mb-3 block">Proceso</span>
@@ -870,7 +870,7 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
             {steps.map((step, i) => (
-              <div key={step.n} className="relative bg-card/50 border border-border/50 rounded-2xl p-6 sm:p-7 backdrop-blur-sm h-full">
+              <div key={step.n} className="relative bg-transparent border border-border/30 rounded-2xl p-6 sm:p-7 backdrop-blur-md h-full">
                 <div className="flex items-start justify-between mb-5">
                   <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center shrink-0', step.iconClass)}>
                     <step.icon className="w-5 h-5" />
@@ -880,7 +880,7 @@ export default function LandingPage() {
                 <h3 className="text-base sm:text-lg font-bold text-foreground mb-2">{step.title}</h3>
                 <p className="text-muted-foreground/75 leading-relaxed text-sm">{step.desc}</p>
                 {i < steps.length - 1 && (
-                  <div className="hidden sm:flex absolute top-1/2 -right-3 -translate-y-1/2 z-10 w-6 h-6 rounded-full bg-background border border-border/60 items-center justify-center pointer-events-none">
+                  <div className="hidden sm:flex absolute top-1/2 -right-3 -translate-y-1/2 z-10 w-6 h-6 rounded-full bg-background border border-border/30 items-center justify-center pointer-events-none">
                     <ArrowRight className="w-3 h-3 text-muted-foreground/50" />
                   </div>
                 )}
@@ -906,11 +906,11 @@ export default function LandingPage() {
           {/* ── Bento grid — explicit placement, no divide-x/y ─────────────── */}
           {(regionStats.length > 0 || dbTestimonials.length > 0) && (
             <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 mb-10 sm:mb-14">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 rounded-2xl border border-border/40 overflow-hidden">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 rounded-2xl border border-border/30 overflow-hidden">
 
                 {/* ── R1 — row1 col1 (all breakpoints) ── */}
                 {regionStats[0] && (
-                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden min-h-[150px] border-b border-border/40">
+                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden min-h-[150px] border-b border-border/30">
                     {regionStats[0].image_url && <img src={regionStats[0].image_url} alt={regionStats[0].city} className="absolute inset-0 w-full h-full object-cover opacity-25 pointer-events-none" />}
                     <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/70 to-background/40 pointer-events-none" />
                     <div className="relative z-10 p-5">
@@ -922,7 +922,7 @@ export default function LandingPage() {
 
                 {/* ── R2 — row1 col2 ── */}
                 {regionStats[1] && (
-                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden min-h-[150px] border-b border-border/40 sm:border-l border-border/40">
+                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden min-h-[150px] border-b border-border/30 sm:border-l border-border/30">
                     {regionStats[1].image_url && <img src={regionStats[1].image_url} alt={regionStats[1].city} className="absolute inset-0 w-full h-full object-cover opacity-25 pointer-events-none" />}
                     <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/70 to-background/40 pointer-events-none" />
                     <div className="relative z-10 p-5">
@@ -942,19 +942,19 @@ export default function LandingPage() {
                         <div className="text-3xl sm:text-4xl font-black text-foreground">{regionStats[4].members}</div>
                         <div className="text-xs sm:text-sm text-muted-foreground mt-1 font-medium">afiliados en {regionStats[4].city}</div>
                       </>
-                    ) : (
+                    ) : platformStats.totalAffiliates > 0 ? (
                       <>
-                        <div className="text-3xl sm:text-4xl font-black text-foreground">{platformStats.totalAffiliates > 0 ? `${fmtNumber(platformStats.totalAffiliates)}+` : '10k+'}</div>
+                        <div className="text-3xl sm:text-4xl font-black text-foreground">{fmtNumber(platformStats.totalAffiliates)}+</div>
                         <div className="text-xs sm:text-sm text-muted-foreground mt-1 font-medium">afiliados en Latinoamérica</div>
                       </>
-                    )}
+                    ) : null}
                   </div>
                 </div>
 
                 {/* ── T1 Roberto — row2 col3: same row as T2 → equal height, no gap ── */}
                 {dbTestimonials[0] && (
-                  <div className="p-5 sm:p-7 flex flex-col justify-between bg-card/30 border-b border-border/40
-                    sm:border-l
+                  <div className="p-5 sm:p-7 flex flex-col justify-between bg-transparent dark:bg-white/[0.02] border-b border-border/30
+                    sm:border-l sm:border-border/30
                     lg:col-start-3 lg:row-start-2 lg:border-l lg:border-b-0
                     min-h-[150px]">
                     <div>
@@ -963,7 +963,7 @@ export default function LandingPage() {
                       </div>
                       <p className="text-foreground/80 leading-relaxed text-sm sm:text-base line-clamp-4">"{dbTestimonials[0].content}"</p>
                     </div>
-                    <div className="flex items-center gap-3 pt-3 mt-4 border-t border-border/40">
+                    <div className="flex items-center gap-3 pt-3 mt-4 border-t border-border/30">
                       <img
                         src={dbTestimonials[0].avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(dbTestimonials[0].name)}&background=e2e8f0&color=64748b`}
                         alt={dbTestimonials[0].name}
@@ -979,10 +979,10 @@ export default function LandingPage() {
                   </div>
                 )}
 
-                {/* ── T2 Miguel — lg: col1-2 row2; sm: col2 row2; mobile: stacked ── */}
+                {/* ── T2 Miguel — lg: col1-2 row2; sm: col1 row2; mobile: stacked ── */}
                 {dbTestimonials[1] && (
-                  <div className="p-5 sm:p-7 flex flex-col justify-between bg-card/30 border-b border-border/40
-                    sm:border-l sm:border-b
+                  <div className="p-5 sm:p-7 flex flex-col justify-between bg-transparent dark:bg-white/[0.02] border-b border-border/30
+                    sm:border-b sm:border-border/30
                     lg:col-start-1 lg:col-span-2 lg:row-start-2 lg:border-l-0 lg:border-b-0
                     min-h-[150px]">
                     <div>
@@ -991,7 +991,7 @@ export default function LandingPage() {
                       </div>
                       <p className="text-foreground/80 leading-relaxed text-sm sm:text-base line-clamp-3">"{dbTestimonials[1].content}"</p>
                     </div>
-                    <div className="flex items-center gap-3 pt-3 mt-4 border-t border-border/40">
+                    <div className="flex items-center gap-3 pt-3 mt-4 border-t border-border/30">
                       <img
                         src={dbTestimonials[1].avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(dbTestimonials[1].name)}&background=e2e8f0&color=64748b`}
                         alt={dbTestimonials[1].name}
@@ -1009,7 +1009,7 @@ export default function LandingPage() {
 
                 {/* ── R3 — lg: col1 row3; sm: col1 row3; mobile: stacked ── */}
                 {regionStats[2] && (
-                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden min-h-[150px] border-b border-border/40 lg:border-b-0 lg:border-t lg:col-start-1 lg:row-start-3">
+                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden min-h-[150px] border-b border-border/30 lg:border-b-0 lg:border-t lg:col-start-1 lg:row-start-3">
                     {regionStats[2].image_url && <img src={regionStats[2].image_url} alt={regionStats[2].city} className="absolute inset-0 w-full h-full object-cover opacity-25 pointer-events-none" />}
                     <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/70 to-background/40 pointer-events-none" />
                     <div className="relative z-10 p-5">
@@ -1021,7 +1021,7 @@ export default function LandingPage() {
 
                 {/* ── R4 — lg: col2 row3; sm: col2 row3; mobile: stacked ── */}
                 {regionStats[3] && (
-                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden min-h-[150px] border-b border-border/40 sm:border-l lg:border-b-0 lg:border-t lg:col-start-2 lg:row-start-3">
+                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden min-h-[150px] border-b border-border/30 sm:border-l lg:border-b-0 lg:border-t lg:col-start-2 lg:row-start-3">
                     {regionStats[3].image_url && <img src={regionStats[3].image_url} alt={regionStats[3].city} className="absolute inset-0 w-full h-full object-cover opacity-25 pointer-events-none" />}
                     <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/70 to-background/40 pointer-events-none" />
                     <div className="relative z-10 p-5">
@@ -1031,11 +1031,11 @@ export default function LandingPage() {
                   </div>
                 )}
 
-                {/* ── T3 Sandra — lg: col3 row3; sm: col1-2 row4 (full width); mobile: stacked ── */}
+                {/* ── T3 Sandra — lg: col3 row3; sm: col2 row3; mobile: stacked ── */}
                 {dbTestimonials[2] && (
-                  <div className="p-5 sm:p-7 flex flex-col justify-between bg-card/30
-                    sm:col-span-2
-                    lg:col-start-3 lg:col-span-1 lg:row-start-3 lg:border-l lg:border-t
+                  <div className="p-5 sm:p-7 flex flex-col justify-between bg-transparent dark:bg-white/[0.02]
+                    sm:border-l sm:border-border/30
+                    lg:col-start-3 lg:col-span-1 lg:row-start-3 lg:border-l lg:border-t lg:border-border/30
                     min-h-[150px]">
                     <div>
                       <div className="flex gap-0.5 mb-3">
@@ -1043,7 +1043,7 @@ export default function LandingPage() {
                       </div>
                       <p className="text-foreground/80 leading-relaxed text-sm line-clamp-4">"{dbTestimonials[2].content}"</p>
                     </div>
-                    <div className="flex items-center gap-3 pt-3 mt-4 border-t border-border/40">
+                    <div className="flex items-center gap-3 pt-3 mt-4 border-t border-border/30">
                       <img
                         src={dbTestimonials[2].avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(dbTestimonials[2].name)}&background=e2e8f0&color=64748b`}
                         alt={dbTestimonials[2].name}
@@ -1084,7 +1084,7 @@ export default function LandingPage() {
                   <p className="text-muted-foreground/80 leading-relaxed mb-6 sm:mb-8 max-w-md text-sm">
                     El sistema premia tu esfuerzo con bonos progresivos. Desde Bronce hasta el nivel máximo Corona.
                   </p>
-                  <Link to={user ? '/dashboard/rangos' : '/registro'} className="inline-flex items-center gap-2 px-6 py-3 bg-foreground/90 backdrop-blur-sm text-background font-semibold rounded-xl hover:opacity-90 transition-all">
+                  <Link to={user ? '/dashboard/rangos' : '/registro'} className="inline-flex items-center gap-2 px-6 py-3 bg-foreground/90 backdrop-blur-md text-background font-semibold rounded-xl hover:opacity-90 transition-all">
                     {user ? 'Ver mis rangos' : 'Ver todos los rangos'} <ArrowRight className="w-4 h-4" />
                   </Link>
                 </div>
@@ -1108,7 +1108,7 @@ export default function LandingPage() {
                             <div
                               key={r.id}
                               className={cn(
-                                'relative rounded-xl border border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden',
+                                'relative rounded-xl border border-border/30 bg-transparent dark:bg-white/[0.03] backdrop-blur-md overflow-hidden',
                                 isCompact ? 'p-3' : 'p-4',
                               )}
                             >
@@ -1175,10 +1175,10 @@ export default function LandingPage() {
                   const isCurrent = user && (user as any).plan === plan.slug;
                   return (
                     <div key={plan.id} className={cn(
-                      'rounded-2xl p-6 flex flex-col relative transition-all backdrop-blur-sm',
+                      'rounded-2xl p-6 flex flex-col relative transition-all backdrop-blur-md',
                       plan.is_popular
-                        ? 'bg-card/80 border border-primary/30 shadow-lg shadow-primary/8'
-                        : 'bg-card/50 border border-border/50 hover:border-border/80',
+                        ? 'bg-transparent dark:bg-white/[0.04] border border-primary/30 shadow-lg shadow-primary/8'
+                        : 'bg-transparent dark:bg-white/[0.02] border border-border/30 hover:border-border/50',
                     )}>
                       {plan.is_popular && (
                         <div className="absolute inset-0 rounded-2xl bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
@@ -1188,7 +1188,7 @@ export default function LandingPage() {
                           'absolute -top-3 left-4 text-xs font-bold px-3 py-1 rounded-full',
                           plan.is_popular
                             ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20'
-                            : 'bg-muted text-foreground border border-border/50',
+                            : 'bg-muted/40 text-foreground border border-border/30',
                         )}>
                           {plan.badge}
                         </div>
@@ -1221,10 +1221,10 @@ export default function LandingPage() {
                         <Link
                           to={user ? '/dashboard/mi-plan' : `/registro?plan=${plan.slug}`}
                           className={cn(
-                            'py-3 rounded-xl text-sm font-semibold text-center transition-all block backdrop-blur-sm relative',
+                            'py-3 rounded-xl text-sm font-semibold text-center transition-all block backdrop-blur-md relative',
                             plan.is_popular
                               ? 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-md shadow-primary/15'
-                              : 'border border-border/60 bg-background/50 hover:bg-muted/50 text-foreground',
+                              : 'border border-border/30 bg-transparent dark:bg-white/[0.03] hover:bg-muted/20 dark:hover:bg-white/[0.05] text-foreground',
                           )}
                         >
                           {isFree ? 'Comenzar gratis' : 'Activar plan'}
@@ -1249,7 +1249,7 @@ export default function LandingPage() {
 
       {/* ── FAQ ───────────────────────────────────────────────────────────────── */}
       <section className="relative py-16 sm:py-24 overflow-hidden">
-        <div className="absolute inset-0 bg-grid opacity-[0.2] mask-fade-center pointer-events-none" />
+        <div className="absolute inset-0 bg-grid opacity-[0.12] mask-fade-center pointer-events-none" />
         <div className="relative max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="mb-10 sm:mb-14">
@@ -1263,7 +1263,7 @@ export default function LandingPage() {
                   Todo lo que necesitas saber. Si tienes más preguntas, estamos disponibles 24/7.
                 </p>
               </div>
-              <Link to="/contacto" className="inline-flex items-center gap-2 px-5 py-2.5 border border-border/60 bg-background/60 backdrop-blur-sm rounded-xl text-sm font-medium hover:border-primary/40 hover:text-primary transition-all group shrink-0">
+              <Link to="/contacto" className="inline-flex items-center gap-2 px-5 py-2.5 border border-border/30 bg-transparent dark:bg-white/[0.03] backdrop-blur-md rounded-xl text-sm font-medium hover:border-primary/40 hover:text-primary transition-all group shrink-0">
                 Contactar soporte
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
               </Link>
@@ -1282,7 +1282,7 @@ export default function LandingPage() {
                 {faqLeft.map((faq) => {
                   const i = faqItems.indexOf(faq);
                   return (
-                    <div key={i} className={cn('border-b border-border/40', i === 0 && 'border-t border-border/40')}>
+                    <div key={i} className={cn('border-b border-border/30', i === 0 && 'border-t border-border/30')}>
                       <button
                         onClick={() => setOpenFaq(openFaq === i ? null : i)}
                         className="w-full flex items-center justify-between py-5 text-left gap-4 group"
@@ -1313,7 +1313,7 @@ export default function LandingPage() {
                   const i = faqItems.indexOf(faq);
                   const isFirst = faqRight[0] === faq;
                   return (
-                    <div key={i} className={cn('border-b border-border/40', isFirst && 'border-t border-border/40')}>
+                    <div key={i} className={cn('border-b border-border/30', isFirst && 'border-t border-border/30')}>
                       <button
                         onClick={() => setOpenFaq(openFaq === i ? null : i)}
                         className="w-full flex items-center justify-between py-5 text-left gap-4 group"
@@ -1347,12 +1347,12 @@ export default function LandingPage() {
       <section className="relative py-20 sm:py-28 overflow-hidden section-dark">
         <div className="absolute top-0 left-0 right-0 h-20 sm:h-28 bg-gradient-to-b from-background to-transparent z-20 pointer-events-none" />
         <div className="absolute bottom-0 left-0 right-0 h-20 sm:h-28 bg-gradient-to-t from-background to-transparent z-20 pointer-events-none" />
-        <div className="absolute inset-0 bg-grid opacity-[0.3] mask-fade-center pointer-events-none" />
+        <div className="absolute inset-0 bg-grid opacity-[0.15] mask-fade-center pointer-events-none" />
         <div className="absolute top-[-20%] left-1/2 -translate-x-1/2 w-[600px] h-[450px] rounded-full bg-primary/10 blur-[120px] pointer-events-none" />
         <div className="absolute bottom-[-15%] left-1/2 -translate-x-1/2 w-[400px] h-[280px] rounded-full bg-sky-500/8 blur-[100px] pointer-events-none" />
 
         <div className="relative z-10 max-w-[680px] mx-auto px-4 sm:px-6 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-muted/40 border border-border/50 rounded-full text-xs font-medium text-muted-foreground dark:bg-white/8 dark:border-white/10 dark:text-white/55 mb-6 sm:mb-8 backdrop-blur-sm">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-muted/15 border border-border/30 rounded-full text-xs font-medium text-muted-foreground dark:bg-white/5 dark:border-white/10 dark:text-white/55 mb-6 sm:mb-8 backdrop-blur-md">
             <Zap className="w-3.5 h-3.5 text-primary" />
             Sin tarjeta de crédito
           </div>
@@ -1368,13 +1368,13 @@ export default function LandingPage() {
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 mb-10">
             <Link
               to={user ? '/dashboard' : '/registro'}
-              className="btn-gold-shimmer inline-flex items-center justify-center gap-2 px-7 sm:px-9 py-4 bg-foreground/90 backdrop-blur-sm text-background font-semibold rounded-xl hover:opacity-90 active:scale-[0.98] transition-all shadow-2xl shadow-black/20 text-base"
+              className="btn-gold-shimmer inline-flex items-center justify-center gap-2 px-7 sm:px-9 py-4 bg-foreground/90 backdrop-blur-md text-background font-semibold rounded-xl hover:opacity-90 active:scale-[0.98] transition-all shadow-2xl shadow-black/20 text-base"
             >
               {user ? 'Ir a mi Panel' : 'Crear cuenta gratis'} <ArrowRight className="w-5 h-5" />
             </Link>
             <Link
               to="/contacto"
-              className="inline-flex items-center justify-center gap-2 px-7 sm:px-9 py-4 bg-muted/40 border border-border/50 text-foreground dark:bg-white/5 dark:border-white/10 dark:text-white font-medium rounded-xl hover:bg-muted/60 dark:hover:bg-white/8 transition-all backdrop-blur-sm text-base"
+              className="inline-flex items-center justify-center gap-2 px-7 sm:px-9 py-4 bg-muted/15 border border-border/30 text-foreground dark:bg-white/5 dark:border-white/10 dark:text-white font-medium rounded-xl hover:bg-muted/25 dark:hover:bg-white/8 transition-all backdrop-blur-md text-base"
             >
               Hablar con ventas
             </Link>

@@ -609,8 +609,8 @@ body {
 
 .bg-grid {
   background-image:
-    linear-gradient(to right, hsl(var(--border) / 0.5) 1px, transparent 1px),
-    linear-gradient(to bottom, hsl(var(--border) / 0.5) 1px, transparent 1px);
+    linear-gradient(to right, hsl(var(--border) / 0.25) 1px, transparent 1px),
+    linear-gradient(to bottom, hsl(var(--border) / 0.25) 1px, transparent 1px);
   background-size: 48px 48px;
 }
 
@@ -625,8 +625,8 @@ body {
 .dark .bg-grid,
 .dark .bg-grid-sm {
   background-image:
-    linear-gradient(to right, hsl(var(--primary) / 0.08) 1px, transparent 1px),
-    linear-gradient(to bottom, hsl(var(--primary) / 0.08) 1px, transparent 1px);
+    linear-gradient(to right, hsl(var(--primary) / 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, hsl(var(--primary) / 0.04) 1px, transparent 1px);
 }
 
 /* Dot pattern */
@@ -686,28 +686,20 @@ body {
 }
 
 .mask-fade-top {
-  -webkit-mask-image: radial-gradient(
-    ellipse 80% 60% at 50% 0%,
-    #000 60%,
-    transparent 100%
-  );
-  mask-image: radial-gradient(
-    ellipse 80% 60% at 50% 0%,
-    #000 60%,
-    transparent 100%
-  );
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 30%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 30%, transparent 100%);
 }
 
 .mask-fade-center {
   -webkit-mask-image: radial-gradient(
-    ellipse 80% 60% at 50% 50%,
-    #000 40%,
-    transparent 100%
+    ellipse 70% 50% at 50% 50%,
+    #000 30%,
+    transparent 90%
   );
   mask-image: radial-gradient(
-    ellipse 80% 60% at 50% 50%,
-    #000 40%,
-    transparent 100%
+    ellipse 70% 50% at 50% 50%,
+    #000 30%,
+    transparent 90%
   );
 }
 
