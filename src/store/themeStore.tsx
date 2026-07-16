@@ -19,30 +19,31 @@ const ThemeContext = createContext<ThemeContextType>({
 function applyTheme(theme: Theme, animate = false) {
   const root = document.documentElement;
 
-  // Determine if dark mode
   const isDark =
     theme === 'dark' ||
     (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
-  // Add transition class for smooth color switching (280ms matches CSS)
-  if (animate) {
-    root.classList.add('theme-transitioning');
-    setTimeout(() => root.classList.remove('theme-transitioning'), 280);
-  }
+  const apply = () => {
+    if (isDark) {
+      root.classList.add('dark');
+      root.style.colorScheme = 'dark';
+    } else {
+      root.classList.remove('dark');
+      root.style.colorScheme = 'light';
+    }
 
-  // Apply theme class and color-scheme
-  if (isDark) {
-    root.classList.add('dark');
-    root.style.colorScheme = 'dark';
+    const metaTheme = document.querySelector('meta[name="theme-color"]');
+    if (metaTheme) {
+      metaTheme.setAttribute('content', isDark ? '#0a0a0a' : '#ffffff');
+    }
+  };
+
+  if (animate && 'startViewTransition' in document) {
+    (document as any).startViewTransition(() => {
+      apply();
+    });
   } else {
-    root.classList.remove('dark');
-    root.style.colorScheme = 'light';
-  }
-
-  // Update meta theme-color for mobile browser chrome
-  const metaTheme = document.querySelector('meta[name="theme-color"]');
-  if (metaTheme) {
-    metaTheme.setAttribute('content', isDark ? '#0a0a0a' : '#ffffff');
+    apply();
   }
 }
 

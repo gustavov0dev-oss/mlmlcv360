@@ -334,23 +334,22 @@ export default function Navbar() {
           mobileNavOpen ? 'pointer-events-auto' : 'pointer-events-none',
         )}
       >
-        {/* Backdrop — moderate blur */}
+        {/* Backdrop */}
         <div
           className={cn(
-            'absolute inset-0 bg-black/40 backdrop-blur-[2px] transition-opacity duration-300',
-            mobileNavOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none',
+            'absolute inset-0 bg-black/40 transition-opacity duration-200',
+            mobileNavOpen ? 'opacity-100' : 'opacity-0',
           )}
           onClick={() => setMobileNavOpen(false)}
         />
 
-        {/* Bottom-sheet panel — rises from bottom, not full height */}
+        {/* Bottom-sheet panel */}
         <div
           className={cn(
             'absolute bottom-0 left-0 right-0 bg-background rounded-t-3xl border-t border-border shadow-2xl',
-            'transition-transform duration-300 ease-out touch-pan-y overscroll-contain',
+            'transition-transform duration-200 ease-out overscroll-contain',
             mobileNavOpen ? 'translate-y-0' : 'translate-y-full',
           )}
-          onTouchMove={(e) => e.stopPropagation()}
         >
           {/* Handle bar */}
           <div className="flex justify-center pt-3 pb-1">

@@ -35,4 +35,41 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
+  build: {
+    chunkSizeWarningLimit: 600,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom'],
+          'supabase': ['@supabase/supabase-js'],
+          'radix-ui': [
+            '@radix-ui/react-dialog',
+            '@radix-ui/react-dropdown-menu',
+            '@radix-ui/react-select',
+            '@radix-ui/react-tabs',
+            '@radix-ui/react-tooltip',
+            '@radix-ui/react-popover',
+            '@radix-ui/react-accordion',
+            '@radix-ui/react-checkbox',
+            '@radix-ui/react-switch',
+            '@radix-ui/react-toast',
+            '@radix-ui/react-avatar',
+            '@radix-ui/react-label',
+            '@radix-ui/react-separator',
+            '@radix-ui/react-scroll-area',
+          ],
+          'tiptap': [
+            '@tiptap/react',
+            '@tiptap/starter-kit',
+            '@tiptap/extension-link',
+            '@tiptap/extension-text-align',
+            '@tiptap/extension-underline',
+          ],
+          'charts': ['recharts'],
+          'forms': ['react-hook-form', 'zod', '@hookform/resolvers'],
+          'utils': ['date-fns', 'clsx', 'tailwind-merge', 'class-variance-authority'],
+        },
+      },
+    },
+  },
 });

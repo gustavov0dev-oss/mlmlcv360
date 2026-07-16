@@ -1,4 +1,4 @@
-import { ReactNode, useState, useEffect } from 'react';
+import { ReactNode, useState, useEffect, lazy, Suspense } from 'react';
 import { Toaster } from 'sonner';
 import { AuthProvider, useAuthStore } from '@/store/authStore';
 import { ThemeProvider } from '@/store/themeStore';
@@ -6,33 +6,33 @@ import { UIProvider } from '@/store/uiStore';
 import { ConfigProvider, useConfig } from '@/store/configStore';
 import { BackendProvider } from '@/lib/backend';
 import { Router, Routes, Route, Navigate, useLocation } from '@/lib/router';
-
-import LandingPage from '@/pages/landing/LandingPage';
-import NosotrosPage from '@/pages/landing/NosotrosPage';
-import PreciosPage from '@/pages/landing/PreciosPage';
-import EmpresaPage from '@/pages/landing/EmpresaPage';
-import ContactoPage from '@/pages/landing/ContactoPage';
-import PlanesPage from '@/pages/landing/PlanesPage';
-import BlogPage from '@/pages/landing/BlogPage';
-import BlogDetailPage from '@/pages/landing/BlogDetailPage';
-import LibroReclamacionesPage from '@/pages/landing/LibroReclamacionesPage';
-import LegalPage from '@/pages/landing/LegalPage';
-import PagoPage from '@/pages/landing/PagoPage';
-import PedidosPage from '@/pages/landing/PedidosPage';
-import LoginPage from '@/pages/auth/LoginPage';
-import RegisterPage from '@/pages/auth/RegisterPage';
-import ResetPasswordPage from '@/pages/auth/ResetPasswordPage';
 import DashboardLayout from '@/layouts/DashboardLayout';
 import WhatsAppButton from '@/components/WhatsAppButton';
-import NotFoundPage from '@/pages/NotFoundPage';
-import StorePage from '@/pages/store/StorePage';
-import ProductDetailPage from '@/pages/store/ProductDetailPage';
-import CartPage from '@/pages/store/CartPage';
-import CheckoutPage from '@/pages/store/CheckoutPage';
-import ComparePage from '@/pages/store/ComparePage';
-import WishlistPage from '@/pages/store/WishlistPage';
 import { CartProvider } from '@/store/cartStore';
 import { Boxes, Wrench as WrenchIcon } from 'lucide-react';
+
+const LandingPage = lazy(() => import('@/pages/landing/LandingPage'));
+const NosotrosPage = lazy(() => import('@/pages/landing/NosotrosPage'));
+const PreciosPage = lazy(() => import('@/pages/landing/PreciosPage'));
+const EmpresaPage = lazy(() => import('@/pages/landing/EmpresaPage'));
+const ContactoPage = lazy(() => import('@/pages/landing/ContactoPage'));
+const PlanesPage = lazy(() => import('@/pages/landing/PlanesPage'));
+const BlogPage = lazy(() => import('@/pages/landing/BlogPage'));
+const BlogDetailPage = lazy(() => import('@/pages/landing/BlogDetailPage'));
+const LibroReclamacionesPage = lazy(() => import('@/pages/landing/LibroReclamacionesPage'));
+const LegalPage = lazy(() => import('@/pages/landing/LegalPage'));
+const PagoPage = lazy(() => import('@/pages/landing/PagoPage'));
+const PedidosPage = lazy(() => import('@/pages/landing/PedidosPage'));
+const LoginPage = lazy(() => import('@/pages/auth/LoginPage'));
+const RegisterPage = lazy(() => import('@/pages/auth/RegisterPage'));
+const ResetPasswordPage = lazy(() => import('@/pages/auth/ResetPasswordPage'));
+const StorePage = lazy(() => import('@/pages/store/StorePage'));
+const ProductDetailPage = lazy(() => import('@/pages/store/ProductDetailPage'));
+const CartPage = lazy(() => import('@/pages/store/CartPage'));
+const CheckoutPage = lazy(() => import('@/pages/store/CheckoutPage'));
+const ComparePage = lazy(() => import('@/pages/store/ComparePage'));
+const WishlistPage = lazy(() => import('@/pages/store/WishlistPage'));
+const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 
 const LANDING_PATHS = ['/', '/nosotros', '/precios', '/empresa', '/contacto', '/planes', '/blog', '/pago', '/login', '/registro', '/reset-password', '/tienda', '/carrito', '/checkout', '/favoritos', '/tienda/comparar', '/libro-reclamaciones', '/legal'];
 const ADMIN_BYPASS_ROLES = ['super_admin', 'admin'];
@@ -102,9 +102,7 @@ function MaintenanceGate({ children }: { children: ReactNode }) {
   const isAdmin = user && ADMIN_BYPASS_ROLES.includes((user as any).role);
   const isDashboard = pathname.startsWith('/dashboard');
 
-  // Admins can always reach dashboard; everyone sees maintenance on public pages
   if (isMaintenanceOn && !isAdmin && !isDashboard) {
-    // Allow login so admin can sign in
     if (pathname === '/login') return <>{children}</>;
     return <MaintenancePage />;
   }
@@ -124,31 +122,33 @@ function AppRoutes() {
   if (loading && !forcedReady) return <AppSkeleton />;
   return (
     <MaintenanceGate>
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/nosotros" element={<NosotrosPage />} />
-        <Route path="/precios" element={<PreciosPage />} />
-        <Route path="/empresa" element={<EmpresaPage />} />
-        <Route path="/contacto" element={<ContactoPage />} />
-        <Route path="/planes" element={<PlanesPage />} />
-        <Route path="/blog" element={<BlogPage />} />
-        <Route path="/blog/:slug" element={<BlogDetailPage />} />
-        <Route path="/libro-reclamaciones" element={<LibroReclamacionesPage />} />
-        <Route path="/legal/:slug" element={<LegalPage />} />
-        <Route path="/pago" element={<PagoPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/registro" element={<RegisterPage />} />
-        <Route path="/reset-password" element={<ResetPasswordPage />} />
-        <Route path="/tienda" element={<StorePage />} />
-        <Route path="/tienda/comparar" element={<ComparePage />} />
-        <Route path="/tienda/*" element={<ProductDetailPage />} />
-        <Route path="/carrito" element={<CartPage />} />
-        <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
-        <Route path="/favoritos" element={<ProtectedRoute><WishlistPage /></ProtectedRoute>} />
-        <Route path="/pedidos" element={<ProtectedRoute><PedidosPage /></ProtectedRoute>} />
-        <Route path="/dashboard/*" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>} />
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
+      <Suspense fallback={<AppSkeleton />}>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/nosotros" element={<NosotrosPage />} />
+          <Route path="/precios" element={<PreciosPage />} />
+          <Route path="/empresa" element={<EmpresaPage />} />
+          <Route path="/contacto" element={<ContactoPage />} />
+          <Route path="/planes" element={<PlanesPage />} />
+          <Route path="/blog" element={<BlogPage />} />
+          <Route path="/blog/:slug" element={<BlogDetailPage />} />
+          <Route path="/libro-reclamaciones" element={<LibroReclamacionesPage />} />
+          <Route path="/legal/:slug" element={<LegalPage />} />
+          <Route path="/pago" element={<PagoPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/registro" element={<RegisterPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/tienda" element={<StorePage />} />
+          <Route path="/tienda/comparar" element={<ComparePage />} />
+          <Route path="/tienda/*" element={<ProductDetailPage />} />
+          <Route path="/carrito" element={<CartPage />} />
+          <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
+          <Route path="/favoritos" element={<ProtectedRoute><WishlistPage /></ProtectedRoute>} />
+          <Route path="/pedidos" element={<ProtectedRoute><PedidosPage /></ProtectedRoute>} />
+          <Route path="/dashboard/*" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </Suspense>
     </MaintenanceGate>
   );
 }

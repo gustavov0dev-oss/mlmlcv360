@@ -211,19 +211,7 @@
     text-rendering: optimizeLegibility;
   }
 
-  /* Theme transition — smooth color switching */
-  html.theme-transitioning,
-  html.theme-transitioning *,
-  html.theme-transitioning *::before,
-  html.theme-transitioning *::after {
-    transition:
-      background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-      color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-      border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-      box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-      fill 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-      stroke 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  }
+  /* Theme switching handled via View Transitions API in JS — no CSS transitions needed */
 
   h1, h2, h3, h4, h5, h6 {
     font-weight: 600;
@@ -596,15 +584,23 @@
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 html {
-  scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
   scroll-padding-top: 80px;
+}
+
+/* Smooth scroll only for anchor links on desktop */
+@media (min-width: 768px) and (hover: hover) {
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  overscroll-behavior-y: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
@@ -721,12 +717,9 @@ body {
 
 .card-lift {
   transition:
-    transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 0.25s ease,
+    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.2s ease,
     border-color 0.2s ease;
-  /* GPU acceleration for smoother interactions */
-  will-change: transform;
-  backface-visibility: hidden;
 }
 
 .card-lift:hover {
@@ -734,14 +727,12 @@ body {
   box-shadow:
     0 12px 40px -12px hsl(var(--primary) / 0.2),
     0 0 0 1px hsl(var(--primary) / 0.1);
-  will-change: auto;
 }
 
 /* Disable hover effects on touch devices to prevent scroll jank */
 @media (hover: none) and (pointer: coarse) {
   .card-lift {
     transition: none;
-    will-change: auto;
   }
 
   .card-lift:hover {
@@ -857,17 +848,13 @@ body {
   opacity: 0;
   transform: translateY(20px);
   transition:
-    opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-  /* GPU acceleration for smoother animations */
-  will-change: opacity, transform;
-  backface-visibility: hidden;
+    opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .reveal.revealed {
   opacity: 1;
   transform: translateY(0);
-  will-change: auto;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
@@ -887,9 +874,8 @@ body {
   pointer-events: none;
   z-index: 0;
   transform: translate(-50%, -50%);
-  transition: left 0.08s linear, top 0.08s linear, opacity 0.3s ease;
+  transition: opacity 0.3s ease;
   opacity: 0;
-  will-change: left, top;
 }
 
 .mouse-glow.active {
@@ -1021,9 +1007,6 @@ body {
     padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
   }
 
-  .will-change-transform {
-    will-change: transform;
-  }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
@@ -1153,16 +1136,25 @@ button:focus-visible {
 @media (max-width: 767px) {
   .reveal {
     opacity: 0;
-    transform: translateY(8px);  /* Reduced for mobile performance */
+    transform: translateY(8px);
     transition:
-      opacity 0.4s ease-out,
-      transform 0.4s ease-out;
-    will-change: opacity, transform;
+      opacity 0.3s ease-out,
+      transform 0.3s ease-out;
   }
 
   .reveal.revealed {
     opacity: 1;
     transform: translateY(0);
-    will-change: auto;
+  }
+
+  /* Disable smooth scroll on mobile to prevent jelly/wobble effect */
+  html {
+    scroll-behavior: auto;
+  }
+
+  /* Prevent overscroll bounce on mobile */
+  body {
+    overscroll-behavior-y: none;
+    -webkit-overflow-scrolling: touch;
   }
 }

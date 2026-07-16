@@ -72,7 +72,8 @@ export function Router({ children }: { children: ReactNode }) {
     window.history.pushState({}, '', to);
     const p = stripQuery(to);
     setRoute({ path: p, params: {} });
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const isMobile = window.matchMedia('(max-width: 767px)').matches;
+    window.scrollTo({ top: 0, behavior: isMobile ? 'auto' : 'smooth' });
     // Trigger locationchange so useSearchParams listeners re-read
     window.dispatchEvent(new Event('locationchange'));
   }, []);
