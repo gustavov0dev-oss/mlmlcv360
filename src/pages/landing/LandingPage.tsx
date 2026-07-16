@@ -66,7 +66,7 @@ function useRegionStats() {
       .select('*')
       .eq('is_active', true)
       .order('sort_order', { ascending: true })
-      .limit(4)
+      .limit(5)
       .then(({ data }) => { if (data) setItems(data); });
   }, []);
   return items;
@@ -495,7 +495,7 @@ export default function LandingPage() {
           </h1>
 
           <p className="text-base sm:text-lg text-muted-foreground/80 max-w-xl sm:max-w-2xl mx-auto mb-8 sm:mb-10 leading-relaxed">
-            La plataforma MLM líder en Latinoamérica. Comisiones en tiempo real, red interactiva y tienda integrada.
+            La plataforma MLM líder del mercado. Comisiones en tiempo real, red interactiva y tienda integrada.
           </p>
 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 mb-8 sm:mb-10">
@@ -838,7 +838,7 @@ export default function LandingPage() {
               {[
                 { icon: DollarSign, title: 'Comisiones en tiempo real', desc: 'Calculadas al instante en cada compra de tu red.', iconClass: 'icon-primary' },
                 { icon: Zap, title: 'Pago automático', desc: 'Transferencias quincenales sin trámite de tu parte.', iconClass: 'icon-primary' },
-                { icon: Globe, title: 'Red internacional', desc: 'Tus afiliados pueden estar en toda Latinoamérica.', iconClass: 'icon-primary' },
+                { icon: Globe, title: 'Red internacional', desc: 'Tus afiliados pueden estar en cualquier ciudad.', iconClass: 'icon-primary' },
                 { icon: TrendingUp, title: 'Crecimiento probado', desc: '+340% anual. Números reales, no promesas.', iconClass: 'icon-primary' },
               ].map((item) => (
                 <div key={item.title} className="rounded-2xl p-4 sm:p-5 border border-border/30 bg-white/60 dark:bg-white/[0.03] backdrop-blur-md">
@@ -897,7 +897,7 @@ export default function LandingPage() {
             <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
               Miles ya <span className="text-gradient-animated">ganan</span> con Cluv 360
             </h2>
-            <p className="text-base text-muted-foreground/80 mt-3 max-w-xl">Historias reales de emprendedores en toda Latinoamérica.</p>
+            <p className="text-base text-muted-foreground/80 mt-3 max-w-xl">Historias reales de emprendedores que ya ganan con la plataforma.</p>
           </div>
 
           {/* ── Bento grid — explicit placement, no divide-x/y ─────────────── */}
