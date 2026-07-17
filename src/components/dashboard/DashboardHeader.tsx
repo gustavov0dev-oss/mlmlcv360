@@ -135,15 +135,15 @@ export default function DashboardHeader() {
     return () => document.removeEventListener('mousedown', handler);
   }, [notifOpen]);
 
-  // Cmd+K (Mac) / Ctrl+K (Windows/Linux) shortcut
+  // Cmd+K (Mac) / Ctrl+K (Windows/Linux) shortcut — accept both modifiers on any platform
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      const isModifierPressed = isMac ? e.metaKey : e.ctrlKey;
-      if (isModifierPressed && e.key === 'k') {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         setSearchOpen(true);
-        setSidebarOpen(false); // Close mobile sidebar when search opens
-        setTimeout(() => inputRef.current?.focus(), 50);
+        setSidebarOpen(false);
+        // Focus after React re-renders the mobile search overlay if needed
+        setTimeout(() => inputRef.current?.focus(), 80);
       }
       if (e.key === 'Escape') {
         setSearchOpen(false);
@@ -154,6 +154,14 @@ export default function DashboardHeader() {
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
   }, [setSidebarOpen]);
+
+  // When search opens on mobile, ensure the mobile input gets focused after render
+  useEffect(() => {
+    if (searchOpen) {
+      const t = setTimeout(() => inputRef.current?.focus(), 100);
+      return () => clearTimeout(t);
+    }
+  }, [searchOpen]);
 
   const performSearch = useCallback(async (q: string) => {
     if (q.length < 2) { setResults([]); return; }
@@ -347,8 +355,7 @@ export default function DashboardHeader() {
   return (
     <>
       <header className={cn(
-        'h-16 border-b border-border bg-background/98 backdrop-blur-sm flex items-center px-3 sm:px-4 lg:px-6 sticky top-0 z-30 transition-all duration-300',
-        searchOpen && 'lg:pr-2'
+        'h-16 border-b border-border bg-background/98 backdrop-blur-sm flex items-center px-3 sm:px-4 lg:px-6 sticky top-0 z-30'
       )}>
 
         {/* Logo — mobile only (desktop sidebar already has it) */}

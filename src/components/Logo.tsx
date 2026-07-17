@@ -46,8 +46,10 @@ interface LogoProps {
   fallbackText?: string;
   /** Tailwind size for the mark wrapper. Default: 'w-8 h-8' */
   size?: string;
-  /** Pixel size for dynamic sizing (overrides Tailwind size) */
+  /** Pixel size for dynamic width (overrides Tailwind size) */
   pixelSize?: number;
+  /** Pixel height — when set, width=pixelSize and height=pixelHeight (independent) */
+  pixelHeight?: number;
   /** Extra className on the img tag */
   imgClass?: string;
 }
@@ -65,11 +67,14 @@ export default function Logo({
   fallbackText = 'MLM 360',
   size = 'w-8 h-8',
   pixelSize,
+  pixelHeight,
   imgClass,
 }: LogoProps) {
   const type = useMemo(() => detectLogoType(value), [value]);
   const safeSvg = useMemo(() => (type === 'svg' ? sanitizeSvg(value) : ''), [type, value]);
-  const pxStyle = pixelSize ? { width: `${pixelSize}px`, height: `${pixelSize}px` } : {};
+  const pxStyle = pixelSize
+    ? { width: `${pixelSize}px`, height: `${pixelHeight ?? pixelSize}px` }
+    : {};
 
   if (type === 'svg') {
     return (
@@ -121,6 +126,7 @@ export function LogoWithText({
   fallbackText = 'MLM 360',
   size = 'w-8 h-8',
   pixelSize,
+  pixelHeight,
   textClass = 'text-lg font-bold text-foreground',
   forceText = false,
 }: {
@@ -128,6 +134,7 @@ export function LogoWithText({
   fallbackText?: string;
   size?: string;
   pixelSize?: number;
+  pixelHeight?: number;
   textClass?: string;
   forceText?: boolean;
 }) {
@@ -136,7 +143,7 @@ export function LogoWithText({
 
   return (
     <span className="flex items-center gap-2.5 min-w-0">
-      <Logo value={value} fallbackText={fallbackText} size={size} pixelSize={pixelSize} />
+      <Logo value={value} fallbackText={fallbackText} size={size} pixelSize={pixelSize} pixelHeight={pixelHeight} />
       {showLabel && <span className={cn(textClass, 'truncate')}>{fallbackText}</span>}
     </span>
   );

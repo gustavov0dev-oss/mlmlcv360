@@ -56,9 +56,12 @@ interface ConfigState {
   logoValue: string;
   logoSizes: {
     navbar: number;
+    navbarHeight: number;
     sidebar: number;
+    sidebarHeight: number;
     collapsed: number;
     login: number;
+    loginHeight: number;
   };
   setShowUsd: (v: boolean) => void;
   refresh: () => Promise<void>;
@@ -75,7 +78,7 @@ const ConfigContext = createContext<ConfigState>({
   loading: true,
   showUsd: false,
   logoValue: '',
-  logoSizes: { navbar: 32, sidebar: 36, collapsed: 40, login: 48 },
+  logoSizes: { navbar: 32, navbarHeight: 32, sidebar: 36, sidebarHeight: 36, collapsed: 40, login: 48, loginHeight: 48 },
   setShowUsd: () => {},
   refresh: async () => {},
 });
@@ -99,7 +102,7 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [showUsd, setShowUsd] = useState(false);
   const [logoValue, setLogoValue] = useState('');
-  const [logoSizes, setLogoSizes] = useState({ navbar: 32, sidebar: 36, collapsed: 40, login: 48 });
+  const [logoSizes, setLogoSizes] = useState({ navbar: 32, navbarHeight: 32, sidebar: 36, sidebarHeight: 36, collapsed: 40, login: 48, loginHeight: 48 });
 
   const refresh = useCallback(async () => {
     try {
@@ -137,11 +140,16 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
         setLogoValue(map.logo_value || '');
         // Single unified logo size for the entire system
         const unifiedSize = parseInt(map.logo_size) || 36;
+        const unifiedHeight = parseInt(map.logo_height) || unifiedSize;
+        // Collapsed logo is always a static square (40px) — independent of main logo size
         setLogoSizes({
           navbar: unifiedSize,
+          navbarHeight: unifiedHeight,
           sidebar: unifiedSize,
-          collapsed: unifiedSize,
+          sidebarHeight: unifiedHeight,
+          collapsed: 40,
           login: unifiedSize,
+          loginHeight: unifiedHeight,
         });
       }
     } catch {

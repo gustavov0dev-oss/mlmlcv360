@@ -667,36 +667,57 @@ export default function AdminPage() {
                     ))}
                   </div>
 
-                  {/* Unified logo size — control only, preview lives on the right */}
+                  {/* Unified logo size — width + height controls, preview lives on the right */}
                   <div className="pt-4 border-t border-border">
                     <h3 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
                       <Image className="w-4 h-4 text-primary" />
-                      Tamano del logo (px)
+                      Tamano del logo
                     </h3>
                     <p className="text-xs text-muted-foreground mb-3">
-                      Un unico tamano para todo el sistema: navbar, sidebar,
-                      login, etc. Mira el resultado en la vista previa →
+                      Ancho y alto independientes. El logo colapsado del
+                      sidebar es siempre cuadrado de 40px. Mira la vista previa →
                     </p>
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="range"
-                        min="16"
-                        max="96"
-                        value={c("logo_size") || "36"}
-                        onChange={(e) => setC("logo_size", e.target.value)}
-                        className="flex-1 accent-primary"
-                      />
-                      <input
-                        type="number"
-                        min="16"
-                        max="96"
-                        value={c("logo_size") || "36"}
-                        onChange={(e) => setC("logo_size", e.target.value)}
-                        className="w-20 px-2 py-1.5 bg-muted border border-border rounded text-foreground text-sm text-center"
-                      />
-                      <span className="text-xs text-muted-foreground w-16">
-                        px
-                      </span>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3">
+                        <label className="text-xs font-medium text-foreground w-16 shrink-0">Ancho</label>
+                        <input
+                          type="range"
+                          min="16"
+                          max="96"
+                          value={c("logo_size") || "36"}
+                          onChange={(e) => setC("logo_size", e.target.value)}
+                          className="flex-1 accent-primary"
+                        />
+                        <input
+                          type="number"
+                          min="16"
+                          max="96"
+                          value={c("logo_size") || "36"}
+                          onChange={(e) => setC("logo_size", e.target.value)}
+                          className="w-20 px-2 py-1.5 bg-muted border border-border rounded text-foreground text-sm text-center"
+                        />
+                        <span className="text-xs text-muted-foreground w-8">px</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <label className="text-xs font-medium text-foreground w-16 shrink-0">Alto</label>
+                        <input
+                          type="range"
+                          min="16"
+                          max="96"
+                          value={c("logo_height") || c("logo_size") || "36"}
+                          onChange={(e) => setC("logo_height", e.target.value)}
+                          className="flex-1 accent-primary"
+                        />
+                        <input
+                          type="number"
+                          min="16"
+                          max="96"
+                          value={c("logo_height") || c("logo_size") || "36"}
+                          onChange={(e) => setC("logo_height", e.target.value)}
+                          className="w-20 px-2 py-1.5 bg-muted border border-border rounded text-foreground text-sm text-center"
+                        />
+                        <span className="text-xs text-muted-foreground w-8">px</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -801,13 +822,17 @@ export default function AdminPage() {
                         <p className="text-[10px] text-muted-foreground mb-2">
                           Tamano real
                         </p>
-                        <div className="flex items-center justify-center h-16 bg-card border border-border rounded-lg overflow-hidden px-2">
+                        <div className="flex items-center justify-center h-20 bg-card border border-border rounded-lg overflow-hidden px-2">
                           <LogoWithText
                             value={c("logo_value")}
                             fallbackText={c("company_name") || "MLM"}
                             pixelSize={Math.min(
                               parseInt(c("logo_size")) || 36,
                               56,
+                            )}
+                            pixelHeight={Math.min(
+                              parseInt(c("logo_height")) || parseInt(c("logo_size")) || 36,
+                              64,
                             )}
                           />
                         </div>
@@ -816,13 +841,17 @@ export default function AdminPage() {
                         <p className="text-[10px] text-muted-foreground mb-2">
                           Expandido
                         </p>
-                        <div className="flex items-center justify-center h-16 bg-card border border-border rounded-lg overflow-hidden px-2 gap-1.5">
+                        <div className="flex items-center justify-center h-20 bg-card border border-border rounded-lg overflow-hidden px-2 gap-1.5">
                           <LogoWithText
                             value={c("logo_value")}
                             fallbackText={c("company_name") || "MLM"}
                             pixelSize={Math.min(
                               parseInt(c("logo_size")) || 36,
                               40,
+                            )}
+                            pixelHeight={Math.min(
+                              parseInt(c("logo_height")) || parseInt(c("logo_size")) || 36,
+                              48,
                             )}
                           />
                           <span className="text-xs font-bold text-foreground truncate max-w-[50px]">
@@ -832,9 +861,9 @@ export default function AdminPage() {
                       </div>
                       <div className="bg-muted/30 rounded-xl p-3 text-center">
                         <p className="text-[10px] text-muted-foreground mb-2">
-                          Colapsado
+                          Colapsado (40px)
                         </p>
-                        <div className="flex items-center justify-center h-16 bg-card border border-border rounded-lg overflow-hidden">
+                        <div className="flex items-center justify-center h-20 bg-card border border-border rounded-lg overflow-hidden">
                           <div className="flex items-center justify-center w-10 h-10 bg-muted/50 border border-border rounded-lg overflow-hidden">
                             {c("logo_collapsed_value") ? (
                               c("logo_collapsed_value")
@@ -884,6 +913,7 @@ export default function AdminPage() {
                       "logo_value",
                       "logo_collapsed_value",
                       "logo_size",
+                      "logo_height",
                     ])
                   }
                   disabled={savingConfig || uploading || uploadingCollapsed}

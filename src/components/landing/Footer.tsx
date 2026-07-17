@@ -90,6 +90,7 @@ export default function Footer() {
                 value={logoValue}
                 fallbackText={companyName}
                 pixelSize={logoSizes.navbar || 32}
+                pixelHeight={logoSizes.navbarHeight || logoSizes.navbar || 32}
                 textClass="text-lg font-bold text-foreground"
               />
               {company.company_tagline && (

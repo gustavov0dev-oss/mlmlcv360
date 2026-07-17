@@ -180,7 +180,7 @@ export default function RegisterPage() {
         {/* Logo pinned top-left */}
         <div className="absolute top-8 left-8 z-10">
           <Link to="/">
-            <LogoWithText value={logoValue} fallbackText={companyName} pixelSize={logoSizes.login || 36} textClass="font-semibold text-foreground" />
+            <LogoWithText value={logoValue} fallbackText={companyName} pixelSize={logoSizes.login || 36} pixelHeight={logoSizes.loginHeight || logoSizes.login || 36} textClass="font-semibold text-foreground" />
           </Link>
         </div>
 
@@ -207,7 +207,7 @@ export default function RegisterPage() {
         <div className="flex items-center justify-between px-6 lg:px-10 py-5">
           {/* Logo visible on mobile only */}
           <Link to="/" className="lg:hidden">
-            <LogoWithText value={logoValue} fallbackText={companyName} pixelSize={logoSizes.login || 36} textClass="font-semibold text-foreground" />
+            <LogoWithText value={logoValue} fallbackText={companyName} pixelSize={logoSizes.login || 36} pixelHeight={logoSizes.loginHeight || logoSizes.login || 36} textClass="font-semibold text-foreground" />
           </Link>
           <div className="hidden lg:block" />
           <button

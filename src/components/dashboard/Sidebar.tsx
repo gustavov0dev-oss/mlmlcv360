@@ -449,26 +449,23 @@ export default function Sidebar() {
           sidebarCollapsed ? 'justify-center px-3' : 'px-4',
         )}>
           {sidebarCollapsed ? (
-            /* Collapsed: square logo container with dynamic size */
+            /* Collapsed: static 40px square logo — independent of main logo size */
             <div
-              className="rounded-xl overflow-hidden flex items-center justify-center bg-muted/50 border border-border/50 flex-shrink-0 transition-all duration-300"
-              style={{
-                width: `${(logoSizes.collapsed || 40) + 4}px`,
-                height: `${(logoSizes.collapsed || 40) + 4}px`,
-              }}
+              className="rounded-xl overflow-hidden flex items-center justify-center bg-muted/50 border border-border/50 flex-shrink-0"
+              style={{ width: '40px', height: '40px' }}
             >
               {effectiveLogoCollapsed ? (
                 effectiveLogoCollapsed.trim().toLowerCase().startsWith('<svg') ? (
                   <span
                     className="inline-flex items-center justify-center [&_svg]:w-full [&_svg]:h-full"
-                    style={{ width: `${logoSizes.collapsed || 40}px`, height: `${logoSizes.collapsed || 40}px` }}
+                    style={{ width: '36px', height: '36px' }}
                     dangerouslySetInnerHTML={{ __html: effectiveLogoCollapsed }}
                   />
                 ) : (
                   <img
                     src={effectiveLogoCollapsed}
                     alt={name}
-                    style={{ width: `${logoSizes.collapsed || 40}px`, height: `${logoSizes.collapsed || 40}px` }}
+                    style={{ width: '36px', height: '36px' }}
                     className="object-contain"
                   />
                 )
@@ -480,8 +477,8 @@ export default function Sidebar() {
             <LogoWithText
               value={logoValue}
               fallbackText={name}
-              size={`w-[${logoSizes.sidebar || 36}px] h-[${logoSizes.sidebar || 36}px]`}
               pixelSize={logoSizes.sidebar || 36}
+              pixelHeight={logoSizes.sidebarHeight || logoSizes.sidebar || 36}
               textClass="text-sm font-bold text-foreground truncate"
             />
           )}

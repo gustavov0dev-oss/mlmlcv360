@@ -79,7 +79,7 @@ export default function ResetPasswordPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <Link to="/">
-            <LogoWithText value={logoValue} fallbackText={companyName} pixelSize={logoSizes.login || 36} textClass="font-semibold text-foreground" />
+            <LogoWithText value={logoValue} fallbackText={companyName} pixelSize={logoSizes.login || 36} pixelHeight={logoSizes.loginHeight || logoSizes.login || 36} textClass="font-semibold text-foreground" />
           </Link>
           <button
             onClick={() => setTheme(isDark ? 'light' : 'dark')}

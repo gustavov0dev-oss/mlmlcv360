@@ -294,7 +294,7 @@ export default function LibroReclamacionesPage() {
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
 
-      <main className="flex-1">
+      <main className="flex-1 pt-16">
         {/* ── Hero ──────────────────────────────────────────────────────── */}
         <section className="bg-background border-b border-border/50">
           <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-8 pb-6">

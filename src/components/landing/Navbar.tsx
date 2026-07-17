@@ -256,6 +256,7 @@ export default function Navbar() {
                 value={logoValue}
                 fallbackText={companyName}
                 pixelSize={logoSizes.navbar || 32}
+                pixelHeight={logoSizes.navbarHeight || logoSizes.navbar || 32}
                 textClass="text-lg font-bold text-foreground"
               />
             </Link>
