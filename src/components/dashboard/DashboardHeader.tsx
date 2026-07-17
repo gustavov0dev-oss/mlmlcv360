@@ -72,8 +72,8 @@ export default function DashboardHeader() {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loadingSearch, setLoadingSearch] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement | null>(null);
-  const setInputBorderRef = (el: HTMLInputElement | null) => { inputRef.current = el; };
+  const desktopInputRef = useRef<HTMLInputElement | null>(null);
+  const mobileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Notifications
   const [notifOpen, setNotifOpen] = useState(false);
@@ -142,8 +142,11 @@ export default function DashboardHeader() {
         e.preventDefault();
         setSearchOpen(true);
         setSidebarOpen(false);
-        // Focus after React re-renders the mobile search overlay if needed
-        setTimeout(() => inputRef.current?.focus(), 80);
+        // Focus the correct input based on viewport (lg breakpoint = 1024px)
+        setTimeout(() => {
+          if (window.innerWidth >= 1024) desktopInputRef.current?.focus();
+          else mobileInputRef.current?.focus();
+        }, 80);
       }
       if (e.key === 'Escape') {
         setSearchOpen(false);
@@ -158,7 +161,7 @@ export default function DashboardHeader() {
   // When search opens on mobile, ensure the mobile input gets focused after render
   useEffect(() => {
     if (searchOpen) {
-      const t = setTimeout(() => inputRef.current?.focus(), 100);
+      const t = setTimeout(() => mobileInputRef.current?.focus(), 100);
       return () => clearTimeout(t);
     }
   }, [searchOpen]);
@@ -371,7 +374,7 @@ export default function DashboardHeader() {
     />
 
     <input
-      ref={setInputBorderRef}
+      ref={desktopInputRef}
       type="text"
       value={query}
       onChange={e => setQuery(e.target.value)}
@@ -405,7 +408,7 @@ export default function DashboardHeader() {
           onClick={() => {
             setQuery('');
             setResults([]);
-            inputRef.current?.focus();
+            desktopInputRef.current?.focus();
           }}
           className="
             w-7 h-7
@@ -479,7 +482,7 @@ export default function DashboardHeader() {
 
           {/* Mobile search icon */}
           <button
-            onClick={() => { setSearchOpen(v => !v); setSidebarOpen(false); setTimeout(() => inputRef.current?.focus(), 50); }}
+            onClick={() => { setSearchOpen(v => !v); setSidebarOpen(false); setTimeout(() => mobileInputRef.current?.focus(), 50); }}
             className="lg:hidden w-10 h-10 sm:w-9 sm:h-9 rounded-xl sm:rounded-full flex items-center justify-center hover:bg-muted/50 active:bg-muted text-muted-foreground active:text-foreground transition-colors"
             aria-label="Buscar"
           >
@@ -673,7 +676,7 @@ export default function DashboardHeader() {
             <div className="relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <input
-                ref={setInputBorderRef}
+                ref={mobileInputRef}
                 type="text"
                 value={query}
                 onChange={e => setQuery(e.target.value)}

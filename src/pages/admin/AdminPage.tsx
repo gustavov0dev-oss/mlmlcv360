@@ -757,14 +757,23 @@ export default function AdminPage() {
                         PNG, JPG, SVG, WebP
                       </span>
                     </label>
-                    <div className="mt-2">
+                    <div className="mt-2 flex gap-2">
                       <input
                         type="text"
                         value={c("logo_value")}
                         onChange={(e) => setC("logo_value", e.target.value)}
                         placeholder="O pega URL / codigo SVG aqui"
-                        className="w-full px-3 py-2 bg-background border border-border rounded-lg text-xs font-mono text-foreground focus:border-primary"
+                        className="flex-1 px-3 py-2 bg-background border border-border rounded-lg text-xs font-mono text-foreground focus:border-primary"
                       />
+                      {c("logo_value") && (
+                        <button
+                          onClick={() => setC("logo_value", "")}
+                          title="Eliminar logo"
+                          className="flex items-center justify-center w-9 px-2 bg-destructive/10 hover:bg-destructive/20 text-destructive border border-destructive/20 rounded-lg transition-colors"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   </div>
 
@@ -801,15 +810,26 @@ export default function AdminPage() {
                         {uploadingCollapsed ? "Subiendo..." : "Logo colapsado"}
                       </span>
                     </label>
-                    <input
-                      type="text"
-                      value={c("logo_collapsed_value") || ""}
-                      onChange={(e) =>
-                        setC("logo_collapsed_value", e.target.value)
-                      }
-                      placeholder="URL logo colapsado (opcional)"
-                      className="w-full mt-2 px-3 py-1.5 bg-background border border-border rounded-lg text-xs font-mono text-foreground focus:border-primary"
-                    />
+                    <div className="flex gap-2 mt-2">
+                      <input
+                        type="text"
+                        value={c("logo_collapsed_value") || ""}
+                        onChange={(e) =>
+                          setC("logo_collapsed_value", e.target.value)
+                        }
+                        placeholder="URL logo colapsado (opcional)"
+                        className="flex-1 px-3 py-1.5 bg-background border border-border rounded-lg text-xs font-mono text-foreground focus:border-primary"
+                      />
+                      {c("logo_collapsed_value") && (
+                        <button
+                          onClick={() => setC("logo_collapsed_value", "")}
+                          title="Eliminar logo colapsado"
+                          className="flex items-center justify-center w-9 px-2 bg-destructive/10 hover:bg-destructive/20 text-destructive border border-destructive/20 rounded-lg transition-colors"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
                   </div>
 
                   {/* Single unified preview — every frame has a FIXED size, so the slider never grows the layout */}
@@ -817,10 +837,10 @@ export default function AdminPage() {
                     <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
                       Vista previa
                     </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div className="bg-muted/30 rounded-xl p-3 text-center">
                         <p className="text-[10px] text-muted-foreground mb-2">
-                          Tamano real
+                          Navbar / Sidebar
                         </p>
                         <div className="flex items-center justify-center h-20 bg-card border border-border rounded-lg overflow-hidden px-2">
                           <LogoWithText
@@ -835,28 +855,6 @@ export default function AdminPage() {
                               64,
                             )}
                           />
-                        </div>
-                      </div>
-                      <div className="bg-muted/30 rounded-xl p-3 text-center">
-                        <p className="text-[10px] text-muted-foreground mb-2">
-                          Expandido
-                        </p>
-                        <div className="flex items-center justify-center h-20 bg-card border border-border rounded-lg overflow-hidden px-2 gap-1.5">
-                          <LogoWithText
-                            value={c("logo_value")}
-                            fallbackText={c("company_name") || "MLM"}
-                            pixelSize={Math.min(
-                              parseInt(c("logo_size")) || 36,
-                              40,
-                            )}
-                            pixelHeight={Math.min(
-                              parseInt(c("logo_height")) || parseInt(c("logo_size")) || 36,
-                              48,
-                            )}
-                          />
-                          <span className="text-xs font-bold text-foreground truncate max-w-[50px]">
-                            {c("company_name") || "MLM 360"}
-                          </span>
                         </div>
                       </div>
                       <div className="bg-muted/30 rounded-xl p-3 text-center">
@@ -1491,11 +1489,20 @@ export default function AdminPage() {
           {/* SEO */}
           {activeModule === "seo" && (
             <div className="bg-card border border-border rounded-xl p-5 sm:p-6">
-              <h2 className="text-lg font-semibold text-foreground mb-5">
-                Configuración SEO
-              </h2>
+              <div className="mb-5">
+                <h2 className="text-lg font-semibold text-foreground">
+                  Configuración SEO
+                </h2>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Controla cómo aparece tu sitio en buscadores y redes sociales.
+                </p>
+              </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="space-y-4">
+                <div className="space-y-5">
+                  <div className="space-y-3">
+                    <h3 className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                      Metadatos básicos
+                    </h3>
                   <div>
                     <label className="block text-xs font-medium text-foreground mb-1.5">
                       Título de la página
@@ -1541,6 +1548,12 @@ export default function AdminPage() {
                       className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-foreground text-sm outline-none focus:border-primary transition-colors"
                     />
                   </div>
+                  </div>
+                  </div>
+                  <div className="space-y-3 pt-2 border-t border-border">
+                    <h3 className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                      Recursos visuales
+                    </h3>
                   <div>
                     <label className="block text-xs font-medium text-foreground mb-1.5">
                       Favicon
@@ -1603,9 +1616,16 @@ export default function AdminPage() {
                             />
                           )}
                         </div>
-                        <span className="text-xs text-muted-foreground truncate">
+                        <span className="text-xs text-muted-foreground truncate flex-1">
                           Vista previa del favicon
                         </span>
+                        <button
+                          onClick={() => setC("favicon_value", "")}
+                          title="Eliminar favicon"
+                          className="flex items-center justify-center w-8 h-8 bg-destructive/10 hover:bg-destructive/20 text-destructive border border-destructive/20 rounded-lg transition-colors"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
                       </div>
                     ) : null}
                   </div>
@@ -1650,7 +1670,7 @@ export default function AdminPage() {
                       </span>
                     </label>
                     {c("seo_og_image") ? (
-                      <div className="mt-2 relative rounded-lg overflow-hidden border border-border bg-muted">
+                      <div className="mt-2 relative rounded-lg overflow-hidden border border-border bg-muted group">
                         <img
                           src={c("seo_og_image")}
                           alt="OG preview"
@@ -1659,6 +1679,13 @@ export default function AdminPage() {
                             e.currentTarget.style.display = "none";
                           }}
                         />
+                        <button
+                          onClick={() => setC("seo_og_image", "")}
+                          title="Eliminar imagen OG"
+                          className="absolute top-2 right-2 flex items-center justify-center w-8 h-8 bg-destructive/10 hover:bg-destructive/20 text-destructive border border-destructive/20 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
                       </div>
                     ) : (
                       <div className="mt-2 flex flex-col items-center justify-center gap-1.5 w-full h-48 rounded-lg border border-dashed border-border bg-muted/40 text-muted-foreground">
