@@ -279,7 +279,7 @@ export default function CheckoutPage() {
     return (
       <div className="min-h-screen bg-background flex flex-col">
         <Navbar />
-        <div className="flex-1 flex items-center justify-center px-4 pt-16 pb-10">
+        <div className="flex-1 flex items-center justify-center px-4 pt-28 pb-10">
         <div className="max-w-md w-full bg-card border border-border rounded-3xl p-8 text-center space-y-5 shadow-2xl">
           <div className="w-20 h-20 bg-green-500/15 rounded-full flex items-center justify-center mx-auto animate-bounce">
             <CheckCircle className="w-10 h-10 text-green-500" />
@@ -342,7 +342,7 @@ export default function CheckoutPage() {
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
       {/* Checkout Header */}
-      <div className="border-b border-border bg-card mt-16">
+      <div className="border-b border-border bg-card mt-28">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4">
           <div className="flex items-center gap-3 mb-4">
             <button onClick={() => step > 1 ? setStep(s => s - 1) : navigate('/carrito')}

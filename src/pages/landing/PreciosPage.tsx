@@ -9,7 +9,7 @@ export default function PreciosPage() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
-      <section className="pt-24 pb-24">
+      <section className="pt-28 pb-24">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
               <h1 className="text-5xl font-bold text-foreground mb-4">Precios transparentes</h1>

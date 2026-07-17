@@ -163,7 +163,7 @@ export default function BlogDetailPage() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
-      <main className="flex-1 pt-16">
+      <main className="flex-1 pt-28">
         {/* SEO breadcrumb — visually hidden */}
         <nav aria-label="breadcrumb" className="sr-only">
           <Link to="/">Inicio</Link> / <Link to="/blog">Novedades</Link> / <span>{article.title}</span>
