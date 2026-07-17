@@ -366,7 +366,7 @@ export default function ProductDetailPage() {
     return (
       <div className="min-h-screen bg-background flex flex-col">
         <Navbar />
-        <div className="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="pt-16 max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div className="lg:col-span-5 space-y-3">
             <div className="aspect-square bg-muted rounded-xl animate-pulse" />
             <div className="flex gap-2">{[...Array(4)].map((_, i) => <div key={i} className="w-16 h-16 bg-muted rounded-xl animate-pulse" />)}</div>
@@ -383,7 +383,7 @@ export default function ProductDetailPage() {
     return (
       <div className="min-h-screen bg-background flex flex-col">
         <Navbar />
-        <div className="flex flex-col items-center justify-center gap-4 px-4 text-center min-h-[60vh]">
+        <div className="pt-16 flex flex-col items-center justify-center gap-4 px-4 text-center min-h-[60vh]">
           <Package className="w-16 h-16 text-muted-foreground/20" />
           <h2 className="text-xl font-bold text-foreground">Producto no encontrado</h2>
           <button onClick={() => navigate('/tienda')}
@@ -401,7 +401,7 @@ export default function ProductDetailPage() {
       <Navbar />
 
       {/* Breadcrumb */}
-      <div className="bg-card/50 border-b border-border">
+      <div className="pt-16 bg-card/50 border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 flex items-center gap-1.5 text-xs text-muted-foreground flex-wrap">
           <button onClick={() => navigate('/')} className="hover:text-foreground">Inicio</button>
           <span>/</span>
