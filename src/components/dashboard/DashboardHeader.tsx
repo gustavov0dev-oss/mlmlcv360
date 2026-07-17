@@ -356,41 +356,114 @@ export default function DashboardHeader() {
         </Link>
 
         {/* Search — large inline on desktop, icon-collapsible on mobile */}
-        <div ref={searchRef} className="relative flex-1 max-w-md mx-2 hidden lg:block">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-            <input
-              type="text"
-              value={query}
-              onChange={e => setQuery(e.target.value)}
-              onFocus={() => setSearchOpen(true)}
-              placeholder="Buscar usuarios, productos..."
-              className="w-full pl-10 pr-[5.5rem] py-2 bg-muted/50 border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary/40 focus:bg-card transition-colors"
-            />
-            {/* Fixed-width right slot — prevents layout shift */}
-            <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center">
-              {query ? (
-                <button
-                  onClick={() => { setQuery(''); setResults([]); inputRef.current?.focus(); }}
-                  className="w-6 h-6 rounded-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              ) : (
-                <kbd className="pointer-events-none inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-mono font-semibold text-muted-foreground bg-background border border-border rounded leading-none">
-                  {isMac ? (<><span className="text-[11px]">⌘</span><span>K</span></>) : 'Ctrl+K'}
-                </kbd>
-              )}
-            </div>
-          </div>
+  <div ref={searchRef} className="relative flex-1 max-w-lg mx-4 hidden lg:block">
+  <div className="relative">
+    <Search
+      className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/70 pointer-events-none"
+    />
 
-          {/* Results dropdown */}
-          {searchOpen && query.length >= 2 && (
-            <div className="absolute left-0 right-0 top-full mt-2 bg-card border border-border rounded-xl shadow-2xl overflow-hidden z-50">
-              <SearchResultsList />
-            </div>
+    <input
+      type="text"
+      value={query}
+      onChange={e => setQuery(e.target.value)}
+      onFocus={() => setSearchOpen(true)}
+      placeholder="Buscar usuarios, productos..."
+      className="
+        w-full
+        h-11
+        pl-11
+        pr-[5.5rem]
+        rounded-2xl
+        bg-card/60
+        border border-white/10
+        text-sm
+        text-foreground
+        placeholder:text-muted-foreground/60
+        outline-none
+        transition-all duration-200
+        hover:border-white/20
+        focus:bg-card
+        focus:border-primary/30
+        focus:ring-2
+        focus:ring-primary/10
+      "
+    />
+
+    {/* Fixed-width right slot — prevents layout shift */}
+    <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center">
+      {query ? (
+        <button
+          onClick={() => {
+            setQuery('');
+            setResults([]);
+            inputRef.current?.focus();
+          }}
+          className="
+            w-7 h-7
+            rounded-lg
+            flex items-center justify-center
+            text-muted-foreground
+            hover:text-foreground
+            hover:bg-muted/60
+            transition-colors
+          "
+        >
+          <X className="w-4 h-4" />
+        </button>
+      ) : (
+        <kbd
+          className="
+            pointer-events-none
+            inline-flex
+            items-center
+            gap-1
+            px-2
+            py-1
+            text-[10px]
+            font-mono
+            font-medium
+            text-muted-foreground
+            bg-background/60
+            border border-white/10
+            rounded-md
+            leading-none
+          "
+        >
+          {isMac ? (
+            <>
+              <span className="text-[11px]">⌘</span>
+              <span>K</span>
+            </>
+          ) : (
+            'Ctrl+K'
           )}
-        </div>
+        </kbd>
+      )}
+    </div>
+  </div>
+
+  {/* Results dropdown */}
+  {searchOpen && query.length >= 2 && (
+    <div
+      className="
+        absolute
+        left-0
+        right-0
+        top-full
+        mt-2
+        bg-card
+        border border-white/10
+        rounded-2xl
+        shadow-2xl
+        overflow-hidden
+        z-50
+        backdrop-blur-xl
+      "
+    >
+      <SearchResultsList />
+    </div>
+  )}
+</div>
 
         {/* Right controls */}
         <div className="ml-auto flex items-center gap-0.5 sm:gap-1 flex-shrink-0">

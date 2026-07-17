@@ -83,12 +83,14 @@ export default function ShippingAdminPage() {
   if (loading) return (
     <div className="space-y-5">
       <div className="flex items-center justify-between"><div className="space-y-1.5"><Skeleton className="h-8 w-56" /><Skeleton className="h-4 w-48" /></div><Skeleton className="h-10 w-32 rounded-xl" /></div>
-      {Array.from({length:2}).map((_,i) => (
-        <div key={i} className="bg-card border border-border rounded-xl overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-border"><Skeleton className="h-4 w-40" /><div className="flex gap-2"><Skeleton className="h-4 w-12" /><Skeleton className="h-4 w-16" /></div></div>
-          <div className="p-5 space-y-2">{Array.from({length:2}).map((_,j)=>(<Skeleton key={j} className="h-14 w-full rounded-xl" />))}</div>
-        </div>
-      ))}
+      <div className="columns-1 lg:columns-2 gap-5 space-y-5">
+        {Array.from({length:2}).map((_,i) => (
+          <div key={i} className="break-inside-avoid bg-card border border-border rounded-xl overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border"><Skeleton className="h-4 w-40" /><div className="flex gap-2"><Skeleton className="h-4 w-12" /><Skeleton className="h-4 w-16" /></div></div>
+            <div className="p-5 space-y-2">{Array.from({length:2}).map((_,j)=>(<Skeleton key={j} className="h-14 w-full rounded-xl" />))}</div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 
@@ -105,52 +107,56 @@ export default function ShippingAdminPage() {
         </button>
       </div>
 
-      {zones.map(zone => (
-        <div key={zone.id} className="bg-card border border-border rounded-xl overflow-hidden">
-          <div className="flex items-center justify-between gap-3 px-5 py-4 border-b border-border bg-muted/20">
-            <div className="flex items-center gap-2 min-w-0">
-              <Globe className="w-4 h-4 text-primary flex-shrink-0" />
-              <h3 className="text-sm font-bold text-foreground truncate">{zone.name}</h3>
-              <span className={cn('text-xs font-semibold px-2 py-0.5 rounded-full shrink-0',
-                zone.status === 'active' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-muted text-muted-foreground')}>
-                {zone.status === 'active' ? 'Activa' : 'Inactiva'}
-              </span>
-            </div>
-            <div className="flex gap-1 shrink-0">
-              <button onClick={() => setEditZone(zone)} className="w-8 h-8 inline-flex items-center justify-center rounded-lg text-primary hover:bg-primary/10 transition-colors" aria-label="Editar zona"><Pencil className="w-4 h-4" /></button>
-              <button onClick={() => setDeleteTarget({ id: zone.id, name: zone.name, kind: 'zone' })} className="w-8 h-8 inline-flex items-center justify-center rounded-lg text-destructive hover:bg-destructive/10 transition-colors" aria-label="Eliminar zona"><Trash2 className="w-4 h-4" /></button>
-            </div>
-          </div>
-          <div className="p-5">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Métodos de envío</p>
-              <button onClick={() => setEditMethod({ zone_id: zone.id, type: 'flat', status: 'active' })}
-                className="text-xs font-bold text-primary hover:underline flex items-center gap-1">
-                <Plus className="w-3 h-3" /> Agregar método
-              </button>
-            </div>
-            {(zone.methods || []).length === 0 && <p className="text-sm text-muted-foreground text-center py-4">Sin métodos de envío</p>}
-            <div className="space-y-2">
-              {(zone.methods || []).map((m: ShippingMethod) => (
-                <div key={m.id} className="flex items-center gap-3 p-3 bg-muted rounded-xl">
-                  <Truck className="w-4 h-4 text-primary flex-shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-foreground truncate">{m.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {m.type === 'free_threshold' ? `Gratis a partir de S/ ${m.free_threshold}` : m.type === 'flat' ? `S/ ${m.price} fijo` : 'Por peso'}
-                      {m.estimated_days_min && ` · ${m.estimated_days_min}–${m.estimated_days_max} días`}
-                    </p>
-                  </div>
-                  <div className="flex gap-1 shrink-0">
-                    <button onClick={() => setEditMethod({ ...m, zone_id: zone.id })} className="w-8 h-8 inline-flex items-center justify-center rounded-lg text-primary hover:bg-primary/10 transition-colors" aria-label="Editar método"><Pencil className="w-4 h-4" /></button>
-                    <button onClick={() => setDeleteTarget({ id: m.id, name: m.name, kind: 'method' })} className="w-8 h-8 inline-flex items-center justify-center rounded-lg text-destructive hover:bg-destructive/10 transition-colors" aria-label="Eliminar método"><Trash2 className="w-4 h-4" /></button>
-                  </div>
+      {zones.length > 0 && (
+        <div className="columns-1 lg:columns-2 gap-5 [column-fill:_balance]">
+          {zones.map(zone => (
+            <div key={zone.id} className="break-inside-avoid mb-5 bg-card border border-border rounded-xl overflow-hidden">
+              <div className="flex items-center justify-between gap-3 px-5 py-4 border-b border-border bg-muted/20">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Globe className="w-4 h-4 text-primary flex-shrink-0" />
+                  <h3 className="text-sm font-bold text-foreground truncate">{zone.name}</h3>
+                  <span className={cn('text-xs font-semibold px-2 py-0.5 rounded-full shrink-0',
+                    zone.status === 'active' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-muted text-muted-foreground')}>
+                    {zone.status === 'active' ? 'Activa' : 'Inactiva'}
+                  </span>
                 </div>
-              ))}
+                <div className="flex gap-1 shrink-0">
+                  <button onClick={() => setEditZone(zone)} className="w-8 h-8 inline-flex items-center justify-center rounded-lg text-primary hover:bg-primary/10 transition-colors" aria-label="Editar zona"><Pencil className="w-4 h-4" /></button>
+                  <button onClick={() => setDeleteTarget({ id: zone.id, name: zone.name, kind: 'zone' })} className="w-8 h-8 inline-flex items-center justify-center rounded-lg text-destructive hover:bg-destructive/10 transition-colors" aria-label="Eliminar zona"><Trash2 className="w-4 h-4" /></button>
+                </div>
+              </div>
+              <div className="p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Métodos de envío</p>
+                  <button onClick={() => setEditMethod({ zone_id: zone.id, type: 'flat', status: 'active' })}
+                    className="text-xs font-bold text-primary hover:underline flex items-center gap-1">
+                    <Plus className="w-3 h-3" /> Agregar método
+                  </button>
+                </div>
+                {(zone.methods || []).length === 0 && <p className="text-sm text-muted-foreground text-center py-4">Sin métodos de envío</p>}
+                <div className="space-y-2">
+                  {(zone.methods || []).map((m: ShippingMethod) => (
+                    <div key={m.id} className="flex items-center gap-3 p-3 bg-muted rounded-xl">
+                      <Truck className="w-4 h-4 text-primary flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-foreground truncate">{m.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {m.type === 'free_threshold' ? `Gratis a partir de S/ ${m.free_threshold}` : m.type === 'flat' ? `S/ ${m.price} fijo` : 'Por peso'}
+                          {m.estimated_days_min && ` · ${m.estimated_days_min}–${m.estimated_days_max} días`}
+                        </p>
+                      </div>
+                      <div className="flex gap-1 shrink-0">
+                        <button onClick={() => setEditMethod({ ...m, zone_id: zone.id })} className="w-8 h-8 inline-flex items-center justify-center rounded-lg text-primary hover:bg-primary/10 transition-colors" aria-label="Editar método"><Pencil className="w-4 h-4" /></button>
+                        <button onClick={() => setDeleteTarget({ id: m.id, name: m.name, kind: 'method' })} className="w-8 h-8 inline-flex items-center justify-center rounded-lg text-destructive hover:bg-destructive/10 transition-colors" aria-label="Eliminar método"><Trash2 className="w-4 h-4" /></button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
-          </div>
+          ))}
         </div>
-      ))}
+      )}
 
       {zones.length === 0 && (
         <div className="text-center py-16 text-muted-foreground bg-card border border-border rounded-xl">

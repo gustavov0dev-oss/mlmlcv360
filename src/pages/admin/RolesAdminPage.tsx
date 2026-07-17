@@ -287,7 +287,7 @@ export default function RolesAdminPage() {
               key={role.id}
               onClick={() => setSelectedRole(role)}
               className={cn(
-                'w-full text-left p-3.5 rounded-xl border-2 transition-all',
+                'w-full text-left p-3.5 rounded-xl border transition-all',
                 selectedRole?.id === role.id
                   ? 'border-primary bg-primary/5 shadow-sm'
                   : 'border-border hover:border-muted-foreground/30 bg-card',
