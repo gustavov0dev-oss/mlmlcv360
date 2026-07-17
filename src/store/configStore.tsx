@@ -135,11 +135,13 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
           name: map.tax_name || 'IGV',
         });
         setLogoValue(map.logo_value || '');
+        // Single unified logo size for the entire system
+        const unifiedSize = parseInt(map.logo_size) || 36;
         setLogoSizes({
-          navbar: parseInt(map.logo_size_navbar) || 32,
-          sidebar: parseInt(map.logo_size_sidebar) || 36,
-          collapsed: parseInt(map.logo_size_collapsed) || 40,
-          login: parseInt(map.logo_size_login) || 48,
+          navbar: unifiedSize,
+          sidebar: unifiedSize,
+          collapsed: unifiedSize,
+          login: unifiedSize,
         });
       }
     } catch {

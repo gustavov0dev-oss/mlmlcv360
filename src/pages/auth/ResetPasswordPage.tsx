@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
 export default function ResetPasswordPage() {
   const navigate = useNavigate();
   const backend = useBackend();
-  const { company, logoValue } = useConfig();
+  const { company, logoValue, logoSizes } = useConfig();
   const { theme, setTheme } = useThemeStore();
   const companyName = company.company_name || 'MLM 360';
   const isDark = theme === 'dark';
@@ -79,7 +79,7 @@ export default function ResetPasswordPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <Link to="/">
-            <LogoWithText value={logoValue} fallbackText={companyName} size="w-8 h-8" textClass="font-semibold text-foreground" />
+            <LogoWithText value={logoValue} fallbackText={companyName} pixelSize={logoSizes.login || 36} textClass="font-semibold text-foreground" />
           </Link>
           <button
             onClick={() => setTheme(isDark ? 'light' : 'dark')}

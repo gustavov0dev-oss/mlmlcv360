@@ -10,6 +10,7 @@ import DashboardLayout from '@/layouts/DashboardLayout';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import { CartProvider } from '@/store/cartStore';
 import { Boxes, Wrench as WrenchIcon } from 'lucide-react';
+import { useSeo } from '@/hooks/useSeo';
 
 const LandingPage = lazy(() => import('@/pages/landing/LandingPage'));
 const NosotrosPage = lazy(() => import('@/pages/landing/NosotrosPage'));
@@ -113,6 +114,8 @@ function MaintenanceGate({ children }: { children: ReactNode }) {
 function AppRoutes() {
   const { loading } = useConfig();
   const [forcedReady, setForcedReady] = useState(false);
+
+  useSeo();
 
   useEffect(() => {
     const t = setTimeout(() => setForcedReady(true), 2000);

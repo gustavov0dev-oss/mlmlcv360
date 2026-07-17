@@ -3,7 +3,7 @@ import { useDatabase } from '@/lib/backend';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import type { ShippingZone, ShippingMethod } from '@/lib/storeTypes';
-import { Plus, Save, Loader as Loader2, Truck, Globe, X } from 'lucide-react';
+import { Plus, Save, Loader as Loader2, Truck, Globe, X, Pencil, Trash2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DeleteConfirmDialog } from '@/components/admin/DeleteConfirmDialog';
 
@@ -94,31 +94,31 @@ export default function ShippingAdminPage() {
 
   return (
     <div className="space-y-5 pb-10">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Zonas y Métodos de Envío</h1>
           <p className="text-sm text-muted-foreground mt-0.5">Configura las tarifas de envío por zona geográfica</p>
         </div>
         <button onClick={() => setEditZone({ status: 'active', countries: [], regions: [] })}
-          className="flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-xl font-bold text-sm hover:bg-primary/90 transition-colors">
+          className="flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-xl font-bold text-sm hover:bg-primary/90 transition-colors self-start">
           <Plus className="w-4 h-4" /> Nueva zona
         </button>
       </div>
 
       {zones.map(zone => (
         <div key={zone.id} className="bg-card border border-border rounded-xl overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-muted/20">
-            <div className="flex items-center gap-2">
-              <Globe className="w-4 h-4 text-primary" />
-              <h3 className="text-sm font-bold text-foreground">{zone.name}</h3>
-              <span className={cn('text-xs font-semibold px-2 py-0.5 rounded-full',
+          <div className="flex items-center justify-between gap-3 px-5 py-4 border-b border-border bg-muted/20">
+            <div className="flex items-center gap-2 min-w-0">
+              <Globe className="w-4 h-4 text-primary flex-shrink-0" />
+              <h3 className="text-sm font-bold text-foreground truncate">{zone.name}</h3>
+              <span className={cn('text-xs font-semibold px-2 py-0.5 rounded-full shrink-0',
                 zone.status === 'active' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-muted text-muted-foreground')}>
                 {zone.status === 'active' ? 'Activa' : 'Inactiva'}
               </span>
             </div>
-            <div className="flex gap-2">
-              <button onClick={() => setEditZone(zone)} className="text-xs font-semibold text-primary hover:underline">Editar</button>
-              <button onClick={() => setDeleteTarget({ id: zone.id, name: zone.name, kind: 'zone' })} className="text-xs font-semibold text-destructive hover:underline">Eliminar</button>
+            <div className="flex gap-1 shrink-0">
+              <button onClick={() => setEditZone(zone)} className="w-8 h-8 inline-flex items-center justify-center rounded-lg text-primary hover:bg-primary/10 transition-colors" aria-label="Editar zona"><Pencil className="w-4 h-4" /></button>
+              <button onClick={() => setDeleteTarget({ id: zone.id, name: zone.name, kind: 'zone' })} className="w-8 h-8 inline-flex items-center justify-center rounded-lg text-destructive hover:bg-destructive/10 transition-colors" aria-label="Eliminar zona"><Trash2 className="w-4 h-4" /></button>
             </div>
           </div>
           <div className="p-5">
@@ -135,15 +135,15 @@ export default function ShippingAdminPage() {
                 <div key={m.id} className="flex items-center gap-3 p-3 bg-muted rounded-xl">
                   <Truck className="w-4 h-4 text-primary flex-shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-foreground">{m.name}</p>
+                    <p className="text-sm font-semibold text-foreground truncate">{m.name}</p>
                     <p className="text-xs text-muted-foreground">
                       {m.type === 'free_threshold' ? `Gratis a partir de S/ ${m.free_threshold}` : m.type === 'flat' ? `S/ ${m.price} fijo` : 'Por peso'}
                       {m.estimated_days_min && ` · ${m.estimated_days_min}–${m.estimated_days_max} días`}
                     </p>
                   </div>
-                  <div className="flex gap-2">
-                    <button onClick={() => setEditMethod({ ...m, zone_id: zone.id })} className="text-xs text-primary hover:underline">Editar</button>
-                    <button onClick={() => setDeleteTarget({ id: m.id, name: m.name, kind: 'method' })} className="text-xs text-destructive hover:underline">Eliminar</button>
+                  <div className="flex gap-1 shrink-0">
+                    <button onClick={() => setEditMethod({ ...m, zone_id: zone.id })} className="w-8 h-8 inline-flex items-center justify-center rounded-lg text-primary hover:bg-primary/10 transition-colors" aria-label="Editar método"><Pencil className="w-4 h-4" /></button>
+                    <button onClick={() => setDeleteTarget({ id: m.id, name: m.name, kind: 'method' })} className="w-8 h-8 inline-flex items-center justify-center rounded-lg text-destructive hover:bg-destructive/10 transition-colors" aria-label="Eliminar método"><Trash2 className="w-4 h-4" /></button>
                   </div>
                 </div>
               ))}
@@ -162,7 +162,7 @@ export default function ShippingAdminPage() {
       {/* Zone modal */}
       {editZone && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-card border border-border rounded-xl w-full max-w-md p-5 space-y-4">
+          <div className="bg-card border border-border rounded-xl w-full max-w-md p-5 space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-bold text-foreground">{editZone.id ? 'Editar zona' : 'Nueva zona'}</h3>
               <button onClick={() => setEditZone(null)} className="text-muted-foreground hover:text-foreground"><X className="w-4 h-4" /></button>
@@ -192,7 +192,7 @@ export default function ShippingAdminPage() {
       {/* Method modal */}
       {editMethod && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-card border border-border rounded-xl w-full max-w-md p-5 space-y-4">
+          <div className="bg-card border border-border rounded-xl w-full max-w-md p-5 space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-bold text-foreground">{editMethod.id ? 'Editar método' : 'Nuevo método'}</h3>
               <button onClick={() => setEditMethod(null)} className="text-muted-foreground"><X className="w-4 h-4" /></button>

@@ -97,7 +97,7 @@ const defaultPermissions: Record<string, Record<string, boolean>> = {
 function ToggleSwitch({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
   return (
     <button onClick={() => onChange(!checked)}
-      className={cn('w-11 h-6 rounded-full relative transition-colors duration-200', checked ? 'bg-primary' : 'bg-muted-foreground/30')}>
+      className={cn('w-11 h-6 rounded-full relative transition-colors duration-200 shrink-0 flex-shrink-0', checked ? 'bg-primary' : 'bg-muted-foreground/30')}>
       <div className={cn('w-4 h-4 bg-white rounded-full absolute top-1 transition-transform duration-200', checked ? 'translate-x-6' : 'translate-x-1')} />
     </button>
   );
@@ -154,6 +154,26 @@ export default function AdminPage() {
       setUploading(false);
       setUploadingCollapsed(false);
     }
+  };
+
+  const [uploadingSeo, setUploadingSeo] = useState(false);
+
+  const handleSeoImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { toast.error('Solo se permiten imágenes'); return; }
+    if (file.size > 5 * 1024 * 1024) { toast.error('Máximo 5 MB'); return; }
+    setUploadingSeo(true);
+    try {
+      const ext = file.name.split('.').pop() || 'jpg';
+      const path = `logos/seo-og-${Date.now()}.${ext}`;
+      const result = await storage.upload('logos', path, file, { contentType: file.type, upsert: true });
+      if (result.success && result.url) {
+        setC('seo_og_image', result.url);
+        toast.success('Imagen subida. Presiona Guardar para aplicar.');
+      } else throw new Error(result.error || 'Upload failed');
+    } catch { toast.error('Error al subir la imagen'); }
+    finally { setUploadingSeo(false); }
   };
 
   const isAdmin = user?.role === 'super_admin' || user?.role === 'admin';
@@ -333,22 +353,24 @@ export default function AdminPage() {
                     ))}
                   </div>
 
-                  {/* Logo sizes */}
+                  {/* Unified logo size */}
                   <div className="pt-4 border-t border-border">
-                    <h3 className="text-sm font-bold text-foreground mb-3">Tamano de logos (px)</h3>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                      {[
-                        { k: 'logo_size_navbar', label: 'Navbar', def: '32' },
-                        { k: 'logo_size_sidebar', label: 'Sidebar', def: '36' },
-                        { k: 'logo_size_collapsed', label: 'Colapsado', def: '40' },
-                        { k: 'logo_size_login', label: 'Login', def: '48' },
-                      ].map(f => (
-                        <div key={f.k}>
-                          <label className="block text-[10px] font-medium text-muted-foreground mb-1">{f.label}</label>
-                          <input type="number" min="16" max="128" value={c(f.k) || f.def} onChange={e => setC(f.k, e.target.value)}
-                            className="w-full px-2 py-1.5 bg-muted border border-border rounded text-foreground text-sm text-center" />
-                        </div>
-                      ))}
+                    <h3 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
+                      <Image className="w-4 h-4 text-primary" />
+                      Tamano del logo (px)
+                    </h3>
+                    <p className="text-xs text-muted-foreground mb-3">Un unico tamano para todo el sistema: navbar, sidebar, login, etc.</p>
+                    <div className="flex items-center gap-3">
+                      <input type="range" min="16" max="96" value={c('logo_size') || '36'} onChange={e => setC('logo_size', e.target.value)}
+                        className="flex-1 accent-primary" />
+                      <input type="number" min="16" max="96" value={c('logo_size') || '36'} onChange={e => setC('logo_size', e.target.value)}
+                        className="w-20 px-2 py-1.5 bg-muted border border-border rounded text-foreground text-sm text-center" />
+                      <span className="text-xs text-muted-foreground w-16">px</span>
+                    </div>
+                    {/* Live preview */}
+                    <div className="mt-3 flex items-center gap-2 bg-card border border-border rounded-lg px-3 py-2 w-fit">
+                      <LogoWithText value={c('logo_value')} fallbackText={c('company_name') || 'MLM'} pixelSize={parseInt(c('logo_size')) || 36} />
+                      <span className="text-xs font-bold text-foreground truncate max-w-[80px]">{c('company_name') || 'MLM 360'}</span>
                     </div>
                   </div>
                 </div>
@@ -445,7 +467,7 @@ export default function AdminPage() {
                   onClick={() => saveConfigKeys([
                     'company_name', 'company_email', 'company_phone', 'company_address', 'company_ruc', 'company_tagline',
                     'logo_value', 'logo_collapsed_value',
-                    'logo_size_navbar', 'logo_size_sidebar', 'logo_size_collapsed', 'logo_size_login'
+                    'logo_size'
                   ])}
                   disabled={savingConfig || uploading || uploadingCollapsed}
                   className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-medium transition-colors disabled:opacity-50"
@@ -743,16 +765,32 @@ export default function AdminPage() {
                   ))}
                 </div>
                 <div className="space-y-4">
-                  {[
-                    { k: 'seo_og_image', label: 'Imagen Open Graph', placeholder: 'https://mlm360.pe/og-image.jpg' },
-                    { k: 'seo_ga_id', label: 'Google Analytics ID', placeholder: 'G-XXXXXXXXXX' },
-                  ].map(f => (
-                    <div key={f.k}>
-                      <label className="block text-xs font-medium text-foreground mb-1.5">{f.label}</label>
-                      <input value={c(f.k)} onChange={e => setC(f.k, e.target.value)} placeholder={f.placeholder}
-                        className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-foreground text-sm outline-none focus:border-primary transition-colors" />
-                    </div>
-                  ))}
+                  <div>
+                    <label className="block text-xs font-medium text-foreground mb-1.5">Imagen Open Graph</label>
+                    <input value={c('seo_og_image')} onChange={e => setC('seo_og_image', e.target.value)} placeholder="https://mlm360.pe/og-image.jpg"
+                      className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-foreground text-sm outline-none focus:border-primary transition-colors" />
+                    <label className={cn(
+                      'flex flex-col items-center justify-center gap-1.5 w-full h-20 mt-2 border-2 border-dashed rounded-lg cursor-pointer transition-colors hover:border-primary/50 hover:bg-primary/5',
+                      uploadingSeo ? 'opacity-50 pointer-events-none' : '', 'border-border'
+                    )}>
+                      <input type="file" accept="image/*" className="sr-only" onChange={handleSeoImage} disabled={uploadingSeo} />
+                      {uploadingSeo
+                        ? <RefreshCw className="w-4 h-4 text-primary animate-spin" />
+                        : <Image className="w-4 h-4 text-muted-foreground" />}
+                      <span className="text-xs text-muted-foreground">{uploadingSeo ? 'Subiendo...' : 'Subir imagen desde archivo'}</span>
+                      <span className="text-[10px] text-muted-foreground/60">PNG, JPG, WebP — máx 5 MB</span>
+                    </label>
+                    {c('seo_og_image') && (
+                      <div className="mt-2 relative rounded-lg overflow-hidden border border-border bg-muted">
+                        <img src={c('seo_og_image')} alt="OG preview" className="w-full h-24 object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-foreground mb-1.5">Google Analytics ID</label>
+                    <input value={c('seo_ga_id')} onChange={e => setC('seo_ga_id', e.target.value)} placeholder="G-XXXXXXXXXX"
+                      className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-foreground text-sm outline-none focus:border-primary transition-colors" />
+                  </div>
                   <div>
                     <label className="block text-xs font-medium text-foreground mb-1.5">Descripción meta</label>
                     <textarea value={c('seo_description')} onChange={e => setC('seo_description', e.target.value)} rows={3}
@@ -832,16 +870,16 @@ export default function AdminPage() {
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between p-4 bg-muted rounded-xl border border-border">
-                    <div>
+                  <div className="flex items-center justify-between p-4 bg-muted rounded-xl border border-border gap-3">
+                    <div className="min-w-0">
                       <div className="text-sm font-semibold text-foreground">Mostrar selección de plan</div>
                       <div className="text-xs text-muted-foreground mt-0.5">El usuario puede elegir un plan durante el registro</div>
                     </div>
                     <ToggleSwitch checked={c('register_show_plans') !== 'false'} onChange={v => setC('register_show_plans', String(v))} />
                   </div>
                   {c('register_show_plans') !== 'false' && (
-                    <div className="flex items-center justify-between p-4 bg-muted rounded-xl border border-border">
-                      <div>
+                    <div className="flex items-center justify-between p-4 bg-muted rounded-xl border border-border gap-3">
+                      <div className="min-w-0">
                         <div className="text-sm font-semibold text-foreground">Requerir selección de plan</div>
                         <div className="text-xs text-muted-foreground mt-0.5">El usuario no puede avanzar sin elegir un plan</div>
                       </div>
@@ -885,12 +923,12 @@ export default function AdminPage() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <div className={cn(
-                    'flex items-center justify-between p-4 rounded-xl border-2 transition-colors',
+                    'flex items-center justify-between p-4 rounded-xl border-2 transition-colors gap-3',
                     c('maintenance_mode') === 'true'
                       ? 'bg-amber-500/10 border-amber-500/30'
                       : 'bg-emerald-500/10 border-green-500/20',
                   )}>
-                    <div>
+                    <div className="min-w-0">
                       <div className="text-sm font-semibold text-foreground">
                         {c('maintenance_mode') === 'true' ? 'Sistema en mantenimiento' : 'Sistema operativo'}
                       </div>
