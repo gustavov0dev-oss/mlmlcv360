@@ -77,11 +77,11 @@ export default function EmpresaPage() {
   const commissionUnilevel = company.commission_unilevel || '2';
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
 
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
-      <section className="relative pt-14 pb-12 sm:pt-20 sm:pb-16 overflow-hidden">
+      <section className="relative pt-16 pb-12 sm:pb-16 overflow-hidden">
         <div className="absolute inset-0 bg-dub-grid opacity-20 mask-fade-top" />
         <div className="relative max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
           <nav aria-label="breadcrumb" className="sr-only">

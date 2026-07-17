@@ -109,9 +109,9 @@ export default function PedidosPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
-      <div className="pt-20 max-w-7xl mx-auto px-4 sm:px-6 py-8">
+      <div className="pt-16 max-w-7xl mx-auto px-4 sm:px-6 py-8">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 mb-6 text-sm">
           <button onClick={() => navigate('/')} className="text-muted-foreground hover:text-foreground transition-colors">Inicio</button>

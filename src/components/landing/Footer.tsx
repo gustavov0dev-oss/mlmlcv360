@@ -52,7 +52,7 @@ function SocialIcon({ icon, iconSvg }: { icon: string; iconSvg?: string | null }
 }
 
 export default function Footer() {
-  const { company, logoValue } = useConfig();
+  const { company, logoValue, logoSizes } = useConfig();
   const companyName = company.company_name || 'MLM 360';
   const companyEmail = company.company_email || 'contacto@mlm360.pe';
   const companyPhone = company.company_phone || '+51 1 234-5678';
@@ -89,7 +89,7 @@ export default function Footer() {
               <LogoWithText
                 value={logoValue}
                 fallbackText={companyName}
-                size="w-8 h-8"
+                pixelSize={logoSizes.navbar || 32}
                 textClass="text-lg font-bold text-foreground"
               />
               {company.company_tagline && (

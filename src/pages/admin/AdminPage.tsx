@@ -30,7 +30,7 @@ import {
   Image,
 } from "lucide-react";
 import { useConfig, type Plan, type Rank } from "@/store/configStore";
-import { LogoWithText } from "@/components/Logo";
+import Logo, { LogoWithText } from "@/components/Logo";
 import { DeleteConfirmDialog } from "@/components/admin/DeleteConfirmDialog";
 
 // Smart icon renderer: detects SVG markup, URL images, emoji, or plain text
@@ -382,6 +382,38 @@ export default function AdminPage() {
       toast.error("Error al subir la imagen");
     } finally {
       setUploadingSeo(false);
+    }
+  };
+
+  const [uploadingFavicon, setUploadingFavicon] = useState(false);
+
+  const handleFaviconFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/") && file.type !== "image/svg+xml" && file.type !== "image/x-icon") {
+      toast.error("Solo se permiten archivos de imagen (PNG, ICO, SVG)");
+      return;
+    }
+    if (file.size > 1024 * 1024) {
+      toast.error("El favicon no debe superar 1 MB");
+      return;
+    }
+    setUploadingFavicon(true);
+    try {
+      const ext = file.name.split(".").pop() || "png";
+      const path = `logos/favicon-${Date.now()}.${ext}`;
+      const result = await storage.upload("logos", path, file, {
+        contentType: file.type,
+        upsert: true,
+      });
+      if (result.success && result.url) {
+        setC("favicon_value", result.url);
+        toast.success("Favicon subido. Presiona Guardar para aplicar.");
+      } else throw new Error(result.error || "Upload failed");
+    } catch {
+      toast.error("Error al subir el favicon");
+    } finally {
+      setUploadingFavicon(false);
     }
   };
 
@@ -764,7 +796,7 @@ export default function AdminPage() {
                     <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
                       Vista previa
                     </h3>
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div className="bg-muted/30 rounded-xl p-3 text-center">
                         <p className="text-[10px] text-muted-foreground mb-2">
                           Tamano real
@@ -788,7 +820,10 @@ export default function AdminPage() {
                           <LogoWithText
                             value={c("logo_value")}
                             fallbackText={c("company_name") || "MLM"}
-                            size="w-6 h-6"
+                            pixelSize={Math.min(
+                              parseInt(c("logo_size")) || 36,
+                              40,
+                            )}
                           />
                           <span className="text-xs font-bold text-foreground truncate max-w-[50px]">
                             {c("company_name") || "MLM 360"}
@@ -819,7 +854,7 @@ export default function AdminPage() {
                                 />
                               )
                             ) : (
-                              <LogoWithText
+                              <Logo
                                 value={c("logo_value")}
                                 fallbackText={(
                                   c("company_name") || "MLM"
@@ -1476,6 +1511,74 @@ export default function AdminPage() {
                       className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-foreground text-sm outline-none focus:border-primary transition-colors"
                     />
                   </div>
+                  <div>
+                    <label className="block text-xs font-medium text-foreground mb-1.5">
+                      Favicon
+                    </label>
+                    <p className="text-[10px] text-muted-foreground mb-2">
+                      Icono que aparece en la pestana del navegador. PNG, ICO o SVG — 32x32px recomendado
+                    </p>
+                    <input
+                      value={c("favicon_value")}
+                      onChange={(e) => setC("favicon_value", e.target.value)}
+                      placeholder="https://mlm360.pe/favicon.ico"
+                      className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-foreground text-sm outline-none focus:border-primary transition-colors"
+                    />
+                    <label
+                      className={cn(
+                        "flex flex-col items-center justify-center gap-1.5 w-full h-20 mt-2 border-2 border-dashed rounded-lg cursor-pointer transition-colors hover:border-primary/50 hover:bg-primary/5",
+                        uploadingFavicon ? "opacity-50 pointer-events-none" : "",
+                        "border-border",
+                      )}
+                    >
+                      <input
+                        type="file"
+                        accept="image/*,.ico,.svg"
+                        className="sr-only"
+                        onChange={handleFaviconFile}
+                        disabled={uploadingFavicon}
+                      />
+                      {uploadingFavicon ? (
+                        <RefreshCw className="w-4 h-4 text-primary animate-spin" />
+                      ) : (
+                        <Image className="w-4 h-4 text-muted-foreground" />
+                      )}
+                      <span className="text-xs text-muted-foreground">
+                        {uploadingFavicon
+                          ? "Subiendo..."
+                          : "Subir favicon desde archivo"}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground/60">
+                        PNG, ICO, SVG — 32x32px
+                      </span>
+                    </label>
+                    {c("favicon_value") ? (
+                      <div className="mt-2 flex items-center gap-3 p-3 rounded-lg border border-border bg-muted/30">
+                        <div className="w-8 h-8 bg-card border border-border rounded-md overflow-hidden flex items-center justify-center flex-shrink-0">
+                          {c("favicon_value").toLowerCase().startsWith("<svg") ? (
+                            <span
+                              className="[&_svg]:w-6 [&_svg]:h-6"
+                              dangerouslySetInnerHTML={{
+                                __html: c("favicon_value"),
+                              }}
+                            />
+                          ) : (
+                            <img
+                              src={c("favicon_value")}
+                              alt="Favicon"
+                              className="w-6 h-6 object-contain"
+                              onError={(e) => {
+                                e.currentTarget.style.display = "none";
+                              }}
+                            />
+                          )}
+                        </div>
+                        <span className="text-xs text-muted-foreground truncate">
+                          Vista previa del favicon
+                        </span>
+                      </div>
+                    ) : null}
+                  </div>
                 </div>
                 <div className="space-y-4">
                   <div>
@@ -1552,6 +1655,7 @@ export default function AdminPage() {
                         "seo_keywords",
                         "seo_og_image",
                         "seo_ga_id",
+                        "favicon_value",
                       ],
                       "seo",
                     )

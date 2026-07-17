@@ -64,11 +64,11 @@ export default function NosotrosPage() {
   const companyName = company.company_name || 'MLM 360';
 
   return (
-    <div className="min-h-screen bg-background overflow-x-hidden">
+    <div className="min-h-screen bg-background overflow-x-hidden flex flex-col">
       <Navbar />
 
       {/* HERO */}
-      <section className="pt-20 pb-20">
+      <section className="pt-16 pb-20">
         <div className="px-6 sm:px-8">
           <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-10 max-w-2xl mx-auto">
             <Link to="/" className="hover:text-foreground transition-colors">Inicio</Link>

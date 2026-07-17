@@ -49,9 +49,9 @@ export default function WishlistPage() {
   };
 
   if (loading) return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
-      <div className="pt-20 max-w-7xl mx-auto px-4 sm:px-6 py-8">
+      <div className="pt-16 max-w-7xl mx-auto px-4 sm:px-6 py-8">
         <div className="flex items-center justify-between mb-6">
           <div className="space-y-1.5"><Skeleton className="h-8 w-36" /><Skeleton className="h-4 w-28" /></div>
           <Skeleton className="h-9 w-20 rounded-xl" />
@@ -72,9 +72,9 @@ export default function WishlistPage() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
-      <div className="pt-20 max-w-7xl mx-auto px-4 sm:px-6 py-8">
+      <div className="pt-16 max-w-7xl mx-auto px-4 sm:px-6 py-8">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-foreground">Mis Favoritos</h1>

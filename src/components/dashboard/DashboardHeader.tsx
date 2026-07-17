@@ -72,7 +72,8 @@ export default function DashboardHeader() {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loadingSearch, setLoadingSearch] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const setInputBorderRef = (el: HTMLInputElement | null) => { inputRef.current = el; };
 
   // Notifications
   const [notifOpen, setNotifOpen] = useState(false);
@@ -363,6 +364,7 @@ export default function DashboardHeader() {
     />
 
     <input
+      ref={setInputBorderRef}
       type="text"
       value={query}
       onChange={e => setQuery(e.target.value)}
@@ -375,13 +377,13 @@ export default function DashboardHeader() {
         pr-[5.5rem]
         rounded-2xl
         bg-card/60
-        border border-white/10
+        border border-border
         text-sm
         text-foreground
         placeholder:text-muted-foreground/60
         outline-none
         transition-all duration-200
-        hover:border-white/20
+        hover:border-border
         focus:bg-card
         focus:border-primary/30
         focus:ring-2
@@ -424,7 +426,7 @@ export default function DashboardHeader() {
             font-medium
             text-muted-foreground
             bg-background/60
-            border border-white/10
+            border border-border
             rounded-md
             leading-none
           "
@@ -452,7 +454,7 @@ export default function DashboardHeader() {
         top-full
         mt-2
         bg-card
-        border border-white/10
+        border border-border
         rounded-2xl
         shadow-2xl
         overflow-hidden
@@ -664,7 +666,7 @@ export default function DashboardHeader() {
             <div className="relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <input
-                ref={inputRef}
+                ref={setInputBorderRef}
                 type="text"
                 value={query}
                 onChange={e => setQuery(e.target.value)}

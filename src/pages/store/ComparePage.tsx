@@ -35,9 +35,9 @@ export default function ComparePage() {
   const allSpecKeys = [...new Set(products.flatMap(p => Object.keys((p as any).specs || {})))];
 
   if (loading) return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
-      <div className="pt-20 max-w-7xl mx-auto px-4 sm:px-6 py-8">
+      <div className="pt-16 max-w-7xl mx-auto px-4 sm:px-6 py-8">
         <div className="flex items-center justify-between mb-6">
           <Skeleton className="h-8 w-48" />
           <Skeleton className="h-9 w-24 rounded-xl" />
@@ -63,9 +63,9 @@ export default function ComparePage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
-      <div className="pt-20 max-w-7xl mx-auto px-4 sm:px-6 py-8">
+      <div className="pt-16 max-w-7xl mx-auto px-4 sm:px-6 py-8">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold text-foreground">Comparar productos</h1>
           <button onClick={() => navigate('/tienda')} className="flex items-center gap-2 px-4 py-2 border border-border rounded-xl text-sm font-semibold hover:bg-muted transition-colors"><X className="w-4 h-4" /> Volver</button>

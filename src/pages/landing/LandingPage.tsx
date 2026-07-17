@@ -464,11 +464,11 @@ export default function LandingPage() {
   const faqRight = faqItems.filter((_, i) => i % 2 !== 0);
 
   return (
-    <div className="min-h-screen bg-background overflow-x-hidden">
+    <div className="min-h-screen bg-background overflow-x-hidden flex flex-col">
       <Navbar />
 
       {/* ── HERO ──────────────────────────────────────────────────────────────── */}
-      <section className="relative pt-20 pb-0 overflow-hidden">
+      <section className="relative pt-16 pb-0 overflow-hidden">
         {/* Grid - subtle */}
         <div className="absolute inset-0 bg-grid opacity-[0.35] mask-fade-top pointer-events-none" />
         {/* Auras */}

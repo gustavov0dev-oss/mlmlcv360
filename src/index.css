@@ -1054,6 +1054,27 @@ select:focus {
   outline: none !important;
 }
 
+/* Prevent white/blue browser focus ring on all inputs — use border color only */
+input,
+textarea,
+select {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: hsl(var(--primary) / 0.5) !important;
+}
+
+/* Allow explicit ring classes to override the above */
+input.focus-ring:focus,
+textarea.focus-ring:focus,
+select.focus-ring:focus {
+  box-shadow: 0 0 0 3px hsl(var(--primary) / 0.12) !important;
+}
+
 /* Dashboard input focus — always gold, never blue */
 .dashboard-input:focus,
 input.themed:focus {
@@ -1122,8 +1143,24 @@ button:focus-visible {
 .dark .icon-violet  { background-color: hsl(270 55% 62% / 0.12); color: hsl(270 55% 62%); border: 1px solid hsl(270 55% 62% / 0.2); }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   MOBILE REVEAL — Lighter animation to prevent jank on low-end devices
+   LAYOUT — Ensure footer never collides with navbar on short pages
    ═══════════════════════════════════════════════════════════════════════════════ */
+
+/* When a page uses min-h-screen + flex-col, the main content should grow */
+.min-h-screen.flex.flex-col > section:first-of-type,
+.min-h-screen.flex.flex-col > main:first-of-type {
+  flex: 1 0 auto;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+#root > * {
+  flex: 1;
+}
 
 @media (max-width: 767px) {
   .reveal {

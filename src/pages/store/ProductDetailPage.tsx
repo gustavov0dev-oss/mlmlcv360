@@ -364,7 +364,7 @@ export default function ProductDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background flex flex-col">
         <Navbar />
         <div className="pt-16 max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div className="lg:col-span-5 space-y-3">
@@ -381,9 +381,9 @@ export default function ProductDetailPage() {
 
   if (!product) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background flex flex-col">
         <Navbar />
-        <div className="pt-24 flex flex-col items-center justify-center gap-4 px-4 text-center min-h-[60vh]">
+        <div className="pt-16 flex flex-col items-center justify-center gap-4 px-4 text-center min-h-[60vh]">
           <Package className="w-16 h-16 text-muted-foreground/20" />
           <h2 className="text-xl font-bold text-foreground">Producto no encontrado</h2>
           <button onClick={() => navigate('/tienda')}
@@ -397,7 +397,7 @@ export default function ProductDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
 
       {/* Breadcrumb */}

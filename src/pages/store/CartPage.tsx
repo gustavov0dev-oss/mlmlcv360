@@ -95,9 +95,9 @@ export default function CartPage() {
 
   if (itemCount === 0) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background flex flex-col">
         <Navbar />
-        <div className="pt-20 flex flex-col items-center justify-center gap-5 px-4 min-h-[80vh]">
+        <div className="pt-16 flex flex-col items-center justify-center gap-5 px-4 min-h-[80vh]">
           <div className="w-24 h-24 rounded-3xl bg-muted flex items-center justify-center">
             <ShoppingCart className="w-12 h-12 text-muted-foreground/30" />
           </div>
@@ -116,7 +116,7 @@ export default function CartPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background pt-16">
+    <div className="min-h-screen bg-background">
       <Navbar />
       {/* Header */}
       <div className="border-b border-border bg-card sticky top-16 z-20">

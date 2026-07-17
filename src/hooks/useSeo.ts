@@ -33,6 +33,7 @@ export function useSeo() {
     const keywords = company.seo_keywords || '';
     const ogImage = company.seo_og_image || '';
     const gaId = company.seo_ga_id || '';
+    const favicon = company.favicon_value || '';
 
     if (title) document.title = title;
     setMeta('name', 'title', title);
@@ -48,6 +49,21 @@ export function useSeo() {
     setTwitterMeta('twitter:description', description);
     if (ogImage) setTwitterMeta('twitter:image', ogImage);
     setTwitterMeta('twitter:card', ogImage ? 'summary_large_image' : 'summary');
+
+    if (favicon) {
+      let link = document.head.querySelector('link[rel="icon"]') as HTMLLinkElement | null;
+      if (!link) {
+        link = document.createElement('link');
+        link.rel = 'icon';
+        document.head.appendChild(link);
+      }
+      if (favicon.toLowerCase().startsWith('<svg')) {
+        const blob = new Blob([favicon], { type: 'image/svg+xml' });
+        link.href = URL.createObjectURL(blob);
+      } else {
+        link.href = favicon;
+      }
+    }
 
     // Inject Google Analytics if configured
     if (gaId && !document.getElementById('ga-script-src')) {
