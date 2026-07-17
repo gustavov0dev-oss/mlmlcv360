@@ -277,7 +277,7 @@ export default function PagoPage() {
     return (
       <div className="min-h-screen bg-background flex flex-col">
         <Navbar />
-        <div className="pt-16 pb-16 flex items-center justify-center px-4">
+        <div className="pt-24 pb-16 flex items-center justify-center px-4">
           <div className="bg-card border border-border rounded-2xl p-8 w-full max-w-md shadow-xl">
             <div className="text-center mb-6">
               <div className="w-16 h-16 rounded-full bg-purple-500/10 border-2 border-purple-500/30 flex items-center justify-center mx-auto mb-4">
@@ -351,7 +351,7 @@ export default function PagoPage() {
     return (
       <div className="min-h-screen bg-background flex flex-col">
         <Navbar />
-        <div className="pt-16 pb-16 flex items-center justify-center px-4">
+        <div className="pt-24 pb-16 flex items-center justify-center px-4">
           <div className="bg-card border border-border rounded-2xl p-8 w-full max-w-md shadow-xl text-center">
             <div className="w-20 h-20 rounded-full bg-green-500/10 border-2 border-green-500/30 flex items-center justify-center mx-auto mb-5">
               <CheckCircle className="w-10 h-10 text-green-500" />
@@ -428,7 +428,7 @@ export default function PagoPage() {
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
 
-      <div className="flex-1 pt-16 pb-16">
+      <div className="flex-1 pt-24 pb-16">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
 
           {/* Back button */}

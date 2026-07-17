@@ -3,6 +3,7 @@ import { Link } from '@/lib/router';
 import { Mail, Phone, MapPin, FileText } from 'lucide-react';
 import { useConfig } from '@/store/configStore';
 import { supabase } from '@/lib/backend/client';
+import { useDatabase } from '@/lib/backend';
 import { LogoWithText } from '@/components/Logo';
 
 interface SocialLink {
@@ -53,6 +54,7 @@ function SocialIcon({ icon, iconSvg }: { icon: string; iconSvg?: string | null }
 
 export default function Footer() {
   const { company, logoValue, logoSizes } = useConfig();
+  const database = useDatabase();
   const companyName = company.company_name || 'MLM 360';
   const companyEmail = company.company_email || 'contacto@mlm360.pe';
   const companyPhone = company.company_phone || '+51 1 234-5678';
@@ -64,20 +66,29 @@ export default function Footer() {
   const [legalPages, setLegalPages] = useState<{ id: string; slug: string; title: string }[]>([]);
 
   useEffect(() => {
-    supabase
-      .from('social_links')
-      .select('*')
-      .eq('is_active', true)
-      .order('sort_order', { ascending: true })
-      .then(({ data }) => { if (data) setSocialLinks(data); });
-    supabase
-      .from('legal_pages')
-      .select('id, slug, title')
-      .eq('is_published', true)
-      .eq('show_in_footer', true)
-      .order('sort_order', { ascending: true })
-      .then(({ data }) => { if (data) setLegalPages(data); });
-  }, []);
+    const loadSocial = () => {
+      supabase
+        .from('social_links')
+        .select('*')
+        .eq('is_active', true)
+        .order('sort_order', { ascending: true })
+        .then(({ data }) => { if (data) setSocialLinks(data); });
+    };
+    const loadLegal = () => {
+      supabase
+        .from('legal_pages')
+        .select('id, slug, title')
+        .eq('is_published', true)
+        .eq('show_in_footer', true)
+        .order('sort_order', { ascending: true })
+        .then(({ data }) => { if (data) setLegalPages(data); });
+    };
+    loadSocial();
+    loadLegal();
+    const unsubSocial = database.subscribe('social_links', loadSocial);
+    const unsubLegal = database.subscribe('legal_pages', loadLegal);
+    return () => { unsubSocial(); unsubLegal(); };
+  }, [database]);
 
   return (
     <footer className="bg-muted/30 border-t border-border">

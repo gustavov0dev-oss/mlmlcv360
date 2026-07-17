@@ -59,16 +59,22 @@ interface RegionStat {
 }
 
 function useRegionStats() {
+  const database = useDatabase();
   const [items, setItems] = useState<RegionStat[]>([]);
   useEffect(() => {
-    supabase
-      .from('testimonial_region_stats')
-      .select('*')
-      .eq('is_active', true)
-      .order('sort_order', { ascending: true })
-      .limit(5)
-      .then(({ data }) => { if (data) setItems(data); });
-  }, []);
+    const load = () => {
+      supabase
+        .from('testimonial_region_stats')
+        .select('*')
+        .eq('is_active', true)
+        .order('sort_order', { ascending: true })
+        .limit(5)
+        .then(({ data }) => { if (data) setItems(data); });
+    };
+    load();
+    const unsub = database.subscribe('testimonial_region_stats', load);
+    return () => unsub();
+  }, [database]);
   return items;
 }
 
@@ -102,15 +108,21 @@ interface DBTestimonial {
 }
 
 function useTestimonials() {
+  const database = useDatabase();
   const [items, setItems] = useState<DBTestimonial[]>([]);
   useEffect(() => {
-    supabase
-      .from('testimonials')
-      .select('*')
-      .eq('is_active', true)
-      .order('sort_order', { ascending: true })
-      .then(({ data }) => { if (data) setItems(data); });
-  }, []);
+    const load = () => {
+      supabase
+        .from('testimonials')
+        .select('*')
+        .eq('is_active', true)
+        .order('sort_order', { ascending: true })
+        .then(({ data }) => { if (data) setItems(data); });
+    };
+    load();
+    const unsub = database.subscribe('testimonials', load);
+    return () => unsub();
+  }, [database]);
   return items;
 }
 
@@ -162,7 +174,12 @@ function StoreSection() {
     setLoading(false);
   }, [database]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+    const unsubCats = database.subscribe('product_categories', load);
+    const unsubProds = database.subscribe('products', load);
+    return () => { unsubCats(); unsubProds(); };
+  }, [load, database]);
 
   const filtered = activeCat ? products.filter(p => p.category_id === activeCat) : products;
   if (!loading && products.length === 0) return null;
@@ -377,6 +394,7 @@ function fmtNumber(n: number): string {
 }
 
 function usePlatformStats() {
+  const database = useDatabase();
   const [stats, setStats] = useState({ totalAffiliates: 0, totalProducts: 0, loaded: false });
   useEffect(() => {
     const load = async () => {
@@ -394,11 +412,15 @@ function usePlatformStats() {
       }
     };
     load();
-  }, []);
+    const unsubProfiles = database.subscribe('profiles', load);
+    const unsubProducts = database.subscribe('products', load);
+    return () => { unsubProfiles(); unsubProducts(); };
+  }, [database]);
   return stats;
 }
 
 function useTopCategories() {
+  const database = useDatabase();
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
   useEffect(() => {
     const load = async () => {
@@ -408,31 +430,39 @@ function useTopCategories() {
       } catch { /* ignore */ }
     };
     load();
-  }, []);
+    const unsub = database.subscribe('product_categories', load);
+    return () => unsub();
+  }, [database]);
   return categories;
 }
 
 // ─── feature product images ─────────────────────────────────────────────────
 function useFeatureProductImages() {
+  const database = useDatabase();
   const [images, setImages] = useState<string[]>([]);
   useEffect(() => {
-    supabase
-      .from('products')
-      .select('images')
-      .eq('status', 'active')
-      .order('sort_order')
-      .limit(6)
-      .then(({ data }) => {
-        if (data) {
-          const imgs = data
-            .flatMap((p: any) => Array.isArray(p.images) ? p.images : [])
-            .map((img: any) => (typeof img === 'string' ? img : img?.url || img?.src || ''))
-            .filter(Boolean)
-            .slice(0, 4);
-          if (imgs.length > 0) setImages(imgs);
-        }
-      });
-  }, []);
+    const load = () => {
+      supabase
+        .from('products')
+        .select('images')
+        .eq('status', 'active')
+        .order('sort_order')
+        .limit(6)
+        .then(({ data }) => {
+          if (data) {
+            const imgs = data
+              .flatMap((p: any) => Array.isArray(p.images) ? p.images : [])
+              .map((img: any) => (typeof img === 'string' ? img : img?.url || img?.src || ''))
+              .filter(Boolean)
+              .slice(0, 4);
+            if (imgs.length > 0) setImages(imgs);
+          }
+        });
+    };
+    load();
+    const unsub = database.subscribe('products', load);
+    return () => unsub();
+  }, [database]);
   return images;
 }
 
@@ -444,6 +474,7 @@ export default function LandingPage() {
   const regionStats = useRegionStats();
   const plans = allPlans.filter(p => p.is_active);
   const { user } = useAuthStore();
+  const database = useDatabase();
   const platformStats = usePlatformStats();
   const topCategories = useTopCategories();
   const featureProductImages = useFeatureProductImages();
@@ -451,13 +482,18 @@ export default function LandingPage() {
   // Dynamic FAQs from database
   const [faqItems, setFaqItems] = useState<{ id: string; question: string; answer: string }[]>([]);
   useEffect(() => {
-    supabase
-      .from('faq_items')
-      .select('id, question, answer')
-      .eq('is_active', true)
-      .order('sort_order', { ascending: true })
-      .then(({ data }) => { if (data) setFaqItems(data); });
-  }, []);
+    const load = () => {
+      supabase
+        .from('faq_items')
+        .select('id, question, answer')
+        .eq('is_active', true)
+        .order('sort_order', { ascending: true })
+        .then(({ data }) => { if (data) setFaqItems(data); });
+    };
+    load();
+    const unsub = database.subscribe('faq_items', load);
+    return () => unsub();
+  }, [database]);
 
   // Split FAQ into two columns
   const faqLeft = faqItems.filter((_, i) => i % 2 === 0);
@@ -468,7 +504,7 @@ export default function LandingPage() {
       <Navbar />
 
       {/* ── HERO ──────────────────────────────────────────────────────────────── */}
-      <section className="relative pt-16 pb-0 overflow-hidden">
+      <section className="relative pt-24 pb-0 overflow-hidden">
         {/* Grid - subtle */}
         <div className="absolute inset-0 bg-grid opacity-[0.35] mask-fade-top pointer-events-none" />
         {/* Auras */}
