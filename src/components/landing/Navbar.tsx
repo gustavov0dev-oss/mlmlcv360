@@ -481,6 +481,8 @@ export default function Navbar() {
         </div>
       )}
 
+      {/* Spacer below fixed nav */}
+      <div className="h-16" />
     </>
   );
 }

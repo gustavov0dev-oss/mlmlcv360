@@ -279,7 +279,7 @@ export default function CheckoutPage() {
     return (
       <div className="min-h-screen bg-background flex flex-col">
         <Navbar />
-        <div className="flex-1 flex items-center justify-center px-4 pt-16 pb-10">
+        <div className="flex-1 flex items-center justify-center px-4 pb-10">
         <div className="max-w-md w-full bg-card border border-border rounded-3xl p-8 text-center space-y-5 shadow-2xl">
           <div className="w-20 h-20 bg-green-500/15 rounded-full flex items-center justify-center mx-auto animate-bounce">
             <CheckCircle className="w-10 h-10 text-green-500" />

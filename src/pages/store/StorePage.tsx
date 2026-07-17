@@ -211,7 +211,7 @@ export default function StorePage() {
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
 
-      <main className="pt-16">
+      <main>
         {/* ── HERO HEADER ── */}
         <div className="bg-gradient-to-br from-primary via-primary to-primary/80 text-primary-foreground">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">

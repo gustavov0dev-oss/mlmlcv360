@@ -468,7 +468,7 @@ export default function LandingPage() {
       <Navbar />
 
       {/* ── HERO ──────────────────────────────────────────────────────────────── */}
-      <section className="relative pt-16 pb-0 overflow-hidden">
+      <section className="relative pb-0 overflow-hidden">
         {/* Grid - subtle */}
         <div className="absolute inset-0 bg-grid opacity-[0.35] mask-fade-top pointer-events-none" />
         {/* Auras */}
