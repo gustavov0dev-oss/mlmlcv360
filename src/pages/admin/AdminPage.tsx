@@ -405,34 +405,47 @@ export default function AdminPage() {
     label: string,
     maxMb = 5,
   ) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!file.type.startsWith("image/")) {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    const valid = files.filter((f) => f.type.startsWith("image/"));
+    if (valid.length === 0) {
       toast.error("Solo se permiten imágenes");
       return;
     }
-    if (file.size > maxMb * 1024 * 1024) {
-      toast.error(`Máximo ${maxMb} MB`);
+    const tooBig = valid.find((f) => f.size > maxMb * 1024 * 1024);
+    if (tooBig) {
+      toast.error(`Máximo ${maxMb} MB por archivo`);
       return;
     }
     setUploading(true);
     try {
-      const ext = file.name.split(".").pop() || "png";
-      const path = `logos/pwa-${key}-${Date.now()}.${ext}`;
-      const result = await storage.upload("logos", path, file, {
-        contentType: file.type,
-        upsert: true,
-      });
-      if (result.success && result.url) {
+      const uploadedUrls: string[] = [];
+      for (const file of valid) {
+        const ext = file.name.split(".").pop() || "png";
+        const path = `logos/pwa-${key}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+        const result = await storage.upload("logos", path, file, {
+          contentType: file.type,
+          upsert: true,
+        });
+        if (result.success && result.url) uploadedUrls.push(result.url);
+        else throw new Error(result.error || "Upload failed");
+      }
+      if (uploadedUrls.length > 0) {
         const existing = c(key);
-        const merged = existing ? `${existing},${result.url}` : result.url;
+        const merged = existing
+          ? `${existing},${uploadedUrls.join(",")}`
+          : uploadedUrls.join(",");
         setC(key, merged);
-        toast.success(`${label} subida. Presiona Guardar para aplicar.`);
-      } else throw new Error(result.error || "Upload failed");
+        toast.success(
+          `${uploadedUrls.length} ${label}${uploadedUrls.length > 1 ? "s" : ""} subida${uploadedUrls.length > 1 ? "s" : ""}. Presiona Guardar para aplicar.`,
+        );
+      }
     } catch {
       toast.error(`Error al subir ${label.toLowerCase()}`);
     } finally {
       setUploading(false);
+      // Reset input value so same file can be re-selected
+      e.target.value = "";
     }
   };
 
@@ -1517,7 +1530,7 @@ export default function AdminPage() {
 
           {/* PWA */}
           {activeModule === "pwa" && (
-            <div className="bg-card border border-border rounded-xl p-5 sm:p-6">
+            <div className="bg-card border border-border rounded-xl p-5 sm:p-6 overflow-x-hidden">
               <h2 className="text-lg font-semibold text-foreground mb-1">
                 Configuración PWA
               </h2>
@@ -1673,6 +1686,7 @@ export default function AdminPage() {
                       <input
                         type="file"
                         accept="image/*"
+                        multiple
                         className="sr-only"
                         onChange={(e) => handlePwaImage(e, "pwa_screenshot_mobile", setUploadingPwaMobile, "Captura móvil", 5)}
                         disabled={uploadingPwaMobile}
@@ -1733,6 +1747,7 @@ export default function AdminPage() {
                       <input
                         type="file"
                         accept="image/*"
+                        multiple
                         className="sr-only"
                         onChange={(e) => handlePwaImage(e, "pwa_screenshot_desktop", setUploadingPwaDesktop, "Captura escritorio", 5)}
                         disabled={uploadingPwaDesktop}
@@ -2360,10 +2375,44 @@ export default function AdminPage() {
                 </p>
               </div>
 
+              {/* Temporizador de cuenta regresiva — opcional */}
+              <div className="max-w-xl mt-6 pt-4 border-t border-border">
+                <div className="flex items-center justify-between p-4 rounded-xl border-2 border-border bg-muted/30 gap-3">
+                  <div className="min-w-0">
+                    <div className="text-sm font-semibold text-foreground">
+                      Temporizador de cuenta regresiva
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-0.5">
+                      Muestra un contador en la página de mantenimiento.
+                    </div>
+                  </div>
+                  <ToggleSwitch
+                    checked={c("maintenance_countdown_enabled") === "true"}
+                    onChange={(v) => setC("maintenance_countdown_enabled", String(v))}
+                  />
+                </div>
+                {c("maintenance_countdown_enabled") === "true" && (
+                  <div className="mt-3">
+                    <label className="block text-xs font-medium text-foreground mb-1.5">
+                      Fecha y hora de finalización
+                    </label>
+                    <input
+                      type="datetime-local"
+                      value={c("maintenance_countdown_date") ? c("maintenance_countdown_date").slice(0, 16) : ""}
+                      onChange={(e) => setC("maintenance_countdown_date", e.target.value ? new Date(e.target.value).toISOString() : "")}
+                      className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Cuando llegue esta fecha, el contador desaparecerá.
+                    </p>
+                  </div>
+                )}
+              </div>
+
               <div className="mt-6 pt-4 border-t border-border flex justify-end">
                 <button
                   onClick={() =>
-                    saveConfigKeys(["maintenance_mode", "maintenance_message"])
+                    saveConfigKeys(["maintenance_mode", "maintenance_message", "maintenance_countdown_enabled", "maintenance_countdown_date"])
                   }
                   disabled={savingConfig}
                   className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-medium transition-colors disabled:opacity-50"

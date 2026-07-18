@@ -9,9 +9,10 @@ import { Router, Routes, Route, Navigate, useLocation } from '@/lib/router';
 import DashboardLayout from '@/layouts/DashboardLayout';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import { CartProvider } from '@/store/cartStore';
-import { Boxes, Wrench as WrenchIcon, ArrowRight, ShieldCheck, Clock, Mail } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { useSeo } from '@/hooks/useSeo';
 import { usePwa } from '@/hooks/usePwa';
+import Logo from '@/components/Logo';
 
 const LandingPage = lazy(() => import('@/pages/landing/LandingPage'));
 const NosotrosPage = lazy(() => import('@/pages/landing/NosotrosPage'));
@@ -39,74 +40,111 @@ const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 const LANDING_PATHS = ['/', '/nosotros', '/precios', '/empresa', '/contacto', '/planes', '/blog', '/pago', '/login', '/registro', '/reset-password', '/tienda', '/carrito', '/checkout', '/favoritos', '/tienda/comparar', '/libro-reclamaciones', '/legal'];
 const ADMIN_BYPASS_ROLES = ['super_admin', 'admin'];
 
+function useCountdown(targetIso: string) {
+  const [remaining, setRemaining] = useState<number | null>(null);
+  useEffect(() => {
+    if (!targetIso) { setRemaining(null); return; }
+    const target = new Date(targetIso).getTime();
+    if (isNaN(target)) { setRemaining(null); return; }
+    const tick = () => {
+      const diff = target - Date.now();
+      setRemaining(diff > 0 ? diff : 0);
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [targetIso]);
+  return remaining;
+}
+
+function formatCountdown(ms: number) {
+  const total = Math.floor(ms / 1000);
+  const d = Math.floor(total / 86400);
+  const h = Math.floor((total % 86400) / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
+  return { d, h, m, s };
+}
+
 function MaintenancePage() {
   const { company } = useConfig();
   const { user } = useAuthStore();
   const name = company.company_name || 'MLM 360';
   const msg = company.maintenance_message || 'Estamos realizando mejoras en nuestra plataforma. Volveremos pronto con una experiencia renovada.';
   const themeColor = company.pwa_theme_color || '#C79B3B';
+  const showCountdown = company.maintenance_countdown_enabled === 'true';
+  const countdownDate = company.maintenance_countdown_date || '';
+  const remaining = useCountdown(countdownDate);
+  const isAdmin = user && ADMIN_BYPASS_ROLES.includes((user as any).role);
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4 py-12 relative overflow-hidden">
-      {/* Background decorations */}
-      <div className="absolute inset-0 -z-10 opacity-[0.07] pointer-events-none">
-        <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full blur-3xl" style={{ background: themeColor }} />
-        <div className="absolute -bottom-32 -right-24 w-[28rem] h-[28rem] rounded-full blur-3xl" style={{ background: themeColor }} />
+      {/* Faded grid mesh background */}
+      <div
+        className="absolute inset-0 -z-10 pointer-events-none"
+        style={{
+          backgroundImage: `linear-gradient(to right, ${themeColor}14 1px, transparent 1px), linear-gradient(to bottom, ${themeColor}14 1px, transparent 1px)`,
+          backgroundSize: '48px 48px',
+          maskImage: 'radial-gradient(ellipse 80% 70% at 50% 50%, black 30%, transparent 100%)',
+          WebkitMaskImage: 'radial-gradient(ellipse 80% 70% at 50% 50%, black 30%, transparent 100%)',
+        }}
+      />
+      {/* Soft glow accents */}
+      <div className="absolute inset-0 -z-10 opacity-[0.06] pointer-events-none">
+        <div className="absolute -top-32 -left-32 w-[30rem] h-[30rem] rounded-full blur-3xl" style={{ background: themeColor }} />
+        <div className="absolute -bottom-40 -right-32 w-[34rem] h-[34rem] rounded-full blur-3xl" style={{ background: themeColor }} />
       </div>
-      <div className="absolute inset-0 -z-10 opacity-[0.04] pointer-events-none" style={{ backgroundImage: `radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)`, backgroundSize: '32px 32px' }} />
 
       <div className="w-full max-w-xl text-center">
-        {/* Brand */}
-        <div className="inline-flex items-center gap-2 mb-10">
-          <Boxes className="w-6 h-6" style={{ color: themeColor }} />
-          <span className="text-lg font-bold tracking-tight text-foreground">{name}</span>
-        </div>
-
-        {/* Animated icon */}
-        <div className="relative mx-auto mb-8 w-24 h-24">
-          <div className="absolute inset-0 rounded-3xl animate-ping opacity-20" style={{ background: themeColor }} />
-          <div className="relative w-24 h-24 rounded-3xl flex items-center justify-center shadow-lg" style={{ background: `${themeColor}1a`, border: `1px solid ${themeColor}33` }}>
-            <WrenchIcon className="w-11 h-11" style={{ color: themeColor }} />
-          </div>
-        </div>
-
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-medium mb-5" style={{ background: `${themeColor}1a`, color: themeColor }}>
-          <Clock className="w-3.5 h-3.5" />
-          Modo mantenimiento
+        {/* Brand logo (image-based) */}
+        <div className="flex justify-center mb-12">
+          <Logo
+            value={company.logo_value || ''}
+            fallbackText={name}
+            pixelSize={72}
+            pixelHeight={72}
+          />
         </div>
 
         <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground mb-4">
           Volveremos pronto
         </h1>
-        <p className="text-muted-foreground text-base sm:text-lg leading-relaxed max-w-md mx-auto mb-10">
+        <p className="text-muted-foreground text-base sm:text-lg leading-relaxed max-w-md mx-auto mb-8">
           {msg}
         </p>
 
-        {/* Feature pills */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-10">
-          {[
-            { icon: ShieldCheck, label: 'Mejoras de seguridad' },
-            { icon: Clock, label: 'Mantenimiento programado' },
-            { icon: Mail, label: 'Soporte disponible' },
-          ].map((f) => (
-            <div key={f.label} className="flex items-center gap-2.5 px-4 py-3 rounded-xl border border-border bg-card/50 backdrop-blur-sm">
-              <f.icon className="w-4 h-4 shrink-0" style={{ color: themeColor }} />
-              <span className="text-sm text-muted-foreground text-left">{f.label}</span>
+        {/* Optional countdown timer */}
+        {showCountdown && remaining !== null && remaining > 0 && (() => {
+          const { d, h, m, s } = formatCountdown(remaining);
+          const units = [
+            { v: d, l: 'Días' },
+            { v: h, l: 'Horas' },
+            { v: m, l: 'Min' },
+            { v: s, l: 'Seg' },
+          ];
+          return (
+            <div className="flex justify-center gap-2 sm:gap-3 mb-8">
+              {units.map((u, i) => (
+                <div key={i} className="flex flex-col items-center">
+                  <div
+                    className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center text-2xl sm:text-3xl font-bold tabular-nums"
+                    style={{ background: `${themeColor}12`, border: `1px solid ${themeColor}26`, color: themeColor }}
+                  >
+                    {String(u.v).padStart(2, '0')}
+                  </div>
+                  <span className="text-[10px] sm:text-xs text-muted-foreground mt-1.5 uppercase tracking-wider">{u.l}</span>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          );
+        })()}
 
-        {user && ADMIN_BYPASS_ROLES.includes((user as any).role) ? (
+        {isAdmin ? (
           <a href="/dashboard" className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-white shadow-lg transition-all hover:shadow-xl hover:-translate-y-0.5" style={{ background: themeColor }}>
             Ir al panel de administración
             <ArrowRight className="w-4 h-4" />
           </a>
-        ) : (
-          <a href="/" className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-medium border border-border bg-card text-foreground hover:bg-muted transition-colors">
-            <ArrowRight className="w-4 h-4 rotate-180" />
-            Reintentar
-          </a>
-        )}
+        ) : null}
       </div>
     </div>
   );
@@ -136,8 +174,10 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
 
 function WhatsAppGate() {
   const { pathname } = useLocation();
+  const { company } = useConfig();
   const isLanding = LANDING_PATHS.some(p => pathname === p || pathname.startsWith(p + '?'));
-  if (!isLanding) return null;
+  const isMaintenanceOn = company.maintenance_mode === 'true';
+  if (!isLanding || isMaintenanceOn) return null;
   return <WhatsAppButton />;
 }
 

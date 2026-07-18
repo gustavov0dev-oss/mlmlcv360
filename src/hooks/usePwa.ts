@@ -16,19 +16,20 @@ function buildIcons(iconValue: string | undefined) {
   if (isSvg) {
     const enc = encodeURIComponent(icon);
     return [
-      { src: `data:image/svg+xml,${enc}`, sizes: '192x192', type: 'image/svg+xml', purpose: 'any maskable' },
-      { src: `data:image/svg+xml,${enc}`, sizes: '512x512', type: 'image/svg+xml', purpose: 'any maskable' },
+      { src: `data:image/svg+xml,${enc}`, sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
+      { src: `data:image/svg+xml,${enc}`, sizes: 'any', type: 'image/svg+xml', purpose: 'maskable' },
     ];
   }
   if (isUrl) {
     return [
-      { src: icon, sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
-      { src: icon, sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
+      { src: icon, sizes: '192x192', type: 'image/png', purpose: 'any' },
+      { src: icon, sizes: '512x512', type: 'image/png', purpose: 'any' },
+      { src: icon, sizes: '512x512', type: 'image/png', purpose: 'maskable' },
     ];
   }
   return [
-    { src: FALLBACK_ICON_192, sizes: '192x192', type: 'image/svg+xml', purpose: 'any maskable' },
-    { src: FALLBACK_ICON_512, sizes: '512x512', type: 'image/svg+xml', purpose: 'any maskable' },
+    { src: FALLBACK_ICON_192, sizes: '192x192', type: 'image/svg+xml', purpose: 'any' },
+    { src: FALLBACK_ICON_512, sizes: '512x512', type: 'image/svg+xml', purpose: 'any' },
   ];
 }
 
@@ -80,8 +81,9 @@ export function usePwa() {
       screenshots: buildScreenshots(company),
     };
 
-    const blob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
-    const url = URL.createObjectURL(blob);
+    // Use data URL instead of blob URL for better PWA install support across browsers
+    const manifestStr = JSON.stringify(manifest);
+    const url = `data:application/manifest+json,${encodeURIComponent(manifestStr)}`;
 
     let link = document.head.querySelector('link[rel="manifest"]') as HTMLLinkElement | null;
     if (!link) {
@@ -99,8 +101,13 @@ export function usePwa() {
     }
     themeMeta.content = themeColor;
 
+    // Register service worker for PWA installability
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    }
+
     return () => {
-      URL.revokeObjectURL(url);
+      // data URLs don't need revocation
     };
   }, [company]);
 }
