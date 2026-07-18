@@ -1,4 +1,4 @@
-import { useState, useEffect, Fragment } from "react";
+import { useState, useEffect, useRef, Fragment } from "react";
 import { useDatabase, useStorage } from "@/lib/backend";
 import { useAuthStore } from "@/store/authStore";
 import { useSearchParams } from "@/lib/router";
@@ -28,9 +28,10 @@ import {
   Wrench,
   TriangleAlert as AlertTriangle,
   Image,
+  GripVertical,
 } from "lucide-react";
 import { useConfig, type Plan, type Rank } from "@/store/configStore";
-import Logo, { LogoWithText } from "@/components/Logo";
+import Logo from "@/components/Logo";
 import { DeleteConfirmDialog } from "@/components/admin/DeleteConfirmDialog";
 
 // Smart icon renderer: detects SVG markup, URL images, emoji, or plain text
@@ -2136,6 +2137,89 @@ export default function AdminPage() {
   );
 }
 
+// ── Shared helpers for Ranks form ──
+const RANK_COLORS = [
+  { name: 'Ámbar', text: 'text-amber-600', bg: 'bg-amber-500/10', border: 'border-amber-500/30', dot: '#d97706' },
+  { name: 'Cian', text: 'text-cyan-600', bg: 'bg-cyan-500/10', border: 'border-cyan-500/30', dot: '#0891b2' },
+  { name: 'Esmeralda', text: 'text-emerald-600', bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', dot: '#059669' },
+  { name: 'Violeta', text: 'text-violet-600', bg: 'bg-violet-500/10', border: 'border-violet-500/30', dot: '#7c3aed' },
+  { name: 'Rosa', text: 'text-pink-600', bg: 'bg-pink-500/10', border: 'border-pink-500/30', dot: '#db2777' },
+  { name: 'Azul', text: 'text-blue-600', bg: 'bg-blue-500/10', border: 'border-blue-500/30', dot: '#2563eb' },
+  { name: 'Rojo', text: 'text-red-600', bg: 'bg-red-500/10', border: 'border-red-500/30', dot: '#dc2626' },
+  { name: 'Naranja', text: 'text-orange-600', bg: 'bg-orange-500/10', border: 'border-orange-500/30', dot: '#ea580c' },
+  { name: 'Lima', text: 'text-lime-600', bg: 'bg-lime-500/10', border: 'border-lime-500/30', dot: '#65a30d' },
+  { name: 'Gris', text: 'text-slate-600', bg: 'bg-slate-500/10', border: 'border-slate-500/30', dot: '#475569' },
+];
+
+const RANK_ICONS = ['🏆', '🥇', '🥈', '🥉', '💎', '⭐', '👑', '🎖️', '🌟', '🔥', '💪', '🎯', '🚀', '⚡', '🌈', '💎'];
+
+function ColorPreview({ form, setForm }: { form: any; setForm: React.Dispatch<React.SetStateAction<any>> }) {
+  return (
+    <div>
+      <label className="block text-xs font-medium text-foreground mb-1.5">
+        Color del rango
+      </label>
+      <div className="flex flex-wrap gap-2 mb-3">
+        {RANK_COLORS.map((c) => {
+          const selected = form.color === c.text;
+          return (
+            <button
+              key={c.name}
+              type="button"
+              onClick={() => setForm((p: any) => ({ ...p, color: c.text, bg_color: c.bg, border_color: c.border }))}
+              className={cn(
+                'flex items-center gap-2 px-3 py-2 rounded-lg border-2 text-xs font-medium transition-all',
+                selected ? 'border-primary ring-2 ring-primary/20' : 'border-border hover:border-muted-foreground/40'
+              )}
+            >
+              <span className="w-4 h-4 rounded-full" style={{ background: c.dot }} />
+              {c.name}
+            </button>
+          );
+        })}
+      </div>
+      <div className={cn('flex items-center gap-3 p-3 rounded-xl border', form.bg_color, form.border_color)}>
+        <span className="text-2xl">{form.icon || '🏆'}</span>
+        <div>
+          <div className={cn('text-sm font-bold', form.color)}>{form.name || 'Vista previa'}</div>
+          <div className="text-xs text-muted-foreground">{form.description || 'Descripción del rango'}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function IconPicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  return (
+    <div>
+      <label className="block text-xs font-medium text-foreground mb-1.5">
+        Icono
+      </label>
+      <div className="flex flex-wrap gap-2 mb-2">
+        {RANK_ICONS.map((icon) => (
+          <button
+            key={icon}
+            type="button"
+            onClick={() => onChange(icon)}
+            className={cn(
+              'w-10 h-10 rounded-lg border-2 flex items-center justify-center text-xl transition-all',
+              value === icon ? 'border-primary ring-2 ring-primary/20' : 'border-border hover:border-muted-foreground/40'
+            )}
+          >
+            {icon}
+          </button>
+        ))}
+      </div>
+      <input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="O pega un emoji/nombre Lucide/URL SVG"
+        className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary"
+      />
+    </div>
+  );
+}
+
 // ── Plans Manager ──
 function PlansManager() {
   const { refresh } = useConfig();
@@ -2146,6 +2230,48 @@ function PlansManager() {
   const [allPlans, setAllPlans] = useState<Plan[]>([]);
   const [deleteTarget, setDeleteTarget] = useState<Plan | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [reordering, setReordering] = useState(false);
+  const dragIndex = useRef<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+    dragIndex.current = index;
+    setIsDragging(true);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+  const handleDragEnd = () => {
+    dragIndex.current = null;
+    setDragOverIndex(null);
+    setIsDragging(false);
+  };
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (dragIndex.current !== null && dragIndex.current !== index) setDragOverIndex(index);
+  };
+  const handleDrop = async (e: React.DragEvent<HTMLDivElement>, dropIndex: number) => {
+    e.preventDefault();
+    const fromIndex = dragIndex.current;
+    setDragOverIndex(null);
+    setIsDragging(false);
+    dragIndex.current = null;
+    if (fromIndex === null || fromIndex === dropIndex) return;
+    const reordered = [...allPlans];
+    const [moved] = reordered.splice(fromIndex, 1);
+    reordered.splice(dropIndex, 0, moved);
+    const withNewOrder = reordered.map((p, i) => ({ ...p, sort_order: i }));
+    setAllPlans(withNewOrder);
+    setReordering(true);
+    await Promise.all(
+      withNewOrder.map((p) =>
+        database.update('plans', p.id, { sort_order: p.sort_order, updated_at: new Date().toISOString() })
+      )
+    );
+    setReordering(false);
+    refresh();
+    toast.success('Orden actualizado');
+  };
 
   const fetchAll = async () => {
     const { data } = await database.select<Plan>("plans", {
@@ -2227,7 +2353,7 @@ function PlansManager() {
             Gestión de Planes
           </h2>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Crea, edita y gestiona los planes de suscripción.
+            Crea, edita y gestiona los planes de suscripción. Arrastra para reordenar.
           </p>
         </div>
         <button
@@ -2253,11 +2379,23 @@ function PlansManager() {
         />
       ) : (
         <div className="space-y-3">
-          {allPlans.map((plan) => (
+          {allPlans.map((plan, i) => (
             <div
               key={plan.id}
-              className="bg-card border border-border rounded-xl p-4 flex items-center gap-4"
+              draggable
+              onDragStart={(e) => handleDragStart(e, i)}
+              onDragEnd={handleDragEnd}
+              onDragOver={(e) => handleDragOver(e, i)}
+              onDrop={(e) => handleDrop(e, i)}
+              className={cn(
+                'bg-card border border-border rounded-xl p-4 flex items-center gap-4 transition-all',
+                isDragging && dragIndex.current === i && 'opacity-40',
+                dragOverIndex === i && 'border-primary ring-2 ring-primary/30'
+              )}
             >
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <GripVertical className="w-4 h-4 text-muted-foreground/50 cursor-grab active:cursor-grabbing" />
+              </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-sm font-bold text-foreground">
@@ -2340,6 +2478,7 @@ function PlansManager() {
               </div>
             </div>
           ))}
+          {reordering && <RefreshCw className="w-3.5 h-3.5 text-muted-foreground animate-spin ml-auto" />}
           {allPlans.length === 0 && (
             <div className="text-center py-12 text-muted-foreground text-sm">
               No hay planes. Crea el primero.
@@ -2391,12 +2530,20 @@ function PlanForm({
     trial_days: String(plan?.trial_days ?? "0"),
     features: (plan?.features || []).join("\n"),
   });
+  const [slugTouched, setSlugTouched] = useState(!!plan?.slug);
+
+  const generateSlug = (name: string) =>
+    name.toLowerCase().trim().replace(/[^a-z0-9\s-]/g, '').replace(/[\s-]+/g, '-').replace(/^-+|-+$/g, '');
+
+  const handleNameChange = (value: string) => {
+    setForm((p) => ({ ...p, name: value, slug: slugTouched ? p.slug : generateSlug(value) }));
+  };
 
   const handleSave = () => {
     onSave({
       ...(plan?.id ? { id: plan.id } : {}),
       name: form.name,
-      slug: form.slug || form.name.toLowerCase().replace(/\s+/g, "-"),
+      slug: form.slug || generateSlug(form.name),
       description: form.description,
       price: Number(form.price) || 0,
       badge: form.badge || null,
@@ -2429,7 +2576,7 @@ function PlanForm({
           </label>
           <input
             value={form.name}
-            onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
+            onChange={(e) => handleNameChange(e.target.value)}
             placeholder="Pro"
             className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary"
           />
@@ -2441,6 +2588,7 @@ function PlanForm({
           <input
             value={form.slug}
             onChange={(e) => setForm((p) => ({ ...p, slug: e.target.value }))}
+            onFocus={() => setSlugTouched(true)}
             placeholder="pro"
             className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary"
           />
@@ -2586,6 +2734,48 @@ function RanksManager() {
   const [allRanks, setAllRanks] = useState<Rank[]>([]);
   const [deleteTarget, setDeleteTarget] = useState<Rank | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [reordering, setReordering] = useState(false);
+  const dragIndex = useRef<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+    dragIndex.current = index;
+    setIsDragging(true);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+  const handleDragEnd = () => {
+    dragIndex.current = null;
+    setDragOverIndex(null);
+    setIsDragging(false);
+  };
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (dragIndex.current !== null && dragIndex.current !== index) setDragOverIndex(index);
+  };
+  const handleDrop = async (e: React.DragEvent<HTMLDivElement>, dropIndex: number) => {
+    e.preventDefault();
+    const fromIndex = dragIndex.current;
+    setDragOverIndex(null);
+    setIsDragging(false);
+    dragIndex.current = null;
+    if (fromIndex === null || fromIndex === dropIndex) return;
+    const reordered = [...allRanks];
+    const [moved] = reordered.splice(fromIndex, 1);
+    reordered.splice(dropIndex, 0, moved);
+    const withNewOrder = reordered.map((r, i) => ({ ...r, sort_order: i }));
+    setAllRanks(withNewOrder);
+    setReordering(true);
+    await Promise.all(
+      withNewOrder.map((r) =>
+        database.update('ranks', r.id, { sort_order: r.sort_order, updated_at: new Date().toISOString() })
+      )
+    );
+    setReordering(false);
+    refresh();
+    toast.success('Orden actualizado');
+  };
 
   const fetchAll = async () => {
     const { data } = await database.select<Rank>("ranks", {
@@ -2646,7 +2836,7 @@ function RanksManager() {
             Gestión de Rangos
           </h2>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Crea, edita y gestiona los rangos del sistema MLM.
+            Crea, edita y gestiona los rangos del sistema MLM. Arrastra para reordenar.
           </p>
         </div>
         <button
@@ -2672,11 +2862,23 @@ function RanksManager() {
         />
       ) : (
         <div className="space-y-3">
-          {allRanks.map((rank) => (
+          {allRanks.map((rank, i) => (
             <div
               key={rank.id}
-              className="bg-card border border-border rounded-xl p-4 flex items-center gap-4"
+              draggable
+              onDragStart={(e) => handleDragStart(e, i)}
+              onDragEnd={handleDragEnd}
+              onDragOver={(e) => handleDragOver(e, i)}
+              onDrop={(e) => handleDrop(e, i)}
+              className={cn(
+                'bg-card border border-border rounded-xl p-4 flex items-center gap-4 transition-all',
+                isDragging && dragIndex.current === i && 'opacity-40',
+                dragOverIndex === i && 'border-primary ring-2 ring-primary/30'
+              )}
             >
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <GripVertical className="w-4 h-4 text-muted-foreground/50 cursor-grab active:cursor-grabbing" />
+              </div>
               <div
                 className={cn(
                   "w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0",
@@ -2738,6 +2940,7 @@ function RanksManager() {
               </div>
             </div>
           ))}
+          {reordering && <RefreshCw className="w-3.5 h-3.5 text-muted-foreground animate-spin ml-auto" />}
           {allRanks.length === 0 && (
             <div className="text-center py-12 text-muted-foreground text-sm">
               No hay rangos. Crea el primero.
@@ -2790,12 +2993,20 @@ function RankForm({
     sort_order: String(rank?.sort_order ?? "0"),
     is_active: rank?.is_active ?? true,
   });
+  const [slugTouched, setSlugTouched] = useState(!!rank?.slug);
+
+  const generateSlug = (name: string) =>
+    name.toLowerCase().trim().replace(/[^a-z0-9\s-]/g, '').replace(/[\s-]+/g, '-').replace(/^-+|-+$/g, '');
+
+  const handleNameChange = (value: string) => {
+    setForm((p) => ({ ...p, name: value, slug: slugTouched ? p.slug : generateSlug(value) }));
+  };
 
   const handleSave = () => {
     onSave({
       ...(rank?.id ? { id: rank.id } : {}),
       name: form.name,
-      slug: form.slug || form.name.toLowerCase().replace(/\s+/g, "-"),
+      slug: form.slug || generateSlug(form.name),
       description: form.description,
       icon: form.icon,
       color: form.color,
@@ -2829,7 +3040,7 @@ function RankForm({
           </label>
           <input
             value={form.name}
-            onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
+            onChange={(e) => handleNameChange(e.target.value)}
             placeholder="Diamante"
             className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary"
           />
@@ -2841,6 +3052,7 @@ function RankForm({
           <input
             value={form.slug}
             onChange={(e) => setForm((p) => ({ ...p, slug: e.target.value }))}
+            onFocus={() => setSlugTouched(true)}
             placeholder="diamond"
             className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary"
           />
@@ -2902,60 +3114,8 @@ function RankForm({
           />
         </div>
       </div>
-      <div className="grid grid-cols-3 gap-4">
-        <div>
-          <label className="block text-xs font-medium text-foreground mb-1.5">
-            Color texto
-          </label>
-          <input
-            value={form.color}
-            onChange={(e) => setForm((p) => ({ ...p, color: e.target.value }))}
-            placeholder="text-cyan-400"
-            className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary font-mono"
-          />
-        </div>
-        <div>
-          <label className="block text-xs font-medium text-foreground mb-1.5">
-            Color fondo
-          </label>
-          <input
-            value={form.bg_color}
-            onChange={(e) =>
-              setForm((p) => ({ ...p, bg_color: e.target.value }))
-            }
-            placeholder="bg-cyan-400/10"
-            className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary font-mono"
-          />
-        </div>
-        <div>
-          <label className="block text-xs font-medium text-foreground mb-1.5">
-            Color borde
-          </label>
-          <input
-            value={form.border_color}
-            onChange={(e) =>
-              setForm((p) => ({ ...p, border_color: e.target.value }))
-            }
-            placeholder="border-cyan-400/30"
-            className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary font-mono"
-          />
-        </div>
-      </div>
-      <div>
-        <label className="block text-xs font-medium text-foreground mb-1.5">
-          Icono (emoji, nombre Lucide, o URL SVG)
-        </label>
-        <input
-          value={form.icon}
-          onChange={(e) => setForm((p) => ({ ...p, icon: e.target.value }))}
-          placeholder="medal, gem, crown, o emoji, o URL"
-          className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary"
-        />
-        <p className="text-xs text-muted-foreground mt-1">
-          Opciones: medal, gem, crown, disc, star, award - o un emoji - o URL de
-          imagen SVG
-        </p>
-      </div>
+      <ColorPreview form={form} setForm={setForm} />
+      <IconPicker value={form.icon} onChange={(v) => setForm((p) => ({ ...p, icon: v }))} />
       <div>
         <label className="block text-xs font-medium text-foreground mb-1.5">
           Descripción
