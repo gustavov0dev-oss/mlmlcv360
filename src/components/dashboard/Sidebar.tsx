@@ -451,7 +451,7 @@ export default function Sidebar() {
           {sidebarCollapsed ? (
             /* Collapsed: static 40px square logo — independent of main logo size */
             <div
-              className="rounded-xl overflow-hidden flex items-center justify-center bg-muted/50 border border-border/50 flex-shrink-0"
+              className="rounded-xl overflow-hidden flex items-center justify-center  flex-shrink-0"
               style={{ width: '40px', height: '40px' }}
             >
               {effectiveLogoCollapsed ? (

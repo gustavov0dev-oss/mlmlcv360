@@ -382,7 +382,7 @@ export default function DashboardHeader() {
       placeholder="Buscar usuarios, productos..."
       className="
         w-full
-        h-11
+        h-10
         pl-11
         pr-[5.5rem]
         rounded-2xl

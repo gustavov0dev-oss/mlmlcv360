@@ -390,7 +390,11 @@ export default function AdminPage() {
   const handleFaviconFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!file.type.startsWith("image/") && file.type !== "image/svg+xml" && file.type !== "image/x-icon") {
+    if (
+      !file.type.startsWith("image/") &&
+      file.type !== "image/svg+xml" &&
+      file.type !== "image/x-icon"
+    ) {
       toast.error("Solo se permiten archivos de imagen (PNG, ICO, SVG)");
       return;
     }
@@ -674,12 +678,16 @@ export default function AdminPage() {
                       Tamano del logo
                     </h3>
                     <p className="text-xs text-muted-foreground mb-3">
-                      Ancho y alto independientes. El logo colapsado del
-                      sidebar es siempre cuadrado de 40px. Mira la vista previa →
+                      El ancho se aplica exacto, igual que en el navbar real. El
+                      alto es una referencia de espacio maximo (el logo no se
+                      deforma). El logo colapsado del sidebar es siempre
+                      cuadrado de 40px. Mira la vista previa →
                     </p>
                     <div className="space-y-3">
                       <div className="flex items-center gap-3">
-                        <label className="text-xs font-medium text-foreground w-16 shrink-0">Ancho</label>
+                        <label className="text-xs font-medium text-foreground w-16 shrink-0">
+                          Ancho
+                        </label>
                         <input
                           type="range"
                           min="16"
@@ -696,10 +704,14 @@ export default function AdminPage() {
                           onChange={(e) => setC("logo_size", e.target.value)}
                           className="w-20 px-2 py-1.5 bg-muted border border-border rounded text-foreground text-sm text-center"
                         />
-                        <span className="text-xs text-muted-foreground w-8">px</span>
+                        <span className="text-xs text-muted-foreground w-8">
+                          px
+                        </span>
                       </div>
                       <div className="flex items-center gap-3">
-                        <label className="text-xs font-medium text-foreground w-16 shrink-0">Alto</label>
+                        <label className="text-xs font-medium text-foreground w-16 shrink-0">
+                          Alto max.
+                        </label>
                         <input
                           type="range"
                           min="16"
@@ -716,7 +728,9 @@ export default function AdminPage() {
                           onChange={(e) => setC("logo_height", e.target.value)}
                           className="w-20 px-2 py-1.5 bg-muted border border-border rounded text-foreground text-sm text-center"
                         />
-                        <span className="text-xs text-muted-foreground w-8">px</span>
+                        <span className="text-xs text-muted-foreground w-8">
+                          px
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -832,7 +846,10 @@ export default function AdminPage() {
                     </div>
                   </div>
 
-                  {/* Single unified preview — every frame has a FIXED size, so the slider never grows the layout */}
+                  {/* Unified preview — el recuadro punteado semi-transparente = espacio real reservado (Ancho x Alto max).
+                      IMPORTANTE: el ANCHO del logo se fija exacto (style width: ancho, height: auto) —
+                      NUNCA se reduce por el alto. Asi el preview coincide con lo que se aplica en el navbar real,
+                      que solo respeta el ancho configurado y calcula el alto natural segun la proporcion del logo. */}
                   <div className="pt-4 border-t border-border">
                     <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
                       Vista previa
@@ -840,29 +857,68 @@ export default function AdminPage() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div className="bg-muted/30 rounded-xl p-3 text-center">
                         <p className="text-[10px] text-muted-foreground mb-2">
-                          Navbar / Sidebar
+                          Navbar / Sidebar (ancho real: {c("logo_size") || 36}
+                          px)
                         </p>
-                        <div className="flex items-center justify-center h-20 bg-card border border-border rounded-lg overflow-hidden px-2">
-                          <LogoWithText
-                            value={c("logo_value")}
-                            fallbackText={c("company_name") || "MLM"}
-                            pixelSize={Math.min(
-                              parseInt(c("logo_size")) || 36,
-                              56,
+                        <div className="flex items-center justify-center h-40 bg-card border border-border rounded-lg overflow-visible px-3">
+                          {/* Recuadro guia punteado = alto MAXIMO de referencia (no fuerza el logo) */}
+                          <div
+                            className="relative flex items-center justify-center border border-dashed border-primary/40 bg-primary/5 rounded"
+                            style={{
+                              width: parseInt(c("logo_size")) || 36,
+                              height:
+                                parseInt(c("logo_height")) ||
+                                parseInt(c("logo_size")) ||
+                                36,
+                              maxWidth: "100%",
+                            }}
+                          >
+                            {/* El logo: ANCHO exacto = logo_size (igual que en el nav real), alto automatico */}
+                            {c("logo_value") ? (
+                              c("logo_value")
+                                .toLowerCase()
+                                .startsWith("<svg") ? (
+                                <span
+                                  style={{
+                                    width: parseInt(c("logo_size")) || 36,
+                                    height: "auto",
+                                  }}
+                                  className="[&_svg]:w-full [&_svg]:h-auto"
+                                  dangerouslySetInnerHTML={{
+                                    __html: c("logo_value"),
+                                  }}
+                                />
+                              ) : (
+                                <img
+                                  src={c("logo_value")}
+                                  alt=""
+                                  style={{
+                                    width: parseInt(c("logo_size")) || 36,
+                                    height: "auto",
+                                  }}
+                                />
+                              )
+                            ) : (
+                              <div
+                                style={{
+                                  width: parseInt(c("logo_size")) || 36,
+                                }}
+                                className="flex items-center justify-center rounded bg-primary/20 text-primary font-bold text-xs py-1"
+                              >
+                                {(c("company_name") || "MLM")
+                                  .slice(0, 2)
+                                  .toUpperCase()}
+                              </div>
                             )}
-                            pixelHeight={Math.min(
-                              parseInt(c("logo_height")) || parseInt(c("logo_size")) || 36,
-                              64,
-                            )}
-                          />
+                          </div>
                         </div>
                       </div>
                       <div className="bg-muted/30 rounded-xl p-3 text-center">
                         <p className="text-[10px] text-muted-foreground mb-2">
                           Colapsado (40px)
                         </p>
-                        <div className="flex items-center justify-center h-20 bg-card border border-border rounded-lg overflow-hidden">
-                          <div className="flex items-center justify-center w-10 h-10 bg-muted/50 border border-border rounded-lg overflow-hidden">
+                        <div className="flex items-center justify-center h-40 bg-card border border-border rounded-lg overflow-hidden">
+                          <div className="flex items-center justify-center w-10 h-10 bg-primary/10 border border-dashed border-primary/40 rounded-lg overflow-hidden">
                             {c("logo_collapsed_value") ? (
                               c("logo_collapsed_value")
                                 .toLowerCase()
@@ -893,6 +949,13 @@ export default function AdminPage() {
                         </div>
                       </div>
                     </div>
+                    <p className="text-[10px] text-muted-foreground/70 mt-2">
+                      El recuadro punteado marca el alto maximo de referencia.
+                      El ancho del logo es siempre exacto al valor configurado,
+                      igual que en el navbar real — si el logo sobresale del
+                      recuadro en alto, es porque su proporcion natural lo pide
+                      asi.
+                    </p>
                   </div>
                 </div>
               </div>
@@ -1498,11 +1561,11 @@ export default function AdminPage() {
                 </p>
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="space-y-5">
-                  <div className="space-y-3">
-                    <h3 className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-                      Metadatos básicos
-                    </h3>
+                {/* Columna 1: SOLO metadatos de texto (se cierra aqui, no antes) */}
+                <div className="space-y-3">
+                  <h3 className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                    Metadatos básicos
+                  </h3>
                   <div>
                     <label className="block text-xs font-medium text-foreground mb-1.5">
                       Título de la página
@@ -1548,90 +1611,107 @@ export default function AdminPage() {
                       className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-foreground text-sm outline-none focus:border-primary transition-colors"
                     />
                   </div>
-                  </div>
-                  </div>
-                  <div className="space-y-3 pt-2 border-t border-border">
+                </div>
+
+                {/* Columna 2: SOLO recursos visuales — Favicon + Imagen OG juntos */}
+                <div className="space-y-5">
+                  <div className="space-y-3">
                     <h3 className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
                       Recursos visuales
                     </h3>
-                  <div>
-                    <label className="block text-xs font-medium text-foreground mb-1.5">
-                      Favicon
-                    </label>
-                    <p className="text-[10px] text-muted-foreground mb-2">
-                      Icono que aparece en la pestana del navegador. PNG, ICO o SVG — 32x32px recomendado
-                    </p>
-                    <input
-                      value={c("favicon_value")}
-                      onChange={(e) => setC("favicon_value", e.target.value)}
-                      placeholder="https://mlm360.pe/favicon.ico"
-                      className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-foreground text-sm outline-none focus:border-primary transition-colors"
-                    />
-                    <label
-                      className={cn(
-                        "flex flex-col items-center justify-center gap-1.5 w-full h-20 mt-2 border-2 border-dashed rounded-lg cursor-pointer transition-colors hover:border-primary/50 hover:bg-primary/5",
-                        uploadingFavicon ? "opacity-50 pointer-events-none" : "",
-                        "border-border",
-                      )}
-                    >
+
+                    <div>
+                      <label className="block text-xs font-medium text-foreground mb-1.5">
+                        Favicon
+                      </label>
+                      <p className="text-[10px] text-muted-foreground mb-2">
+                        Icono que aparece en la pestana del navegador. PNG, ICO
+                        o SVG — 32x32px recomendado
+                      </p>
                       <input
-                        type="file"
-                        accept="image/*,.ico,.svg"
-                        className="sr-only"
-                        onChange={handleFaviconFile}
-                        disabled={uploadingFavicon}
+                        value={c("favicon_value")}
+                        onChange={(e) => setC("favicon_value", e.target.value)}
+                        placeholder="https://mlm360.pe/favicon.ico"
+                        className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-foreground text-sm outline-none focus:border-primary transition-colors"
                       />
-                      {uploadingFavicon ? (
-                        <RefreshCw className="w-4 h-4 text-primary animate-spin" />
-                      ) : (
-                        <Image className="w-4 h-4 text-muted-foreground" />
-                      )}
-                      <span className="text-xs text-muted-foreground">
-                        {uploadingFavicon
-                          ? "Subiendo..."
-                          : "Subir favicon desde archivo"}
-                      </span>
-                      <span className="text-[10px] text-muted-foreground/60">
-                        PNG, ICO, SVG — 32x32px
-                      </span>
-                    </label>
-                    {c("favicon_value") ? (
-                      <div className="mt-2 flex items-center gap-3 p-3 rounded-lg border border-border bg-muted/30">
-                        <div className="w-8 h-8 bg-card border border-border rounded-md overflow-hidden flex items-center justify-center flex-shrink-0">
-                          {c("favicon_value").toLowerCase().startsWith("<svg") ? (
-                            <span
-                              className="[&_svg]:w-6 [&_svg]:h-6"
-                              dangerouslySetInnerHTML={{
-                                __html: c("favicon_value"),
-                              }}
-                            />
-                          ) : (
-                            <img
-                              src={c("favicon_value")}
-                              alt="Favicon"
-                              className="w-6 h-6 object-contain"
-                              onError={(e) => {
-                                e.currentTarget.style.display = "none";
-                              }}
-                            />
-                          )}
-                        </div>
-                        <span className="text-xs text-muted-foreground truncate flex-1">
-                          Vista previa del favicon
+                      <label
+                        className={cn(
+                          "flex flex-col items-center justify-center gap-1.5 w-full h-20 mt-2 border-2 border-dashed rounded-lg cursor-pointer transition-colors hover:border-primary/50 hover:bg-primary/5",
+                          uploadingFavicon
+                            ? "opacity-50 pointer-events-none"
+                            : "",
+                          "border-border",
+                        )}
+                      >
+                        <input
+                          type="file"
+                          accept="image/*,.ico,.svg"
+                          className="sr-only"
+                          onChange={handleFaviconFile}
+                          disabled={uploadingFavicon}
+                        />
+                        {uploadingFavicon ? (
+                          <RefreshCw className="w-4 h-4 text-primary animate-spin" />
+                        ) : (
+                          <Image className="w-4 h-4 text-muted-foreground" />
+                        )}
+                        <span className="text-xs text-muted-foreground">
+                          {uploadingFavicon
+                            ? "Subiendo..."
+                            : "Subir favicon desde archivo"}
                         </span>
-                        <button
-                          onClick={() => setC("favicon_value", "")}
-                          title="Eliminar favicon"
-                          className="flex items-center justify-center w-8 h-8 bg-destructive/10 hover:bg-destructive/20 text-destructive border border-destructive/20 rounded-lg transition-colors"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    ) : null}
+                        <span className="text-[10px] text-muted-foreground/60">
+                          PNG, ICO, SVG — 32x32px
+                        </span>
+                      </label>
+                      {c("favicon_value") ? (
+                        <div className="mt-2 flex items-center gap-3 p-3 rounded-lg border border-border bg-muted/30">
+                          <div className="w-8 h-8 bg-card border border-border rounded-md overflow-hidden flex items-center justify-center flex-shrink-0">
+                            {c("favicon_value")
+                              .toLowerCase()
+                              .startsWith("<svg") ? (
+                              <span
+                                className="[&_svg]:w-6 [&_svg]:h-6"
+                                dangerouslySetInnerHTML={{
+                                  __html: c("favicon_value"),
+                                }}
+                              />
+                            ) : (
+                              <img
+                                src={c("favicon_value")}
+                                alt="Favicon"
+                                className="w-6 h-6 object-contain"
+                                onError={(e) => {
+                                  e.currentTarget.style.display = "none";
+                                }}
+                              />
+                            )}
+                          </div>
+                          <span className="text-xs text-muted-foreground truncate flex-1">
+                            Vista previa del favicon
+                          </span>
+                          <button
+                            onClick={() => setC("favicon_value", "")}
+                            title="Eliminar favicon"
+                            className="flex items-center justify-center w-8 h-8 bg-destructive/10 hover:bg-destructive/20 text-destructive border border-destructive/20 rounded-lg transition-colors"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="mt-2 flex items-center gap-3 p-3 rounded-lg border border-dashed border-border bg-muted/10">
+                          <div className="w-8 h-8 bg-card border border-border rounded-md overflow-hidden flex items-center justify-center flex-shrink-0">
+                            <Image className="w-3.5 h-3.5 text-muted-foreground/40" />
+                          </div>
+                          <span className="text-xs text-muted-foreground/50 flex-1">
+                            Sin favicon configurado aún
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-                <div className="space-y-4">
-                  <div>
+
+                  <div className="pt-4 border-t border-border">
                     <label className="block text-xs font-medium text-foreground mb-1.5">
                       Imagen Open Graph
                     </label>
@@ -1958,16 +2038,25 @@ export default function AdminPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div
-                    className={cn(
-                      "flex items-center justify-between p-4 rounded-xl border-2 transition-colors gap-3",
-                      c("maintenance_mode") === "true"
-                        ? "bg-amber-500/10 border-amber-500/30"
-                        : "bg-emerald-500/10 border-green-500/20",
-                    )}
-                  >
+              {/* Estado — ancho completo */}
+              <div className="space-y-3 mb-6">
+                <div
+                  className={cn(
+                    "flex items-center justify-between p-4 rounded-xl border-2 transition-colors gap-3",
+                    c("maintenance_mode") === "true"
+                      ? "bg-amber-500/10 border-amber-500/30"
+                      : "bg-emerald-500/10 border-green-500/20",
+                  )}
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div
+                      className={cn(
+                        "w-2.5 h-2.5 rounded-full shrink-0",
+                        c("maintenance_mode") === "true"
+                          ? "bg-amber-500 animate-pulse"
+                          : "bg-emerald-500",
+                      )}
+                    />
                     <div className="min-w-0">
                       <div className="text-sm font-semibold text-foreground">
                         {c("maintenance_mode") === "true"
@@ -1980,45 +2069,42 @@ export default function AdminPage() {
                           : "Todos los usuarios pueden acceder normalmente."}
                       </div>
                     </div>
-                    <ToggleSwitch
-                      checked={c("maintenance_mode") === "true"}
-                      onChange={(v) => {
-                        setC("maintenance_mode", String(v));
-                      }}
-                    />
                   </div>
-
-                  {c("maintenance_mode") === "true" && (
-                    <div className="flex items-start gap-2.5 bg-amber-500/10 border border-amber-500/20 rounded-lg p-3.5">
-                      <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
-                      <p className="text-xs text-amber-700 dark:text-amber-300">
-                        El modo mantenimiento está <strong>ACTIVO</strong>. Solo
-                        los administradores y superadmins pueden acceder al
-                        sistema.
-                      </p>
-                    </div>
-                  )}
+                  <ToggleSwitch
+                    checked={c("maintenance_mode") === "true"}
+                    onChange={(v) => {
+                      setC("maintenance_mode", String(v));
+                    }}
+                  />
                 </div>
 
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-medium text-foreground mb-1.5">
-                      Mensaje para los usuarios
-                    </label>
-                    <textarea
-                      value={c("maintenance_message")}
-                      onChange={(e) =>
-                        setC("maintenance_message", e.target.value)
-                      }
-                      rows={3}
-                      placeholder="Estamos realizando mejoras. Volvemos pronto."
-                      className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors resize-none"
-                    />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Este mensaje se mostrará en la página de mantenimiento.
+                {c("maintenance_mode") === "true" && (
+                  <div className="flex items-start gap-2.5 bg-amber-500/10 border border-amber-500/20 rounded-lg p-3.5">
+                    <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                    <p className="text-xs text-amber-700 dark:text-amber-300">
+                      El modo mantenimiento está <strong>ACTIVO</strong>. Solo
+                      los administradores y superadmins pueden acceder al
+                      sistema.
                     </p>
                   </div>
-                </div>
+                )}
+              </div>
+
+              {/* Mensaje — una sola columna, ancho completo */}
+              <div className="max-w-xl">
+                <label className="block text-xs font-medium text-foreground mb-1.5">
+                  Mensaje para los usuarios
+                </label>
+                <textarea
+                  value={c("maintenance_message")}
+                  onChange={(e) => setC("maintenance_message", e.target.value)}
+                  rows={3}
+                  placeholder="Estamos realizando mejoras. Volvemos pronto."
+                  className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors resize-none"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Este mensaje se mostrará en la página de mantenimiento.
+                </p>
               </div>
 
               <div className="mt-6 pt-4 border-t border-border flex justify-end">
@@ -2039,7 +2125,6 @@ export default function AdminPage() {
               </div>
             </div>
           )}
-
           {/* ── RANGOS ── */}
           {activeModule === "rangos" && <RanksManager />}
 
