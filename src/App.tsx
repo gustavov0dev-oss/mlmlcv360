@@ -66,7 +66,7 @@ function formatCountdown(ms: number) {
   return { d, h, m, s };
 }
 
-function MaintenancePage() {
+function MaintenancePage({ isAdminBypass = false }: { isAdminBypass?: boolean } = {}) {
   const { company } = useConfig();
   const { user } = useAuthStore();
   const name = company.company_name || 'MLM 360';
@@ -75,7 +75,7 @@ function MaintenancePage() {
   const showCountdown = company.maintenance_countdown_enabled === 'true';
   const countdownDate = company.maintenance_countdown_date || '';
   const remaining = useCountdown(countdownDate);
-  const isAdmin = user && ADMIN_BYPASS_ROLES.includes((user as any).role);
+  const isAdmin = isAdminBypass || (user && ADMIN_BYPASS_ROLES.includes((user as any).role));
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4 py-12 relative overflow-hidden">
@@ -96,16 +96,13 @@ function MaintenancePage() {
       </div>
 
       <div className="w-full max-w-xl text-center">
-        {/* Brand logo (image-based) — max 196px width, responsive */}
+        {/* Brand logo — max 196px width, height auto from image aspect ratio */}
         <div className="flex justify-center mb-12 w-full">
-          <div className="flex justify-center items-center" style={{ maxWidth: '196px', width: '100%' }}>
-            <Logo
-              value={company.logo_value || ''}
-              fallbackText={name}
-              pixelSize={196}
-              imgClass="w-full h-auto"
-            />
-          </div>
+          <Logo
+            value={company.logo_value || ''}
+            fallbackText={name}
+            imgClass="max-w-[196px] w-full h-auto object-contain"
+          />
         </div>
 
         <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground mb-4">
@@ -202,7 +199,8 @@ function MaintenanceGate({ children }: { children: ReactNode }) {
   if (isMaintenanceOn && !isDashboard) {
     if (authLoading) return <AppSkeleton />;
     if (pathname === '/login') return <>{children}</>;
-    if (!isAdmin) return <MaintenancePage />;
+    // Non-admins see the maintenance page; admins see it too but with a bypass bar
+    return <MaintenancePage isAdminBypass={!!isAdmin} />;
   }
 
   return <>{children}</>;
