@@ -2286,6 +2286,7 @@ function PlansManager() {
 
       {showForm ? (
         <PlanForm
+          key={editing?.id || 'new'}
           plan={editing}
           onSave={handleSave}
           onCancel={() => {
@@ -2616,7 +2617,7 @@ function PlanForm({
           Activo
         </label>
       </div>
-      <div className="flex justify-end pt-2">
+      <div className="mt-6 pt-4 border-t border-border flex justify-end">
         <button
           onClick={handleSave}
           disabled={saving}
@@ -2759,6 +2760,7 @@ function RanksManager() {
 
       {showForm ? (
         <RankForm
+          key={editing?.id || 'new'}
           rank={editing}
           onSave={handleSave}
           onCancel={() => {
@@ -2889,8 +2891,8 @@ function RankForm({
     description: rank?.description || "",
     icon: rank?.icon || "🏆",
     color: rank?.color || "#d97706",
-    bg_color: rank?.bg_color || "#f59e0b1a",
-    border_color: rank?.border_color || "#f59e0b4d",
+    bg_color: rank?.bg_color || "",
+    border_color: rank?.border_color || "",
     bonus: String(rank?.bonus ?? ""),
     min_affiliates: String(rank?.min_affiliates ?? ""),
     min_volume: String(rank?.min_volume ?? ""),
@@ -2904,6 +2906,25 @@ function RankForm({
 
   const handleNameChange = (value: string) => {
     setForm((p) => ({ ...p, name: value, slug: slugTouched ? p.slug : generateSlug(value) }));
+  };
+
+  // Derive bg (10% alpha) and border (30% alpha) from a single hex color
+  const hexToRgba = (hex: string, alpha: number) => {
+    const h = hex.replace('#', '');
+    if (h.length !== 6) return hex;
+    const r = parseInt(h.slice(0, 2), 16);
+    const g = parseInt(h.slice(2, 4), 16);
+    const b = parseInt(h.slice(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  };
+
+  const handleColorChange = (hex: string) => {
+    setForm((p) => ({
+      ...p,
+      color: hex,
+      bg_color: hexToRgba(hex, 0.1),
+      border_color: hexToRgba(hex, 0.3),
+    }));
   };
 
   const handleSave = () => {
@@ -2962,18 +2983,18 @@ function RankForm({
           />
         </div>
       </div>
-      <div className="grid grid-cols-4 gap-4">
-        <div>
-          <label className="block text-xs font-medium text-foreground mb-1.5">
-            Icono (emoji)
-          </label>
-          <input
-            value={form.icon}
-            onChange={(e) => setForm((p) => ({ ...p, icon: e.target.value }))}
-            placeholder="💎"
-            className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary text-center text-xl"
-          />
-        </div>
+      <div>
+        <label className="block text-xs font-medium text-foreground mb-1.5">
+          Icono (emoji, SVG, o URL de imagen)
+        </label>
+        <input
+          value={form.icon}
+          onChange={(e) => setForm((p) => ({ ...p, icon: e.target.value }))}
+          placeholder="💎 o <svg...> o https://..."
+          className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary"
+        />
+      </div>
+      <div className="grid grid-cols-3 gap-4">
         <div>
           <label className="block text-xs font-medium text-foreground mb-1.5">
             Bono (S/)
@@ -3020,62 +3041,27 @@ function RankForm({
       </div>
       <div>
         <label className="block text-xs font-medium text-foreground mb-1.5">
-          Color del texto
+          Color del rango
         </label>
         <div className="flex items-center gap-2">
           <input
             type="color"
             value={form.color}
-            onChange={(e) => setForm((p) => ({ ...p, color: e.target.value }))}
+            onChange={(e) => handleColorChange(e.target.value)}
             className="w-10 h-10 rounded-lg border border-border cursor-pointer bg-muted p-1"
           />
           <input
             value={form.color}
-            onChange={(e) => setForm((p) => ({ ...p, color: e.target.value }))}
+            onChange={(e) => handleColorChange(e.target.value)}
             className="flex-1 px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary font-mono"
           />
         </div>
+        <p className="text-xs text-muted-foreground mt-1">
+          El color de fondo y borde se generan automáticamente a partir de este color.
+        </p>
       </div>
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-xs font-medium text-foreground mb-1.5">
-            Color de fondo
-          </label>
-          <div className="flex items-center gap-2">
-            <input
-              type="color"
-              value={form.bg_color}
-              onChange={(e) => setForm((p) => ({ ...p, bg_color: e.target.value }))}
-              className="w-10 h-10 rounded-lg border border-border cursor-pointer bg-muted p-1"
-            />
-            <input
-              value={form.bg_color}
-              onChange={(e) => setForm((p) => ({ ...p, bg_color: e.target.value }))}
-              className="flex-1 px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary font-mono"
-            />
-          </div>
-        </div>
-        <div>
-          <label className="block text-xs font-medium text-foreground mb-1.5">
-            Color del borde
-          </label>
-          <div className="flex items-center gap-2">
-            <input
-              type="color"
-              value={form.border_color}
-              onChange={(e) => setForm((p) => ({ ...p, border_color: e.target.value }))}
-              className="w-10 h-10 rounded-lg border border-border cursor-pointer bg-muted p-1"
-            />
-            <input
-              value={form.border_color}
-              onChange={(e) => setForm((p) => ({ ...p, border_color: e.target.value }))}
-              className="flex-1 px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary font-mono"
-            />
-          </div>
-        </div>
-      </div>
-      <div className="flex items-center gap-3 p-3 rounded-xl border" style={{ background: form.bg_color, borderColor: form.border_color }}>
-        <span className="text-2xl">{form.icon || '🏆'}</span>
+      <div className="flex items-center gap-3 p-3 rounded-xl border" style={{ background: form.bg_color || hexToRgba(form.color, 0.1), borderColor: form.border_color || hexToRgba(form.color, 0.3) }}>
+        <RenderIcon value={form.icon || '🏆'} className="w-7 h-7" />
         <div>
           <div className="text-sm font-bold" style={{ color: form.color }}>{form.name || 'Vista previa'}</div>
           <div className="text-xs text-muted-foreground">{form.description || 'Descripción del rango'}</div>
@@ -3107,7 +3093,7 @@ function RankForm({
           Activo
         </label>
       </div>
-      <div className="flex justify-end pt-2">
+      <div className="mt-6 pt-4 border-t border-border flex justify-end">
         <button
           onClick={handleSave}
           disabled={saving}
