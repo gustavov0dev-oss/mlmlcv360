@@ -2297,6 +2297,10 @@ function PlansManager() {
         />
       ) : (
         <div className="bg-card border border-border rounded-xl overflow-hidden divide-y divide-border">
+          <div className="px-4 py-2 bg-muted/40 flex items-center gap-2">
+            <GripVertical className="w-3.5 h-3.5 text-muted-foreground/50" />
+            <span className="text-xs text-muted-foreground">Arrastra para reordenar</span>
+          </div>
           {allPlans.map((plan, i) => (
             <div
               key={plan.id}
@@ -2771,6 +2775,10 @@ function RanksManager() {
         />
       ) : (
         <div className="bg-card border border-border rounded-xl overflow-hidden divide-y divide-border">
+          <div className="px-4 py-2 bg-muted/40 flex items-center gap-2">
+            <GripVertical className="w-3.5 h-3.5 text-muted-foreground/50" />
+            <span className="text-xs text-muted-foreground">Arrastra para reordenar</span>
+          </div>
           {allRanks.map((rank, i) => (
             <div
               key={rank.id}

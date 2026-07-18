@@ -401,13 +401,15 @@ export default function RolesAdminPage() {
                   value={selectedRole.color}
                   onChange={c => setSelectedRole(p => p ? { ...p, color: c } : p)} />
               </div>
-              <button
-                onClick={saveRole}
-                disabled={saving}
-                className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-bold hover:bg-primary/90 disabled:opacity-50 transition-colors">
-                {saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                Guardar cambios
-              </button>
+              <div className="mt-2 pt-4 border-t border-border flex justify-end">
+                <button
+                  onClick={saveRole}
+                  disabled={saving}
+                  className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-bold hover:bg-primary/90 disabled:opacity-50 transition-colors">
+                  {saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  Guardar cambios
+                </button>
+              </div>
             </div>
           </div>
         ) : (
