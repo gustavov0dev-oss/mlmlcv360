@@ -46,7 +46,13 @@ function RenderIcon({
   const v = value.trim();
   if (v.startsWith("<svg")) {
     return (
-      <span className={className} dangerouslySetInnerHTML={{ __html: v }} />
+      <span
+        className={cn(
+          "[&_svg]:w-full [&_svg]:h-auto [&_svg]:max-w-full [&_svg]:max-h-full",
+          className,
+        )}
+        dangerouslySetInnerHTML={{ __html: v }}
+      />
     );
   }
   if (v.startsWith("http") || v.startsWith("/") || v.startsWith("data:")) {
@@ -387,6 +393,48 @@ export default function AdminPage() {
   };
 
   const [uploadingFavicon, setUploadingFavicon] = useState(false);
+
+  const [uploadingPwaIcon, setUploadingPwaIcon] = useState(false);
+  const [uploadingPwaMobile, setUploadingPwaMobile] = useState(false);
+  const [uploadingPwaDesktop, setUploadingPwaDesktop] = useState(false);
+
+  const handlePwaImage = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    key: string,
+    setUploading: (v: boolean) => void,
+    label: string,
+    maxMb = 5,
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Solo se permiten imágenes");
+      return;
+    }
+    if (file.size > maxMb * 1024 * 1024) {
+      toast.error(`Máximo ${maxMb} MB`);
+      return;
+    }
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop() || "png";
+      const path = `logos/pwa-${key}-${Date.now()}.${ext}`;
+      const result = await storage.upload("logos", path, file, {
+        contentType: file.type,
+        upsert: true,
+      });
+      if (result.success && result.url) {
+        const existing = c(key);
+        const merged = existing ? `${existing},${result.url}` : result.url;
+        setC(key, merged);
+        toast.success(`${label} subida. Presiona Guardar para aplicar.`);
+      } else throw new Error(result.error || "Upload failed");
+    } catch {
+      toast.error(`Error al subir ${label.toLowerCase()}`);
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleFaviconFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -1470,22 +1518,17 @@ export default function AdminPage() {
           {/* PWA */}
           {activeModule === "pwa" && (
             <div className="bg-card border border-border rounded-xl p-5 sm:p-6">
-              <h2 className="text-lg font-semibold text-foreground mb-5">
+              <h2 className="text-lg font-semibold text-foreground mb-1">
                 Configuración PWA
               </h2>
+              <p className="text-xs text-muted-foreground mb-5">
+                Define cómo se instala y muestra tu app en escritorio y móvil. El manifest se genera dinámicamente desde esta configuración.
+              </p>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   {[
-                    {
-                      k: "pwa_name",
-                      label: "Nombre de la app",
-                      placeholder: "MLM 360",
-                    },
-                    {
-                      k: "pwa_short_name",
-                      label: "Nombre corto",
-                      placeholder: "MLM360",
-                    },
+                    { k: "pwa_name", label: "Nombre de la app", placeholder: "MLM 360 - Sistema Empresarial" },
+                    { k: "pwa_short_name", label: "Nombre corto", placeholder: "MLM360" },
                   ].map((f) => (
                     <div key={f.k}>
                       <label className="block text-xs font-medium text-foreground mb-1.5">
@@ -1499,8 +1542,6 @@ export default function AdminPage() {
                       />
                     </div>
                   ))}
-                </div>
-                <div className="space-y-4">
                   <div>
                     <label className="block text-xs font-medium text-foreground mb-1.5">
                       Descripción
@@ -1512,16 +1553,221 @@ export default function AdminPage() {
                       className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-foreground text-sm outline-none focus:border-primary transition-colors"
                     />
                   </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-medium text-foreground mb-1.5">
+                        Color del tema
+                      </label>
+                      <input
+                        type="color"
+                        value={c("pwa_theme_color") || "#C79B3B"}
+                        onChange={(e) => setC("pwa_theme_color", e.target.value)}
+                        className="w-full h-10 px-2 py-1 bg-muted border border-border rounded-lg text-foreground text-sm outline-none focus:border-primary"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-foreground mb-1.5">
+                        Color de fondo
+                      </label>
+                      <input
+                        type="color"
+                        value={c("pwa_background_color") || "#ffffff"}
+                        onChange={(e) => setC("pwa_background_color", e.target.value)}
+                        className="w-full h-10 px-2 py-1 bg-muted border border-border rounded-lg text-foreground text-sm outline-none focus:border-primary"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-5">
                   <div>
                     <label className="block text-xs font-medium text-foreground mb-1.5">
-                      Color del tema
+                      Icono de la app
                     </label>
+                    <p className="text-[10px] text-muted-foreground mb-2">
+                      Se usa para instalar en escritorio/móvil. PNG 512x512 o SVG. Si está vacío, usa el favicon o logo.
+                    </p>
                     <input
-                      type="color"
-                      value={c("pwa_theme_color") || "#1d4ed8"}
-                      onChange={(e) => setC("pwa_theme_color", e.target.value)}
-                      className="w-full h-10 px-2 py-1 bg-muted border border-border rounded-lg text-foreground text-sm outline-none focus:border-primary"
+                      value={c("pwa_icon")}
+                      onChange={(e) => setC("pwa_icon", e.target.value)}
+                      placeholder="https://mlm360.pe/icon.png o pega SVG"
+                      className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-foreground text-sm outline-none focus:border-primary transition-colors"
                     />
+                    <label
+                      className={cn(
+                        "flex flex-col items-center justify-center gap-1.5 w-full h-20 mt-2 border-2 border-dashed rounded-lg cursor-pointer transition-colors hover:border-primary/50 hover:bg-primary/5",
+                        uploadingPwaIcon ? "opacity-50 pointer-events-none" : "",
+                        "border-border",
+                      )}
+                    >
+                      <input
+                        type="file"
+                        accept="image/*,.svg"
+                        className="sr-only"
+                        onChange={(e) => handlePwaImage(e, "pwa_icon", setUploadingPwaIcon, "Icono", 5)}
+                        disabled={uploadingPwaIcon}
+                      />
+                      {uploadingPwaIcon ? (
+                        <RefreshCw className="w-4 h-4 text-primary animate-spin" />
+                      ) : (
+                        <Image className="w-4 h-4 text-muted-foreground" />
+                      )}
+                      <span className="text-xs text-muted-foreground">
+                        {uploadingPwaIcon ? "Subiendo..." : "Subir icono desde archivo"}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground/60">
+                        PNG 512x512 o SVG — máx 5 MB
+                      </span>
+                    </label>
+                    {c("pwa_icon") && (
+                      <div className="mt-2 flex items-center gap-3 p-3 rounded-lg border border-border bg-muted/30">
+                        <div className="w-12 h-12 bg-card border border-border rounded-md overflow-hidden flex items-center justify-center flex-shrink-0">
+                          {c("pwa_icon").toLowerCase().startsWith("<svg") ? (
+                            <span
+                              className="[&_svg]:w-10 [&_svg]:h-10"
+                              dangerouslySetInnerHTML={{ __html: c("pwa_icon") }}
+                            />
+                          ) : (
+                            <img
+                              src={c("pwa_icon")}
+                              alt="Icono PWA"
+                              className="w-10 h-10 object-contain"
+                              onError={(e) => { e.currentTarget.style.display = "none"; }}
+                            />
+                          )}
+                        </div>
+                        <span className="text-xs text-muted-foreground truncate flex-1">
+                          Vista previa del icono
+                        </span>
+                        <button
+                          onClick={() => setC("pwa_icon", "")}
+                          title="Eliminar icono"
+                          className="flex items-center justify-center w-8 h-8 bg-destructive/10 hover:bg-destructive/20 text-destructive border border-destructive/20 rounded-lg transition-colors"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="pt-4 border-t border-border">
+                    <label className="block text-xs font-medium text-foreground mb-1.5">
+                      Capturas — Móvil (vertical)
+                    </label>
+                    <p className="text-[10px] text-muted-foreground mb-2">
+                      Se muestran al instalar en teléfonos. URLs separadas por coma, o sube (se acumulan).
+                    </p>
+                    <input
+                      value={c("pwa_screenshot_mobile")}
+                      onChange={(e) => setC("pwa_screenshot_mobile", e.target.value)}
+                      placeholder="https://mlm360.pe/movil1.png, https://..."
+                      className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-foreground text-sm outline-none focus:border-primary transition-colors"
+                    />
+                    <label
+                      className={cn(
+                        "flex flex-col items-center justify-center gap-1.5 w-full h-20 mt-2 border-2 border-dashed rounded-lg cursor-pointer transition-colors hover:border-primary/50 hover:bg-primary/5",
+                        uploadingPwaMobile ? "opacity-50 pointer-events-none" : "",
+                        "border-border",
+                      )}
+                    >
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="sr-only"
+                        onChange={(e) => handlePwaImage(e, "pwa_screenshot_mobile", setUploadingPwaMobile, "Captura móvil", 5)}
+                        disabled={uploadingPwaMobile}
+                      />
+                      {uploadingPwaMobile ? (
+                        <RefreshCw className="w-4 h-4 text-primary animate-spin" />
+                      ) : (
+                        <Image className="w-4 h-4 text-muted-foreground" />
+                      )}
+                      <span className="text-xs text-muted-foreground">
+                        {uploadingPwaMobile ? "Subiendo..." : "Subir captura móvil"}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground/60">
+                        PNG, JPG, WebP — 1080x1920 — máx 5 MB
+                      </span>
+                    </label>
+                    {c("pwa_screenshot_mobile") && (
+                      <div className="mt-2 flex gap-2 flex-wrap">
+                        {c("pwa_screenshot_mobile").split(",").filter(Boolean).map((src, i) => (
+                          <div key={i} className="relative w-16 h-28 rounded-md overflow-hidden border border-border bg-muted group">
+                            <img src={src.trim()} alt={`Móvil ${i + 1}`} className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = "none"; }} />
+                            <button
+                              onClick={() => {
+                                const urls = c("pwa_screenshot_mobile").split(",").filter(Boolean);
+                                urls.splice(i, 1);
+                                setC("pwa_screenshot_mobile", urls.join(","));
+                              }}
+                              className="absolute top-0.5 right-0.5 w-5 h-5 bg-destructive/80 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="pt-4 border-t border-border">
+                    <label className="block text-xs font-medium text-foreground mb-1.5">
+                      Capturas — Escritorio (horizontal)
+                    </label>
+                    <p className="text-[10px] text-muted-foreground mb-2">
+                      Se muestran al instalar en escritorio. URLs separadas por coma, o sube (se acumulan).
+                    </p>
+                    <input
+                      value={c("pwa_screenshot_desktop")}
+                      onChange={(e) => setC("pwa_screenshot_desktop", e.target.value)}
+                      placeholder="https://mlm360.pe/desktop1.png, https://..."
+                      className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-foreground text-sm outline-none focus:border-primary transition-colors"
+                    />
+                    <label
+                      className={cn(
+                        "flex flex-col items-center justify-center gap-1.5 w-full h-20 mt-2 border-2 border-dashed rounded-lg cursor-pointer transition-colors hover:border-primary/50 hover:bg-primary/5",
+                        uploadingPwaDesktop ? "opacity-50 pointer-events-none" : "",
+                        "border-border",
+                      )}
+                    >
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="sr-only"
+                        onChange={(e) => handlePwaImage(e, "pwa_screenshot_desktop", setUploadingPwaDesktop, "Captura escritorio", 5)}
+                        disabled={uploadingPwaDesktop}
+                      />
+                      {uploadingPwaDesktop ? (
+                        <RefreshCw className="w-4 h-4 text-primary animate-spin" />
+                      ) : (
+                        <Image className="w-4 h-4 text-muted-foreground" />
+                      )}
+                      <span className="text-xs text-muted-foreground">
+                        {uploadingPwaDesktop ? "Subiendo..." : "Subir captura escritorio"}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground/60">
+                        PNG, JPG, WebP — 1920x1080 — máx 5 MB
+                      </span>
+                    </label>
+                    {c("pwa_screenshot_desktop") && (
+                      <div className="mt-2 flex gap-2 flex-wrap">
+                        {c("pwa_screenshot_desktop").split(",").filter(Boolean).map((src, i) => (
+                          <div key={i} className="relative w-28 h-16 rounded-md overflow-hidden border border-border bg-muted group">
+                            <img src={src.trim()} alt={`Escritorio ${i + 1}`} className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = "none"; }} />
+                            <button
+                              onClick={() => {
+                                const urls = c("pwa_screenshot_desktop").split(",").filter(Boolean);
+                                urls.splice(i, 1);
+                                setC("pwa_screenshot_desktop", urls.join(","));
+                              }}
+                              className="absolute top-0.5 right-0.5 w-5 h-5 bg-destructive/80 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -1534,6 +1780,10 @@ export default function AdminPage() {
                         "pwa_short_name",
                         "pwa_description",
                         "pwa_theme_color",
+                        "pwa_background_color",
+                        "pwa_icon",
+                        "pwa_screenshot_mobile",
+                        "pwa_screenshot_desktop",
                       ],
                       "pwa",
                     )

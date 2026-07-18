@@ -9,8 +9,9 @@ import { Router, Routes, Route, Navigate, useLocation } from '@/lib/router';
 import DashboardLayout from '@/layouts/DashboardLayout';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import { CartProvider } from '@/store/cartStore';
-import { Boxes, Wrench as WrenchIcon } from 'lucide-react';
+import { Boxes, Wrench as WrenchIcon, ArrowRight, ShieldCheck, Clock, Mail } from 'lucide-react';
 import { useSeo } from '@/hooks/useSeo';
+import { usePwa } from '@/hooks/usePwa';
 
 const LandingPage = lazy(() => import('@/pages/landing/LandingPage'));
 const NosotrosPage = lazy(() => import('@/pages/landing/NosotrosPage'));
@@ -42,25 +43,71 @@ function MaintenancePage() {
   const { company } = useConfig();
   const { user } = useAuthStore();
   const name = company.company_name || 'MLM 360';
-  const msg = company.maintenance_message || 'Estamos realizando mejoras. Volvemos pronto.';
+  const msg = company.maintenance_message || 'Estamos realizando mejoras en nuestra plataforma. Volveremos pronto con una experiencia renovada.';
+  const themeColor = company.pwa_theme_color || '#C79B3B';
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4 text-center">
-      <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-6">
-        <WrenchIcon className="w-8 h-8 text-primary" />
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4 py-12 relative overflow-hidden">
+      {/* Background decorations */}
+      <div className="absolute inset-0 -z-10 opacity-[0.07] pointer-events-none">
+        <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full blur-3xl" style={{ background: themeColor }} />
+        <div className="absolute -bottom-32 -right-24 w-[28rem] h-[28rem] rounded-full blur-3xl" style={{ background: themeColor }} />
       </div>
-      <div className="flex items-center gap-2 mb-4">
-        <Boxes className="w-6 h-6 text-primary" />
-        <span className="text-xl font-bold text-foreground">{name}</span>
-      </div>
-      <h1 className="text-3xl font-bold text-foreground mb-3">En mantenimiento</h1>
-      <p className="text-muted-foreground max-w-md mb-8">{msg}</p>
-      {user && ADMIN_BYPASS_ROLES.includes((user as any).role) && (
-        <div className="text-xs text-muted-foreground bg-muted px-4 py-2 rounded-full">
-          Eres administrador — puedes acceder igualmente al{' '}
-          <a href="/dashboard" className="text-primary font-medium underline">panel</a>.
+      <div className="absolute inset-0 -z-10 opacity-[0.04] pointer-events-none" style={{ backgroundImage: `radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)`, backgroundSize: '32px 32px' }} />
+
+      <div className="w-full max-w-xl text-center">
+        {/* Brand */}
+        <div className="inline-flex items-center gap-2 mb-10">
+          <Boxes className="w-6 h-6" style={{ color: themeColor }} />
+          <span className="text-lg font-bold tracking-tight text-foreground">{name}</span>
         </div>
-      )}
+
+        {/* Animated icon */}
+        <div className="relative mx-auto mb-8 w-24 h-24">
+          <div className="absolute inset-0 rounded-3xl animate-ping opacity-20" style={{ background: themeColor }} />
+          <div className="relative w-24 h-24 rounded-3xl flex items-center justify-center shadow-lg" style={{ background: `${themeColor}1a`, border: `1px solid ${themeColor}33` }}>
+            <WrenchIcon className="w-11 h-11" style={{ color: themeColor }} />
+          </div>
+        </div>
+
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-medium mb-5" style={{ background: `${themeColor}1a`, color: themeColor }}>
+          <Clock className="w-3.5 h-3.5" />
+          Modo mantenimiento
+        </div>
+
+        <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground mb-4">
+          Volveremos pronto
+        </h1>
+        <p className="text-muted-foreground text-base sm:text-lg leading-relaxed max-w-md mx-auto mb-10">
+          {msg}
+        </p>
+
+        {/* Feature pills */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-10">
+          {[
+            { icon: ShieldCheck, label: 'Mejoras de seguridad' },
+            { icon: Clock, label: 'Mantenimiento programado' },
+            { icon: Mail, label: 'Soporte disponible' },
+          ].map((f) => (
+            <div key={f.label} className="flex items-center gap-2.5 px-4 py-3 rounded-xl border border-border bg-card/50 backdrop-blur-sm">
+              <f.icon className="w-4 h-4 shrink-0" style={{ color: themeColor }} />
+              <span className="text-sm text-muted-foreground text-left">{f.label}</span>
+            </div>
+          ))}
+        </div>
+
+        {user && ADMIN_BYPASS_ROLES.includes((user as any).role) ? (
+          <a href="/dashboard" className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-white shadow-lg transition-all hover:shadow-xl hover:-translate-y-0.5" style={{ background: themeColor }}>
+            Ir al panel de administración
+            <ArrowRight className="w-4 h-4" />
+          </a>
+        ) : (
+          <a href="/" className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-medium border border-border bg-card text-foreground hover:bg-muted transition-colors">
+            <ArrowRight className="w-4 h-4 rotate-180" />
+            Reintentar
+          </a>
+        )}
+      </div>
     </div>
   );
 }
@@ -96,16 +143,17 @@ function WhatsAppGate() {
 
 function MaintenanceGate({ children }: { children: ReactNode }) {
   const { company } = useConfig();
-  const { user } = useAuthStore();
+  const { user, loading: authLoading } = useAuthStore();
   const { pathname } = useLocation();
 
   const isMaintenanceOn = company.maintenance_mode === 'true';
   const isAdmin = user && ADMIN_BYPASS_ROLES.includes((user as any).role);
   const isDashboard = pathname.startsWith('/dashboard');
 
-  if (isMaintenanceOn && !isAdmin && !isDashboard) {
+  if (isMaintenanceOn && !isDashboard) {
+    if (authLoading) return <AppSkeleton />;
     if (pathname === '/login') return <>{children}</>;
-    return <MaintenancePage />;
+    if (!isAdmin) return <MaintenancePage />;
   }
 
   return <>{children}</>;
@@ -116,6 +164,7 @@ function AppRoutes() {
   const [forcedReady, setForcedReady] = useState(false);
 
   useSeo();
+  usePwa();
 
   useEffect(() => {
     const t = setTimeout(() => setForcedReady(true), 2000);
