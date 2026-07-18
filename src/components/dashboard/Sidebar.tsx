@@ -407,8 +407,18 @@ export default function Sidebar() {
     ? (user.full_name || user.email || 'U').split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase()
     : 'U';
 
-  const userPlan = user ? plans.find(p => p.slug === user.plan || p.id === user.plan) : null;
-  const userRank = user ? ranks.find(r => r.slug === user.rank || r.name?.toLowerCase() === user.rank?.toLowerCase()) : null;
+  // Legacy English rank names → new Spanish slugs (profiles may store old values)
+  const RANK_LEGACY_MAP: Record<string, string> = {
+    bronze: 'plata', silver: 'plata', gold: 'oro',
+    platinum: 'zafiro', diamond: 'diamante', master: 'master',
+  };
+  const userPlan = user ? plans.find(p => p.slug === user.plan || p.id === user.plan || p.name?.toLowerCase() === user.plan?.toLowerCase()) : null;
+  const userRank = user ? ranks.find(r =>
+    r.slug === user.rank ||
+    r.slug === RANK_LEGACY_MAP[user.rank || ''] ||
+    r.name?.toLowerCase() === user.rank?.toLowerCase() ||
+    r.name?.toLowerCase() === RANK_LEGACY_MAP[user.rank || '']
+  ) : null;
 
   const UserAvatar = ({ size = 'sm' }: { size?: 'sm' | 'md' | 'lg' }) => {
     const dim = size === 'lg' ? 'w-10 h-10 text-sm' : size === 'md' ? 'w-9 h-9 text-sm' : 'w-8 h-8 text-xs';

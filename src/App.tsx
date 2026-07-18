@@ -96,14 +96,16 @@ function MaintenancePage() {
       </div>
 
       <div className="w-full max-w-xl text-center">
-        {/* Brand logo (image-based) */}
-        <div className="flex justify-center mb-12">
-          <Logo
-            value={company.logo_value || ''}
-            fallbackText={name}
-            pixelSize={72}
-            pixelHeight={72}
-          />
+        {/* Brand logo (image-based) — max 196px width, responsive */}
+        <div className="flex justify-center mb-12 w-full">
+          <div className="flex justify-center items-center" style={{ maxWidth: '196px', width: '100%' }}>
+            <Logo
+              value={company.logo_value || ''}
+              fallbackText={name}
+              pixelSize={196}
+              imgClass="w-full h-auto"
+            />
+          </div>
         </div>
 
         <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground mb-4">
@@ -113,7 +115,7 @@ function MaintenancePage() {
           {msg}
         </p>
 
-        {/* Optional countdown timer */}
+        {/* Optional countdown timer — Apple-style flip-card */}
         {showCountdown && remaining !== null && remaining > 0 && (() => {
           const { d, h, m, s } = formatCountdown(remaining);
           const units = [
@@ -125,14 +127,21 @@ function MaintenancePage() {
           return (
             <div className="flex justify-center gap-2 sm:gap-3 mb-8">
               {units.map((u, i) => (
-                <div key={i} className="flex flex-col items-center">
+                <div key={i} className="flex flex-col items-center gap-1.5">
                   <div
-                    className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center text-2xl sm:text-3xl font-bold tabular-nums"
-                    style={{ background: `${themeColor}12`, border: `1px solid ${themeColor}26`, color: themeColor }}
+                    className="relative w-[18vw] max-w-[88px] h-[18vw] max-h-[88px] rounded-2xl flex items-center justify-center text-3xl sm:text-4xl font-bold tabular-nums overflow-hidden select-none"
+                    style={{
+                      background: 'color-mix(in oklab, var(--card) 80%, transparent)',
+                      border: '1px solid color-mix(in oklab, var(--border) 80%, transparent)',
+                      boxShadow: '0 8px 24px -8px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.06)',
+                      color: themeColor,
+                    }}
                   >
-                    {String(u.v).padStart(2, '0')}
+                    {/* Center divider line — Apple-style flip clock */}
+                    <span className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-px bg-black/10 dark:bg-white/10 pointer-events-none" />
+                    <span className="relative z-10">{String(u.v).padStart(2, '0')}</span>
                   </div>
-                  <span className="text-[10px] sm:text-xs text-muted-foreground mt-1.5 uppercase tracking-wider">{u.l}</span>
+                  <span className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider font-medium">{u.l}</span>
                 </div>
               ))}
             </div>

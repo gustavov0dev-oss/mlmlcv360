@@ -1530,14 +1530,14 @@ export default function AdminPage() {
 
           {/* PWA */}
           {activeModule === "pwa" && (
-            <div className="bg-card border border-border rounded-xl p-5 sm:p-6 overflow-x-hidden">
+            <div className="bg-card border border-border rounded-xl p-5 sm:p-6 overflow-hidden">
               <h2 className="text-lg font-semibold text-foreground mb-1">
                 Configuración PWA
               </h2>
               <p className="text-xs text-muted-foreground mb-5">
                 Define cómo se instala y muestra tu app en escritorio y móvil. El manifest se genera dinámicamente desde esta configuración.
               </p>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 min-w-0">
                 <div className="space-y-4">
                   {[
                     { k: "pwa_name", label: "Nombre de la app", placeholder: "MLM 360 - Sistema Empresarial" },
@@ -1879,6 +1879,31 @@ export default function AdminPage() {
                       className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-foreground text-sm outline-none focus:border-primary transition-colors"
                     />
                   </div>
+                  <div>
+                    <label className="block text-xs font-medium text-foreground mb-1.5">
+                      URL del sitio (canonical)
+                    </label>
+                    <input
+                      value={c("website_url")}
+                      onChange={(e) => setC("website_url", e.target.value)}
+                      placeholder="https://mlm360.pe"
+                      className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-foreground text-sm outline-none focus:border-primary transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-foreground mb-1.5">
+                      Eslogan / Tagline (AEO)
+                    </label>
+                    <input
+                      value={c("slogan")}
+                      onChange={(e) => setC("slogan", e.target.value)}
+                      placeholder="Tu socio estratégico en crecimiento"
+                      className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-foreground text-sm outline-none focus:border-primary transition-colors"
+                    />
+                    <p className="text-[10px] text-muted-foreground/60 mt-1">
+                      Se usa en datos estructurados para motores de IA.
+                    </p>
+                  </div>
                 </div>
 
                 {/* Columna 2: SOLO recursos visuales — Favicon + Imagen OG juntos */}
@@ -2050,6 +2075,49 @@ export default function AdminPage() {
                   </div>
                 </div>
               </div>
+              <div className="mt-6 pt-4 border-t border-border">
+                <h3 className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-3">
+                  Datos geográficos (SEO local)
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-foreground mb-1.5">País</label>
+                    <input
+                      value={c("address_country")}
+                      onChange={(e) => setC("address_country", e.target.value)}
+                      placeholder="PE"
+                      className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-foreground text-sm outline-none focus:border-primary transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-foreground mb-1.5">Región</label>
+                    <input
+                      value={c("address_region")}
+                      onChange={(e) => setC("address_region", e.target.value)}
+                      placeholder="Lima"
+                      className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-foreground text-sm outline-none focus:border-primary transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-foreground mb-1.5">Ciudad</label>
+                    <input
+                      value={c("address_city")}
+                      onChange={(e) => setC("address_city", e.target.value)}
+                      placeholder="Lima"
+                      className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-foreground text-sm outline-none focus:border-primary transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-foreground mb-1.5">Dirección</label>
+                    <input
+                      value={c("address_street")}
+                      onChange={(e) => setC("address_street", e.target.value)}
+                      placeholder="Av. Principal 123"
+                      className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-foreground text-sm outline-none focus:border-primary transition-colors"
+                    />
+                  </div>
+                </div>
+              </div>
               <div className="mt-6 pt-4 border-t border-border flex justify-end">
                 <button
                   onClick={() =>
@@ -2061,6 +2129,12 @@ export default function AdminPage() {
                         "seo_og_image",
                         "seo_ga_id",
                         "favicon_value",
+                        "website_url",
+                        "slogan",
+                        "address_country",
+                        "address_region",
+                        "address_city",
+                        "address_street",
                       ],
                       "seo",
                     )
