@@ -42,14 +42,22 @@ function setJsonLd(id: string, json: object) {
   el.textContent = JSON.stringify(json);
 }
 
+function removeJsonLd(id: string) {
+  const el = document.getElementById(id);
+  if (el) el.remove();
+}
+
 /**
  * Applies SEO configuration from system_config to the document head at runtime.
  * Updates title, meta description, keywords, Open Graph, Twitter cards,
- * canonical link, JSON-LD structured data (Organization, WebSite, BreadcrumbList),
- * geo tags, and AI/Answer-Engine optimization (AEO) hints.
+ * canonical link, JSON-LD structured data (Organization, WebSite, SoftwareApplication,
+ * BreadcrumbList), geo tags, and AI/Answer-Engine optimization (AEO) hints.
+ *
+ * All data is dynamic — sourced from the live system_config table via ConfigStore.
+ * No hardcoded company info exists anywhere in the SEO output.
  */
 export function useSeo() {
-  const { company } = useConfig();
+  const { company, plans } = useConfig();
 
   useEffect(() => {
     const companyName = company.company_name || 'MLM 360';
@@ -171,6 +179,41 @@ export function useSeo() {
       },
     });
 
+    // ── JSON-LD: SoftwareApplication (dynamic from plans pricing) ──
+    // Build offers from active plans; only emit if we have at least one priced plan.
+    const activePlans = (plans || []).filter(p => p.is_active);
+    const offers = activePlans
+      .filter(p => typeof p.price === 'number' && p.price >= 0)
+      .map(p => ({
+        '@type': 'Offer',
+        name: p.name,
+        price: String(p.price),
+        priceCurrency: p.currency || 'PEN',
+        description: p.description || undefined,
+        url: `${websiteUrl}/planes`,
+      }));
+
+    const appSchema: Record<string, unknown> = {
+      '@context': 'https://schema.org',
+      '@type': 'SoftwareApplication',
+      name: companyName,
+      applicationCategory: 'BusinessApplication',
+      operatingSystem: 'Web, Android, iOS',
+      url: websiteUrl,
+      description,
+      offers: offers.length === 1 ? offers[0] : offers.length > 1 ? offers : undefined,
+      publisher: {
+        '@type': 'Organization',
+        name: companyName,
+        url: websiteUrl,
+      },
+    };
+    if (logoUrl && (logoUrl.startsWith('http') || logoUrl.startsWith('/'))) {
+      (appSchema as any).logo = logoUrl;
+    }
+    if (slogan) (appSchema as any).slogan = slogan;
+    setJsonLd('ld-software-app', appSchema);
+
     // ── JSON-LD: BreadcrumbList (dynamic from current path) ──
     if (typeof window !== 'undefined') {
       const path = window.location.pathname;
@@ -187,6 +230,8 @@ export function useSeo() {
           '@type': 'BreadcrumbList',
           itemListElement: items,
         });
+      } else {
+        removeJsonLd('ld-breadcrumb');
       }
     }
 
@@ -208,5 +253,97 @@ export function useSeo() {
       `;
       document.head.appendChild(scriptInit);
     }
-  }, [company]);
+  }, [company, plans]);
+}
+
+/**
+ * Sets a Product JSON-LD schema for a product detail page.
+ * Call this from ProductDetailPage once the product data is loaded.
+ * Pass null to remove the product schema when navigating away.
+ *
+ * `companyName` and `websiteUrl` come from system_config via useConfig()
+ * — pass them from the component so the schema stays fully dynamic.
+ */
+export function setProductSchema(
+  product: {
+    name: string;
+    slug: string;
+    description?: string;
+    short_description?: string;
+    base_price: number;
+    compare_price?: number;
+    currency: string;
+    images?: Array<{ url: string; alt?: string }>;
+    sku?: string;
+    category?: { name?: string; slug?: string } | null;
+    avg_rating?: number;
+    review_count?: number;
+    is_digital?: boolean;
+    tags?: string[];
+  } | null,
+  options: { companyName: string; websiteUrl: string },
+) {
+  const id = 'ld-product';
+  if (!product) {
+    removeJsonLd(id);
+    return;
+  }
+  const companyName = options.companyName || 'MLM 360';
+  const websiteUrl = options.websiteUrl || (typeof window !== 'undefined' ? window.location.origin : '');
+  const productUrl = `${websiteUrl}/tienda/${product.slug}`;
+  const image = product.images && product.images.length > 0 ? product.images[0].url : undefined;
+  const description = product.short_description || product.description || '';
+
+  const schema: Record<string, unknown> = {
+    '@context': 'https://schema.org',
+    '@type': product.is_digital ? 'DigitalProduct' : 'Product',
+    name: product.name,
+    description: description || undefined,
+    sku: product.sku || undefined,
+    url: productUrl,
+    image: image || undefined,
+    brand: {
+      '@type': 'Brand',
+      name: companyName,
+    },
+    offers: {
+      '@type': 'Offer',
+      url: productUrl,
+      price: String(product.base_price),
+      priceCurrency: product.currency || 'PEN',
+      availability: 'https://schema.org/InStock',
+      priceValidUntil: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().slice(0, 10),
+    },
+  };
+  if (product.compare_price && product.compare_price > product.base_price) {
+    (schema.offers as any).priceSpecification = {
+      '@type': 'PriceSpecification',
+      price: String(product.base_price),
+      priceCurrency: product.currency || 'PEN',
+      originalPrice: String(product.compare_price),
+    };
+  }
+  if (product.category && product.category.name) {
+    (schema as any).category = product.category.name;
+  }
+  if (Array.isArray(product.tags) && product.tags.length > 0) {
+    (schema as any).keywords = product.tags.join(', ');
+  }
+  if (typeof product.avg_rating === 'number' && product.avg_rating > 0 && typeof product.review_count === 'number' && product.review_count > 0) {
+    (schema as any).aggregateRating = {
+      '@type': 'AggregateRating',
+      ratingValue: String(product.avg_rating),
+      reviewCount: String(product.review_count),
+      bestRating: '5',
+      worstRating: '1',
+    };
+  }
+  setJsonLd(id, schema);
+}
+
+/**
+ * Clears the Product JSON-LD schema. Call on unmount or when leaving a product page.
+ */
+export function clearProductSchema() {
+  removeJsonLd('ld-product');
 }

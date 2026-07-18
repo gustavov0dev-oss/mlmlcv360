@@ -9,7 +9,6 @@ import { Router, Routes, Route, Navigate, useLocation } from '@/lib/router';
 import DashboardLayout from '@/layouts/DashboardLayout';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import { CartProvider } from '@/store/cartStore';
-import { ArrowRight } from 'lucide-react';
 import { useSeo } from '@/hooks/useSeo';
 import { usePwa } from '@/hooks/usePwa';
 import Logo from '@/components/Logo';
@@ -66,16 +65,30 @@ function formatCountdown(ms: number) {
   return { d, h, m, s };
 }
 
-function MaintenancePage({ isAdminBypass = false }: { isAdminBypass?: boolean } = {}) {
+function MaintenancePage() {
   const { company } = useConfig();
-  const { user } = useAuthStore();
   const name = company.company_name || 'MLM 360';
   const msg = company.maintenance_message || 'Estamos realizando mejoras en nuestra plataforma. Volveremos pronto con una experiencia renovada.';
   const themeColor = company.pwa_theme_color || '#C79B3B';
   const showCountdown = company.maintenance_countdown_enabled === 'true';
   const countdownDate = company.maintenance_countdown_date || '';
   const remaining = useCountdown(countdownDate);
-  const isAdmin = isAdminBypass || (user && ADMIN_BYPASS_ROLES.includes((user as any).role));
+
+  // Human-readable target date for display below the countdown
+  const targetDate = (() => {
+    if (!countdownDate) return null;
+    const d = new Date(countdownDate);
+    if (isNaN(d.getTime())) return null;
+    try {
+      return new Intl.DateTimeFormat('es-PE', {
+        dateStyle: 'long',
+        timeStyle: 'short',
+        timeZone: typeof Intl !== 'undefined' ? undefined : 'UTC',
+      }).format(d);
+    } catch {
+      return d.toLocaleString();
+    }
+  })();
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4 py-12 relative overflow-hidden">
@@ -83,8 +96,8 @@ function MaintenancePage({ isAdminBypass = false }: { isAdminBypass?: boolean } 
       <div
         className="absolute inset-0 -z-10 pointer-events-none"
         style={{
-          backgroundImage: `linear-gradient(to right, ${themeColor}14 1px, transparent 1px), linear-gradient(to bottom, ${themeColor}14 1px, transparent 1px)`,
-          backgroundSize: '48px 48px',
+          backgroundImage: `linear-gradient(to right, ${themeColor}1F 1px, transparent 1px), linear-gradient(to bottom, ${themeColor}1F 1px, transparent 1px)`,
+          backgroundSize: '56px 56px',
           maskImage: 'radial-gradient(ellipse 80% 70% at 50% 50%, black 30%, transparent 100%)',
           WebkitMaskImage: 'radial-gradient(ellipse 80% 70% at 50% 50%, black 30%, transparent 100%)',
         }}
@@ -122,35 +135,44 @@ function MaintenancePage({ isAdminBypass = false }: { isAdminBypass?: boolean } 
             { v: s, l: 'Seg' },
           ];
           return (
-            <div className="flex justify-center gap-2 sm:gap-3 mb-8">
-              {units.map((u, i) => (
-                <div key={i} className="flex flex-col items-center gap-1.5">
-                  <div
-                    className="relative w-[18vw] max-w-[88px] h-[18vw] max-h-[88px] rounded-2xl flex items-center justify-center text-3xl sm:text-4xl font-bold tabular-nums overflow-hidden select-none"
-                    style={{
-                      background: 'color-mix(in oklab, var(--card) 80%, transparent)',
-                      border: '1px solid color-mix(in oklab, var(--border) 80%, transparent)',
-                      boxShadow: '0 8px 24px -8px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.06)',
-                      color: themeColor,
-                    }}
-                  >
-                    {/* Center divider line — Apple-style flip clock */}
-                    <span className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-px bg-black/10 dark:bg-white/10 pointer-events-none" />
-                    <span className="relative z-10">{String(u.v).padStart(2, '0')}</span>
+            <div className="mb-6">
+              <div className="flex justify-center gap-2 sm:gap-3 mb-4">
+                {units.map((u, i) => (
+                  <div key={i} className="flex flex-col items-center gap-1.5">
+                    <div
+                      className="relative w-[18vw] max-w-[88px] h-[18vw] max-h-[88px] rounded-2xl flex items-center justify-center text-3xl sm:text-4xl font-bold tabular-nums overflow-hidden select-none"
+                      style={{
+                        background: 'color-mix(in oklab, var(--card) 80%, transparent)',
+                        border: '1px solid color-mix(in oklab, var(--border) 80%, transparent)',
+                        boxShadow: '0 8px 24px -8px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.06)',
+                        color: themeColor,
+                      }}
+                    >
+                      {/* Center divider line — Apple-style flip clock */}
+                      <span className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-px bg-black/10 dark:bg-white/10 pointer-events-none" />
+                      <span className="relative z-10">{String(u.v).padStart(2, '0')}</span>
+                    </div>
+                    <span className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider font-medium">{u.l}</span>
                   </div>
-                  <span className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider font-medium">{u.l}</span>
-                </div>
-              ))}
+                ))}
+              </div>
+              {targetDate && (
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  Reapertura programada para el{' '}
+                  <time dateTime={countdownDate} className="font-medium text-foreground">
+                    {targetDate}
+                  </time>
+                </p>
+              )}
             </div>
           );
         })()}
 
-        {isAdmin ? (
-          <a href="/dashboard" className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-white shadow-lg transition-all hover:shadow-xl hover:-translate-y-0.5" style={{ background: themeColor }}>
-            Ir al panel de administración
-            <ArrowRight className="w-4 h-4" />
-          </a>
-        ) : null}
+        {showCountdown && remaining !== null && remaining === 0 && (
+          <p className="text-sm text-muted-foreground mb-8">
+            Estamos finalizando los últimos detalles. Volveremos en cualquier momento.
+          </p>
+        )}
       </div>
     </div>
   );
@@ -198,9 +220,11 @@ function MaintenanceGate({ children }: { children: ReactNode }) {
 
   if (isMaintenanceOn && !isDashboard) {
     if (authLoading) return <AppSkeleton />;
-    if (pathname === '/login') return <>{children}</>;
-    // Non-admins see the maintenance page; admins see it too but with a bypass bar
-    return <MaintenancePage isAdminBypass={!!isAdmin} />;
+    if (pathname === '/login' || pathname === '/registro' || pathname === '/reset-password') return <>{children}</>;
+    // Admins bypass maintenance entirely — they see the regular content
+    if (isAdmin) return <>{children}</>;
+    // Non-admins see the maintenance page
+    return <MaintenancePage />;
   }
 
   return <>{children}</>;
