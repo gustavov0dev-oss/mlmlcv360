@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from '@/lib/router';
 import {
   X, Sun, Moon, ChevronDown, LogOut, LayoutDashboard, User,
@@ -17,6 +17,19 @@ const rankIconMap: Record<string, React.ComponentType<{ className?: string }>> =
   medal: Medal, crown: Crown, star: Star,
   bronze: Medal, silver: Medal, gold: Medal, platinum: Medal, diamond: Medal,
 };
+
+function resolveBadgeColor(color: string | undefined, bg: string | undefined, fallbackColor: string, fallbackBg: string) {
+  const isRaw = (v?: string) => v && (v.startsWith('#') || v.startsWith('rgb') || v.startsWith('hsl'));
+  const style: React.CSSProperties = {};
+  if (isRaw(color)) style.color = color;
+  if (isRaw(bg)) style.backgroundColor = bg;
+  const cls = cn(
+    'inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-full',
+    !isRaw(color) ? (color || fallbackColor) : '',
+    !isRaw(bg) ? (bg || fallbackBg) : '',
+  );
+  return { cls, style };
+}
 
 function RankBadgeIcon({ rank, className }: { rank: Rank; className?: string }) {
   const icon = rank.icon || '';
@@ -103,16 +116,14 @@ function DesktopUserMenu() {
               <div className="text-xs text-muted-foreground truncate">{user.email}</div>
               {(userPlan || userRank) && (
                 <div className="flex items-center gap-1 mt-1 flex-wrap">
-                  {userPlan && (
-                    <span className={cn('inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-full', userPlan.color || 'text-amber-600 dark:text-amber-400', userPlan.bg_color || 'bg-amber-500/10')}>
-                      <Crown className="w-2.5 h-2.5" />{userPlan.name}
-                    </span>
-                  )}
-                  {userRank && (
-                    <span className={cn('inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-full', userRank.color || 'text-primary', userRank.bg_color || 'bg-primary/10')}>
-                      <RankBadgeIcon rank={userRank} className="w-2.5 h-2.5" />{userRank.name}
-                    </span>
-                  )}
+                  {userPlan && (() => {
+                    const { cls, style } = resolveBadgeColor(userPlan.color, userPlan.bg_color, 'text-amber-600 dark:text-amber-400', 'bg-amber-500/10');
+                    return <span className={cls} style={style}><Crown className="w-2.5 h-2.5" />{userPlan.name}</span>;
+                  })()}
+                  {userRank && (() => {
+                    const { cls, style } = resolveBadgeColor(userRank.color, userRank.bg_color, 'text-primary', 'bg-primary/10');
+                    return <span className={cls} style={style}><RankBadgeIcon rank={userRank} className="w-2.5 h-2.5" />{userRank.name}</span>;
+                  })()}
                 </div>
               )}
             </div>
@@ -376,16 +387,14 @@ export default function Navbar() {
                   <div className="text-sm text-muted-foreground truncate">{user.email}</div>
                   {(userPlan || userRank) && (
                     <div className="flex items-center gap-1 mt-0.5 flex-wrap">
-                      {userPlan && (
-                        <span className={cn('inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-full', userPlan.color || 'text-amber-600 dark:text-amber-400', userPlan.bg_color || 'bg-amber-500/10')}>
-                          <Crown className="w-2.5 h-2.5" />{userPlan.name}
-                        </span>
-                      )}
-                      {userRank && (
-                        <span className={cn('inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-full', userRank.color || 'text-primary', userRank.bg_color || 'bg-primary/10')}>
-                          <RankBadgeIcon rank={userRank} className="w-2.5 h-2.5" />{userRank.name}
-                        </span>
-                      )}
+                      {userPlan && (() => {
+                        const { cls, style } = resolveBadgeColor(userPlan.color, userPlan.bg_color, 'text-amber-600 dark:text-amber-400', 'bg-amber-500/10');
+                        return <span className={cls} style={style}><Crown className="w-2.5 h-2.5" />{userPlan.name}</span>;
+                      })()}
+                      {userRank && (() => {
+                        const { cls, style } = resolveBadgeColor(userRank.color, userRank.bg_color, 'text-primary', 'bg-primary/10');
+                        return <span className={cls} style={style}><RankBadgeIcon rank={userRank} className="w-2.5 h-2.5" />{userRank.name}</span>;
+                      })()}
                     </div>
                   )}
                 </div>

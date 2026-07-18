@@ -549,21 +549,19 @@ export default function Sidebar() {
             <div className="flex flex-col items-center gap-2 py-3 px-2">
               <UserAvatar size="md" />
               {(userPlan || userRank) && (() => {
-                const active = userRank || userPlan;
-                const { cls: bgCls, style: bgStyle } = resolveBadgeColor(
-                  userRank ? userRank.color : userPlan?.color,
-                  userRank ? userRank.bg_color : userPlan?.bg_color,
-                  'text-primary',
-                  'bg-primary/10',
-                );
+                const r = userRank;
+                const p = userPlan;
+                const rawColor = r?.color || p?.color;
+                const iconStyle: React.CSSProperties = rawColor?.startsWith('#') || rawColor?.startsWith('rgb') || rawColor?.startsWith('hsl')
+                  ? { color: rawColor }
+                  : {};
+                const iconClass = (!rawColor?.startsWith('#') && !rawColor?.startsWith('rgb') && !rawColor?.startsWith('hsl'))
+                  ? (rawColor || 'text-primary')
+                  : '';
                 return (
-                  <div className="w-full flex items-center justify-center" title={active?.name}>
-                    <div className={cn('flex items-center gap-1 px-2 py-0.5 rounded-full', bgCls)} style={bgStyle}>
-                      {userRank ? (
-                        <RankIcon rank={userRank} className="w-3 h-3" />
-                      ) : (
-                        <Crown className="w-3 h-3" />
-                      )}
+                  <div className="w-full flex items-center justify-center" title={r?.name || p?.name}>
+                    <div className={cn('w-4 h-4 flex items-center justify-center', iconClass)} style={iconStyle}>
+                      {r ? <RankIcon rank={r} className="w-4 h-4" /> : <Crown className="w-4 h-4" />}
                     </div>
                   </div>
                 );
