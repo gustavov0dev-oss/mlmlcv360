@@ -358,7 +358,7 @@ export default function DashboardHeader() {
   return (
     <>
       <header className={cn(
-        'h-16 border-b border-border bg-background/98 backdrop-blur-sm flex items-center px-3 sm:px-4 lg:px-6 sticky top-0 z-40 shrink-0'
+        'h-16 border-b border-border bg-background flex items-center px-3 sm:px-4 lg:px-6 shrink-0 z-40'
       )}>
 
         {/* Logo — mobile only (desktop sidebar already has it) */}

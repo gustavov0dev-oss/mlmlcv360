@@ -560,7 +560,7 @@
   background: hsl(var(--muted-foreground) / 0.5);
 }
 
-/* Range sliders — visible track + thumb in both light and dark themes */
+/* Range sliders — visible filled track + thumb in both light and dark themes */
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
@@ -569,6 +569,10 @@ input[type="range"] {
   background: hsl(var(--muted));
   cursor: pointer;
   outline: none;
+}
+/* Filled portion via inline style: background: linear-gradient(...) set by component */
+input[type="range"].slider-filled {
+  background: linear-gradient(to right, hsl(var(--primary)) var(--fill, 50%), hsl(var(--muted)) var(--fill, 50%));
 }
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
@@ -592,6 +596,11 @@ input[type="range"]::-moz-range-thumb {
   border: 2px solid hsl(var(--background));
   box-shadow: 0 1px 3px hsl(var(--primary) / 0.4);
   cursor: pointer;
+}
+input[type="range"]::-moz-range-progress {
+  background: hsl(var(--primary));
+  height: 6px;
+  border-radius: 9999px;
 }
 input[type="range"]:disabled {
   opacity: 0.5;
