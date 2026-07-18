@@ -74,42 +74,26 @@ function MaintenancePage() {
   const countdownDate = company.maintenance_countdown_date || '';
   const remaining = useCountdown(countdownDate);
 
-  // Human-readable target date for display below the countdown
-  const targetDate = (() => {
-    if (!countdownDate) return null;
-    const d = new Date(countdownDate);
-    if (isNaN(d.getTime())) return null;
-    try {
-      return new Intl.DateTimeFormat('es-PE', {
-        dateStyle: 'long',
-        timeStyle: 'short',
-        timeZone: typeof Intl !== 'undefined' ? undefined : 'UTC',
-      }).format(d);
-    } catch {
-      return d.toLocaleString();
-    }
-  })();
-
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4 py-12 relative overflow-hidden">
       {/* Faded grid mesh background */}
       <div
         className="absolute inset-0 -z-10 pointer-events-none"
         style={{
-          backgroundImage: `linear-gradient(to right, ${themeColor}1F 1px, transparent 1px), linear-gradient(to bottom, ${themeColor}1F 1px, transparent 1px)`,
+          backgroundImage: `linear-gradient(to right, ${themeColor}22 1px, transparent 1px), linear-gradient(to bottom, ${themeColor}22 1px, transparent 1px)`,
           backgroundSize: '56px 56px',
           maskImage: 'radial-gradient(ellipse 80% 70% at 50% 50%, black 30%, transparent 100%)',
           WebkitMaskImage: 'radial-gradient(ellipse 80% 70% at 50% 50%, black 30%, transparent 100%)',
         }}
       />
       {/* Soft glow accents */}
-      <div className="absolute inset-0 -z-10 opacity-[0.06] pointer-events-none">
+      <div className="absolute inset-0 -z-10 opacity-[0.07] pointer-events-none">
         <div className="absolute -top-32 -left-32 w-[30rem] h-[30rem] rounded-full blur-3xl" style={{ background: themeColor }} />
         <div className="absolute -bottom-40 -right-32 w-[34rem] h-[34rem] rounded-full blur-3xl" style={{ background: themeColor }} />
       </div>
 
       <div className="w-full max-w-xl text-center">
-        {/* Brand logo — max 196px width, height auto from image aspect ratio */}
+        {/* Brand logo */}
         <div className="flex justify-center mb-12 w-full">
           <Logo
             value={company.logo_value || ''}
@@ -121,11 +105,11 @@ function MaintenancePage() {
         <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground mb-4">
           Volveremos pronto
         </h1>
-        <p className="text-muted-foreground text-base sm:text-lg leading-relaxed max-w-md mx-auto mb-8">
+        <p className="text-muted-foreground text-base sm:text-lg leading-relaxed max-w-md mx-auto mb-10">
           {msg}
         </p>
 
-        {/* Optional countdown timer — Apple-style flip-card */}
+        {/* Countdown timer */}
         {showCountdown && remaining !== null && remaining > 0 && (() => {
           const { d, h, m, s } = formatCountdown(remaining);
           const units = [
@@ -135,44 +119,27 @@ function MaintenancePage() {
             { v: s, l: 'Seg' },
           ];
           return (
-            <div className="mb-6">
-              <div className="flex justify-center gap-2 sm:gap-3 mb-4">
-                {units.map((u, i) => (
-                  <div key={i} className="flex flex-col items-center gap-1.5">
-                    <div
-                      className="relative w-[18vw] max-w-[88px] h-[18vw] max-h-[88px] rounded-2xl flex items-center justify-center text-3xl sm:text-4xl font-bold tabular-nums overflow-hidden select-none"
-                      style={{
-                        background: 'color-mix(in oklab, var(--card) 80%, transparent)',
-                        border: '1px solid color-mix(in oklab, var(--border) 80%, transparent)',
-                        boxShadow: '0 8px 24px -8px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.06)',
-                        color: themeColor,
-                      }}
-                    >
-                      {/* Center divider line — Apple-style flip clock */}
-                      <span className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-px bg-black/10 dark:bg-white/10 pointer-events-none" />
-                      <span className="relative z-10">{String(u.v).padStart(2, '0')}</span>
-                    </div>
-                    <span className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider font-medium">{u.l}</span>
+            <div className="flex justify-center gap-3 sm:gap-4 mb-10">
+              {units.map((u, i) => (
+                <div key={i} className="flex flex-col items-center gap-2">
+                  <div
+                    className="relative w-[18vw] max-w-[90px] aspect-square rounded-2xl flex items-center justify-center text-3xl sm:text-4xl font-bold tabular-nums select-none overflow-hidden"
+                    style={{
+                      background: 'hsl(var(--card))',
+                      border: `1.5px solid ${themeColor}44`,
+                      boxShadow: `0 0 24px -8px ${themeColor}55, 0 4px 16px -4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)`,
+                      color: themeColor,
+                    }}
+                  >
+                    <span className="absolute inset-x-0 top-1/2 -translate-y-px h-px bg-current opacity-10 pointer-events-none" />
+                    <span className="relative z-10 drop-shadow-sm">{String(u.v).padStart(2, '0')}</span>
                   </div>
-                ))}
-              </div>
-              {targetDate && (
-                <p className="text-xs sm:text-sm text-muted-foreground">
-                  Reapertura programada para el{' '}
-                  <time dateTime={countdownDate} className="font-medium text-foreground">
-                    {targetDate}
-                  </time>
-                </p>
-              )}
+                  <span className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-widest font-semibold">{u.l}</span>
+                </div>
+              ))}
             </div>
           );
         })()}
-
-        {showCountdown && remaining !== null && remaining === 0 && (
-          <p className="text-sm text-muted-foreground mb-8">
-            Estamos finalizando los últimos detalles. Volveremos en cualquier momento.
-          </p>
-        )}
       </div>
     </div>
   );

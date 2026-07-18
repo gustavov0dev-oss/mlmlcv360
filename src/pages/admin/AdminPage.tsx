@@ -2466,19 +2466,33 @@ export default function AdminPage() {
                   />
                 </div>
                 {c("maintenance_countdown_enabled") === "true" && (
-                  <div className="mt-3">
-                    <label className="block text-xs font-medium text-foreground mb-1.5">
-                      Fecha y hora de finalización
-                    </label>
-                    <input
-                      type="datetime-local"
-                      value={c("maintenance_countdown_date") ? c("maintenance_countdown_date").slice(0, 16) : ""}
-                      onChange={(e) => setC("maintenance_countdown_date", e.target.value ? new Date(e.target.value).toISOString() : "")}
-                      className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors"
+                  <div className="mt-3 space-y-3">
+                    <div>
+                      <label className="block text-xs font-medium text-foreground mb-1.5">
+                        Fecha y hora de reapertura
+                      </label>
+                      <input
+                        type="datetime-local"
+                        value={c("maintenance_countdown_date") ? c("maintenance_countdown_date").slice(0, 16) : ""}
+                        onChange={(e) => setC("maintenance_countdown_date", e.target.value ? new Date(e.target.value).toISOString() : "")}
+                        className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors"
+                      />
+                      {c("maintenance_countdown_date") && (() => {
+                        const d = new Date(c("maintenance_countdown_date"));
+                        if (isNaN(d.getTime())) return null;
+                        try {
+                          return (
+                            <p className="text-xs text-primary font-medium mt-1">
+                              {new Intl.DateTimeFormat('es-PE', { dateStyle: 'full', timeStyle: 'short' }).format(d)}
+                            </p>
+                          );
+                        } catch { return null; }
+                      })()}
+                    </div>
+                    <MaintenanceCountdownPreview
+                      dateIso={c("maintenance_countdown_date")}
+                      themeColor={c("pwa_theme_color") || "#C79B3B"}
                     />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Cuando llegue esta fecha, el contador desaparecerá.
-                    </p>
                   </div>
                 )}
               </div>
@@ -2507,6 +2521,53 @@ export default function AdminPage() {
           {/* ── FINANZAS ── */}
           {activeModule === "finanzas" && <GatewaysManager />}
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Maintenance Manager ──
+function MaintenanceCountdownPreview({ dateIso, themeColor }: { dateIso: string; themeColor: string }) {
+  const [remaining, setRemaining] = useState<number | null>(null);
+  useEffect(() => {
+    if (!dateIso) { setRemaining(null); return; }
+    const target = new Date(dateIso).getTime();
+    if (isNaN(target)) { setRemaining(null); return; }
+    const tick = () => setRemaining(Math.max(0, target - Date.now()));
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [dateIso]);
+
+  if (remaining === null) return null;
+
+  const total = Math.floor(remaining / 1000);
+  const d = Math.floor(total / 86400);
+  const h = Math.floor((total % 86400) / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
+  const units = [{ v: d, l: 'Días' }, { v: h, l: 'Horas' }, { v: m, l: 'Min' }, { v: s, l: 'Seg' }];
+
+  return (
+    <div className="mt-4 p-4 bg-muted/40 border border-border rounded-xl">
+      <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">Vista previa del contador</p>
+      <div className="flex gap-2 justify-center">
+        {units.map((u, i) => (
+          <div key={i} className="flex flex-col items-center gap-1">
+            <div
+              className="w-12 h-12 rounded-xl flex items-center justify-center text-xl font-bold tabular-nums"
+              style={{
+                background: 'hsl(var(--card))',
+                border: `1.5px solid ${themeColor}44`,
+                boxShadow: `0 0 12px -4px ${themeColor}44`,
+                color: themeColor,
+              }}
+            >
+              {String(u.v).padStart(2, '0')}
+            </div>
+            <span className="text-[9px] text-muted-foreground uppercase tracking-wide font-medium">{u.l}</span>
+          </div>
+        ))}
       </div>
     </div>
   );
