@@ -194,17 +194,18 @@ export default function SettingsPage() {
         <div className="space-y-4">
           {/* Theme selector */}
           <div className="bg-card border border-border rounded-xl p-6">
-            <h3 className="font-semibold text-foreground flex items-center gap-2 mb-5"><Sun className="w-4 h-4 text-primary" /> Tema Visual</h3>
+            <h3 className="font-semibold text-foreground flex items-center gap-2 mb-1"><Sun className="w-4 h-4 text-primary" /> Tema Visual Global</h3>
+            <p className="text-xs text-muted-foreground mb-5">El tema que elijas se aplicará a todo el sistema y a todos los usuarios (frontend y dashboard).</p>
             <div className="grid grid-cols-3 gap-3">
               {[
-                { id: 'light', icon: Sun, label: 'Claro', preview: 'bg-white border-gray-200' },
-                { id: 'dark', icon: Moon, label: 'Oscuro', preview: 'bg-gray-900 border-gray-700' },
-                { id: 'system', icon: Monitor, label: 'Sistema', preview: 'bg-gradient-to-br from-white to-gray-900 border-gray-400' },
+                { id: 'light', icon: Sun, label: 'Claro', preview: 'bg-white border-neutral-300' },
+                { id: 'dark', icon: Moon, label: 'Oscuro', preview: 'bg-neutral-900 border-neutral-700' },
+                { id: 'system', icon: Monitor, label: 'Sistema', preview: 'bg-gradient-to-br from-white to-neutral-900 border-neutral-500' },
               ].map(({ id, icon: Icon, label, preview }) => (
                 <button key={id} onClick={() => setTheme(id as any)}
-                  className={cn('flex flex-col items-center gap-3 p-5 rounded-xl border-2 transition-all',
+                  className={cn('flex flex-col items-center gap-3 p-5 rounded-xl border transition-all',
                     theme === id ? 'border-primary bg-primary/5' : 'border-border hover:border-muted-foreground')}>
-                  <div className={cn('w-12 h-8 rounded-lg border-2', preview)} />
+                  <div className={cn('w-12 h-8 rounded-lg border', preview)} />
                   <div className={cn('flex flex-col items-center gap-1', theme === id ? 'text-primary' : 'text-foreground')}>
                     <Icon className="w-4 h-4" />
                     <span className="text-sm font-medium">{label}</span>

@@ -1,14 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useBackend, useDatabase, useStorage } from '@/lib/backend';
 import { useAuthStore } from '@/store/authStore';
+import { useConfig, type Rank } from '@/store/configStore';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-import { User, Mail, Phone, Shield, Calendar, Save, Camera, Lock, Eye, EyeOff, Copy, Link2, CircleCheck as CheckCircle } from 'lucide-react';
+import { User, Mail, Phone, Shield, Calendar, Save, Camera, Lock, Eye, EyeOff, Copy, Link2, CircleCheck as CheckCircle, Crown, Medal, Star } from 'lucide-react';
 
-const rankLabels: Record<string, string> = {
-  bronze: 'Bronce', silver: 'Plata', gold: 'Oro',
-  platinum: 'Platino', diamond: 'Diamante', crown: 'Corona',
-};
 const statusLabels: Record<string, string> = {
   active: 'Activo', suspended: 'Suspendido', pending: 'Pendiente', inactive: 'Inactivo',
 };
@@ -17,12 +14,65 @@ const roleLabels: Record<string, string> = {
   admin: 'Admin', super_admin: 'Super Admin',
 };
 
+function resolveBadgeColor(color: string | undefined, bg: string | undefined, fallbackColor: string, fallbackBg: string) {
+  const isRaw = (v?: string) => v && (v.startsWith('#') || v.startsWith('rgb') || v.startsWith('hsl'));
+  const style: React.CSSProperties = {};
+  if (isRaw(color)) style.color = color;
+  if (isRaw(bg)) style.backgroundColor = bg;
+  const cls = cn(
+    'flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-full',
+    !isRaw(color) ? (color || fallbackColor) : '',
+    !isRaw(bg) ? (bg || fallbackBg) : '',
+  );
+  return { cls, style };
+}
+
+const rankIconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  medal: Medal, crown: Crown, star: Star,
+  bronze: Medal, silver: Medal, gold: Medal, platinum: Medal, diamond: Medal,
+};
+
+function RankBadgeIcon({ rank, className }: { rank: Rank; className?: string }) {
+  const icon = rank.icon || '';
+  const trimmed = icon.trim();
+  if (trimmed.toLowerCase().startsWith('<svg')) {
+    return (
+      <span
+        className={cn('inline-flex items-center justify-center w-full h-full [&>svg]:w-full [&>svg]:h-full [&>svg]:object-contain', className)}
+        dangerouslySetInnerHTML={{ __html: trimmed }}
+      />
+    );
+  }
+  if (trimmed.startsWith('http') || trimmed.startsWith('/')) {
+    return <img src={trimmed} alt="" className={cn('w-full h-full object-contain', className)} />;
+  }
+  const Comp = rankIconMap[trimmed.toLowerCase()];
+  if (Comp) return <Comp className={className} />;
+  if (trimmed.length === 1 || (trimmed.length <= 4 && !trimmed.includes('.'))) {
+    return <span className={cn('flex items-center justify-center w-full h-full', className)}>{trimmed}</span>;
+  }
+  return <Star className={className} />;
+}
+
 export default function ProfilePage() {
   const { user, fetchProfile, getInviteLink } = useAuthStore();
+  const { plans, ranks } = useConfig();
   const database = useDatabase();
   const storage = useStorage();
   const [copied, setCopied] = useState(false);
   const inviteLink = getInviteLink();
+
+  const RANK_LEGACY_MAP: Record<string, string> = {
+    bronze: 'plata', silver: 'plata', gold: 'oro',
+    platinum: 'zafiro', diamond: 'diamante', master: 'master',
+  };
+  const userPlan = user ? plans.find(p => p.slug === user.plan || p.id === user.plan || p.name?.toLowerCase() === user.plan?.toLowerCase()) : null;
+  const userRank = user ? ranks.find(r =>
+    r.slug === user.rank ||
+    r.slug === RANK_LEGACY_MAP[user.rank || ''] ||
+    r.name?.toLowerCase() === user.rank?.toLowerCase() ||
+    r.name?.toLowerCase() === RANK_LEGACY_MAP[user.rank || '']
+  ) : null;
 
   const copyInvite = () => {
     if (!inviteLink) return;
@@ -143,7 +193,25 @@ export default function ProfilePage() {
             <p className="text-sm text-muted-foreground">{form.email}</p>
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mt-3">
               <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-primary/10 text-primary">{roleLabels[user.role] || user.role}</span>
-              <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-yellow-500/10 text-yellow-600">{rankLabels[user.rank] || 'Bronce'}</span>
+              {userPlan && (() => {
+                const { cls, style } = resolveBadgeColor(userPlan.color, userPlan.bg_color, 'text-amber-600 dark:text-amber-400', 'bg-amber-500/10');
+                return (
+                  <span className={cls} style={style}>
+                    <Crown className="w-2.5 h-2.5" />{userPlan.name}
+                  </span>
+                );
+              })()}
+              {userRank && (() => {
+                const { cls, style } = resolveBadgeColor(userRank.color, userRank.bg_color, 'text-primary', 'bg-primary/10');
+                return (
+                  <span className={cls} style={style}>
+                    <RankBadgeIcon rank={userRank} className="w-2.5 h-2.5" />{userRank.name}
+                  </span>
+                );
+              })()}
+              {!userRank && (
+                <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-yellow-500/10 text-yellow-600">Bronce</span>
+              )}
               <span className={cn('text-xs font-medium px-2.5 py-1 rounded-full',
                 user.status === 'active' ? 'bg-green-500/10 text-green-600' : 'bg-red-500/10 text-red-500')}>
                 {statusLabels[user.status] || user.status}

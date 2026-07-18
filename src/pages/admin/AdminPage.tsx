@@ -2432,8 +2432,25 @@ export default function AdminPage() {
                 )}
               </div>
 
-              {/* Mensaje — una sola columna, ancho completo */}
+              {/* Título — una sola columna, ancho completo */}
               <div className="max-w-xl">
+                <label className="block text-xs font-medium text-foreground mb-1.5">
+                  Título de la página
+                </label>
+                <input
+                  type="text"
+                  value={c("maintenance_title")}
+                  onChange={(e) => setC("maintenance_title", e.target.value)}
+                  placeholder="Volveremos pronto"
+                  className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Título principal que se mostrará en la página de mantenimiento.
+                </p>
+              </div>
+
+              {/* Mensaje — una sola columna, ancho completo */}
+              <div className="max-w-xl mt-4">
                 <label className="block text-xs font-medium text-foreground mb-1.5">
                   Mensaje para los usuarios
                 </label>
@@ -2491,7 +2508,6 @@ export default function AdminPage() {
                     </div>
                     <MaintenanceCountdownPreview
                       dateIso={c("maintenance_countdown_date")}
-                      themeColor={c("pwa_theme_color") || "#C79B3B"}
                     />
                   </div>
                 )}
@@ -2500,7 +2516,7 @@ export default function AdminPage() {
               <div className="mt-6 pt-4 border-t border-border flex justify-end">
                 <button
                   onClick={() =>
-                    saveConfigKeys(["maintenance_mode", "maintenance_message", "maintenance_countdown_enabled", "maintenance_countdown_date"])
+                    saveConfigKeys(["maintenance_mode", "maintenance_title", "maintenance_message", "maintenance_countdown_enabled", "maintenance_countdown_date"])
                   }
                   disabled={savingConfig}
                   className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-medium transition-colors disabled:opacity-50"
@@ -2527,7 +2543,7 @@ export default function AdminPage() {
 }
 
 // ── Maintenance Manager ──
-function MaintenanceCountdownPreview({ dateIso, themeColor }: { dateIso: string; themeColor: string }) {
+function MaintenanceCountdownPreview({ dateIso }: { dateIso: string }) {
   const [remaining, setRemaining] = useState<number | null>(null);
   useEffect(() => {
     if (!dateIso) { setRemaining(null); return; }
@@ -2557,10 +2573,9 @@ function MaintenanceCountdownPreview({ dateIso, themeColor }: { dateIso: string;
             <div
               className="w-12 h-12 rounded-xl flex items-center justify-center text-xl font-bold tabular-nums"
               style={{
-                background: 'hsl(var(--card))',
-                border: `1.5px solid ${themeColor}44`,
-                boxShadow: `0 0 12px -4px ${themeColor}44`,
-                color: themeColor,
+                background: 'hsl(var(--muted))',
+                border: '1px solid hsl(var(--border))',
+                color: 'hsl(var(--foreground))',
               }}
             >
               {String(u.v).padStart(2, '0')}

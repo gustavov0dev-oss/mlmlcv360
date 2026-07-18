@@ -754,7 +754,7 @@ export default function LandingPage() {
                 </div>
                 <p className="text-sm text-muted-foreground leading-relaxed mb-5 flex-1">Cada nivel desbloquea bonos y beneficios exclusivos. Tu esfuerzo siempre tiene recompensa.</p>
                 <div className="space-y-2.5">
-                  {ranks.filter(r => r.is_active !== false).slice(0, 5).map((r, idx, arr) => {
+                  {ranks.filter(r => r.is_active !== false).map((r, idx, arr) => {
                     const pct = Math.round(((idx + 1) / arr.length) * 100);
                     const rankColor = r.color?.startsWith('#') ? r.color : '#0ea5e9';
                     return (
@@ -1119,7 +1119,7 @@ export default function LandingPage() {
 
                 <div>
                   {(() => {
-                    const activeRanks = ranks.filter(r => r.is_active !== false).slice(0, 8);
+                    const activeRanks = ranks.filter(r => r.is_active !== false);
                     const count = activeRanks.length;
                     const gridClass = count >= 6
                       ? 'grid grid-cols-2 sm:grid-cols-3 gap-2'

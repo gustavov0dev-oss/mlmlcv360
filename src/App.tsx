@@ -1,7 +1,7 @@
 import { ReactNode, useState, useEffect, lazy, Suspense } from 'react';
 import { Toaster } from 'sonner';
 import { AuthProvider, useAuthStore } from '@/store/authStore';
-import { ThemeProvider } from '@/store/themeStore';
+import { ThemeProvider, ThemeSync } from '@/store/themeStore';
 import { UIProvider } from '@/store/uiStore';
 import { ConfigProvider, useConfig } from '@/store/configStore';
 import { BackendProvider } from '@/lib/backend';
@@ -69,6 +69,7 @@ function MaintenancePage() {
   const { company } = useConfig();
   const name = company.company_name || 'MLM 360';
   const msg = company.maintenance_message || 'Estamos realizando mejoras en nuestra plataforma. Volveremos pronto con una experiencia renovada.';
+  const title = company.maintenance_title || 'Volveremos pronto';
   const themeColor = company.pwa_theme_color || '#C79B3B';
   const showCountdown = company.maintenance_countdown_enabled === 'true';
   const countdownDate = company.maintenance_countdown_date || '';
@@ -103,7 +104,7 @@ function MaintenancePage() {
         </div>
 
         <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground mb-4">
-          Volveremos pronto
+          {title}
         </h1>
         <p className="text-muted-foreground text-base sm:text-lg leading-relaxed max-w-md mx-auto mb-10">
           {msg}
@@ -125,14 +126,13 @@ function MaintenancePage() {
                   <div
                     className="relative w-[18vw] max-w-[90px] aspect-square rounded-2xl flex items-center justify-center text-3xl sm:text-4xl font-bold tabular-nums select-none overflow-hidden"
                     style={{
-                      background: 'hsl(var(--card))',
-                      border: `1.5px solid ${themeColor}44`,
-                      boxShadow: `0 0 24px -8px ${themeColor}55, 0 4px 16px -4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)`,
-                      color: themeColor,
+                      background: 'hsl(var(--muted))',
+                      border: '1px solid hsl(var(--border))',
+                      color: 'hsl(var(--foreground))',
                     }}
                   >
                     <span className="absolute inset-x-0 top-1/2 -translate-y-px h-px bg-current opacity-10 pointer-events-none" />
-                    <span className="relative z-10 drop-shadow-sm">{String(u.v).padStart(2, '0')}</span>
+                    <span className="relative z-10">{String(u.v).padStart(2, '0')}</span>
                   </div>
                   <span className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-widest font-semibold">{u.l}</span>
                 </div>
@@ -198,11 +198,15 @@ function MaintenanceGate({ children }: { children: ReactNode }) {
 }
 
 function AppRoutes() {
-  const { loading } = useConfig();
+  const { loading, company } = useConfig();
   const [forcedReady, setForcedReady] = useState(false);
 
   useSeo();
   usePwa();
+
+  // Sync global theme from system_config to all users
+  const globalTheme = company.global_theme;
+  // ThemeSync handles reading global_theme and persisting theme changes
 
   useEffect(() => {
     const t = setTimeout(() => setForcedReady(true), 2000);
@@ -212,6 +216,7 @@ function AppRoutes() {
   if (loading && !forcedReady) return <AppSkeleton />;
   return (
     <MaintenanceGate>
+      <ThemeSync globalTheme={globalTheme} />
       <Suspense fallback={<AppSkeleton />}>
         <Routes>
           <Route path="/" element={<LandingPage />} />
