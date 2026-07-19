@@ -1,13 +1,11 @@
 import { Navigate, useLocation } from '@/lib/router';
 import { useAuthStore } from '@/store/authStore';
 import { useUIStore } from '@/store/uiStore';
-import { useConfig } from '@/store/configStore';
 import { cn } from '@/lib/utils';
 import Sidebar from '@/components/dashboard/Sidebar';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import { Skeleton } from '@/components/ui/skeleton';
-import { lazy, Suspense, useEffect, useState } from 'react';
-import { Wrench } from 'lucide-react';
+import { lazy, Suspense, useEffect } from 'react';
 
 const DashboardPage = lazy(() => import('@/pages/dashboard/DashboardPage'));
 const ProfilePage = lazy(() => import('@/pages/dashboard/ProfilePage'));
@@ -63,42 +61,6 @@ function PageSkeleton() {
   );
 }
 
-function useCountdown(targetIso: string) {
-  const [remaining, setRemaining] = useState<number | null>(null);
-  useEffect(() => {
-    if (!targetIso) { setRemaining(null); return; }
-    const target = new Date(targetIso).getTime();
-    if (isNaN(target)) { setRemaining(null); return; }
-    const tick = () => {
-      const diff = target - Date.now();
-      setRemaining(diff > 0 ? diff : 0);
-    };
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, [targetIso]);
-  return remaining;
-}
-
-function MaintenanceBanner({ countdownDate, enabled }: { countdownDate: string; enabled: boolean }) {
-  const remaining = useCountdown(enabled ? countdownDate : '');
-  if (enabled && remaining !== null && remaining > 0) {
-    const total = Math.floor(remaining / 1000);
-    const d = Math.floor(total / 86400);
-    const h = Math.floor((total % 86400) / 3600);
-    const m = Math.floor((total % 3600) / 60);
-    const s = total % 60;
-    const pad = (n: number) => String(n).padStart(2, '0');
-    return (
-      <div className="flex items-center gap-2 text-xs font-medium tabular-nums">
-        <span className="opacity-80">Reapertura en</span>
-        <span className="font-semibold">{d > 0 ? `${d}d ` : ''}{pad(h)}:{pad(m)}:{pad(s)}</span>
-      </div>
-    );
-  }
-  return null;
-}
-
 function DashboardContent() {
   const { pathname } = useLocation();
 
@@ -146,10 +108,6 @@ function DashboardContent() {
 export default function DashboardLayout() {
   const { sidebarCollapsed } = useUIStore();
   const { user, loading } = useAuthStore();
-  const { company } = useConfig();
-  const isMaintenanceOn = company.maintenance_mode === 'true';
-  const maintenanceCountdownEnabled = company.maintenance_countdown_enabled === 'true';
-  const countdownDate = company.maintenance_countdown_date || '';
 
   // Prevent body-level scroll while the dashboard is mounted — the dashboard
   // manages its own internal scroll via the main element's overflow-y-auto.
@@ -194,15 +152,6 @@ export default function DashboardLayout() {
       <div className={cn('flex-1 flex flex-col min-w-0 h-[100dvh] overflow-hidden transition-[margin] duration-200 lg:ml-auto',
         sidebarCollapsed ? 'lg:ml-[72px]' : 'lg:ml-[260px]')}>
         <DashboardHeader />
-        {isMaintenanceOn && (
-          <div className="flex items-center gap-3 px-4 sm:px-6 lg:px-8 py-2.5 bg-amber-500/10 border-b border-amber-500/30 text-amber-700 dark:text-amber-300">
-            <Wrench className="w-4 h-4 flex-shrink-0" />
-            <div className="flex-1 min-w-0 text-xs sm:text-sm font-medium">
-              El sitio está en modo mantenimiento para los visitantes. Tú como administrador sigues con acceso.
-            </div>
-            <MaintenanceBanner countdownDate={countdownDate} enabled={maintenanceCountdownEnabled} />
-          </div>
-        )}
         <main className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 lg:p-8 bg-background dashboard-scroll">
           <div className="max-w-[1400px] mx-auto w-full">
             <DashboardContent />

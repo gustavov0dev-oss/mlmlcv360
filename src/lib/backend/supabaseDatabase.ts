@@ -176,10 +176,9 @@ export const supabaseDatabaseService: DatabaseInterface = {
   },
 
   subscribe(table: string, callback: (payload: unknown) => void, options: SubscribeOptions = {}): () => void {
-    const uid = Math.random().toString(36).slice(2, 9);
     const channelName = options.filter
-      ? `${table}-changes-${options.filter}-${uid}`
-      : `${table}-changes-${uid}`;
+      ? `${table}-changes-${options.filter}`
+      : `${table}-changes`;
     const channel = supabase
       .channel(channelName)
       .on(
