@@ -2486,11 +2486,18 @@ export default function AdminPage() {
                   <div className="mt-3 space-y-3">
                     <div>
                       <label className="block text-xs font-medium text-foreground mb-1.5">
-                        Fecha y hora de reapertura
+                        Fecha y hora de reapertura (hora local)
                       </label>
                       <input
                         type="datetime-local"
-                        value={c("maintenance_countdown_date") ? c("maintenance_countdown_date").slice(0, 16) : ""}
+                        value={(() => {
+                          const iso = c("maintenance_countdown_date");
+                          if (!iso) return "";
+                          const d = new Date(iso);
+                          if (isNaN(d.getTime())) return "";
+                          const pad = (n: number) => String(n).padStart(2, "0");
+                          return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+                        })()}
                         onChange={(e) => setC("maintenance_countdown_date", e.target.value ? new Date(e.target.value).toISOString() : "")}
                         className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors"
                       />
@@ -2500,7 +2507,7 @@ export default function AdminPage() {
                         try {
                           return (
                             <p className="text-xs text-primary font-medium mt-1">
-                              {new Intl.DateTimeFormat('es-PE', { dateStyle: 'full', timeStyle: 'short' }).format(d)}
+                              {new Intl.DateTimeFormat('es-PE', { dateStyle: 'full', timeStyle: 'short', timeZone: 'America/Lima' }).format(d)}
                             </p>
                           );
                         } catch { return null; }

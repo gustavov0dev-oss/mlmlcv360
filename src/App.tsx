@@ -76,7 +76,7 @@ function MaintenancePage() {
   const remaining = useCountdown(countdownDate);
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4 py-12 relative overflow-hidden">
+    <div className="min-h-[100dvh] h-[100dvh] bg-background flex flex-col items-center justify-center px-4 py-12 relative overflow-hidden">
       {/* Faded grid mesh background */}
       <div
         className="absolute inset-0 -z-10 pointer-events-none"
@@ -169,10 +169,12 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
 
 function WhatsAppGate() {
   const { pathname } = useLocation();
-  const { company } = useConfig();
+  const { company, loading } = useConfig();
   const isLanding = LANDING_PATHS.some(p => pathname === p || pathname.startsWith(p + '?'));
   const isMaintenanceOn = company.maintenance_mode === 'true';
-  if (!isLanding || isMaintenanceOn) return null;
+  // Wait for config to load before deciding — prevents flash of the button
+  // during the brief window before maintenance_mode is fetched on reload.
+  if (loading || !isLanding || isMaintenanceOn) return null;
   return <WhatsAppButton />;
 }
 
