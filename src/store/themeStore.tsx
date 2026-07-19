@@ -1,17 +1,25 @@
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import { useDatabase } from '@/lib/backend';
 
 type Theme = 'light' | 'dark' | 'system';
 
 interface ThemeContextType {
   theme: Theme;
   setTheme: (theme: Theme) => void;
+  /** Apply a theme as the system default without pinning it as the user's override. */
+  applyGlobalDefault: (theme: Theme) => void;
+  /** Reset the user's local override and fall back to the global default. */
+  resetToGlobal: () => void;
 }
 
 const ThemeContext = createContext<ThemeContextType>({
   theme: 'dark',
   setTheme: () => {},
+  applyGlobalDefault: () => {},
+  resetToGlobal: () => {},
 });
+
+const STORAGE_KEY = 'mlm360-theme';
+const OVERRIDE_KEY = 'mlm360-theme-override';
 
 /**
  * Apply theme to document with proper color-scheme sync
@@ -52,7 +60,7 @@ function applyTheme(theme: Theme) {
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(() => {
-    const stored = localStorage.getItem('mlm360-theme');
+    const stored = localStorage.getItem(STORAGE_KEY);
     return (stored as Theme) || 'dark';
   });
 
@@ -72,14 +80,30 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, [theme]);
 
+  // User-initiated theme change: persist locally and mark as a personal override
+  // so the global default from system_config no longer overwrites it.
   const setTheme = useCallback((newTheme: Theme) => {
     setThemeState(newTheme);
-    localStorage.setItem('mlm360-theme', newTheme);
+    localStorage.setItem(STORAGE_KEY, newTheme);
+    localStorage.setItem(OVERRIDE_KEY, '1');
     applyTheme(newTheme);
   }, []);
 
+  // Apply a theme as the system default (used by ThemeSync when reading global_theme).
+  // Does NOT mark a personal override — any user without an override follows this default.
+  const applyGlobalDefault = useCallback((next: Theme) => {
+    localStorage.setItem(STORAGE_KEY, next);
+    setThemeState(next);
+    applyTheme(next);
+  }, []);
+
+  const resetToGlobal = useCallback(() => {
+    localStorage.removeItem(OVERRIDE_KEY);
+    localStorage.removeItem(STORAGE_KEY);
+  }, []);
+
   return (
-    <ThemeContext.Provider value={{ theme, setTheme }}>
+    <ThemeContext.Provider value={{ theme, setTheme, applyGlobalDefault, resetToGlobal }}>
       {children}
     </ThemeContext.Provider>
   );
@@ -87,37 +111,29 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
 /**
  * ThemeSync — rendered inside ConfigProvider.
- * Reads `global_theme` from system_config and applies it globally.
- * When any user (typically admin) changes the theme via setTheme, it persists
- * to system_config so all users get the same theme.
+ *
+ * Behavior:
+ * - The admin sets a global default theme via system_config (`global_theme`) from
+ *   the Settings page. That default is applied to every visitor on first load.
+ * - Once a user picks their own theme via the navbar/dashboard toggle, we record
+ *   a local override (`mlm360-theme-override`) and stop re-applying the global
+ *   default to them. Their personal choice persists across reloads.
+ * - Only the admin's Settings page writes `global_theme` to system_config.
+ *   Regular user toggles NEVER mutate the global default.
  */
 export function ThemeSync({ globalTheme }: { globalTheme: string | undefined }) {
-  const { theme, setTheme } = useThemeStore();
-  const database = useDatabase();
+  const { theme, applyGlobalDefault } = useThemeStore();
 
-  // Apply global theme from config when it changes
   useEffect(() => {
     if (!globalTheme) return;
     const valid: Theme[] = ['light', 'dark', 'system'];
-    if (valid.includes(globalTheme as Theme) && globalTheme !== theme) {
-      setTheme(globalTheme as Theme);
+    if (!valid.includes(globalTheme as Theme)) return;
+    const hasOverride = localStorage.getItem(OVERRIDE_KEY) === '1';
+    if (hasOverride) return; // respect user's personal choice
+    if (globalTheme !== theme) {
+      applyGlobalDefault(globalTheme as Theme);
     }
-  }, [globalTheme, theme, setTheme]);
-
-  // Persist theme changes to system_config
-  useEffect(() => {
-    const t = setTimeout(() => {
-      if (theme) {
-        database.upsert('system_config', {
-          key: 'global_theme',
-          value: theme,
-          category: 'general',
-          updated_at: new Date().toISOString(),
-        }, 'key').catch(() => {});
-      }
-    }, 300);
-    return () => clearTimeout(t);
-  }, [theme, database]);
+  }, [globalTheme, theme, applyGlobalDefault]);
 
   return null;
 }

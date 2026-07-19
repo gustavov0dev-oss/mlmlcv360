@@ -135,6 +135,30 @@ export function useSeo() {
       }
     }
 
+    // ── PWA manifest link + theme-color meta (kept in sync with system_config) ──
+    const themeColor = company.pwa_theme_color || '#C79B3B';
+    let manifestLink = document.head.querySelector('link[rel="manifest"]') as HTMLLinkElement | null;
+    if (!manifestLink) {
+      manifestLink = document.createElement('link');
+      manifestLink.rel = 'manifest';
+      document.head.appendChild(manifestLink);
+    }
+    manifestLink.href = '/manifest.json';
+
+    let themeColorMeta = document.head.querySelector('meta[name="theme-color"]') as HTMLMetaElement | null;
+    if (!themeColorMeta) {
+      themeColorMeta = document.createElement('meta');
+      themeColorMeta.setAttribute('name', 'theme-color');
+      document.head.appendChild(themeColorMeta);
+    }
+    themeColorMeta.setAttribute('content', themeColor);
+
+    // Apple touch icon + mobile web app title — dynamic from company config
+    setMeta('name', 'apple-mobile-web-app-title', companyName);
+    setMeta('name', 'mobile-web-app-capable', 'yes');
+    setMeta('name', 'apple-mobile-web-app-capable', 'yes');
+    setMeta('name', 'apple-mobile-web-app-status-bar-style', 'default');
+
     // ── JSON-LD: Organization ──
     const orgSchema: Record<string, unknown> = {
       '@context': 'https://schema.org',
