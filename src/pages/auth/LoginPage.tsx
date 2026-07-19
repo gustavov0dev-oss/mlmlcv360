@@ -67,8 +67,6 @@ export default function LoginPage() {
 
   const googleEnabled = company.google_oauth_enabled === 'true';
 
-  if (user) return <Navigate to="/dashboard" />;
-
   const { register, handleSubmit, formState: { errors }, setValue } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
@@ -80,6 +78,8 @@ export default function LoginPage() {
       setRememberMe(true);
     }
   }, [setValue]);
+
+  if (user) return <Navigate to="/dashboard" />;
 
   const onSubmit = async (data: FormData) => {
     setLoading(true);
