@@ -1,10 +1,5 @@
 {
   "rewrites": [
-    { "source": "/manifest.json", "destination": "https://lctyygnwhkoehulkaast.supabase.co/functions/v1/site-files/manifest.json" },
-    { "source": "/robots.txt", "destination": "https://lctyygnwhkoehulkaast.supabase.co/functions/v1/site-files/robots.txt" },
-    { "source": "/sitemap.xml", "destination": "https://lctyygnwhkoehulkaast.supabase.co/functions/v1/site-files/sitemap.xml" },
     { "source": "/(.*)", "destination": "/index.html" }
-  ],
-  "trailingSlash": false,
-  "cleanUrls": true
+  ]
 }

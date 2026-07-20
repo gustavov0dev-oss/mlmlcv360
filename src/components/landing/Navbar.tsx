@@ -6,7 +6,7 @@ import {
   Crown, Zap, Scale, Star, Medal,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useThemeStore } from '@/store/themeStore';
+import { useThemeStore, useIsDark } from '@/store/themeStore';
 import { useAuthStore } from '@/store/authStore';
 import { useConfig, type Rank } from '@/store/configStore';
 import { useCart } from '@/store/cartStore';
@@ -189,7 +189,8 @@ function DesktopUserMenu() {
 export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { theme, setTheme } = useThemeStore();
+  const { setTheme } = useThemeStore();
+  const isDark = useIsDark();
   const { user, signOut } = useAuthStore();
   const { company, logoValue, logoSizes, plans, ranks } = useConfig();
   const { itemCount } = useCart();
@@ -197,7 +198,6 @@ export default function Navbar() {
   const companyName = company.company_name || 'MLM 360';
   const [scrolled, setScrolled] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-  const isDark = theme === 'dark';
   const isLoggedIn = !!user;
 
   // Simple scroll lock - no position:fixed to avoid jelly scroll

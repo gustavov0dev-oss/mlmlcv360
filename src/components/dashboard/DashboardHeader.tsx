@@ -6,7 +6,7 @@ import {
   ChevronDown, ExternalLink, CheckCheck, Trash2, X, Users, Package, ShoppingBag,
   LayoutDashboard, Crown, Star, Medal, DollarSign, ArrowRight,
 } from 'lucide-react';
-import { useThemeStore } from '@/store/themeStore';
+import { useThemeStore, useIsDark } from '@/store/themeStore';
 import { useAuthStore } from '@/store/authStore';
 import { useUIStore } from '@/store/uiStore';
 import { useConfig, type Rank } from '@/store/configStore';
@@ -70,14 +70,14 @@ function RankBadgeIcon({ rank, className }: { rank: Rank; className?: string }) 
 }
 
 export default function DashboardHeader() {
-  const { theme, setTheme } = useThemeStore();
+  const { setTheme } = useThemeStore();
+  const isDark = useIsDark();
   const { user, signOut } = useAuthStore();
   const { sidebarOpen, setSidebarOpen } = useUIStore();
   const { company, logoValue, logoSizes, plans, ranks } = useConfig();
   const database = useDatabase();
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const isDark = theme === 'dark';
   const role = (user as any)?.role || 'user';
   const canAccessSettings = role === 'super_admin' || role === 'admin';
 

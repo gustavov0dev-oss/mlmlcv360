@@ -141,3 +141,27 @@ export function ThemeSync({ globalTheme }: { globalTheme: string | undefined }) 
 export function useThemeStore() {
   return useContext(ThemeContext);
 }
+
+/**
+ * Returns the resolved dark/light state, taking 'system' theme into account.
+ * Use this in navbars/headers so the toggle icon matches what the user actually sees.
+ */
+export function useIsDark() {
+  const { theme } = useThemeStore();
+  const [isDark, setIsDark] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return theme === 'dark';
+    return theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  });
+
+  useEffect(() => {
+    if (theme === 'dark') { setIsDark(true); return; }
+    if (theme === 'light') { setIsDark(false); return; }
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const handler = () => setIsDark(mq.matches);
+    setIsDark(mq.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, [theme]);
+
+  return isDark;
+}
