@@ -30,7 +30,7 @@
         try {
           var stored = localStorage.getItem('mlm360-theme');
           var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-          var shouldDark = stored === 'dark' || (!stored && prefersDark);
+          var shouldDark = stored === 'dark' || stored === 'system' && prefersDark || (!stored && prefersDark);
           var doc = document.documentElement;
 
           if (shouldDark) {
