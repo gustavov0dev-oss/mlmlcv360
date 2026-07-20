@@ -60,7 +60,9 @@ export function useSeo() {
   const { company, plans } = useConfig();
 
   useEffect(() => {
-    const companyName = company.company_name || 'MLM 360';
+    // Don't overwrite the static title while config is still loading
+    if (!company.company_name) return;
+    const companyName = company.company_name;
     const title = company.seo_title || `${companyName} - Sistema Empresarial Premium`;
     const description = company.seo_description || 'Sistema MLM empresarial premium. Gestiona tu red de afiliados y comisiones.';
     const keywords = company.seo_keywords || '';

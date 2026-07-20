@@ -343,7 +343,7 @@ export default function Navbar() {
         aria-hidden={!mobileNavOpen}
         className={cn(
           'fixed top-16 left-0 right-0 bottom-0 z-[55] lg:hidden',
-          mobileNavOpen ? 'pointer-events-auto' : 'pointer-events-none',
+          mobileNavOpen ? 'pointer-events-auto visible' : 'pointer-events-none invisible',
         )}
       >
         {/* Backdrop */}
