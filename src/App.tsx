@@ -199,7 +199,8 @@ function MaintenanceGate({ children }: { children: ReactNode }) {
 }
 
 function AppRoutes() {
-  const { loading, company } = useConfig();
+  const { loading: configLoading, company } = useConfig();
+  const { loading: authLoading } = useAuthStore();
   const [forcedReady, setForcedReady] = useState(false);
 
   useSeo();
@@ -214,7 +215,10 @@ function AppRoutes() {
     return () => clearTimeout(t);
   }, []);
 
-  if (loading && !forcedReady) return <AppSkeleton />;
+  // Wait for BOTH config and auth to resolve before rendering routes.
+  // This prevents guest-state flashes (e.g. "Empezar gratis" button) for
+  // logged-in users during the initial session restore on manual reload.
+  if ((configLoading || authLoading) && !forcedReady) return <AppSkeleton />;
   return (
     <MaintenanceGate>
       <ThemeSync globalTheme={globalTheme} />

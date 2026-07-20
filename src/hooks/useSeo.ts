@@ -89,6 +89,13 @@ export function useSeo() {
     setMeta('name', 'robots', 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1');
     setMeta('name', 'googlebot', 'index, follow');
 
+    // Cache title so the inline FOUC script in index.html can restore it
+    // instantly on next reload, before useSeo runs.
+    try {
+      localStorage.setItem('mlm360-company-name', companyName);
+      localStorage.setItem('mlm360-seo-title', title);
+    } catch {}
+
     // ── Geo tags (geo-targeting for local SEO) ──
     if (addressRegion || addressCity) {
       setMeta('name', 'geo.region', addressCountry.toUpperCase());

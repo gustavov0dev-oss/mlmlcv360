@@ -8,8 +8,22 @@
     <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)" />
 
     <!-- Primary Meta Tags — populated dynamically by useSeo hook from system_config.
-         Kept minimal to avoid showing stale static content on refresh. -->
-    <title></title>
+         A cached company name is restored synchronously here to prevent any URL
+         or fallback-title flash on reload. useSeo overwrites it once config loads. -->
+    <title>MLM 360</title>
+    <script>
+      (function() {
+        try {
+          var cachedName = localStorage.getItem('mlm360-company-name');
+          var cachedTitle = localStorage.getItem('mlm360-seo-title');
+          if (cachedTitle) {
+            document.title = cachedTitle;
+          } else if (cachedName) {
+            document.title = cachedName + ' - Sistema Empresarial Premium';
+          }
+        } catch (e) {}
+      })();
+    </script>
 
     <!-- PWA -->
     <link rel="manifest" href="/manifest.json" />

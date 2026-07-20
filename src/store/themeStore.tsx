@@ -61,7 +61,9 @@ function applyTheme(theme: Theme) {
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
-    return (stored as Theme) || 'dark';
+    // Default to 'system' so new visitors follow their OS color-scheme
+    // preference instead of being forced into dark mode.
+    return (stored as Theme) || 'system';
   });
 
   // Apply theme on mount and when changed
