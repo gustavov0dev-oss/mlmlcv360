@@ -76,10 +76,10 @@ function MaintenancePage() {
   const remaining = useCountdown(countdownDate);
 
   return (
-    <div className="h-screen overflow-hidden bg-background flex flex-col px-4 relative">
+    <div className="min-h-[100dvh] w-full overflow-y-auto bg-background flex flex-col items-center justify-center px-4 py-10 relative">
       {/* Faded grid mesh background */}
       <div
-        className="absolute inset-0 -z-10 pointer-events-none"
+        className="fixed inset-0 -z-10 pointer-events-none"
         style={{
           backgroundImage: `linear-gradient(to right, ${themeColor}22 1px, transparent 1px), linear-gradient(to bottom, ${themeColor}22 1px, transparent 1px)`,
           backgroundSize: '56px 56px',
@@ -88,13 +88,13 @@ function MaintenancePage() {
         }}
       />
       {/* Soft glow accents */}
-      <div className="absolute inset-0 -z-10 opacity-[0.07] pointer-events-none overflow-hidden">
+      <div className="fixed inset-0 -z-10 opacity-[0.07] pointer-events-none overflow-hidden">
         <div className="absolute -top-32 -left-32 w-[30rem] h-[30rem] rounded-full blur-3xl" style={{ background: themeColor }} />
         <div className="absolute -bottom-40 -right-32 w-[34rem] h-[34rem] rounded-full blur-3xl" style={{ background: themeColor }} />
       </div>
 
-      {/* Logo anchored at top */}
-      <div className="flex justify-center pt-8 sm:pt-12 shrink-0">
+      {/* Logo */}
+      <div className="flex justify-center mb-8 sm:mb-10 shrink-0">
         <Logo
           value={company.logo_value || ''}
           fallbackText={name}
@@ -102,8 +102,8 @@ function MaintenancePage() {
         />
       </div>
 
-      {/* Main content centered in remaining space */}
-      <div className="flex-1 flex flex-col items-center justify-center text-center w-full max-w-xl mx-auto">
+      {/* Main content centered */}
+      <div className="flex flex-col items-center justify-center text-center w-full max-w-xl mx-auto">
         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-foreground mb-3 sm:mb-4">
           {title}
         </h1>
@@ -142,9 +142,6 @@ function MaintenancePage() {
           );
         })()}
       </div>
-
-      {/* Bottom spacer matching logo area for visual balance */}
-      <div className="shrink-0 pb-8 sm:pb-12" />
     </div>
   );
 }
