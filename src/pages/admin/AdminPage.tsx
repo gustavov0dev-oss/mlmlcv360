@@ -2432,25 +2432,8 @@ export default function AdminPage() {
                 )}
               </div>
 
-              {/* Título — una sola columna, ancho completo */}
-              <div className="max-w-xl">
-                <label className="block text-xs font-medium text-foreground mb-1.5">
-                  Título de la página
-                </label>
-                <input
-                  type="text"
-                  value={c("maintenance_title")}
-                  onChange={(e) => setC("maintenance_title", e.target.value)}
-                  placeholder="Volveremos pronto"
-                  className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors"
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Título principal que se mostrará en la página de mantenimiento.
-                </p>
-              </div>
-
               {/* Mensaje — una sola columna, ancho completo */}
-              <div className="max-w-xl mt-4">
+              <div className="max-w-xl">
                 <label className="block text-xs font-medium text-foreground mb-1.5">
                   Mensaje para los usuarios
                 </label>
@@ -2483,32 +2466,19 @@ export default function AdminPage() {
                   />
                 </div>
                 {c("maintenance_countdown_enabled") === "true" && (
-                  <div className="mt-3 space-y-3">
-                    <div>
-                      <label className="block text-xs font-medium text-foreground mb-1.5">
-                        Fecha y hora de reapertura
-                      </label>
-                      <input
-                        type="datetime-local"
-                        value={c("maintenance_countdown_date") ? c("maintenance_countdown_date").slice(0, 16) : ""}
-                        onChange={(e) => setC("maintenance_countdown_date", e.target.value ? new Date(e.target.value).toISOString() : "")}
-                        className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors"
-                      />
-                      {c("maintenance_countdown_date") && (() => {
-                        const d = new Date(c("maintenance_countdown_date"));
-                        if (isNaN(d.getTime())) return null;
-                        try {
-                          return (
-                            <p className="text-xs text-primary font-medium mt-1">
-                              {new Intl.DateTimeFormat('es-PE', { dateStyle: 'full', timeStyle: 'short' }).format(d)}
-                            </p>
-                          );
-                        } catch { return null; }
-                      })()}
-                    </div>
-                    <MaintenanceCountdownPreview
-                      dateIso={c("maintenance_countdown_date")}
+                  <div className="mt-3">
+                    <label className="block text-xs font-medium text-foreground mb-1.5">
+                      Fecha y hora de finalización
+                    </label>
+                    <input
+                      type="datetime-local"
+                      value={c("maintenance_countdown_date") ? c("maintenance_countdown_date").slice(0, 16) : ""}
+                      onChange={(e) => setC("maintenance_countdown_date", e.target.value ? new Date(e.target.value).toISOString() : "")}
+                      className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors"
                     />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Cuando llegue esta fecha, el contador desaparecerá.
+                    </p>
                   </div>
                 )}
               </div>
@@ -2516,7 +2486,7 @@ export default function AdminPage() {
               <div className="mt-6 pt-4 border-t border-border flex justify-end">
                 <button
                   onClick={() =>
-                    saveConfigKeys(["maintenance_mode", "maintenance_title", "maintenance_message", "maintenance_countdown_enabled", "maintenance_countdown_date"])
+                    saveConfigKeys(["maintenance_mode", "maintenance_message", "maintenance_countdown_enabled", "maintenance_countdown_date"])
                   }
                   disabled={savingConfig}
                   className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-medium transition-colors disabled:opacity-50"
@@ -2537,52 +2507,6 @@ export default function AdminPage() {
           {/* ── FINANZAS ── */}
           {activeModule === "finanzas" && <GatewaysManager />}
         </div>
-      </div>
-    </div>
-  );
-}
-
-// ── Maintenance Manager ──
-function MaintenanceCountdownPreview({ dateIso }: { dateIso: string }) {
-  const [remaining, setRemaining] = useState<number | null>(null);
-  useEffect(() => {
-    if (!dateIso) { setRemaining(null); return; }
-    const target = new Date(dateIso).getTime();
-    if (isNaN(target)) { setRemaining(null); return; }
-    const tick = () => setRemaining(Math.max(0, target - Date.now()));
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, [dateIso]);
-
-  if (remaining === null) return null;
-
-  const total = Math.floor(remaining / 1000);
-  const d = Math.floor(total / 86400);
-  const h = Math.floor((total % 86400) / 3600);
-  const m = Math.floor((total % 3600) / 60);
-  const s = total % 60;
-  const units = [{ v: d, l: 'Días' }, { v: h, l: 'Horas' }, { v: m, l: 'Min' }, { v: s, l: 'Seg' }];
-
-  return (
-    <div className="mt-4 p-4 bg-muted/40 border border-border rounded-xl">
-      <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">Vista previa del contador</p>
-      <div className="flex gap-2 justify-center">
-        {units.map((u, i) => (
-          <div key={i} className="flex flex-col items-center gap-1">
-            <div
-              className="w-12 h-12 rounded-xl flex items-center justify-center text-xl font-bold tabular-nums"
-              style={{
-                background: 'hsl(var(--muted))',
-                border: '1px solid hsl(var(--border))',
-                color: 'hsl(var(--foreground))',
-              }}
-            >
-              {String(u.v).padStart(2, '0')}
-            </div>
-            <span className="text-[9px] text-muted-foreground uppercase tracking-wide font-medium">{u.l}</span>
-          </div>
-        ))}
       </div>
     </div>
   );

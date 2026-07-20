@@ -3,7 +3,6 @@ import { useDatabase, useStorage } from '@/lib/backend';
 import { useCart } from '@/store/cartStore';
 import { useAuthStore } from '@/store/authStore';
 import { useConfig } from '@/store/configStore';
-import { setProductSchema, clearProductSchema } from '@/hooks/useSeo';
 import ProductCard from '@/components/store/ProductCard';
 import { useNavigate } from '@/lib/router';
 import { cn } from '@/lib/utils';
@@ -137,7 +136,7 @@ export default function ProductDetailPage() {
   const slug = window.location.pathname.split('/').filter(p => p && p !== 'tienda').pop() || '';
   const { addItem, items } = useCart();
   const { user } = useAuthStore();
-  const { exchangeRate, showUsd, setShowUsd, company } = useConfig();
+  const { exchangeRate, showUsd, setShowUsd } = useConfig();
   const navigate = useNavigate();
 
   const [product, setProduct] = useState<Product | null>(null);
@@ -227,19 +226,6 @@ export default function ProductDetailPage() {
   }, [slug, user]);
 
   useEffect(() => { load(); }, [load]);
-
-  // Inject dynamic Product JSON-LD schema using live product + company data
-  useEffect(() => {
-    if (product) {
-      setProductSchema(product, {
-        companyName: company.company_name || '',
-        websiteUrl: company.website_url || window.location.origin,
-      });
-    } else {
-      clearProductSchema();
-    }
-    return () => clearProductSchema();
-  }, [product, company.company_name, company.website_url]);
 
   const variants = product
     ? ((product.variants || []) as ProductVariant[])

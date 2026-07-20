@@ -14,6 +14,7 @@ import {
 } from './types';
 import { supabase } from './client';
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // The Supabase query builder uses a complex fluent generic chain that is impractical
 // to type precisely in a wrapper. We use `any` internally and cast results to the
 // strongly-typed public interfaces defined in types.ts.

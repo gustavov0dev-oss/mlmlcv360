@@ -1,5 +1,7 @@
 {
   "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
-  ]
+    { "source": "/((?!api|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|manifest.json|sw.js|assets|images|icons).*)", "destination": "/index.html" }
+  ],
+  "trailingSlash": false,
+  "cleanUrls": true
 }

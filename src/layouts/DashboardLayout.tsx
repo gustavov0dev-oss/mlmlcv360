@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 import Sidebar from '@/components/dashboard/Sidebar';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import { Skeleton } from '@/components/ui/skeleton';
-import { lazy, Suspense, useEffect } from 'react';
+import { lazy, Suspense } from 'react';
 
 const DashboardPage = lazy(() => import('@/pages/dashboard/DashboardPage'));
 const ProfilePage = lazy(() => import('@/pages/dashboard/ProfilePage'));
@@ -108,14 +108,6 @@ function DashboardContent() {
 export default function DashboardLayout() {
   const { sidebarCollapsed } = useUIStore();
   const { user, loading } = useAuthStore();
-
-  // Prevent body-level scroll while the dashboard is mounted — the dashboard
-  // manages its own internal scroll via the main element's overflow-y-auto.
-  useEffect(() => {
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = prev; };
-  }, []);
 
   if (loading) {
     return (

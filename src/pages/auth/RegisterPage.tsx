@@ -88,6 +88,8 @@ export default function RegisterPage() {
     }
   }, [searchParams, activePlans, showPlans, defaultPlan]);
 
+  if (user) return <Navigate to="/dashboard" />;
+
   const { register, handleSubmit, formState: { errors }, watch } = useForm<Step1Data>({
     resolver: zodResolver(step1Schema),
     defaultValues: { referral_code: searchParams.get('ref') || '' },
@@ -165,8 +167,6 @@ export default function RegisterPage() {
   const metCount = requirements.filter(r => r.valid).length;
   const strength = pwdVal.length === 0 ? 0 : metCount;
   const strengthLabels = ['', 'Débil', 'Regular', 'Fuerte'];
-
-  if (user) return <Navigate to="/dashboard" />;
 
   return (
     <div className="min-h-screen bg-background flex flex-col lg:flex-row">

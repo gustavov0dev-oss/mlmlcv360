@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import { useUIStore } from '@/store/uiStore';
 import { useConfig } from '@/store/configStore';
 import { useDatabase } from '@/lib/backend';
 import { cn } from '@/lib/utils';
 import { Link, useLocation, useNavigate } from '@/lib/router';
+import { useState, useEffect, useRef } from 'react';
 import { LayoutDashboard, Users, GitBranch, DollarSign, Award, ChartBar as BarChart3, Settings, ChevronDown, ChevronRight, UserCog, CreditCard, User, ShoppingBag, Package, Truck, Tag, ChartBar as BarChart2, ShoppingCart, FolderOpen, MessageSquare, Shield, Crown, Star, Medal, LogOut, Link2, CircleHelp as HelpCircle, FileText, ScrollText } from 'lucide-react';
 import { type Rank } from '@/store/configStore';
 
@@ -12,19 +12,6 @@ const rankIconMap: Record<string, React.ComponentType<{ className?: string }>> =
   medal: Medal, crown: Crown, star: Star,
   bronze: Medal, silver: Medal, gold: Medal, platinum: Medal, diamond: Medal,
 };
-
-// Returns className + style handling both Tailwind class strings and hex/rgb colors.
-function resolveBadgeColor(color: string | undefined, bg: string | undefined, fallbackColor: string, fallbackBg: string) {
-  const isRaw = (v?: string) => v && (v.startsWith('#') || v.startsWith('rgb') || v.startsWith('hsl'));
-  const style: React.CSSProperties = {};
-  if (isRaw(color)) style.color = color;
-  if (isRaw(bg)) style.backgroundColor = bg;
-  const cls = cn(
-    !isRaw(color) ? (color || fallbackColor) : '',
-    !isRaw(bg) ? (bg || fallbackBg) : '',
-  );
-  return { cls, style };
-}
 
 function RankIcon({ rank, className }: { rank: Rank; className?: string }) {
   const icon = rank.icon || '';
@@ -548,24 +535,17 @@ export default function Sidebar() {
           {sidebarCollapsed ? (
             <div className="flex flex-col items-center gap-2 py-3 px-2">
               <UserAvatar size="md" />
-              {(userPlan || userRank) && (() => {
-                const r = userRank;
-                const p = userPlan;
-                const rawColor = r?.color || p?.color;
-                const iconStyle: React.CSSProperties = rawColor?.startsWith('#') || rawColor?.startsWith('rgb') || rawColor?.startsWith('hsl')
-                  ? { color: rawColor }
-                  : {};
-                const iconClass = (!rawColor?.startsWith('#') && !rawColor?.startsWith('rgb') && !rawColor?.startsWith('hsl'))
-                  ? (rawColor || 'text-primary')
-                  : '';
-                return (
-                  <div className="w-full flex items-center justify-center" title={r?.name || p?.name}>
-                    <div className={cn('w-4 h-4 flex items-center justify-center', iconClass)} style={iconStyle}>
-                      {r ? <RankIcon rank={r} className="w-4 h-4" /> : <Crown className="w-4 h-4" />}
-                    </div>
+              {(userPlan || userRank) && (
+                <div className="w-full flex items-center justify-center" title={userRank ? userRank.name : userPlan?.name}>
+                  <div className={cn('flex items-center gap-1 px-2 py-0.5 rounded-full', userRank?.bg_color || userPlan?.bg_color || 'bg-primary/10')}>
+                    {userRank ? (
+                      <RankIcon rank={userRank} className={cn('w-3 h-3', userRank.color || 'text-primary')} />
+                    ) : (
+                      <Crown className="w-3 h-3 text-amber-500" />
+                    )}
                   </div>
-                );
-              })()}
+                </div>
+              )}
               <button
                 onClick={() => setSidebarCollapsed(false)}
                 className="w-8 h-7 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
@@ -585,22 +565,18 @@ export default function Sidebar() {
                   <p className={cn('text-[10px] truncate', roleColorClass || 'text-muted-foreground')} style={roleColorStyle}>{roleLabel}</p>
                   {/* Plan + Rank badges */}
                   <div className="flex items-center gap-1 mt-0.5 flex-wrap">
-                    {userPlan && (() => {
-                      const { cls, style } = resolveBadgeColor(userPlan.color, userPlan.bg_color, 'text-amber-600 dark:text-amber-400', 'bg-amber-500/10');
-                      return (
-                        <span className={cn('flex items-center gap-0.5 text-[9px] font-semibold px-1.5 py-0.5 rounded-full leading-none', cls)} style={style}>
-                          <Crown className="w-2.5 h-2.5" />{userPlan.name}
-                        </span>
-                      );
-                    })()}
-                    {userRank && (() => {
-                      const { cls, style } = resolveBadgeColor(userRank.color, userRank.bg_color, 'text-primary', 'bg-primary/10');
-                      return (
-                        <span className={cn('inline-flex items-center gap-0.5 text-[9px] font-semibold px-1.5 py-0.5 rounded-full leading-none', cls)} style={style}>
-                          <RankIcon rank={userRank} className="w-2.5 h-2.5" />{userRank.name}
-                        </span>
-                      );
-                    })()}
+                    {userPlan && (
+                      <span className={cn('flex items-center gap-0.5 text-[9px] font-semibold px-1.5 py-0.5 rounded-full leading-none', userPlan.color || 'text-amber-600 dark:text-amber-400', userPlan.bg_color || 'bg-amber-500/10')}>
+                        <Crown className="w-2.5 h-2.5" />
+                        {userPlan.name}
+                      </span>
+                    )}
+                    {userRank && (
+                      <span className={cn('inline-flex items-center gap-0.5 text-[9px] font-semibold px-1.5 py-0.5 rounded-full leading-none', userRank.color || 'text-primary', userRank.bg_color || 'bg-primary/10')}>
+                        <RankIcon rank={userRank} className="w-2.5 h-2.5" />
+                        {userRank.name}
+                      </span>
+                    )}
                   </div>
                 </div>
                 <button
@@ -641,22 +617,16 @@ export default function Sidebar() {
                 <p className={cn('text-[10px] font-semibold uppercase tracking-wider mt-0.5', roleColorClass || 'text-muted-foreground')} style={roleColorStyle}>{roleLabel}</p>
                 {(userPlan || userRank) && (
                   <div className="flex items-center gap-1 mt-1 flex-wrap">
-                    {userPlan && (() => {
-                      const { cls, style } = resolveBadgeColor(userPlan.color, userPlan.bg_color, 'text-amber-600 dark:text-amber-400', 'bg-amber-500/10');
-                      return (
-                        <span className={cn('flex items-center gap-0.5 text-[9px] font-semibold px-1.5 py-0.5 rounded-full', cls)} style={style}>
-                          <Crown className="w-2.5 h-2.5" />{userPlan.name}
-                        </span>
-                      );
-                    })()}
-                    {userRank && (() => {
-                      const { cls, style } = resolveBadgeColor(userRank.color, userRank.bg_color, 'text-primary', 'bg-primary/10');
-                      return (
-                        <span className={cn('inline-flex items-center gap-0.5 text-[9px] font-semibold px-1.5 py-0.5 rounded-full', cls)} style={style}>
-                          <RankIcon rank={userRank} className="w-2.5 h-2.5" />{userRank.name}
-                        </span>
-                      );
-                    })()}
+                    {userPlan && (
+                      <span className={cn('flex items-center gap-0.5 text-[9px] font-semibold px-1.5 py-0.5 rounded-full', userPlan.color || 'text-amber-600 dark:text-amber-400', userPlan.bg_color || 'bg-amber-500/10')}>
+                        <Crown className="w-2.5 h-2.5" />{userPlan.name}
+                      </span>
+                    )}
+                    {userRank && (
+                      <span className={cn('inline-flex items-center gap-0.5 text-[9px] font-semibold px-1.5 py-0.5 rounded-full', userRank.color || 'text-primary', userRank.bg_color || 'bg-primary/10')}>
+                        <RankIcon rank={userRank} className="w-2.5 h-2.5" />{userRank.name}
+                      </span>
+                    )}
                   </div>
                 )}
               </div>

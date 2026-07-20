@@ -82,6 +82,7 @@ export default function Logo({
         className={cn(pixelSize ? '' : size, 'inline-flex items-center justify-center [&>svg]:w-full [&>svg]:h-full flex-shrink-0')}
         style={pxStyle}
         // sanitised above — no scripts, no event handlers
+        // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{ __html: safeSvg }}
         aria-label={fallbackText}
         role="img"
