@@ -1,9 +1,10 @@
 {
-  "rewrites": [
-    { "source": "/manifest.json", "destination": "https://lctyygnwhkoehulkaast.supabase.co/functions/v1/site-files/manifest.json" },
-    { "source": "/robots.txt", "destination": "https://lctyygnwhkoehulkaast.supabase.co/functions/v1/site-files/robots.txt" },
-    { "source": "/sitemap.xml", "destination": "https://lctyygnwhkoehulkaast.supabase.co/functions/v1/site-files/sitemap.xml" },
-    { "source": "/(.*)", "destination": "/index.html" }
+  "routes": [
+    { "src": "/manifest.json", "dest": "https://lctyygnwhkoehulkaast.supabase.co/functions/v1/site-files/manifest.json" },
+    { "src": "/robots.txt", "dest": "https://lctyygnwhkoehulkaast.supabase.co/functions/v1/site-files/robots.txt" },
+    { "src": "/sitemap.xml", "dest": "https://lctyygnwhkoehulkaast.supabase.co/functions/v1/site-files/sitemap.xml" },
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/index.html" }
   ],
   "trailingSlash": false,
   "cleanUrls": true
