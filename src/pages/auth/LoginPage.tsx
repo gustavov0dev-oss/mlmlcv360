@@ -53,7 +53,7 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const backend = useBackend();
   const { theme, setTheme } = useThemeStore();
-  const { user } = useAuthStore();
+  const { user, fetchProfile } = useAuthStore();
   const { company, logoValue, logoSizes } = useConfig();
   const companyName = company.company_name || 'MLM 360';
   const isDark = theme === 'dark';
@@ -93,7 +93,13 @@ export default function LoginPage() {
       toast.error(translateAuthError(result.error));
       setLoading(false);
     } else {
-      toast.success('Bienvenido!');
+      const userId = result.session?.user?.id;
+      let displayName = '';
+      if (userId) {
+        const profile = await fetchProfile(userId);
+        displayName = profile?.full_name?.split(' ')[0] || profile?.username || '';
+      }
+      toast.success(displayName ? `¡Bienvenido, ${displayName}!` : '¡Bienvenido!');
       navigate('/dashboard');
     }
   };

@@ -76,7 +76,7 @@ function MaintenancePage() {
   const remaining = useCountdown(countdownDate);
 
   return (
-    <div className="h-screen overflow-hidden bg-background flex flex-col items-center justify-center px-4 relative">
+    <div className="h-screen overflow-hidden bg-background flex flex-col px-4 relative">
       {/* Faded grid mesh background */}
       <div
         className="absolute inset-0 -z-10 pointer-events-none"
@@ -88,25 +88,26 @@ function MaintenancePage() {
         }}
       />
       {/* Soft glow accents */}
-      <div className="absolute inset-0 -z-10 opacity-[0.07] pointer-events-none">
+      <div className="absolute inset-0 -z-10 opacity-[0.07] pointer-events-none overflow-hidden">
         <div className="absolute -top-32 -left-32 w-[30rem] h-[30rem] rounded-full blur-3xl" style={{ background: themeColor }} />
         <div className="absolute -bottom-40 -right-32 w-[34rem] h-[34rem] rounded-full blur-3xl" style={{ background: themeColor }} />
       </div>
 
-      <div className="w-full max-w-xl text-center">
-        {/* Brand logo */}
-        <div className="flex justify-center mb-12 w-full">
-          <Logo
-            value={company.logo_value || ''}
-            fallbackText={name}
-            imgClass="max-w-[196px] w-full h-auto object-contain"
-          />
-        </div>
+      {/* Logo anchored at top */}
+      <div className="flex justify-center pt-8 sm:pt-12 shrink-0">
+        <Logo
+          value={company.logo_value || ''}
+          fallbackText={name}
+          imgClass="max-w-[160px] sm:max-w-[196px] w-full h-auto object-contain"
+        />
+      </div>
 
-        <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground mb-4">
+      {/* Main content centered in remaining space */}
+      <div className="flex-1 flex flex-col items-center justify-center text-center w-full max-w-xl mx-auto">
+        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-foreground mb-3 sm:mb-4">
           {title}
         </h1>
-        <p className="text-muted-foreground text-base sm:text-lg leading-relaxed max-w-md mx-auto mb-10">
+        <p className="text-muted-foreground text-sm sm:text-base lg:text-lg leading-relaxed max-w-md mx-auto mb-8 sm:mb-10">
           {msg}
         </p>
 
@@ -120,11 +121,11 @@ function MaintenancePage() {
             { v: s, l: 'Seg' },
           ];
           return (
-            <div className="flex justify-center gap-3 sm:gap-4 mb-10">
+            <div className="flex justify-center gap-3 sm:gap-4">
               {units.map((u, i) => (
                 <div key={i} className="flex flex-col items-center gap-2">
                   <div
-                    className="relative w-[18vw] max-w-[90px] aspect-square rounded-2xl flex items-center justify-center text-3xl sm:text-4xl font-bold tabular-nums select-none overflow-hidden"
+                    className="relative w-[17vw] max-w-[80px] aspect-square rounded-2xl flex items-center justify-center text-2xl sm:text-3xl font-bold tabular-nums select-none overflow-hidden"
                     style={{
                       background: 'hsl(var(--muted))',
                       border: '1px solid hsl(var(--border))',
@@ -134,13 +135,16 @@ function MaintenancePage() {
                     <span className="absolute inset-x-0 top-1/2 -translate-y-px h-px bg-current opacity-10 pointer-events-none" />
                     <span className="relative z-10">{String(u.v).padStart(2, '0')}</span>
                   </div>
-                  <span className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-widest font-semibold">{u.l}</span>
+                  <span className="text-[9px] sm:text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">{u.l}</span>
                 </div>
               ))}
             </div>
           );
         })()}
       </div>
+
+      {/* Bottom spacer matching logo area for visual balance */}
+      <div className="shrink-0 pb-8 sm:pb-12" />
     </div>
   );
 }

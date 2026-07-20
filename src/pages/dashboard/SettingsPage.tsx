@@ -30,7 +30,7 @@ function ToggleSwitch({ checked, onChange }: { checked: boolean; onChange: (v: b
 }
 
 export default function SettingsPage() {
-  const { theme, applyGlobalDefault } = useThemeStore();
+  const { applyGlobalDefault } = useThemeStore();
   const database = useDatabase();
   const [activeTab, setActiveTab] = useState<Tab>('mlm');
   const [config, setConfig] = useState<Config>({});
@@ -203,15 +203,16 @@ export default function SettingsPage() {
                 { id: 'system', icon: Monitor, label: 'Sistema', preview: 'bg-gradient-to-br from-white to-neutral-900 border-neutral-500' },
               ].map(({ id, icon: Icon, label, preview }) => (
                 <button key={id} onClick={() => {
+                  setC('global_theme', id);
                   applyGlobalDefault(id as any);
                   database.upsert('system_config', {
                     key: 'global_theme', value: id, category: 'general', updated_at: new Date().toISOString(),
                   }, 'key').then(() => toast.success('Tema global actualizado')).catch(() => toast.error('Error al guardar tema global'));
                 }}
                   className={cn('flex flex-col items-center gap-3 p-5 rounded-xl border transition-all',
-                    theme === id ? 'border-primary bg-primary/5' : 'border-border hover:border-muted-foreground')}>
+                    (c('global_theme') || 'dark') === id ? 'border-primary bg-primary/5' : 'border-border hover:border-muted-foreground')}>
                   <div className={cn('w-12 h-8 rounded-lg border', preview)} />
-                  <div className={cn('flex flex-col items-center gap-1', theme === id ? 'text-primary' : 'text-foreground')}>
+                  <div className={cn('flex flex-col items-center gap-1', (c('global_theme') || 'dark') === id ? 'text-primary' : 'text-foreground')}>
                     <Icon className="w-4 h-4" />
                     <span className="text-sm font-medium">{label}</span>
                   </div>
