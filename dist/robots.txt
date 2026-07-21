@@ -1,7 +1,0 @@
-User-agent: *
-Allow: /
-Disallow: /dashboard
-Disallow: /login
-Disallow: /registro
-
-Sitemap: https://mlm360.pe/sitemap.xml
