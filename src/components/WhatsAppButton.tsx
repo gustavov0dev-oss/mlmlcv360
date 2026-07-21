@@ -46,7 +46,7 @@ export default function WhatsAppButton() {
   };
 
   return (
-    <div className={cn('fixed bottom-5 z-40 transition-all', config.position === 'right' ? 'right-5' : 'left-5')}>
+    <div className={cn('fixed bottom-5 z-30 transition-all', config.position === 'right' ? 'right-5' : 'left-5')}>
       {showChat && (
         <div className={cn(
           'absolute bottom-16 w-72 bg-card border border-border rounded-xl shadow-2xl overflow-hidden animate-fade-in-up',
