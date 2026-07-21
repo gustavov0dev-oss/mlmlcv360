@@ -7,27 +7,23 @@
     <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)" />
 
-    <!-- Primary Meta Tags -->
-    <title>MLM 360 - Sistema MLM Empresarial Premium del Perú</title>
-    <meta name="title" content="MLM 360 - Sistema MLM Empresarial Premium del Perú" />
-    <meta name="description" content="MLM 360 es el sistema MLM más completo del Perú. Gestiona tu red de afiliados, automatiza comisiones binarias y unilevel, escala tu negocio multinivel." />
-    <meta name="keywords" content="MLM Peru, sistema MLM, marketing multinivel, red de afiliados, comisiones binarias, MLM software, MLM 360, afiliados Peru" />
-    <meta name="author" content="MLM 360" />
-    <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="https://mlm360.pe/" />
-
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://mlm360.pe/" />
-    <meta property="og:title" content="MLM 360 - Sistema MLM Empresarial Premium" />
-    <meta property="og:description" content="El sistema MLM más poderoso del Perú. Gestiona tu red de afiliados, automatiza comisiones y multiplica tus ingresos." />
-    <meta property="og:site_name" content="MLM 360" />
-    <meta property="og:locale" content="es_PE" />
-
-    <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="MLM 360 - Sistema MLM Empresarial Premium" />
-    <meta name="twitter:description" content="El sistema MLM más poderoso del Perú. Gestiona tu red y multiplica tus ingresos." />
+    <!-- Primary Meta Tags — populated dynamically by useSeo hook from system_config.
+         A cached company name is restored synchronously here to prevent any URL
+         or fallback-title flash on reload. useSeo overwrites it once config loads. -->
+    <title>MLM 360</title>
+    <script>
+      (function() {
+        try {
+          var cachedName = localStorage.getItem('mlm360-company-name');
+          var cachedTitle = localStorage.getItem('mlm360-seo-title');
+          if (cachedTitle) {
+            document.title = cachedTitle;
+          } else if (cachedName) {
+            document.title = cachedName + ' - Sistema Empresarial Premium';
+          }
+        } catch (e) {}
+      })();
+    </script>
 
     <!-- PWA -->
     <link rel="manifest" href="/manifest.json" />
@@ -36,46 +32,8 @@
     <meta name="apple-mobile-web-app-title" content="MLM 360" />
     <meta name="mobile-web-app-capable" content="yes" />
 
-    <!-- Schema.org structured data -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "MLM 360",
-      "description": "Sistema MLM empresarial para gestionar redes de afiliados y comisiones en Perú.",
-      "applicationCategory": "BusinessApplication",
-      "operatingSystem": "Web, Android, iOS",
-      "offers": {
-        "@type": "Offer",
-        "price": "99",
-        "priceCurrency": "PEN"
-      },
-      "publisher": {
-        "@type": "Organization",
-        "name": "MLM 360",
-        "url": "https://mlm360.pe"
-      },
-      "aggregateRating": {
-        "@type": "AggregateRating",
-        "ratingValue": "4.8",
-        "ratingCount": "12540"
-      }
-    }
-    </script>
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      "name": "MLM 360",
-      "url": "https://mlm360.pe",
-      "description": "Sistema MLM empresarial premium del Perú",
-      "address": {
-        "@type": "PostalAddress",
-        "addressCountry": "PE",
-        "addressLocality": "Lima"
-      }
-    }
-    </script>
+    <!-- Schema.org structured data is injected dynamically by useSeo hook
+         using live system_config data — no static schemas here to avoid duplicates -->
 
     <!-- ═══════════════════════════════════════════════════════════════════════════
          FOUC PREVENTION — Apply theme before first paint
@@ -86,7 +44,7 @@
         try {
           var stored = localStorage.getItem('mlm360-theme');
           var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-          var shouldDark = stored === 'dark' || (!stored && prefersDark);
+          var shouldDark = stored === 'dark' || stored === 'system' && prefersDark || (!stored && prefersDark);
           var doc = document.documentElement;
 
           if (shouldDark) {
