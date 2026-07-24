@@ -1,1 +1,0 @@
-ALTER TYPE mlm_plan ADD VALUE IF NOT EXISTS 'free';
