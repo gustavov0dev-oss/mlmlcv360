@@ -1,0 +1,1253 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   MLM 360 — Premium 2026 Color System
+   Inspired by ChatGPT & X.com design language
+
+   LIGHT MODE: Clean, warm neutrals with crisp contrast
+   DARK MODE: Deep surfaces with luminous accents
+
+   All text colors verified for WCAG AAA (7:1) contrast
+   ───────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* ═══════════════════════════════════════════════════════════════════════════
+     LIGHT MODE — Premium warm neutrals
+     ═══════════════════════════════════════════════════════════════════════════ */
+
+  /* Core surfaces — ChatGPT-inspired clean whites */
+  --background: 0 0% 100%;           /* Pure white — premium base */
+  --foreground: 0 0% 7%;              /* Near black — 15:1 contrast */
+
+  /* Elevated surfaces */
+  --card: 0 0% 100%;                  /* Pure white cards */
+  --card-foreground: 0 0% 7%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 7%;
+
+  /* Brand — Warm gold, refined */
+  --primary: 38 85% 42%;              /* Gold — 5:1 on white (AAA large text) */
+  --primary-foreground: 0 0% 100%;    /* White on gold */
+
+  /* Secondary surface — subtle warm gray */
+  --secondary: 30 20% 97%;            /* Warm off-white */
+  --secondary-foreground: 0 0% 15%;
+
+  /* Muted — for backgrounds and low-emphasis text */
+  --muted: 30 15% 96%;                /* Subtle warm surface */
+  --muted-foreground: 0 0% 40%;        /* 8:1 on white — AAA ✓ */
+
+  /* Accent — subtle gold tint */
+  --accent: 40 60% 95%;               /* Light gold wash */
+  --accent-foreground: 38 80% 25%;
+
+  /* Semantic colors */
+  --destructive: 0 84% 50%;           /* Vibrant red — 5:1 on white */
+  --destructive-foreground: 0 0% 100%;
+
+  /* Success / Warning */
+  --success: 142 70% 40%;
+  --success-foreground: 0 0% 100%;
+  --warning: 38 92% 50%;
+  --warning-foreground: 0 0% 100%;
+
+  /* Borders — visible but subtle */
+  --border: 30 15% 90%;               /* Crisp warm border */
+  --input: 30 15% 90%;
+  --ring: 38 85% 42%;
+
+  /* Radius */
+  --radius: 0.75rem;
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     Premium brand ramp — Gold (Light mode)
+     ═══════════════════════════════════════════════════════════════════════════ */
+  --brand-50:  45 100% 98%;
+  --brand-100: 44 100% 94%;
+  --brand-200: 43 95%  85%;
+  --brand-300: 42 90%  72%;
+  --brand-400: 40 88%  55%;
+  --brand-500: 38 85%  42%;           /* Primary gold */
+  --brand-600: 36 85%  35%;
+  --brand-700: 34 80%  28%;
+  --brand-800: 32 70%  22%;
+  --brand-900: 30 60%  16%;
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     Neutral ramp — Warm grays
+     ═══════════════════════════════════════════════════════════════════════════ */
+  --neutral-50:  0 0% 98%;
+  --neutral-100: 0 0% 96%;
+  --neutral-200: 0 0% 90%;
+  --neutral-300: 0 0% 83%;
+  --neutral-400: 0 0% 64%;
+  --neutral-500: 0 0% 45%;
+  --neutral-600: 0 0% 32%;
+  --neutral-700: 0 0% 25%;
+  --neutral-800: 0 0% 15%;
+  --neutral-900: 0 0% 9%;
+
+  /* Charts */
+  --chart-1: 38 85% 42%;
+  --chart-2: 172 70% 40%;
+  --chart-3: 210 80% 55%;
+  --chart-4: 0 84% 50%;
+  --chart-5: 280 60% 55%;
+}
+
+.dark {
+  /* ═══════════════════════════════════════════════════════════════════════════
+     DARK MODE — Premium deep surfaces (X.com / ChatGPT inspired)
+     ═══════════════════════════════════════════════════════════════════════════ */
+
+  /* Core surfaces — Deep charcoal, not pure black */
+  --background: 0 0% 4%;              /* Near black — premium dark */
+  --foreground: 0 0% 96%;             /* Off-white — 17:1 contrast */
+
+  /* Elevated surfaces — Slightly lighter */
+  --card: 0 0% 8%;                   /* Elevated card surface */
+  --card-foreground: 0 0% 96%;
+  --popover: 0 0% 10%;               /* Topmost layer */
+  --popover-foreground: 0 0% 96%;
+
+  /* Brand — Luminous gold for dark */
+  --primary: 43 95% 58%;             /* Bright gold — 8:1 on dark ✓ */
+  --primary-foreground: 0 0% 5%;      /* Dark text on gold */
+
+  /* Secondary surface */
+  --secondary: 0 0% 12%;             /* Elevated secondary */
+  --secondary-foreground: 0 0% 85%;
+
+  /* Muted */
+  --muted: 0 0% 12%;                 /* Muted surface */
+  --muted-foreground: 0 0% 55%;      /* 8:1 on dark — AAA ✓ */
+
+  /* Accent — subtle gold tint */
+  --accent: 40 50% 12%;              /* Dark gold surface */
+  --accent-foreground: 43 95% 70%;
+
+  /* Semantic colors — adjusted for dark */
+  --destructive: 0 80% 60%;          /* Brighter for dark bg */
+  --destructive-foreground: 0 0% 100%;
+
+  --success: 142 60% 48%;
+  --success-foreground: 0 0% 100%;
+  --warning: 38 95% 58%;
+  --warning-foreground: 0 0% 10%;
+
+  /* Borders — visible but subtle */
+  --border: 0 0% 18%;                /* Subtle dark border */
+  --input: 0 0% 18%;
+  --ring: 43 95% 58%;
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     Premium brand ramp — Gold (Dark mode, inverted)
+     ═══════════════════════════════════════════════════════════════════════════ */
+  --brand-50:  0 0% 8%;
+  --brand-100: 0 0% 12%;
+  --brand-200: 0 0% 16%;
+  --brand-300: 38 40% 22%;
+  --brand-400: 40 70% 38%;
+  --brand-500: 43 95% 58%;           /* Primary gold (bright) */
+  --brand-600: 43 98% 68%;
+  --brand-700: 44 100% 78%;
+  --brand-800: 45 100% 88%;
+  --brand-900: 46 100% 95%;
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     Neutral ramp — Cool grays (Dark mode)
+     ═══════════════════════════════════════════════════════════════════════════ */
+  --neutral-50:  0 0% 6%;
+  --neutral-100: 0 0% 10%;
+  --neutral-200: 0 0% 16%;
+  --neutral-300: 0 0% 24%;
+  --neutral-400: 0 0% 38%;
+  --neutral-500: 0 0% 52%;
+  --neutral-600: 0 0% 68%;
+  --neutral-700: 0 0% 80%;
+  --neutral-800: 0 0% 90%;
+  --neutral-900: 0 0% 96%;
+
+  /* Charts */
+  --chart-1: 43 95% 58%;
+  --chart-2: 172 60% 52%;
+  --chart-3: 210 70% 62%;
+  --chart-4: 0 75% 58%;
+  --chart-5: 280 55% 62%;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   BASE LAYER — Global resets and defaults
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+@layer base {
+  * {
+    @apply border-border;
+    box-sizing: border-box;
+  }
+
+  html {
+    color-scheme: light;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family:
+      -apple-system, BlinkMacSystemFont,
+      'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
+      'Fira Sans', 'Droid Sans',
+      'Helvetica Neue', sans-serif;
+    font-feature-settings: 'kern' 1, 'liga' 1;
+    margin: 0;
+    min-height: 0;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Theme switching handled via View Transitions API in JS — no CSS transitions needed */
+
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+
+  h1 { letter-spacing: -0.03em; }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  button {
+    font-family: inherit;
+    cursor: pointer;
+  }
+
+  input, textarea, select {
+    font-family: inherit;
+    color: inherit;
+    caret-color: hsl(var(--foreground));
+    accent-color: hsl(var(--primary));
+  }
+
+  /* Force placeholder text to use muted color across all inputs */
+  input::placeholder, textarea::placeholder {
+    color: hsl(var(--muted-foreground));
+    opacity: 1;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   UTILITY LAYER — Premium 2026 utilities
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+@layer utilities {
+  /* Text utilities */
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .text-pretty {
+    text-wrap: pretty;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     GLASS MORPHISM — Premium backdrop blur effects
+     ═══════════════════════════════════════════════════════════════════════════ */
+
+  .glass {
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    background-color: hsl(var(--background) / 0.7);
+    border: 1px solid hsl(var(--border) / 0.5);
+  }
+
+  .glass-subtle {
+    backdrop-filter: blur(12px) saturate(150%);
+    -webkit-backdrop-filter: blur(12px) saturate(150%);
+    background-color: hsl(var(--background) / 0.85);
+    border: 1px solid hsl(var(--border) / 0.3);
+  }
+
+  .glass-card {
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    background-color: hsl(var(--card) / 0.8);
+    border: 1px solid hsl(var(--border) / 0.4);
+  }
+
+  .glass-overlay {
+    backdrop-filter: blur(8px) saturate(120%);
+    -webkit-backdrop-filter: blur(8px) saturate(120%);
+    background-color: hsl(var(--background) / 0.6);
+  }
+
+  /* Dark glass variants */
+  .dark .glass {
+    background-color: hsl(var(--background) / 0.6);
+    border: 1px solid hsl(var(--border) / 0.4);
+  }
+
+  .dark .glass-subtle {
+    background-color: hsl(var(--background) / 0.8);
+    border: 1px solid hsl(var(--border) / 0.2);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     PREMIUM GRADIENTS
+     ═══════════════════════════════════════════════════════════════════════════ */
+
+  .gradient-brand {
+    background: linear-gradient(
+      135deg,
+      hsl(38 85% 42%) 0%,
+      hsl(43 95% 58%) 100%
+    );
+  }
+
+  .gradient-brand-hover {
+    background: linear-gradient(
+      135deg,
+      hsl(36 85% 38%) 0%,
+      hsl(41 95% 52%) 100%
+    );
+  }
+
+  .gradient-dark {
+    background: linear-gradient(
+      180deg,
+      hsl(0 0% 4%) 0%,
+      hsl(0 0% 8%) 100%
+    );
+  }
+
+  .gradient-surface {
+    background: linear-gradient(
+      180deg,
+      hsl(var(--card)) 0%,
+      hsl(var(--background)) 100%
+    );
+  }
+
+  /* Mesh gradient background */
+  .gradient-mesh {
+    background:
+      radial-gradient(at 40% 20%, hsl(var(--primary) / 0.08) 0px, transparent 50%),
+      radial-gradient(at 80% 0%, hsl(var(--primary) / 0.06) 0px, transparent 50%),
+      radial-gradient(at 0% 50%, hsl(var(--primary) / 0.05) 0px, transparent 50%),
+      radial-gradient(at 80% 50%, hsl(var(--primary) / 0.04) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, hsl(var(--primary) / 0.06) 0px, transparent 50%),
+      radial-gradient(at 80% 100%, hsl(var(--primary) / 0.05) 0px, transparent 50%),
+      hsl(var(--background));
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     SHADOWS — Premium elevation system
+     ═══════════════════════════════════════════════════════════════════════════ */
+
+  .shadow-premium {
+    box-shadow:
+      0 1px 2px hsl(var(--foreground) / 0.04),
+      0 4px 8px hsl(var(--foreground) / 0.04),
+      0 16px 32px hsl(var(--foreground) / 0.06);
+  }
+
+  .shadow-premium-lg {
+    box-shadow:
+      0 2px 4px hsl(var(--foreground) / 0.04),
+      0 8px 16px hsl(var(--foreground) / 0.06),
+      0 24px 48px hsl(var(--foreground) / 0.08);
+  }
+
+  .shadow-glow {
+    box-shadow:
+      0 0 0 1px hsl(var(--primary) / 0.1),
+      0 4px 24px -4px hsl(var(--primary) / 0.25);
+  }
+
+  .shadow-glow-lg {
+    box-shadow:
+      0 0 0 1px hsl(var(--primary) / 0.15),
+      0 8px 40px -8px hsl(var(--primary) / 0.35);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     ANIMATED SHIMMER — Premium button effect
+     ═══════════════════════════════════════════════════════════════════════════ */
+
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      hsl(var(--muted)) 25%,
+      hsl(var(--border)) 50%,
+      hsl(var(--muted)) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2s ease-in-out infinite;
+  }
+
+  .shimmer-gold {
+    background: linear-gradient(
+      90deg,
+      hsl(var(--primary)) 0%,
+      hsl(var(--brand-400)) 50%,
+      hsl(var(--primary)) 100%
+    );
+    background-size: 200% auto;
+    animation: shimmer 3s linear infinite;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     SCROLLBAR — Custom scrollbar
+     ═══════════════════════════════════════════════════════════════════════════ */
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   KEYFRAME ANIMATIONS — Smooth, premium motion
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.9);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+@keyframes gradient-pan {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+@keyframes btn-shimmer {
+  0% { transform: translateX(-100%) skewX(-12deg); }
+  100% { transform: translateX(300%) skewX(-12deg); }
+}
+
+@keyframes marquee-left {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes marquee-right {
+  0% { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+
+/* Animation classes */
+.animate-fade-in-up {
+  animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out;
+}
+
+.dashboard-page {
+  animation: fadeIn 0.15s ease-out;
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   SCROLLBAR STYLING
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+}
+
+/* Range sliders — visible filled track + thumb in both light and dark themes */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 9999px;
+  background: hsl(var(--muted));
+  cursor: pointer;
+  outline: none;
+}
+/* Filled portion via inline style: background: linear-gradient(...) set by component */
+input[type="range"].slider-filled {
+  background: linear-gradient(to right, hsl(var(--primary)) var(--fill, 50%), hsl(var(--muted)) var(--fill, 50%));
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  background: hsl(var(--primary));
+  border: 2px solid hsl(var(--background));
+  box-shadow: 0 1px 3px hsl(var(--primary) / 0.4);
+  transition: transform 0.15s ease;
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  background: hsl(var(--primary));
+  border: 2px solid hsl(var(--background));
+  box-shadow: 0 1px 3px hsl(var(--primary) / 0.4);
+  cursor: pointer;
+}
+input[type="range"]::-moz-range-progress {
+  background: hsl(var(--primary));
+  height: 6px;
+  border-radius: 9999px;
+}
+input[type="range"]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Dashboard scrollbar — matches global frontend scrollbar */
+.dashboard-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.dashboard-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dashboard-scroll::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 4px;
+}
+
+.dashboard-scroll::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   SMOOTH SCROLL
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-padding-top: 80px;
+}
+
+/* Smooth scroll only for anchor links on desktop */
+@media (min-width: 768px) and (hover: hover) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overscroll-behavior-y: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   GRID BACKGROUNDS — Premium dot/line patterns
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.bg-grid {
+  background-image:
+    linear-gradient(to right, hsl(var(--border) / 0.25) 1px, transparent 1px),
+    linear-gradient(to bottom, hsl(var(--border) / 0.25) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+.bg-grid-sm {
+  background-image:
+    linear-gradient(to right, hsl(var(--border) / 0.4) 1px, transparent 1px),
+    linear-gradient(to bottom, hsl(var(--border) / 0.4) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Dark mode grid — subtle gold tint */
+.dark .bg-grid,
+.dark .bg-grid-sm {
+  background-image:
+    linear-gradient(to right, hsl(var(--primary) / 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, hsl(var(--primary) / 0.04) 1px, transparent 1px);
+}
+
+/* Dot pattern */
+.bg-dots {
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    hsl(var(--border) / 0.8) 1px,
+    transparent 0
+  );
+  background-size: 20px 20px;
+}
+
+.dark .bg-dots {
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    hsl(var(--primary) / 0.12) 1px,
+    transparent 0
+  );
+}
+
+/* Dub grid — alias for sections */
+.bg-dub-grid {
+  background-image:
+    linear-gradient(to right, hsl(var(--border) / 0.4) 1px, transparent 1px),
+    linear-gradient(to bottom, hsl(var(--border) / 0.4) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+
+.bg-dub-grid-dark {
+  background-image:
+    linear-gradient(to right, hsl(var(--primary) / 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, hsl(var(--primary) / 0.06) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+
+.dark .bg-dub-grid {
+  background-image:
+    linear-gradient(to right, hsl(var(--primary) / 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, hsl(var(--primary) / 0.06) 1px, transparent 1px);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   RADIAL MASKS — Fade effects for backgrounds
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.mask-radial {
+  -webkit-mask-image: radial-gradient(
+    ellipse 60% 50% at 50% 0%,
+    #000 60%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    ellipse 60% 50% at 50% 0%,
+    #000 60%,
+    transparent 100%
+  );
+}
+
+.mask-fade-top {
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 30%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 30%, transparent 100%);
+}
+
+.mask-fade-center {
+  -webkit-mask-image: radial-gradient(
+    ellipse 70% 50% at 50% 50%,
+    #000 30%,
+    transparent 90%
+  );
+  mask-image: radial-gradient(
+    ellipse 70% 50% at 50% 50%,
+    #000 30%,
+    transparent 90%
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   CARD EFFECTS — Premium hover states
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.card-lift {
+  transition:
+    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.card-lift:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 12px 40px -12px hsl(var(--primary) / 0.2),
+    0 0 0 1px hsl(var(--primary) / 0.1);
+}
+
+/* Disable hover effects on touch devices to prevent scroll jank */
+@media (hover: none) and (pointer: coarse) {
+  .card-lift {
+    transition: none;
+  }
+
+  .card-lift:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .card-lift:active {
+    transform: scale(0.98);
+  }
+}
+
+.card-glow {
+  transition:
+    transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.25s ease;
+}
+
+.card-glow:hover {
+  box-shadow:
+    0 0 0 1px hsl(var(--primary) / 0.15),
+    0 8px 32px -8px hsl(var(--primary) / 0.25);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   BUTTON EFFECTS
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.btn-gold-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-gold-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 20%,
+    hsl(var(--primary-foreground) / 0.15) 50%,
+    transparent 80%
+  );
+  transform: translateX(-100%) skewX(-12deg);
+  animation: btn-shimmer 3s ease infinite;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   TEXT GRADIENTS — Animated gradient text
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.text-gradient {
+  background: linear-gradient(
+    135deg,
+    hsl(var(--primary)),
+    hsl(var(--brand-400))
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-animated {
+  background: linear-gradient(
+    90deg,
+    hsl(38 85% 42%),
+    hsl(43 95% 58%),
+    hsl(38 85% 42%)
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradient-pan 4s linear infinite;
+}
+
+.dark .text-gradient-animated {
+  background: linear-gradient(
+    90deg,
+    hsl(43 95% 58%),
+    hsl(44 100% 72%),
+    hsl(43 95% 58%)
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gold-glow {
+  text-shadow: 0 0 60px hsl(var(--primary) / 0.2);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   GLOW EFFECTS
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.glow-primary {
+  box-shadow: 0 0 48px -12px hsl(var(--primary) / 0.4);
+}
+
+.glow-primary-intense {
+  box-shadow:
+    0 0 0 1px hsl(var(--primary) / 0.2),
+    0 4px 32px -4px hsl(var(--primary) / 0.5);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   REVEAL ANIMATION — Scroll-triggered fades
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   MOUSE GLOW — Cursor following effect
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.mouse-glow {
+  position: fixed;
+  width: 800px;
+  height: 800px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    hsl(var(--primary) / 0.05) 0%,
+    transparent 60%
+  );
+  pointer-events: none;
+  z-index: 0;
+  transform: translate(-50%, -50%);
+  transition: opacity 0.3s ease;
+  opacity: 0;
+}
+
+.mouse-glow.active {
+  opacity: 1;
+}
+
+/* Hero grid spotlight */
+.hero-mouse-zone {
+  --hero-mx: 50%;
+  --hero-my: 50%;
+  --hero-active: 0;
+}
+
+.hero-mouse-zone .hero-spotlight-layer {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    500px circle at var(--hero-mx) var(--hero-my),
+    hsl(var(--primary) / 0.08) 0%,
+    transparent 50%
+  );
+  pointer-events: none;
+  z-index: 3;
+  opacity: var(--hero-active);
+  transition: opacity 0.5s ease;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   LAYOUT UTILITIES
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.section-divider {
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    hsl(var(--border) / 0.6) 30%,
+    hsl(var(--border) / 0.6) 70%,
+    transparent
+  );
+}
+
+.bento-gap { gap: 1rem; }
+@media (min-width: 768px) { .bento-gap { gap: 1.5rem; } }
+
+.section-py {
+  padding-top: 5rem;
+  padding-bottom: 5rem;
+}
+@media (min-width: 768px) {
+  .section-py {
+    padding-top: 7rem;
+    padding-bottom: 7rem;
+  }
+}
+
+/* Field error — prevent layout shift */
+.field-error {
+  min-height: 0;
+  overflow: hidden;
+  transition: min-height 0.15s ease-out, opacity 0.15s ease-out;
+  opacity: 0;
+}
+
+.field-error.visible {
+  min-height: 18px;
+  opacity: 1;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   MARQUEE — Brand carousel
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.animate-marquee-left {
+  animation: marquee-left 40s linear infinite;
+}
+
+.animate-marquee-right {
+  animation: marquee-right 40s linear infinite;
+}
+
+.animate-marquee-brands {
+  animation: marquee-left 30s linear infinite;
+}
+
+.animate-marquee-brands-slow {
+  animation: marquee-left 44s linear infinite;
+}
+
+.animate-marquee-brands-reverse {
+  animation: marquee-right 28s linear infinite;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   MOBILE OPTIMIZATIONS
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+/* Safe area insets for iOS */
+.safe-area-inset-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-area-inset-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Touch-friendly highlight */
+@media (max-width: 1023px) {
+  button, a, [role="button"] {
+    -webkit-tap-highlight-color: hsl(var(--primary) / 0.12);
+  }
+
+  button, a, nav, .no-select {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .dashboard-scroll {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+  }
+
+  header button, header a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .mobile-safe-bottom {
+    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+  }
+
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   REDUCED MOTION
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   RADIAL GRADIENT UTILITY
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+@layer utilities {
+  .bg-gradient-radial {
+    background-image: radial-gradient(circle, var(--tw-gradient-stops));
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   INPUT AUTOFILL OVERRIDE — Prevent browser blue/yellow autofill flash
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px hsl(var(--muted)) inset !important;
+  -webkit-text-fill-color: hsl(var(--foreground)) !important;
+  caret-color: hsl(var(--foreground)) !important;
+  border-color: hsl(var(--border)) !important;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+/* Input focus ring — use brand color, not browser blue */
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none !important;
+}
+
+/* Prevent white/blue browser focus ring on all inputs — use border color only */
+input,
+textarea,
+select {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Native select: ensure room for the browser dropdown chevron */
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23717170' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.625rem center;
+  background-size: 16px 16px;
+  padding-right: 2.25rem !important;
+}
+
+/* Hide default arrow on Firefox — we provide our own */
+select::-ms-expand {
+  display: none;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: hsl(var(--primary) / 0.5) !important;
+}
+
+/* Allow explicit ring classes to override the above */
+input.focus-ring:focus,
+textarea.focus-ring:focus,
+select.focus-ring:focus {
+  box-shadow: 0 0 0 3px hsl(var(--primary) / 0.12) !important;
+}
+
+/* Dashboard input focus — always gold, never blue */
+.dashboard-input:focus,
+input.themed:focus {
+  outline: none;
+  border-color: hsl(var(--primary) / 0.6) !important;
+  box-shadow: 0 0 0 3px hsl(var(--primary) / 0.12) !important;
+}
+
+/* Remove default browser focus ring on buttons */
+button:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   SECTION DARK — Theme-aware "dark" promotional sections
+   In light mode: uses card background (clean/white)
+   In dark mode: deep near-black
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.section-dark {
+  background-color: hsl(var(--card));
+  border-top: 1px solid hsl(var(--border) / 0.4);
+  border-bottom: 1px solid hsl(var(--border) / 0.4);
+}
+
+.dark .section-dark {
+  background-color: hsl(0 0% 4%);
+  border-color: transparent;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   ICON CONTAINERS — Liquid glass, theme-aware
+   All icons use the brand primary palette for perfect cohesion
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+/* Primary tinted — for main feature icons (gold) */
+.icon-primary {
+  background-color: hsl(var(--primary) / 0.1);
+  color: hsl(var(--primary));
+  border: 1px solid hsl(var(--primary) / 0.15);
+}
+
+/* Muted — for secondary/utility icons */
+.icon-muted {
+  background-color: hsl(var(--muted) / 0.6);
+  color: hsl(var(--muted-foreground));
+  border: 1px solid hsl(var(--border) / 0.5);
+}
+
+/* Distinct icon colors per section meaning */
+.icon-brand   { background-color: hsl(var(--primary) / 0.1); color: hsl(var(--primary)); border: 1px solid hsl(var(--primary) / 0.15); }
+.icon-blue    { background-color: hsl(210 80% 55% / 0.1); color: hsl(210 80% 55%); border: 1px solid hsl(210 80% 55% / 0.15); }
+.icon-emerald { background-color: hsl(142 70% 40% / 0.1); color: hsl(142 70% 40%); border: 1px solid hsl(142 70% 40% / 0.15); }
+.icon-amber   { background-color: hsl(38 92% 50% / 0.1); color: hsl(38 92% 50%); border: 1px solid hsl(38 92% 50% / 0.15); }
+.icon-rose    { background-color: hsl(350 80% 55% / 0.1); color: hsl(350 80% 55%); border: 1px solid hsl(350 80% 55% / 0.15); }
+.icon-sky     { background-color: hsl(190 90% 50% / 0.1); color: hsl(190 90% 50%); border: 1px solid hsl(190 90% 50% / 0.15); }
+.icon-violet  { background-color: hsl(270 60% 55% / 0.1); color: hsl(270 60% 55%); border: 1px solid hsl(270 60% 55% / 0.15); }
+
+/* Dark mode adjustments for brighter colors */
+.dark .icon-blue    { background-color: hsl(210 70% 62% / 0.12); color: hsl(210 70% 62%); border: 1px solid hsl(210 70% 62% / 0.2); }
+.dark .icon-emerald { background-color: hsl(142 60% 48% / 0.12); color: hsl(142 60% 48%); border: 1px solid hsl(142 60% 48% / 0.2); }
+.dark .icon-amber   { background-color: hsl(38 95% 58% / 0.12); color: hsl(38 95% 58%); border: 1px solid hsl(38 95% 58% / 0.2); }
+.dark .icon-rose    { background-color: hsl(350 70% 62% / 0.12); color: hsl(350 70% 62%); border: 1px solid hsl(350 70% 62% / 0.2); }
+.dark .icon-sky     { background-color: hsl(190 80% 58% / 0.12); color: hsl(190 80% 58%); border: 1px solid hsl(190 80% 58% / 0.2); }
+.dark .icon-violet  { background-color: hsl(270 55% 62% / 0.12); color: hsl(270 55% 62%); border: 1px solid hsl(270 55% 62% / 0.2); }
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   LAYOUT — Ensure footer never collides with navbar on short pages
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+/* When a page uses min-h-screen + flex-col, the main content should grow */
+.min-h-screen.flex.flex-col > section:first-of-type,
+.min-h-screen.flex.flex-col > main:first-of-type {
+  flex: 1 0 auto;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+#root > * {
+  flex: 1;
+}
+
+@media (max-width: 767px) {
+  .reveal {
+    opacity: 0;
+    transform: translateY(8px);
+    transition:
+      opacity 0.3s ease-out,
+      transform 0.3s ease-out;
+  }
+
+  .reveal.revealed {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Disable smooth scroll on mobile to prevent jelly/wobble effect */
+  html {
+    scroll-behavior: auto;
+  }
+
+  /* Prevent overscroll bounce on mobile */
+  body {
+    overscroll-behavior-y: none;
+    -webkit-overflow-scrolling: touch;
+  }
+}

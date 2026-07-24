@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <!-- Theme color for mobile browser chrome - matches our premium color system -->
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)" />
+
+    <!-- Primary Meta Tags — populated dynamically by useSeo hook from system_config.
+         A cached company name is restored synchronously here to prevent any URL
+         or fallback-title flash on reload. useSeo overwrites it once config loads. -->
+    <title>MLM 360</title>
+    <script>
+      (function() {
+        try {
+          var cachedName = localStorage.getItem('mlm360-company-name');
+          var cachedTitle = localStorage.getItem('mlm360-seo-title');
+          if (cachedTitle) {
+            document.title = cachedTitle;
+          } else if (cachedName) {
+            document.title = cachedName + ' - Sistema Empresarial Premium';
+          }
+        } catch (e) {}
+      })();
+    </script>
+
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="MLM 360" />
+    <meta name="mobile-web-app-capable" content="yes" />
+
+    <!-- Schema.org structured data is injected dynamically by useSeo hook
+         using live system_config data — no static schemas here to avoid duplicates -->
+
+    <!-- ═══════════════════════════════════════════════════════════════════════════
+         FOUC PREVENTION — Apply theme before first paint
+         Runs synchronously to prevent any flash of unstyled content
+         ═══════════════════════════════════════════════════════════════════════════ -->
+    <script>
+      (function() {
+        try {
+          var stored = localStorage.getItem('mlm360-theme');
+          var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var shouldDark = stored === 'dark' || stored === 'system' && prefersDark || (!stored && prefersDark);
+          var doc = document.documentElement;
+
+          if (shouldDark) {
+            doc.classList.add('dark');
+            doc.style.colorScheme = 'dark';
+          } else {
+            doc.classList.remove('dark');
+            doc.style.colorScheme = 'light';
+          }
+
+          // Update meta theme-color
+          var meta = document.querySelector('meta[name="theme-color"]');
+          if (meta) {
+            meta.setAttribute('content', shouldDark ? '#0a0a0a' : '#ffffff');
+          }
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

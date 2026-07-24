@@ -1,0 +1,4 @@
+/* Intentionally minimal — layout is handled by components */
+#root {
+  min-height: 0;
+}
