@@ -1,10 +1,14 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useDatabase } from '@/lib/backend';
 import { useCart } from '@/store/cartStore';
 import { useAuthStore } from '@/store/authStore';
 import { useConfig } from '@/store/configStore';
 import { useNavigate } from '@/lib/router';
-import { Search, X, ShoppingCart, Package, SlidersHorizontal, Sparkles, TrendingUp, Clock, ArrowUpDown, Star, ChevronDown, LayoutGrid, DollarSign } from 'lucide-react';
+import {
+  Search, X, ShoppingCart, Package, SlidersHorizontal,
+  Sparkles, TrendingUp, Clock, ArrowUpDown, Star, ChevronDown,
+  DollarSign, ChevronRight,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Product, ProductCategory } from '@/lib/storeTypes';
 import { toast } from 'sonner';
@@ -22,50 +26,67 @@ const SORT_OPTIONS = [
   { value: 'rating', label: 'Mejor valorados', icon: Star },
 ];
 
-function Skeleton() {
+function CardSkeleton() {
   return (
-    <div className="bg-card rounded-xl overflow-hidden border border-border">
+    <div className="bg-card rounded-2xl overflow-hidden border border-border/50">
       <div className="aspect-square bg-muted animate-pulse" />
       <div className="p-3 space-y-2">
-        <div className="h-2.5 bg-muted rounded animate-pulse w-1/3" />
-        <div className="h-4 bg-muted rounded animate-pulse" />
-        <div className="h-3 bg-muted rounded animate-pulse w-2/3" />
-        <div className="h-6 bg-muted rounded animate-pulse w-1/2 mt-2" />
+        <div className="h-2 bg-muted rounded animate-pulse w-1/3" />
+        <div className="h-3.5 bg-muted rounded animate-pulse" />
+        <div className="h-3.5 bg-muted rounded animate-pulse w-3/4" />
+        <div className="h-5 bg-muted rounded animate-pulse w-1/2 mt-3" />
       </div>
     </div>
   );
 }
 
 function CompareBar({ products, onRemove, onClear }: {
-  products: Product[]; onRemove: (id: string) => void; onClear: () => void;
+  products: Product[];
+  onRemove: (id: string) => void;
+  onClear: () => void;
 }) {
   const navigate = useNavigate();
   if (products.length === 0) return null;
+
   return (
-    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[calc(100vw-2rem)] max-w-sm">
-      <div className="bg-card border-2 border-primary rounded-xl shadow-2xl p-3 flex items-center gap-3">
-        <div className="flex gap-2 flex-1 overflow-x-auto">
+    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 px-4 w-full max-w-md pointer-events-none">
+      <div className="bg-card border border-border/80 rounded-2xl shadow-2xl shadow-black/30 p-3 flex items-center gap-3 pointer-events-auto">
+        {/* Thumbnails */}
+        <div className="flex gap-2 flex-1">
           {products.map(p => (
-            <div key={p.id} className="relative flex-shrink-0 w-12 h-12 rounded-xl overflow-hidden border border-border">
-              {p.images?.[0]?.url
-                ? <img src={p.images[0].url} alt={p.name} className="w-full h-full object-cover" />
-                : <Package className="w-full h-full p-2 text-muted-foreground/30" />}
-              <button onClick={() => onRemove(p.id)}
-                className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold">×</button>
+            <div key={p.id} className="relative flex-shrink-0">
+              <div className="w-12 h-12 rounded-xl overflow-hidden border border-border bg-muted">
+                {p.images?.[0]?.url
+                  ? <img src={p.images[0].url} alt={p.name} className="w-full h-full object-cover" />
+                  : <Package className="w-full h-full p-2.5 text-muted-foreground/30" />}
+              </div>
+              <button
+                onClick={() => onRemove(p.id)}
+                className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center shadow-md transition-colors z-10"
+              >
+                <X className="w-3 h-3" />
+              </button>
             </div>
           ))}
           {Array.from({ length: Math.max(0, 3 - products.length) }).map((_, i) => (
-            <div key={i} className="flex-shrink-0 w-12 h-12 rounded-xl border-2 border-dashed border-border/40 flex items-center justify-center text-xl text-muted-foreground/30">+</div>
+            <div key={i} className="flex-shrink-0 w-12 h-12 rounded-xl border-2 border-dashed border-border/40 flex items-center justify-center text-lg text-muted-foreground/30 font-light">+</div>
           ))}
         </div>
-        <div className="flex gap-1.5 flex-shrink-0">
+        {/* Actions */}
+        <div className="flex items-center gap-2 flex-shrink-0">
           {products.length >= 2 && (
-            <button onClick={() => navigate(`/tienda/comparar?ids=${products.map(p => p.id).join(',')}`)}
-              className="px-3 py-2 bg-primary text-primary-foreground rounded-xl text-xs font-bold">
+            <button
+              onClick={() => navigate(`/tienda/comparar?ids=${products.map(p => p.id).join(',')}`)}
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-xl text-xs font-bold transition-all active:scale-95"
+            >
               Comparar
             </button>
           )}
-          <button onClick={onClear} className="p-2 border border-border rounded-xl hover:bg-muted">
+          <button
+            onClick={onClear}
+            className="p-2 border border-border/60 rounded-xl hover:bg-muted transition-colors"
+            title="Limpiar comparación"
+          >
             <X className="w-4 h-4 text-muted-foreground" />
           </button>
         </div>
@@ -74,34 +95,29 @@ function CompareBar({ products, onRemove, onClear }: {
   );
 }
 
-function MiniProductRow({ products, onCompare, compareIds, wishlist, onWishlist }: {
-  products: Product[];
-  onCompare?: (p: Product) => void;
-  compareIds: Set<string>;
-  wishlist: Set<string>;
-  onWishlist: (id: string, v: boolean) => void;
-}) {
+function SectionHeader({ icon, title, onSeeAll }: { icon: React.ReactNode; title: string; onSeeAll?: () => void }) {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-      {products.map(p => (
-        <ProductCard
-          key={p.id} product={p}
-          isWishlisted={wishlist.has(p.id)}
-          onWishlistToggle={(id, w) => onWishlist(id, w)}
-          onCompareToggle={onCompare}
-          isComparing={compareIds.has(p.id)}
-        />
-      ))}
+    <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center gap-2">
+        {icon}
+        <h2 className="text-sm font-bold text-foreground uppercase tracking-wider">{title}</h2>
+      </div>
+      {onSeeAll && (
+        <button onClick={onSeeAll} className="flex items-center gap-0.5 text-xs text-primary font-semibold">
+          Ver todo <ChevronRight className="w-3.5 h-3.5" />
+        </button>
+      )}
     </div>
   );
 }
 
 export default function StorePage() {
   const database = useDatabase();
-  const { company, exchangeRate, showUsd, setShowUsd } = useConfig();
+  const { company, showUsd, setShowUsd } = useConfig();
   const { user } = useAuthStore();
   const { itemCount, subtotal } = useCart();
   const navigate = useNavigate();
+  const searchRef = useRef<HTMLInputElement>(null);
 
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<ProductCategory[]>([]);
@@ -132,15 +148,19 @@ export default function StorePage() {
       }),
       database.select<ProductCategory>('product_categories', { filter: { status: 'active' }, order: { column: 'sort_order' } }),
     ]);
-    setProducts(((prods || []) as Product[]));
+    setProducts((prods || []) as Product[]);
     setCategories((cats || []) as ProductCategory[]);
+
     if (user) {
       const { data: wl } = await database.select('wishlists', { select: 'product_id', filter: { user_id: user.id } });
       if (wl) setWishlist(new Set((wl as any[]).map((w: any) => w.product_id)));
     }
-    // Bestsellers last 30 days
+
     const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-    const { data: orderItems } = await database.select<any>('order_items', { select: 'product_id, quantity', filter: [{ column: 'created_at', operator: 'gte', value: since }] });
+    const { data: orderItems } = await database.select<any>('order_items', {
+      select: 'product_id, quantity',
+      filter: [{ column: 'created_at', operator: 'gte', value: since }],
+    });
     const oiArr = (orderItems || []) as any[];
     if (oiArr.length > 0 && prods) {
       const countMap: Record<string, number> = {};
@@ -191,7 +211,6 @@ export default function StorePage() {
   const activeCat = categories.find(c => c.id === catFilter);
   const storeName = company.store_name || 'Tienda';
   const showHomeSections = !catFilter && !search;
-
   const compareIds = new Set(compareList.map(p => p.id));
 
   const toggleCompare = (product: Product) => {
@@ -211,66 +230,89 @@ export default function StorePage() {
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
 
-      <main className="pt-16">
-        {/* ── HERO HEADER ── */}
-        <div className="bg-gradient-to-br from-primary via-primary to-primary/80 text-primary-foreground">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <LayoutGrid className="w-5 h-5 opacity-70" />
-                  <span className="text-sm font-semibold opacity-80">Catálogo</span>
-                </div>
-                <h1 className="text-2xl sm:text-3xl font-bold">{storeName}</h1>
-                <p className="text-primary-foreground/70 text-sm mt-1">
-                  {loading ? 'Cargando productos...' : `${filtered.length} productos disponibles${activeCat ? ` · ${activeCat.name}` : ''}`}
-                </p>
+      <main className="pt-16 flex-1">
+
+        {/* ── SEARCH BAR ── */}
+        <div className="bg-card border-b border-border/60">
+          <div className="max-w-7xl mx-auto px-3 sm:px-6 py-3">
+            <div className="flex items-center gap-2">
+              {/* Search */}
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                <input
+                  ref={searchRef}
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  placeholder={`Buscar en ${storeName}...`}
+                  className="w-full pl-9 pr-8 py-2.5 bg-muted/60 border border-border/60 rounded-xl text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-primary/60 focus:bg-background transition-colors"
+                />
+                {search && (
+                  <button onClick={() => setSearch('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-muted transition-colors">
+                    <X className="w-3.5 h-3.5 text-muted-foreground" />
+                  </button>
+                )}
               </div>
-              <div className="flex items-center gap-2">
-                <div className="relative flex-1 sm:w-64">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <input value={search} onChange={e => setSearch(e.target.value)}
-                    placeholder="Buscar productos..."
-                    className="w-full pl-9 pr-4 py-2.5 bg-background/95 text-foreground rounded-xl text-sm outline-none" />
-                  {search && <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2"><X className="w-3.5 h-3.5 text-muted-foreground" /></button>}
-                </div>
-                <button onClick={() => navigate('/carrito')}
-                  className="relative flex items-center gap-1.5 px-4 py-2.5 bg-background/15 hover:bg-background/25 backdrop-blur rounded-xl font-bold text-sm transition-colors flex-shrink-0">
-                  <ShoppingCart className="w-4 h-4" />
-                  <span className="hidden sm:inline">{itemCount > 0 ? `(${itemCount})` : 'Carrito'}</span>
-                  {itemCount > 0 && <span className="sm:hidden absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">{itemCount > 9 ? '9+' : itemCount}</span>}
-                </button>
-                {/* Currency toggle */}
-                <button onClick={() => setShowUsd(!showUsd)}
-                  className={cn('flex items-center gap-1.5 px-3 py-2.5 rounded-xl font-bold text-sm transition-colors flex-shrink-0',
-                    showUsd ? 'bg-green-500 text-white' : 'bg-background/15 hover:bg-background/25 backdrop-blur text-primary-foreground')}>
-                  <DollarSign className="w-4 h-4" />
-                  <span className="hidden sm:inline">{showUsd ? `USD (S/${exchangeRate.toFixed(2)})` : 'USD'}</span>
-                </button>
-              </div>
+
+              {/* Cart */}
+              <button
+                onClick={() => navigate('/carrito')}
+                className="relative flex items-center gap-1.5 px-3.5 py-2.5 bg-muted/60 border border-border/60 hover:border-primary/40 rounded-xl text-sm font-semibold transition-colors flex-shrink-0"
+              >
+                <ShoppingCart className="w-4 h-4" />
+                <span className="hidden sm:inline text-foreground">Carrito</span>
+                {itemCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                    {itemCount > 9 ? '9+' : itemCount}
+                  </span>
+                )}
+              </button>
+
+              {/* Currency */}
+              <button
+                onClick={() => setShowUsd(!showUsd)}
+                className={cn(
+                  'flex items-center gap-1 px-3 py-2.5 rounded-xl text-xs font-bold border transition-colors flex-shrink-0',
+                  showUsd
+                    ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30 dark:text-emerald-400'
+                    : 'bg-muted/60 border-border/60 text-muted-foreground hover:border-primary/40'
+                )}
+              >
+                <DollarSign className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">{showUsd ? 'USD' : 'PEN'}</span>
+              </button>
             </div>
+
             {subtotal > 0 && (
-              <div className="mt-4 max-w-xs">
+              <div className="mt-2">
                 <FreeShippingBar subtotal={subtotal} threshold={freeShipThreshold} />
               </div>
             )}
           </div>
         </div>
 
-        {/* ── CATEGORY BAR (sticky) ── */}
-        <div className="sticky top-16 z-30 bg-card/95 backdrop-blur border-b border-border shadow-sm">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6">
-            <div className="flex items-center gap-1.5 py-2 overflow-x-auto scrollbar-hide">
-              <button onClick={() => setCatFilter('')}
-                className={cn('flex-shrink-0 px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap',
-                  !catFilter ? 'bg-primary text-primary-foreground shadow-sm' : 'text-foreground hover:bg-muted')}>
+        {/* ── CATEGORY PILLS (sticky) ── */}
+        <div className="sticky top-16 z-30 bg-card/98 backdrop-blur-md border-b border-border/60 shadow-sm">
+          <div className="max-w-7xl mx-auto px-3 sm:px-6">
+            <div className="flex items-center gap-1 py-2 overflow-x-auto scrollbar-hide">
+              <button
+                onClick={() => setCatFilter('')}
+                className={cn(
+                  'flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all',
+                  !catFilter ? 'bg-primary text-primary-foreground shadow-sm' : 'text-foreground/70 hover:text-foreground hover:bg-muted/80'
+                )}
+              >
                 Todo
               </button>
               {categories.map(cat => (
-                <button key={cat.id} onClick={() => setCatFilter(catFilter === cat.id ? '' : cat.id)}
-                  className={cn('flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap',
-                    catFilter === cat.id ? 'bg-primary text-primary-foreground shadow-sm' : 'text-foreground hover:bg-muted')}>
-                  {cat.image_url && <img src={cat.image_url} alt="" className="w-4 h-4 rounded-full object-cover" />}
+                <button
+                  key={cat.id}
+                  onClick={() => setCatFilter(catFilter === cat.id ? '' : cat.id)}
+                  className={cn(
+                    'flex-shrink-0 flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all',
+                    catFilter === cat.id ? 'bg-primary text-primary-foreground shadow-sm' : 'text-foreground/70 hover:text-foreground hover:bg-muted/80'
+                  )}
+                >
+                  {cat.image_url && <img src={cat.image_url} alt="" className="w-3.5 h-3.5 rounded-full object-cover" />}
                   {cat.name}
                 </button>
               ))}
@@ -278,110 +320,17 @@ export default function StorePage() {
           </div>
         </div>
 
-        {/* ── FEATURED ── */}
-        {showHomeSections && featured.length > 0 && (
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Sparkles className="w-4 h-4 text-amber-500" />
-              <h2 className="text-base font-bold text-foreground uppercase tracking-wide">Productos destacados</h2>
-            </div>
-            <MiniProductRow products={featured.slice(0, 8)} onCompare={toggleCompare} compareIds={compareIds} wishlist={wishlist} onWishlist={handleWishlist} />
-          </div>
-        )}
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-6 space-y-6">
 
-        {/* ── BESTSELLERS (last 30 days) ── */}
-        {showHomeSections && bestsellers.length > 0 && (
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6">
-            <div className="flex items-center gap-2 mb-4">
-              <TrendingUp className="w-4 h-4 text-green-500" />
-              <h2 className="text-base font-bold text-foreground uppercase tracking-wide">Más vendidos este mes</h2>
-            </div>
-            <MiniProductRow products={bestsellers} onCompare={toggleCompare} compareIds={compareIds} wishlist={wishlist} onWishlist={handleWishlist} />
-          </div>
-        )}
-
-        {/* ── MAIN CATALOG ── */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-5 sm:py-6">
-          {showHomeSections && (
-            <div className="flex items-center gap-2 mb-4">
-              <LayoutGrid className="w-4 h-4 text-muted-foreground" />
-              <h2 className="text-base font-bold text-foreground uppercase tracking-wide">Todos los productos</h2>
-            </div>
-          )}
-
-          {/* Toolbar */}
-          <div className="flex items-center gap-2 mb-4 flex-wrap">
-            <select value={sort} onChange={e => setSort(e.target.value)}
-              className="flex-1 sm:flex-none px-3 py-2 bg-card border border-border rounded-xl text-sm text-foreground outline-none focus:border-primary min-w-0">
-              {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-            </select>
-
-            <button onClick={() => setShowFilters(v => !v)}
-              className={cn('flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-semibold border transition-colors flex-shrink-0',
-                showFilters || hasActiveFilters ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-foreground border-border hover:border-primary/40')}>
-              <SlidersHorizontal className="w-4 h-4" />
-              <span className="hidden sm:inline">Filtros</span>
-              {hasActiveFilters && <span className="w-2 h-2 bg-current rounded-full" />}
-            </button>
-
-            {catFilter && activeCat && (
-              <button onClick={() => setCatFilter('')}
-                className="flex items-center gap-1 px-3 py-1.5 bg-primary/10 text-primary rounded-full text-xs font-semibold">
-                {activeCat.name} <X className="w-3 h-3 ml-0.5" />
-              </button>
-            )}
-            {search && (
-              <button onClick={() => setSearch('')}
-                className="flex items-center gap-1 px-3 py-1.5 bg-primary/10 text-primary rounded-full text-xs font-semibold">
-                "{search}" <X className="w-3 h-3 ml-0.5" />
-              </button>
-            )}
-            <span className="ml-auto text-xs text-muted-foreground hidden sm:block">{filtered.length} productos</span>
-          </div>
-
-          {showFilters && (
-            <div className="bg-card border border-border rounded-xl p-4 mb-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div>
-                <label className="block text-xs font-bold text-foreground mb-1.5">Precio mín. (S/)</label>
-                <input type="number" value={priceMin} onChange={e => setPriceMin(e.target.value)} placeholder="0"
-                  className="w-full px-3 py-2 bg-muted border border-border rounded-xl text-sm outline-none focus:border-primary" />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-foreground mb-1.5">Precio máx. (S/)</label>
-                <input type="number" value={priceMax} onChange={e => setPriceMax(e.target.value)} placeholder="Sin límite"
-                  className="w-full px-3 py-2 bg-muted border border-border rounded-xl text-sm outline-none focus:border-primary" />
-              </div>
-              {hasActiveFilters && (
-                <div className="col-span-2 flex items-end">
-                  <button onClick={() => { setPriceMin(''); setPriceMax(''); setSearch(''); setCatFilter(''); setShowFilters(false); }}
-                    className="text-red-500 text-sm font-semibold hover:underline">
-                    Limpiar filtros
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-
-          <div className="sm:hidden text-xs text-muted-foreground mb-3">{filtered.length} resultados</div>
-
-          {loading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
-              {Array.from({ length: 10 }).map((_, i) => <Skeleton key={i} />)}
-            </div>
-          ) : filtered.length === 0 ? (
-            <div className="text-center py-20">
-              <Package className="w-16 h-16 mx-auto mb-4 text-muted-foreground/15" />
-              <h3 className="text-lg font-bold text-foreground">Sin resultados</h3>
-              <p className="text-muted-foreground text-sm mt-1 mb-4">Intenta con otros filtros o búsquedas</p>
-              <button onClick={() => { setSearch(''); setCatFilter(''); setPriceMin(''); setPriceMax(''); }}
-                className="px-6 py-2.5 bg-primary text-primary-foreground rounded-xl font-semibold text-sm">
-                Ver todo
-              </button>
-            </div>
-          ) : (
-            <>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
-                {paginated.map(p => (
+          {/* ── FEATURED ── */}
+          {showHomeSections && !loading && featured.length > 0 && (
+            <section>
+              <SectionHeader
+                icon={<Sparkles className="w-4 h-4 text-amber-500" />}
+                title="Destacados"
+              />
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-3">
+                {featured.map(p => (
                   <ProductCard
                     key={p.id} product={p}
                     isWishlisted={wishlist.has(p.id)}
@@ -391,17 +340,152 @@ export default function StorePage() {
                   />
                 ))}
               </div>
-              {hasMore && (
-                <div className="text-center mt-8">
-                  <button onClick={() => setPage(p => p + 1)}
-                    className="inline-flex items-center gap-2 px-8 py-3 border-2 border-primary text-primary rounded-xl font-bold text-sm hover:bg-primary hover:text-primary-foreground transition-colors">
-                    <ChevronDown className="w-4 h-4" />
-                    Cargar más ({filtered.length - paginated.length} restantes)
-                  </button>
-                </div>
-              )}
-            </>
+            </section>
           )}
+
+          {/* ── BESTSELLERS ── */}
+          {showHomeSections && !loading && bestsellers.length > 0 && (
+            <section>
+              <SectionHeader
+                icon={<TrendingUp className="w-4 h-4 text-emerald-500" />}
+                title="Más vendidos"
+              />
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-3">
+                {bestsellers.map(p => (
+                  <ProductCard
+                    key={p.id} product={p}
+                    isWishlisted={wishlist.has(p.id)}
+                    onWishlistToggle={handleWishlist}
+                    onCompareToggle={toggleCompare}
+                    isComparing={compareIds.has(p.id)}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* ── CATALOG ── */}
+          <section>
+            {showHomeSections && (
+              <SectionHeader
+                icon={<Package className="w-4 h-4 text-muted-foreground" />}
+                title={activeCat ? activeCat.name : 'Todos los productos'}
+              />
+            )}
+
+            {/* Toolbar */}
+            <div className="flex items-center gap-2 mb-3 flex-wrap">
+              <div className="relative flex-shrink-0">
+                <select
+                  value={sort}
+                  onChange={e => setSort(e.target.value)}
+                  className="appearance-none pl-3 pr-8 py-2 bg-muted/60 border border-border/60 rounded-xl text-xs font-semibold text-foreground outline-none focus:border-primary/60 transition-colors cursor-pointer"
+                >
+                  {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
+                <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground pointer-events-none" />
+              </div>
+
+              <button
+                onClick={() => setShowFilters(v => !v)}
+                className={cn(
+                  'flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border transition-colors flex-shrink-0',
+                  showFilters || hasActiveFilters
+                    ? 'bg-primary/10 text-primary border-primary/30'
+                    : 'bg-muted/60 text-foreground/70 border-border/60 hover:border-primary/40'
+                )}
+              >
+                <SlidersHorizontal className="w-3.5 h-3.5" />
+                Filtros
+                {hasActiveFilters && <span className="w-1.5 h-1.5 bg-primary rounded-full" />}
+              </button>
+
+              {catFilter && activeCat && (
+                <button onClick={() => setCatFilter('')} className="flex items-center gap-1 px-2.5 py-1.5 bg-primary/10 text-primary rounded-full text-xs font-semibold">
+                  {activeCat.name} <X className="w-3 h-3" />
+                </button>
+              )}
+              {search && (
+                <button onClick={() => setSearch('')} className="flex items-center gap-1 px-2.5 py-1.5 bg-primary/10 text-primary rounded-full text-xs font-semibold">
+                  "{search}" <X className="w-3 h-3" />
+                </button>
+              )}
+
+              <span className="ml-auto text-xs text-muted-foreground">
+                {loading ? '...' : `${filtered.length} productos`}
+              </span>
+            </div>
+
+            {/* Filter panel */}
+            {showFilters && (
+              <div className="bg-muted/40 border border-border/60 rounded-xl p-3 mb-3 flex flex-wrap gap-3 items-end">
+                <div className="flex-1 min-w-[120px]">
+                  <label className="block text-xs font-bold text-foreground/70 mb-1">Precio mín. (S/)</label>
+                  <input type="number" value={priceMin} onChange={e => setPriceMin(e.target.value)} placeholder="0"
+                    className="w-full px-3 py-2 bg-card border border-border/60 rounded-xl text-sm outline-none focus:border-primary/60 transition-colors" />
+                </div>
+                <div className="flex-1 min-w-[120px]">
+                  <label className="block text-xs font-bold text-foreground/70 mb-1">Precio máx. (S/)</label>
+                  <input type="number" value={priceMax} onChange={e => setPriceMax(e.target.value)} placeholder="Sin límite"
+                    className="w-full px-3 py-2 bg-card border border-border/60 rounded-xl text-sm outline-none focus:border-primary/60 transition-colors" />
+                </div>
+                {hasActiveFilters && (
+                  <button
+                    onClick={() => { setPriceMin(''); setPriceMax(''); setSearch(''); setCatFilter(''); setShowFilters(false); }}
+                    className="text-red-500 text-xs font-bold py-2 px-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 transition-colors"
+                  >
+                    Limpiar todo
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* Grid */}
+            {loading ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-3">
+                {Array.from({ length: 12 }).map((_, i) => <CardSkeleton key={i} />)}
+              </div>
+            ) : filtered.length === 0 ? (
+              <div className="text-center py-20">
+                <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
+                  <Package className="w-8 h-8 text-muted-foreground/30" />
+                </div>
+                <h3 className="text-base font-bold text-foreground">Sin resultados</h3>
+                <p className="text-muted-foreground text-sm mt-1 mb-5">Intenta con otros filtros o búsqueda</p>
+                <button
+                  onClick={() => { setSearch(''); setCatFilter(''); setPriceMin(''); setPriceMax(''); }}
+                  className="px-6 py-2.5 bg-primary text-primary-foreground rounded-xl font-semibold text-sm transition-all active:scale-95"
+                >
+                  Ver todo
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-3">
+                  {paginated.map(p => (
+                    <ProductCard
+                      key={p.id} product={p}
+                      isWishlisted={wishlist.has(p.id)}
+                      onWishlistToggle={handleWishlist}
+                      onCompareToggle={toggleCompare}
+                      isComparing={compareIds.has(p.id)}
+                    />
+                  ))}
+                </div>
+                {hasMore && (
+                  <div className="text-center mt-8">
+                    <button
+                      onClick={() => setPage(p => p + 1)}
+                      className="inline-flex items-center gap-2 px-8 py-3 border-2 border-border hover:border-primary text-foreground hover:text-primary rounded-xl font-bold text-sm transition-all"
+                    >
+                      <ChevronDown className="w-4 h-4" />
+                      Ver más ({filtered.length - paginated.length} productos)
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+          </section>
         </div>
       </main>
 

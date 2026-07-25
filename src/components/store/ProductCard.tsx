@@ -87,116 +87,155 @@ export default function ProductCard({
   return (
     <div
       onClick={() => navigate(`/tienda/${product.slug}`)}
-      className="group relative bg-card border border-border rounded-xl overflow-hidden cursor-pointer hover:shadow-xl hover:border-primary/40 transition-all duration-200 flex flex-col h-full"
+      className={cn(
+        'group relative bg-card border rounded-2xl overflow-hidden cursor-pointer flex flex-col h-full transition-all duration-200',
+        isComparing
+          ? 'border-primary/60 ring-1 ring-primary/30 shadow-md'
+          : 'border-border/60 hover:border-border hover:shadow-md'
+      )}
     >
-      {/* Image area */}
-      <div className="relative w-full overflow-hidden bg-muted" style={{ paddingBottom: '100%' }}>
-        <div className="absolute inset-0">
-          {img
-            ? <img src={img} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
-            : <div className="w-full h-full flex items-center justify-center"><ShoppingCart className="w-10 h-10 text-muted-foreground/15" /></div>}
+      {/* Image */}
+      <div className="relative w-full bg-muted/40" style={{ aspectRatio: '1 / 1' }}>
+        {img
+          ? <img src={img} alt={product.name} className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500" loading="lazy" />
+          : <div className="absolute inset-0 flex items-center justify-center"><ShoppingCart className="w-8 h-8 text-muted-foreground/15" /></div>
+        }
 
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-200 hidden sm:block" />
+        {/* Overlay on hover - desktop */}
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/8 transition-colors duration-200 hidden sm:block pointer-events-none" />
 
-          <div className="absolute top-2 left-2 flex flex-col gap-1 z-10 pointer-events-none">
-            {discount > 0 && (
-              <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow leading-none">
-                -{discount}%
-              </span>
-            )}
-            {outOfStock && (
-              <span className="bg-gray-900/80 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow leading-none">
-                Agotado
-              </span>
-            )}
-            {lowStock && !outOfStock && (
-              <span className="bg-orange-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow leading-none">
-                ¡Últimos!
-              </span>
-            )}
-          </div>
-
-          <div className="absolute top-2 right-2 z-10 flex flex-col gap-1.5 items-end">
-            {product.featured && (
-              <span className="bg-amber-400 text-amber-900 text-[9px] font-bold px-1.5 py-0.5 rounded-md leading-none">
-                DEST
-              </span>
-            )}
-            <button onClick={handleWishlist}
-              className={cn('w-7 h-7 rounded-lg flex items-center justify-center shadow transition-all backdrop-blur-sm',
-                wishlisted ? 'bg-red-500 text-white' : 'bg-card/90 text-muted-foreground hover:text-red-500 hover:bg-card opacity-100 sm:opacity-0 sm:group-hover:opacity-100')}>
-              <Heart className={cn('w-3.5 h-3.5', wishlisted && 'fill-current')} />
-            </button>
-            {onCompareToggle && (
-              <button onClick={handleCompare}
-                className={cn('hidden sm:flex w-7 h-7 rounded-lg items-center justify-center shadow transition-all backdrop-blur-sm text-xs font-bold',
-                  isComparing ? 'bg-primary text-white' : 'bg-card/90 text-muted-foreground hover:bg-primary hover:text-white opacity-0 group-hover:opacity-100')}>
-                VS
-              </button>
-            )}
-          </div>
-
-          {/* Desktop hover: add to cart */}
-          <button onClick={handleAdd} disabled={outOfStock || adding}
-            className={cn('absolute inset-x-0 bottom-0 py-2.5 flex items-center justify-center gap-1.5 text-xs font-bold transition-all duration-200',
-              'translate-y-full group-hover:translate-y-0',
-              'hidden sm:flex',
-              outOfStock ? 'bg-gray-600 text-white cursor-not-allowed' :
-              adding ? 'bg-green-500 text-white' :
-              'bg-primary text-primary-foreground hover:bg-primary/90')}>
-            <ShoppingCart className="w-3.5 h-3.5" />
-            {outOfStock ? 'Sin stock' : adding ? '¡Agregado!' : 'Agregar al carrito'}
-          </button>
+        {/* Badges - left */}
+        <div className="absolute top-2 left-2 flex flex-col gap-1 z-10 pointer-events-none">
+          {discount > 0 && (
+            <span className="bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-md shadow leading-none">
+              -{discount}%
+            </span>
+          )}
+          {outOfStock && (
+            <span className="bg-black/70 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow leading-none backdrop-blur-sm">
+              Agotado
+            </span>
+          )}
+          {lowStock && !outOfStock && (
+            <span className="bg-orange-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow leading-none">
+              ¡Últimos!
+            </span>
+          )}
         </div>
+
+        {/* Badges + actions - right */}
+        <div className="absolute top-2 right-2 z-10 flex flex-col gap-1.5 items-end">
+          {product.featured && (
+            <span className="bg-amber-400 text-amber-900 text-[9px] font-black px-1.5 py-0.5 rounded-md leading-none uppercase tracking-wide">
+              Dest
+            </span>
+          )}
+          <button
+            onClick={handleWishlist}
+            className={cn(
+              'w-7 h-7 rounded-full flex items-center justify-center shadow-md transition-all',
+              wishlisted
+                ? 'bg-red-500 text-white'
+                : 'bg-card/90 text-muted-foreground hover:text-red-500 backdrop-blur-sm opacity-100 sm:opacity-0 sm:group-hover:opacity-100'
+            )}
+          >
+            <Heart className={cn('w-3.5 h-3.5', wishlisted && 'fill-current')} />
+          </button>
+          {onCompareToggle && (
+            <button
+              onClick={handleCompare}
+              className={cn(
+                'hidden sm:flex w-7 h-7 rounded-full items-center justify-center shadow-md transition-all text-[10px] font-black backdrop-blur-sm',
+                isComparing
+                  ? 'bg-primary text-white opacity-100'
+                  : 'bg-card/90 text-muted-foreground opacity-0 group-hover:opacity-100 hover:bg-primary hover:text-white'
+              )}
+            >
+              VS
+            </button>
+          )}
+        </div>
+
+        {/* Add to cart - hover slide (desktop) */}
+        {!outOfStock && (
+          <button
+            onClick={handleAdd}
+            disabled={adding}
+            className={cn(
+              'absolute inset-x-0 bottom-0 h-9 hidden sm:flex items-center justify-center gap-1.5 text-xs font-bold',
+              'translate-y-full group-hover:translate-y-0 transition-transform duration-200',
+              adding ? 'bg-emerald-500 text-white' : 'bg-primary text-primary-foreground'
+            )}
+          >
+            <ShoppingCart className="w-3.5 h-3.5" />
+            {adding ? '¡Agregado!' : 'Agregar al carrito'}
+          </button>
+        )}
+        {outOfStock && (
+          <div className="absolute inset-x-0 bottom-0 h-9 hidden sm:flex items-center justify-center gap-1.5 text-xs font-bold translate-y-full group-hover:translate-y-0 transition-transform duration-200 bg-muted/90 text-muted-foreground backdrop-blur-sm">
+            <ShoppingCart className="w-3.5 h-3.5" />
+            Sin stock
+          </div>
+        )}
       </div>
 
       {/* Info */}
-      <div className="p-3 flex flex-col flex-1 gap-1">
+      <div className="p-2.5 flex flex-col flex-1 gap-0.5">
         {product.category && (
-          <span className="text-[10px] font-bold text-primary/60 uppercase tracking-wide truncate">
+          <span className="text-[9px] font-black text-primary/50 uppercase tracking-widest truncate">
             {(product.category as any).name}
           </span>
         )}
 
-        <h3 className="text-sm font-semibold text-foreground leading-snug line-clamp-2 min-h-[2.5rem]">
+        <h3 className="text-xs font-semibold text-foreground leading-snug line-clamp-2" style={{ minHeight: '2.4em' }}>
           {product.name}
         </h3>
 
         {(product.review_count ?? 0) > 0 && (
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-0.5 mt-0.5">
             {Array.from({ length: 5 }).map((_, i) => (
-              <Star key={i} className={cn('w-3 h-3', i < Math.round(product.avg_rating ?? 0) ? 'text-amber-400 fill-amber-400' : 'text-muted-foreground/20')} />
+              <Star
+                key={i}
+                className={cn('w-2.5 h-2.5', i < Math.round(product.avg_rating ?? 0) ? 'text-amber-400 fill-amber-400' : 'text-muted-foreground/20 fill-muted-foreground/10')}
+              />
             ))}
-            <span className="text-[10px] text-muted-foreground ml-0.5">({product.review_count})</span>
+            <span className="text-[9px] text-muted-foreground ml-0.5">({product.review_count})</span>
           </div>
         )}
 
         <div className="mt-auto pt-1.5">
-          <div className="flex items-baseline gap-1.5 flex-wrap">
-            <span className={cn('text-base font-bold', outOfStock ? 'text-muted-foreground' : 'text-foreground')}>
+          <div className="flex items-baseline gap-1 flex-wrap">
+            <span className={cn('text-sm font-black', outOfStock ? 'text-muted-foreground' : 'text-foreground')}>
               {fmtPrice(price, showUsd, exchangeRate)}
             </span>
             {comparePrice && comparePrice > price && (
-              <span className="text-xs text-muted-foreground line-through">
+              <span className="text-[10px] text-muted-foreground/60 line-through">
                 {fmtPrice(comparePrice, showUsd, exchangeRate)}
               </span>
             )}
           </div>
           {discount > 0 && !outOfStock && (
-            <span className="text-[10px] text-green-600 dark:text-green-400 font-semibold">
+            <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold">
               Ahorras {fmtPrice(comparePrice! - price, showUsd, exchangeRate)}
             </span>
           )}
         </div>
 
         {/* Mobile: add button */}
-        <button onClick={handleAdd} disabled={outOfStock || adding}
-          className={cn('sm:hidden mt-1.5 w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95',
-            outOfStock ? 'bg-muted text-muted-foreground cursor-not-allowed' :
-            adding ? 'bg-green-500 text-white' :
-            'bg-primary text-primary-foreground')}>
-          <ShoppingCart className="w-3.5 h-3.5" />
-          {outOfStock ? 'Sin stock' : adding ? '¡Agregado!' : 'Agregar'}
+        <button
+          onClick={handleAdd}
+          disabled={outOfStock || adding}
+          className={cn(
+            'sm:hidden mt-2 w-full flex items-center justify-center gap-1 py-2 rounded-xl text-xs font-bold transition-all active:scale-95',
+            outOfStock
+              ? 'bg-muted text-muted-foreground cursor-not-allowed'
+              : adding
+                ? 'bg-emerald-500 text-white'
+                : 'bg-primary text-primary-foreground'
+          )}
+        >
+          <ShoppingCart className="w-3 h-3" />
+          {outOfStock ? 'Agotado' : adding ? '¡Agregado!' : 'Agregar'}
         </button>
       </div>
     </div>
