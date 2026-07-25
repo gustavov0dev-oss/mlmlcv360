@@ -6,7 +6,7 @@ import { useConfig } from '@/store/configStore';
 import { useNavigate } from '@/lib/router';
 import {
   Search, X, Package, SlidersHorizontal,
-  Sparkles, TrendingUp, ChevronDown, DollarSign,
+  Sparkles, TrendingUp, ChevronDown, Truck,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Product, ProductCategory } from '@/lib/storeTypes';
@@ -92,7 +92,7 @@ function CompareBar({ products, onRemove, onClear }: {
 
 export default function StorePage() {
   const database = useDatabase();
-  const { company, showUsd, setShowUsd } = useConfig();
+  const { company, showUsd, setShowUsd, currencySymbol } = useConfig();
   const { user } = useAuthStore();
   const { subtotal } = useCart();
 
@@ -196,48 +196,64 @@ export default function StorePage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-muted/30">
       <Navbar />
 
-      {/* ── SEARCH + CATEGORIES ROW (not sticky, clean) ── */}
-      <div className="bg-card pt-16">
+      {/* ── HERO SEARCH BAR (Mercado Libre style) ── */}
+      <div className="bg-primary pt-16">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 py-3">
           <div className="flex items-center gap-2">
-            <div className="relative flex-1 max-w-2xl">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+            {/* Search */}
+            <div className="relative flex-1">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
               <input
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                placeholder="Buscar productos..."
-                className="w-full pl-9 pr-8 py-2.5 bg-muted/60 border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-primary focus:bg-card transition-colors"
+                placeholder="Buscar productos, marcas y más..."
+                className="w-full pl-10 pr-9 py-3 bg-white text-foreground border-0 rounded-xl text-sm font-medium placeholder:text-muted-foreground/70 outline-none shadow-sm focus:ring-2 focus:ring-white/40 transition-all"
               />
               {search && (
-                <button onClick={() => setSearch('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-muted transition-colors">
-                  <X className="w-3.5 h-3.5 text-muted-foreground" />
+                <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-muted transition-colors">
+                  <X className="w-4 h-4 text-muted-foreground" />
                 </button>
               )}
             </div>
+
+            {/* Currency converter toggle */}
             <button
               onClick={() => setShowUsd(!showUsd)}
               className={cn(
-                'flex items-center gap-1 px-3 py-2.5 rounded-lg text-xs font-bold border transition-colors flex-shrink-0',
-                showUsd ? 'text-emerald-600 dark:text-emerald-400 border-emerald-500/30 bg-emerald-500/5' : 'text-muted-foreground border-border hover:border-primary/40 hover:text-foreground'
+                'flex items-center gap-1.5 px-3.5 py-3 rounded-xl text-xs font-bold flex-shrink-0 shadow-sm transition-all active:scale-95',
+                showUsd
+                  ? 'bg-white text-emerald-600'
+                  : 'bg-white/15 text-white hover:bg-white/25'
               )}
+              title="Cambiar moneda"
             >
-              <DollarSign className="w-3.5 h-3.5" />
+              <span className={cn('w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black',
+                showUsd ? 'bg-emerald-500 text-white' : 'bg-white/30 text-white')}>
+                {showUsd ? '$' : 'S'}
+              </span>
               {showUsd ? 'USD' : 'PEN'}
             </button>
           </div>
+        </div>
+      </div>
 
-          {/* Category pills */}
-          <div className="flex items-center gap-1.5 pt-2.5 pb-1 overflow-x-auto scrollbar-hide">
+      {/* ── CATEGORIES BAR (sticky, ML-style) ── */}
+      <div className="sticky top-16 z-30 bg-card border-b border-border shadow-sm">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6">
+          <div className="flex items-center gap-1.5 py-2 overflow-x-auto scrollbar-hide">
             <button
               onClick={() => setCatFilter('')}
               className={cn(
-                'flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all',
-                !catFilter ? 'bg-primary text-primary-foreground' : 'text-foreground/70 hover:text-foreground hover:bg-muted'
+                'flex-shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all',
+                !catFilter
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-foreground/70 hover:text-foreground hover:bg-muted'
               )}
             >
+              <Package className="w-3.5 h-3.5" />
               Todo
             </button>
             {categories.map(cat => (
@@ -245,11 +261,15 @@ export default function StorePage() {
                 key={cat.id}
                 onClick={() => setCatFilter(catFilter === cat.id ? '' : cat.id)}
                 className={cn(
-                  'flex-shrink-0 flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all',
-                  catFilter === cat.id ? 'bg-primary text-primary-foreground' : 'text-foreground/70 hover:text-foreground hover:bg-muted'
+                  'flex-shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all',
+                  catFilter === cat.id
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-foreground/70 hover:text-foreground hover:bg-muted'
                 )}
               >
-                {cat.image_url && <img src={cat.image_url} alt="" className="w-3.5 h-3.5 rounded-full object-cover" />}
+                {cat.image_url
+                  ? <img src={cat.image_url} alt="" className="w-4 h-4 rounded object-cover" />
+                  : <span className="w-1 h-1 rounded-full bg-current opacity-40" />}
                 {cat.name}
               </button>
             ))}
@@ -263,11 +283,12 @@ export default function StorePage() {
 
           {/* Free shipping notice */}
           {subtotal > 0 && subtotal < freeShipThreshold && (
-            <div className="bg-card rounded-xl px-4 py-3 mb-4 flex items-center gap-2">
+            <div className="bg-card rounded-xl px-4 py-3 mb-4 flex items-center gap-2 border border-border">
+              <Truck className="w-4 h-4 text-primary flex-shrink-0" />
               <div className="text-xs text-foreground/70">
-                Agrega <strong className="text-primary">S/ {(freeShipThreshold - subtotal).toFixed(2)}</strong> más para envío gratis
+                Agrega <strong className="text-primary">{currencySymbol} {(freeShipThreshold - subtotal).toFixed(2)}</strong> más para envío gratis
               </div>
-              <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden">
+              <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden ml-2">
                 <div
                   className="h-full bg-primary rounded-full transition-all duration-500"
                   style={{ width: `${Math.min((subtotal / freeShipThreshold) * 100, 100)}%` }}
@@ -276,14 +297,15 @@ export default function StorePage() {
             </div>
           )}
           {subtotal >= freeShipThreshold && subtotal > 0 && (
-            <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-4 py-2.5 mb-4 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+            <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-4 py-2.5 mb-4 text-xs font-semibold text-emerald-700 dark:text-emerald-400 flex items-center gap-2">
+              <Truck className="w-4 h-4" />
               ¡Tienes envío gratis en tu pedido!
             </div>
           )}
 
           {/* ── FEATURED SECTION ── */}
           {showHome && !loading && featured.length > 0 && (
-            <section className="bg-card rounded-2xl p-4 mb-4">
+            <section className="bg-card rounded-2xl p-4 mb-4 border border-border">
               <div className="flex items-center gap-2 mb-3">
                 <Sparkles className="w-4 h-4 text-amber-500" />
                 <h2 className="text-sm font-bold text-foreground">Destacados</h2>
@@ -298,7 +320,7 @@ export default function StorePage() {
 
           {/* ── BESTSELLERS ── */}
           {showHome && !loading && bestsellers.length > 0 && (
-            <section className="bg-card rounded-2xl p-4 mb-4">
+            <section className="bg-card rounded-2xl p-4 mb-4 border border-border">
               <div className="flex items-center gap-2 mb-3">
                 <TrendingUp className="w-4 h-4 text-emerald-500" />
                 <h2 className="text-sm font-bold text-foreground">Más vendidos</h2>
@@ -312,7 +334,7 @@ export default function StorePage() {
           )}
 
           {/* ── CATALOG ── */}
-          <section className="bg-card rounded-2xl p-4">
+          <section className="bg-card rounded-2xl p-4 border border-border">
             {/* Header */}
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-bold text-foreground">
@@ -364,12 +386,12 @@ export default function StorePage() {
             {showFilters && (
               <div className="bg-muted/40 border border-border rounded-xl p-3 mb-4 flex flex-wrap gap-3 items-end">
                 <div className="flex-1 min-w-[120px]">
-                  <label className="block text-xs font-bold text-foreground/70 mb-1">Precio mín. (S/)</label>
+                  <label className="block text-xs font-bold text-foreground/70 mb-1">Precio mín. ({currencySymbol})</label>
                   <input type="number" value={priceMin} onChange={e => setPriceMin(e.target.value)} placeholder="0"
                     className="w-full px-3 py-2 bg-card border border-border rounded-lg text-sm outline-none focus:border-primary transition-colors" />
                 </div>
                 <div className="flex-1 min-w-[120px]">
-                  <label className="block text-xs font-bold text-foreground/70 mb-1">Precio máx. (S/)</label>
+                  <label className="block text-xs font-bold text-foreground/70 mb-1">Precio máx. ({currencySymbol})</label>
                   <input type="number" value={priceMax} onChange={e => setPriceMax(e.target.value)} placeholder="Sin límite"
                     className="w-full px-3 py-2 bg-card border border-border rounded-lg text-sm outline-none focus:border-primary transition-colors" />
                 </div>
