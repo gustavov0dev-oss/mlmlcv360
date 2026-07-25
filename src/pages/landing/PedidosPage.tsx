@@ -53,9 +53,31 @@ export default function PedidosPage({ initialTab = 'pedidos' }: { initialTab?: T
       filter: { user_id: user.id },
       order: { column: 'created_at', ascending: false },
     });
-    setOrders((data as Order[]) || []);
+    const ordersData = (data as Order[]) || [];
+
+    // Enrich items with live product images from products table
+    const productIds = Array.from(new Set(
+      ordersData.flatMap(o => (o.items || []).map((i: any) => i.product_id).filter(Boolean))
+    )) as string[];
+    let productsById: Record<string, any> = {};
+    if (productIds.length > 0) {
+      const { data: prods } = await database.select('products', {
+        select: 'id, name, slug, images',
+        filter: [{ column: 'id', operator: 'in', value: productIds }],
+      });
+      ((prods as any[]) || []).forEach((p: any) => { productsById[p.id] = p; });
+    }
+    const enriched = ordersData.map(o => ({
+      ...o,
+      items: (o.items || []).map((it: any) => ({
+        ...it,
+        image_url: (it.product_id && productsById[it.product_id]?.images?.[0]?.url) || it.image_url || '',
+      })),
+    }));
+
+    setOrders(enriched);
     setLoadingOrders(false);
-  }, [user, navigate]);
+  }, [user, navigate, database]);
 
   const loadWishlist = useCallback(async () => {
     if (!user) return;

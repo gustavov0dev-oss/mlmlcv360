@@ -41,7 +41,7 @@ export default function OrdersPage() {
     if (productIds.length > 0) {
       const { data: products } = await database.select<Product>('products', {
         select: 'id, name, slug, images, status',
-        filter: { id: productIds },
+        filter: [{ column: 'id', operator: 'in', value: productIds }],
       });
       (products as Product[] || []).forEach(p => { productsById[p.id] = p; });
     }
@@ -49,8 +49,8 @@ export default function OrdersPage() {
       ...o,
       items: (o.items || []).map(it => ({
         ...it,
-        product_name: productsById[it.product_id!]?.name || it.product_name,
-        image_url: productsById[it.product_id!]?.images?.[0]?.url || it.image_url || '',
+        product_name: (it.product_id && productsById[it.product_id]?.name) || it.product_name,
+        image_url: (it.product_id && productsById[it.product_id]?.images?.[0]?.url) || it.image_url || '',
       })),
     }));
     setOrders(enriched);

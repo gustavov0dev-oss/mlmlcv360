@@ -91,7 +91,7 @@ export default function Footer() {
   }, [database]);
 
   return (
-    <footer className="bg-muted/30 border-t border-border">
+    <footer className="bg-muted/30 border-t border-border mt-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="py-12 lg:py-14">
           <div className="flex flex-col lg:flex-row lg:items-start gap-10 lg:gap-16">
