@@ -79,11 +79,11 @@ export default function ResetPasswordPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <Link to="/">
-            <LogoWithText value={logoValue} fallbackText={companyName} pixelSize={logoSizes.login || 36} pixelHeight={logoSizes.loginHeight || logoSizes.login || 36} textClass="font-semibold text-foreground" />
+            <LogoWithText value={logoValue} fallbackText={companyName} pixelSize={logoSizes.login || 32} pixelHeight={logoSizes.loginHeight || logoSizes.login || 32} textClass="font-semibold text-foreground" />
           </Link>
           <button
             onClick={() => setTheme(isDark ? 'light' : 'dark')}
-            className="w-9 h-9 rounded-xl flex items-center justify-center bg-muted/50 hover:bg-muted/80 transition-colors text-muted-foreground"
+            className="w-9 h-9 rounded-full flex items-center justify-center bg-muted/50 hover:bg-muted/80 transition-colors text-muted-foreground"
             aria-label="Toggle theme"
           >
             {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}

@@ -204,15 +204,15 @@ export default function RegisterPage() {
       <div className="flex-1 flex flex-col min-h-screen lg:min-h-0">
         {/* Top bar with glass effect */}
         {/* Top bar */}
-        <div className="flex items-center justify-between px-6 lg:px-10 py-5">
+        <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-10 shrink-0">
           {/* Logo visible on mobile only */}
           <Link to="/" className="lg:hidden">
-            <LogoWithText value={logoValue} fallbackText={companyName} pixelSize={logoSizes.login || 36} pixelHeight={logoSizes.loginHeight || logoSizes.login || 36} textClass="font-semibold text-foreground" />
+            <LogoWithText value={logoValue} fallbackText={companyName} pixelSize={logoSizes.login || 32} pixelHeight={logoSizes.loginHeight || logoSizes.login || 32} textClass="font-semibold text-foreground" />
           </Link>
           <div className="hidden lg:block" />
           <button
             onClick={() => setTheme(isDark ? 'light' : 'dark')}
-            className="w-9 h-9 rounded-xl flex items-center justify-center bg-muted/50 hover:bg-muted/80 transition-colors text-muted-foreground"
+            className="w-9 h-9 rounded-full flex items-center justify-center bg-muted/50 hover:bg-muted/80 transition-colors text-muted-foreground"
             aria-label="Cambiar tema"
           >
             {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}

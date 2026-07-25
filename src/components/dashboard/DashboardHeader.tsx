@@ -388,7 +388,7 @@ export default function DashboardHeader() {
 
         {/* Logo — mobile only (desktop sidebar already has it) */}
         <Link to="/" className="flex-shrink-0 flex lg:hidden active:scale-95 transition-transform">
-          <Logo value={logoValue} fallbackText={companyName} pixelSize={logoSizes.navbar || 28} />
+          <Logo value={logoValue} fallbackText={companyName} pixelSize={logoSizes.navbar || 32} />
         </Link>
 
         {/* Search — large inline on desktop, icon-collapsible on mobile */}
@@ -508,7 +508,7 @@ export default function DashboardHeader() {
           {/* Mobile search icon */}
           <button
             onClick={() => { setSearchOpen(v => !v); setSidebarOpen(false); setTimeout(() => mobileInputRef.current?.focus(), 50); }}
-            className="lg:hidden w-10 h-10 sm:w-9 sm:h-9 rounded-xl sm:rounded-full flex items-center justify-center hover:bg-muted/50 active:bg-muted text-muted-foreground active:text-foreground transition-colors"
+            className="lg:hidden w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted/50 active:bg-muted text-muted-foreground active:text-foreground transition-colors"
             aria-label="Buscar"
           >
             <Search className="w-5 h-5" />
@@ -516,7 +516,7 @@ export default function DashboardHeader() {
 
           {/* Link to public site */}
           <Link to="/"
-            className="w-10 h-10 sm:w-9 sm:h-9 rounded-xl sm:rounded-full flex items-center justify-center hover:bg-muted/50 active:bg-muted text-muted-foreground hover:text-foreground transition-colors hidden sm:flex"
+            className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted/50 active:bg-muted text-muted-foreground hover:text-foreground transition-colors hidden sm:flex"
           >
             <ExternalLink className="w-5 h-5" />
           </Link>
@@ -524,7 +524,7 @@ export default function DashboardHeader() {
           {/* Theme toggle */}
           <button
             onClick={() => setTheme(isDark ? 'light' : 'dark')}
-            className="w-10 h-10 sm:w-9 sm:h-9 rounded-xl sm:rounded-full flex items-center justify-center hover:bg-muted/50 active:bg-muted text-muted-foreground hover:text-foreground transition-colors hidden sm:flex"
+            className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted/50 active:bg-muted text-muted-foreground hover:text-foreground transition-colors hidden sm:flex"
           >
             {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
           </button>
@@ -534,11 +534,11 @@ export default function DashboardHeader() {
             <button
               id="bell-btn"
               onClick={() => { setNotifOpen(v => !v); if (!notifOpen) fetchNotifications(); }}
-              className="relative w-10 h-10 sm:w-9 sm:h-9 rounded-xl sm:rounded-full flex items-center justify-center hover:bg-muted/50 active:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+              className="relative w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted/50 active:bg-muted text-muted-foreground hover:text-foreground transition-colors"
             >
               <Bell className="w-5 h-5" />
               {unread > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 sm:top-0.5 sm:right-0.5 min-w-[18px] h-[18px] sm:min-w-[16px] sm:h-4 px-1 bg-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-sm ring-2 ring-background">
+                <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-0.5 bg-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-sm ring-2 ring-background">
                   {unread > 9 ? '9+' : unread}
                 </span>
               )}
@@ -692,7 +692,7 @@ export default function DashboardHeader() {
           {/* Hamburger — mobile only */}
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="lg:hidden w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center rounded-xl sm:rounded-full hover:bg-muted/60 active:bg-muted text-foreground transition-colors"
+            className="lg:hidden w-9 h-9 flex items-center justify-center rounded-full hover:bg-muted/60 active:bg-muted text-foreground transition-colors"
             aria-label={sidebarOpen ? 'Cerrar menú' : 'Abrir menú'}
           >
             {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
