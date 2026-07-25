@@ -3,7 +3,7 @@ import { useDatabase } from '@/lib/backend';
 
 import { useNavigate } from '@/lib/router';
 import { cn } from '@/lib/utils';
-import type { Order, OrderTracking } from '@/lib/storeTypes';
+import type { Order, OrderTracking, Product } from '@/lib/storeTypes';
 import { ChevronLeft, Package, Truck, CircleCheck as CheckCircle, Clock, Circle as XCircle, Printer, MapPin, Phone, ExternalLink, RefreshCw } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -114,7 +114,29 @@ export default function OrderDetailPage() {
       database.select<OrderTracking>('order_tracking', { filter: { order_id: orderId }, order: { column: 'created_at' } }),
       database.select<{ key: string; value: string }>('system_config', { select: 'key,value' }),
     ]);
-    if (o) setOrder({ ...(o as Order), tracking: (t as OrderTracking[]) || [] });
+    if (o) {
+      const orderData = o as Order;
+      // Fetch live product data so images/names stay current
+      const productIds = (orderData.items || []).map(i => i.product_id).filter(Boolean) as string[];
+      let productsById: Record<string, Product> = {};
+      if (productIds.length > 0) {
+        const { data: products } = await database.select<Product>('products', {
+          select: 'id, name, slug, images, status',
+          filter: { id: Array.from(new Set(productIds)) },
+        });
+        (products as Product[] || []).forEach(p => { productsById[p.id] = p; });
+      }
+      const enriched: Order = {
+        ...orderData,
+        items: (orderData.items || []).map(it => ({
+          ...it,
+          product_name: it.product_id && productsById[it.product_id]?.name || it.product_name,
+          image_url: it.product_id && productsById[it.product_id]?.images?.[0]?.url || it.image_url || '',
+        })),
+        tracking: (t as OrderTracking[]) || [],
+      };
+      setOrder(enriched);
+    }
     setTracking((t as OrderTracking[]) || []);
     if (cfg) {
       const c: Record<string, string> = {};

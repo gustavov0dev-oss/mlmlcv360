@@ -3,7 +3,7 @@ import { useDatabase } from '@/lib/backend';
 import { useAuthStore } from '@/store/authStore';
 import { useNavigate } from '@/lib/router';
 import { cn } from '@/lib/utils';
-import type { Order } from '@/lib/storeTypes';
+import type { Order, Product } from '@/lib/storeTypes';
 import { Package, ChevronRight, ShoppingBag } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -32,7 +32,28 @@ export default function OrdersPage() {
       filter: { user_id: user.id },
       order: { column: 'created_at', ascending: false },
     });
-    setOrders((data as Order[]) || []);
+    const ordersData = (data as Order[]) || [];
+    // Fetch live product data so images/names stay current
+    const productIds = Array.from(new Set(
+      ordersData.flatMap(o => (o.items || []).map(i => i.product_id).filter(Boolean) as string[])
+    ));
+    let productsById: Record<string, Product> = {};
+    if (productIds.length > 0) {
+      const { data: products } = await database.select<Product>('products', {
+        select: 'id, name, slug, images, status',
+        filter: { id: productIds },
+      });
+      (products as Product[] || []).forEach(p => { productsById[p.id] = p; });
+    }
+    const enriched = ordersData.map(o => ({
+      ...o,
+      items: (o.items || []).map(it => ({
+        ...it,
+        product_name: productsById[it.product_id!]?.name || it.product_name,
+        image_url: productsById[it.product_id!]?.images?.[0]?.url || it.image_url || '',
+      })),
+    }));
+    setOrders(enriched);
     setLoading(false);
   }, [user]);
 
