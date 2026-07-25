@@ -47,7 +47,7 @@ function applyTheme(theme: Theme) {
 
   const metaTheme = document.querySelector('meta[name="theme-color"]');
   if (metaTheme) {
-    metaTheme.setAttribute('content', isDark ? '#0a0a0a' : '#ffffff');
+    metaTheme.setAttribute('content', isDark ? '#090909' : '#ffffff');
   }
 
   // Remove the freeze on next frame so transitions resume for normal interactions

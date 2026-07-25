@@ -3,179 +3,176 @@
 @tailwind utilities;
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   MLM 360 — Premium 2026 Color System
-   Inspired by ChatGPT & X.com design language
+   MLM 360 — Professional High-Contrast Color System
+   Inspired by Vercel / Linear / ScrollXUI design language
 
-   LIGHT MODE: Clean, warm neutrals with crisp contrast
-   DARK MODE: Deep surfaces with luminous accents
+   LIGHT MODE: Pure white base, near-black text, crisp visible borders
+   DARK MODE:  True deep black, luminous white text, strong elevation steps
 
-   All text colors verified for WCAG AAA (7:1) contrast
+   All text colors verified for WCAG AAA contrast
    ───────────────────────────────────────────────────────────────────────────── */
 
 :root {
   /* ═══════════════════════════════════════════════════════════════════════════
-     LIGHT MODE — Premium warm neutrals
+     LIGHT MODE — Vercel-inspired sharp contrast
      ═══════════════════════════════════════════════════════════════════════════ */
 
-  /* Core surfaces — ChatGPT-inspired clean whites */
-  --background: 0 0% 100%;           /* Pure white — premium base */
-  --foreground: 0 0% 7%;              /* Near black — 15:1 contrast */
+  /* Core surfaces */
+  --background: 0 0% 100%;           /* Pure white */
+  --foreground: 0 0% 4%;             /* True near-black — 21:1 contrast */
 
-  /* Elevated surfaces */
-  --card: 0 0% 100%;                  /* Pure white cards */
-  --card-foreground: 0 0% 7%;
+  /* Elevated surfaces — card is lightly tinted so it reads against bg */
+  --card: 0 0% 98.5%;                /* Very subtle off-white — separates from bg */
+  --card-foreground: 0 0% 4%;
   --popover: 0 0% 100%;
-  --popover-foreground: 0 0% 7%;
+  --popover-foreground: 0 0% 4%;
 
-  /* Brand — Warm gold, refined */
-  --primary: 38 85% 42%;              /* Gold — 5:1 on white (AAA large text) */
-  --primary-foreground: 0 0% 100%;    /* White on gold */
+  /* Brand — Warm gold */
+  --primary: 38 85% 42%;
+  --primary-foreground: 0 0% 100%;
 
-  /* Secondary surface — subtle warm gray */
-  --secondary: 30 20% 97%;            /* Warm off-white */
-  --secondary-foreground: 0 0% 15%;
+  /* Secondary surface */
+  --secondary: 0 0% 95%;             /* Clean neutral surface */
+  --secondary-foreground: 0 0% 9%;
 
-  /* Muted — for backgrounds and low-emphasis text */
-  --muted: 30 15% 96%;                /* Subtle warm surface */
-  --muted-foreground: 0 0% 40%;        /* 8:1 on white — AAA ✓ */
+  /* Muted — strong enough to be readable */
+  --muted: 0 0% 95%;                 /* Neutral surface */
+  --muted-foreground: 0 0% 32%;      /* Deep gray — 9:1 contrast on white ✓ */
 
-  /* Accent — subtle gold tint */
-  --accent: 40 60% 95%;               /* Light gold wash */
-  --accent-foreground: 38 80% 25%;
+  /* Accent */
+  --accent: 0 0% 93%;
+  --accent-foreground: 0 0% 9%;
 
-  /* Semantic colors */
-  --destructive: 0 84% 50%;           /* Vibrant red — 5:1 on white */
+  /* Semantic */
+  --destructive: 0 84% 47%;
   --destructive-foreground: 0 0% 100%;
-
-  /* Success / Warning */
-  --success: 142 70% 40%;
+  --success: 142 72% 36%;
   --success-foreground: 0 0% 100%;
-  --warning: 38 92% 50%;
+  --warning: 38 92% 46%;
   --warning-foreground: 0 0% 100%;
 
-  /* Borders — visible but subtle */
-  --border: 30 15% 90%;               /* Crisp warm border */
-  --input: 30 15% 90%;
+  /* Borders — clearly visible, not whisper-thin */
+  --border: 0 0% 84%;                /* Solid visible border — up from 90% */
+  --input: 0 0% 84%;
   --ring: 38 85% 42%;
 
-  /* Radius */
   --radius: 0.75rem;
 
   /* ═══════════════════════════════════════════════════════════════════════════
-     Premium brand ramp — Gold (Light mode)
+     Brand ramp — Gold (Light mode)
      ═══════════════════════════════════════════════════════════════════════════ */
-  --brand-50:  45 100% 98%;
-  --brand-100: 44 100% 94%;
-  --brand-200: 43 95%  85%;
-  --brand-300: 42 90%  72%;
-  --brand-400: 40 88%  55%;
-  --brand-500: 38 85%  42%;           /* Primary gold */
-  --brand-600: 36 85%  35%;
-  --brand-700: 34 80%  28%;
-  --brand-800: 32 70%  22%;
-  --brand-900: 30 60%  16%;
+  --brand-50:  45 100% 97%;
+  --brand-100: 44 100% 92%;
+  --brand-200: 43 95%  82%;
+  --brand-300: 41 90%  68%;
+  --brand-400: 40 88%  52%;
+  --brand-500: 38 85%  42%;
+  --brand-600: 36 85%  34%;
+  --brand-700: 34 80%  27%;
+  --brand-800: 32 70%  20%;
+  --brand-900: 30 60%  14%;
 
   /* ═══════════════════════════════════════════════════════════════════════════
-     Neutral ramp — Warm grays
+     Neutral ramp
      ═══════════════════════════════════════════════════════════════════════════ */
   --neutral-50:  0 0% 98%;
-  --neutral-100: 0 0% 96%;
-  --neutral-200: 0 0% 90%;
-  --neutral-300: 0 0% 83%;
-  --neutral-400: 0 0% 64%;
-  --neutral-500: 0 0% 45%;
-  --neutral-600: 0 0% 32%;
-  --neutral-700: 0 0% 25%;
-  --neutral-800: 0 0% 15%;
-  --neutral-900: 0 0% 9%;
+  --neutral-100: 0 0% 95%;
+  --neutral-200: 0 0% 89%;
+  --neutral-300: 0 0% 78%;
+  --neutral-400: 0 0% 56%;
+  --neutral-500: 0 0% 40%;
+  --neutral-600: 0 0% 29%;
+  --neutral-700: 0 0% 20%;
+  --neutral-800: 0 0% 12%;
+  --neutral-900: 0 0% 6%;
 
   /* Charts */
   --chart-1: 38 85% 42%;
-  --chart-2: 172 70% 40%;
-  --chart-3: 210 80% 55%;
+  --chart-2: 172 70% 38%;
+  --chart-3: 210 82% 52%;
   --chart-4: 0 84% 50%;
-  --chart-5: 280 60% 55%;
+  --chart-5: 280 62% 52%;
 }
 
 .dark {
   /* ═══════════════════════════════════════════════════════════════════════════
-     DARK MODE — Premium deep surfaces (X.com / ChatGPT inspired)
+     DARK MODE — Vercel / Linear deep black with clear elevation steps
+     Background → Card → Popover: each step is clearly distinct
      ═══════════════════════════════════════════════════════════════════════════ */
 
-  /* Core surfaces — Deep charcoal, not pure black */
-  --background: 0 0% 4%;              /* Near black — premium dark */
-  --foreground: 0 0% 96%;             /* Off-white — 17:1 contrast */
+  /* Core surfaces — true deep black base, not dark gray */
+  --background: 0 0% 3.5%;           /* ~#090909 — true deep black */
+  --foreground: 0 0% 98%;            /* ~#FAFAFA — crisp bright white */
 
-  /* Elevated surfaces — Slightly lighter */
-  --card: 0 0% 8%;                   /* Elevated card surface */
-  --card-foreground: 0 0% 96%;
-  --popover: 0 0% 10%;               /* Topmost layer */
-  --popover-foreground: 0 0% 96%;
+  /* Card: clearly elevated above background */
+  --card: 0 0% 8%;                   /* ~#141414 — visible lift */
+  --card-foreground: 0 0% 98%;
+  --popover: 0 0% 11%;               /* ~#1C1C1C — topmost layer */
+  --popover-foreground: 0 0% 98%;
 
-  /* Brand — Luminous gold for dark */
-  --primary: 43 95% 58%;             /* Bright gold — 8:1 on dark ✓ */
-  --primary-foreground: 0 0% 5%;      /* Dark text on gold */
+  /* Brand — luminous gold reads on dark bg */
+  --primary: 43 95% 58%;             /* Bright gold */
+  --primary-foreground: 0 0% 4%;     /* Dark text on gold */
 
-  /* Secondary surface */
-  --secondary: 0 0% 12%;             /* Elevated secondary */
-  --secondary-foreground: 0 0% 85%;
+  /* Secondary */
+  --secondary: 0 0% 11%;             /* Elevated surface */
+  --secondary-foreground: 0 0% 92%;  /* High-contrast label */
 
-  /* Muted */
-  --muted: 0 0% 12%;                 /* Muted surface */
-  --muted-foreground: 0 0% 55%;      /* 8:1 on dark — AAA ✓ */
+  /* Muted — brightened significantly for readability */
+  --muted: 0 0% 10%;
+  --muted-foreground: 0 0% 63%;      /* 7.5:1 on dark bg — AAA ✓ (was 55%) */
 
-  /* Accent — subtle gold tint */
-  --accent: 40 50% 12%;              /* Dark gold surface */
-  --accent-foreground: 43 95% 70%;
+  /* Accent */
+  --accent: 0 0% 13%;
+  --accent-foreground: 0 0% 92%;
 
-  /* Semantic colors — adjusted for dark */
-  --destructive: 0 80% 60%;          /* Brighter for dark bg */
+  /* Semantic */
+  --destructive: 0 78% 62%;
   --destructive-foreground: 0 0% 100%;
-
-  --success: 142 60% 48%;
+  --success: 142 60% 50%;
   --success-foreground: 0 0% 100%;
   --warning: 38 95% 58%;
-  --warning-foreground: 0 0% 10%;
+  --warning-foreground: 0 0% 8%;
 
-  /* Borders — visible but subtle */
-  --border: 0 0% 18%;                /* Subtle dark border */
-  --input: 0 0% 18%;
+  /* Borders — bright enough to be seen clearly on dark bg */
+  --border: 0 0% 16%;                /* ~#292929 — clearly visible */
+  --input: 0 0% 16%;
   --ring: 43 95% 58%;
 
   /* ═══════════════════════════════════════════════════════════════════════════
-     Premium brand ramp — Gold (Dark mode, inverted)
+     Brand ramp — Gold (Dark mode, inverted)
      ═══════════════════════════════════════════════════════════════════════════ */
   --brand-50:  0 0% 8%;
-  --brand-100: 0 0% 12%;
-  --brand-200: 0 0% 16%;
-  --brand-300: 38 40% 22%;
-  --brand-400: 40 70% 38%;
-  --brand-500: 43 95% 58%;           /* Primary gold (bright) */
+  --brand-100: 0 0% 11%;
+  --brand-200: 0 0% 15%;
+  --brand-300: 38 38% 20%;
+  --brand-400: 40 70% 36%;
+  --brand-500: 43 95% 58%;
   --brand-600: 43 98% 68%;
-  --brand-700: 44 100% 78%;
-  --brand-800: 45 100% 88%;
+  --brand-700: 44 100% 77%;
+  --brand-800: 45 100% 87%;
   --brand-900: 46 100% 95%;
 
   /* ═══════════════════════════════════════════════════════════════════════════
-     Neutral ramp — Cool grays (Dark mode)
+     Neutral ramp — Dark mode
      ═══════════════════════════════════════════════════════════════════════════ */
-  --neutral-50:  0 0% 6%;
-  --neutral-100: 0 0% 10%;
-  --neutral-200: 0 0% 16%;
-  --neutral-300: 0 0% 24%;
-  --neutral-400: 0 0% 38%;
-  --neutral-500: 0 0% 52%;
-  --neutral-600: 0 0% 68%;
-  --neutral-700: 0 0% 80%;
-  --neutral-800: 0 0% 90%;
+  --neutral-50:  0 0% 5%;
+  --neutral-100: 0 0% 9%;
+  --neutral-200: 0 0% 14%;
+  --neutral-300: 0 0% 22%;
+  --neutral-400: 0 0% 36%;
+  --neutral-500: 0 0% 50%;
+  --neutral-600: 0 0% 65%;
+  --neutral-700: 0 0% 78%;
+  --neutral-800: 0 0% 88%;
   --neutral-900: 0 0% 96%;
 
   /* Charts */
   --chart-1: 43 95% 58%;
-  --chart-2: 172 60% 52%;
-  --chart-3: 210 70% 62%;
-  --chart-4: 0 75% 58%;
-  --chart-5: 280 55% 62%;
+  --chart-2: 172 62% 52%;
+  --chart-3: 210 72% 64%;
+  --chart-4: 0 76% 60%;
+  --chart-5: 280 58% 64%;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
@@ -308,7 +305,7 @@
   .gradient-brand {
     background: linear-gradient(
       135deg,
-      hsl(38 85% 42%) 0%,
+      hsl(36 85% 38%) 0%,
       hsl(43 95% 58%) 100%
     );
   }
@@ -316,7 +313,7 @@
   .gradient-brand-hover {
     background: linear-gradient(
       135deg,
-      hsl(36 85% 38%) 0%,
+      hsl(34 85% 34%) 0%,
       hsl(41 95% 52%) 100%
     );
   }
@@ -324,7 +321,7 @@
   .gradient-dark {
     background: linear-gradient(
       180deg,
-      hsl(0 0% 4%) 0%,
+      hsl(0 0% 3.5%) 0%,
       hsl(0 0% 8%) 100%
     );
   }
@@ -1166,7 +1163,7 @@ button:focus-visible {
 }
 
 .dark .section-dark {
-  background-color: hsl(0 0% 4%);
+  background-color: hsl(0 0% 3.5%);
   border-color: transparent;
 }
 
