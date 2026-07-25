@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { ShoppingCart, Star, Heart, GitCompareArrows } from 'lucide-react';
+import { ShoppingCart, Star, Heart, GitCompareArrows, Truck } from 'lucide-react';
 import type { Product, ProductVariant } from '@/lib/storeTypes';
 import { useCart } from '@/store/cartStore';
 import { useAuthStore } from '@/store/authStore';
@@ -9,9 +9,9 @@ import { useDatabase } from '@/lib/backend';
 import { toast } from 'sonner';
 import { useState } from 'react';
 
-function fmtPrice(n: number, showUsd: boolean, rate: number) {
+function fmtPrice(n: number, showUsd: boolean, rate: number, symbol: string) {
   if (showUsd) return `$${(n / rate).toFixed(2)}`;
-  return `S/ ${n.toFixed(2)}`;
+  return `${symbol} ${n.toFixed(2)}`;
 }
 
 interface ProductCardProps {
@@ -20,6 +20,7 @@ interface ProductCardProps {
   isWishlisted?: boolean;
   onCompareToggle?: (product: Product) => void;
   isComparing?: boolean;
+  freeShipThreshold?: number;
 }
 
 export default function ProductCard({
@@ -28,10 +29,11 @@ export default function ProductCard({
   isWishlisted: initialWishlisted = false,
   onCompareToggle,
   isComparing = false,
+  freeShipThreshold,
 }: ProductCardProps) {
   const { addItem } = useCart();
   const { user } = useAuthStore();
-  const { showUsd, exchangeRate } = useConfig();
+  const { showUsd, exchangeRate, currencySymbol } = useConfig();
   const navigate = useNavigate();
   const database = useDatabase();
   const [wishlisted, setWishlisted] = useState(initialWishlisted);
@@ -50,15 +52,18 @@ export default function ProductCard({
   const stock = activeVariants.length > 0 ? totalVariantStock : (product.general_stock ?? 99);
   const outOfStock = product.track_stock && stock === 0;
   const lowStock = product.track_stock && stock > 0 && stock <= 5;
+  const qualifiesFreeShip = freeShipThreshold ? price >= freeShipThreshold : false;
 
   const img = product.images?.[0]?.url;
+  const rating = product.avg_rating ?? 0;
+  const reviewCount = product.review_count ?? 0;
 
   const handleAdd = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (outOfStock || adding) return;
     setAdding(true);
     addItem(product, firstVariant, 1);
-    toast.success('Agregado', {
+    toast.success('¡Agregado al carrito!', {
       description: product.name,
       action: { label: 'Ver carrito', onClick: () => navigate('/carrito') },
     });
@@ -88,43 +93,51 @@ export default function ProductCard({
     <div
       onClick={() => navigate(`/tienda/${product.slug}`)}
       className={cn(
-        'group relative flex flex-col cursor-pointer bg-card rounded-lg overflow-hidden transition-all duration-200',
-        isComparing ? 'ring-2 ring-primary shadow-md' : 'hover:shadow-md'
+        'group relative flex flex-col cursor-pointer select-none',
+        isComparing && 'ring-2 ring-primary ring-offset-1 rounded-xl'
       )}
     >
-      {/* Image */}
-      <div className="relative w-full bg-muted/30" style={{ aspectRatio: '1 / 1' }}>
+      {/* ── IMAGE ── */}
+      <div className="relative w-full rounded-xl overflow-hidden bg-muted/30" style={{ aspectRatio: '1 / 1' }}>
         {img
-          ? <img src={img} alt={product.name} className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500" loading="lazy" />
-          : <div className="absolute inset-0 flex items-center justify-center"><ShoppingCart className="w-8 h-8 text-muted-foreground/15" /></div>
+          ? <img
+              src={img}
+              alt={product.name}
+              className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500"
+              loading="lazy"
+            />
+          : <div className="absolute inset-0 flex items-center justify-center">
+              <ShoppingCart className="w-10 h-10 text-muted-foreground/15" />
+            </div>
         }
 
-        {/* Discount badge */}
+        {/* Discount badge — top left */}
         {discount > 0 && (
-          <span className="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded leading-none z-10">
+          <span className="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded leading-none z-10 select-none">
             -{discount}%
           </span>
         )}
         {outOfStock && (
-          <span className="absolute top-2 left-2 bg-black/70 text-white text-[10px] font-bold px-1.5 py-0.5 rounded leading-none z-10 backdrop-blur-sm">
+          <span className="absolute top-2 left-2 bg-black/70 text-white text-[10px] font-bold px-1.5 py-0.5 rounded leading-none z-10 backdrop-blur-sm select-none">
             Agotado
           </span>
         )}
         {lowStock && !outOfStock && !discount && (
-          <span className="absolute top-2 left-2 bg-orange-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded leading-none z-10">
+          <span className="absolute top-2 left-2 bg-orange-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded leading-none z-10 select-none">
             ¡Últimos!
           </span>
         )}
 
-        {/* Actions */}
-        <div className="absolute top-2 right-2 z-10 flex flex-col gap-1.5">
+        {/* Action buttons — top right */}
+        <div className="absolute top-2 right-2 z-10 flex flex-col gap-1.5 items-end">
           <button
             onClick={handleWishlist}
+            aria-label="Guardar en favoritos"
             className={cn(
-              'w-7 h-7 rounded-full flex items-center justify-center shadow-sm transition-all',
+              'w-7 h-7 rounded-full flex items-center justify-center shadow-sm transition-all duration-150',
               wishlisted
                 ? 'bg-red-500 text-white'
-                : 'bg-card/90 text-muted-foreground hover:text-red-500 backdrop-blur-sm opacity-100 sm:opacity-0 sm:group-hover:opacity-100'
+                : 'bg-white/90 text-muted-foreground hover:text-red-500 dark:bg-black/60 sm:opacity-0 sm:group-hover:opacity-100 opacity-100'
             )}
           >
             <Heart className={cn('w-3.5 h-3.5', wishlisted && 'fill-current')} />
@@ -132,76 +145,99 @@ export default function ProductCard({
           {onCompareToggle && (
             <button
               onClick={handleCompare}
+              aria-label="Comparar"
               className={cn(
-                'w-7 h-7 rounded-full flex items-center justify-center shadow-sm transition-all backdrop-blur-sm',
+                'w-7 h-7 rounded-full flex items-center justify-center shadow-sm transition-all duration-150',
                 isComparing
-                  ? 'bg-primary text-white opacity-100'
-                  : 'bg-card/90 text-muted-foreground opacity-100 sm:opacity-0 sm:group-hover:opacity-100 hover:bg-primary hover:text-white'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-white/90 text-muted-foreground dark:bg-black/60 hover:bg-primary hover:text-primary-foreground sm:opacity-0 sm:group-hover:opacity-100 opacity-100'
               )}
-              title="Comparar"
             >
               <GitCompareArrows className="w-3.5 h-3.5" />
             </button>
           )}
         </div>
 
-        {/* Desktop add-to-cart slide-up */}
+        {/* Desktop cart button — slides up INSIDE image, covers bottom 25% only */}
         {!outOfStock && (
           <button
             onClick={handleAdd}
             disabled={adding}
+            aria-label="Agregar al carrito"
             className={cn(
-              'absolute inset-x-0 bottom-0 h-9 hidden sm:flex items-center justify-center gap-1.5 text-xs font-bold translate-y-full group-hover:translate-y-0 transition-transform duration-200',
+              'absolute inset-x-0 bottom-0 hidden sm:flex items-center justify-center gap-1.5',
+              'h-10 text-xs font-bold select-none',
+              'translate-y-full group-hover:translate-y-0 transition-transform duration-200 ease-out',
               adding ? 'bg-emerald-500 text-white' : 'bg-primary text-primary-foreground'
             )}
           >
             <ShoppingCart className="w-3.5 h-3.5" />
-            {adding ? '¡Agregado!' : 'Agregar'}
+            {adding ? '¡Agregado!' : 'Agregar al carrito'}
           </button>
         )}
       </div>
 
-      {/* Info */}
-      <div className="p-2.5 flex flex-col flex-1 gap-0.5">
+      {/* ── INFO ── */}
+      <div className="pt-2.5 flex flex-col">
+        {/* Category */}
         {product.category && (
-          <span className="text-[9px] font-black text-primary/50 uppercase tracking-widest truncate">
+          <span className="text-[9px] font-black tracking-widest uppercase text-muted-foreground/50 truncate leading-none mb-1">
             {(product.category as any).name}
           </span>
         )}
 
-        <h3 className="text-xs font-medium text-foreground leading-snug line-clamp-2" style={{ minHeight: '2.4em' }}>
+        {/* Name — natural height, no min-height so no blank space */}
+        <h3 className="text-[13px] text-foreground leading-snug line-clamp-2 mb-1.5">
           {product.name}
         </h3>
 
-        {(product.review_count ?? 0) > 0 && (
-          <div className="flex items-center gap-0.5 mt-0.5">
+        {/* Stars — only rendered when there are reviews */}
+        {reviewCount > 0 && (
+          <div className="flex items-center gap-0.5 mb-1.5">
             {Array.from({ length: 5 }).map((_, i) => (
               <Star
                 key={i}
-                className={cn('w-2.5 h-2.5', i < Math.round(product.avg_rating ?? 0) ? 'text-amber-400 fill-amber-400' : 'text-muted-foreground/20 fill-muted-foreground/10')}
+                className={cn(
+                  'w-3 h-3',
+                  i < Math.round(rating) ? 'text-amber-400 fill-amber-400' : 'text-muted-foreground/20'
+                )}
               />
             ))}
-            <span className="text-[9px] text-muted-foreground ml-0.5">({product.review_count})</span>
+            <span className="text-[10px] text-muted-foreground ml-0.5">({reviewCount})</span>
           </div>
         )}
 
-        <div className="mt-auto pt-1.5">
-          <div className="flex items-baseline gap-1 flex-wrap">
-            <span className={cn('text-base font-bold', outOfStock ? 'text-muted-foreground' : 'text-foreground')}>
-              {fmtPrice(price, showUsd, exchangeRate)}
+        {/* Price */}
+        <div className="flex items-baseline gap-1.5 flex-wrap">
+          <span className={cn('text-base font-bold', outOfStock ? 'text-muted-foreground' : 'text-foreground')}>
+            {fmtPrice(price, showUsd, exchangeRate, currencySymbol)}
+          </span>
+          {comparePrice && comparePrice > price && (
+            <span className="text-xs text-muted-foreground/60 line-through">
+              {fmtPrice(comparePrice, showUsd, exchangeRate, currencySymbol)}
             </span>
-            {comparePrice && comparePrice > price && (
-              <span className="text-[10px] text-muted-foreground/60 line-through">
-                {fmtPrice(comparePrice, showUsd, exchangeRate)}
-              </span>
-            )}
-          </div>
+          )}
           {discount > 0 && !outOfStock && (
-            <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold">
-              Ahorras {fmtPrice(comparePrice! - price, showUsd, exchangeRate)}
+            <span className="text-xs text-emerald-600 dark:text-emerald-400 font-bold">
+              {discount}% OFF
             </span>
           )}
         </div>
+
+        {/* Savings */}
+        {discount > 0 && comparePrice && !outOfStock && (
+          <span className="text-[10px] text-muted-foreground">
+            Ahorras {fmtPrice(comparePrice - price, showUsd, exchangeRate, currencySymbol)}
+          </span>
+        )}
+
+        {/* Free shipping label */}
+        {qualifiesFreeShip && !outOfStock && (
+          <span className="flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5">
+            <Truck className="w-3 h-3" />
+            Envío gratis
+          </span>
+        )}
 
         {/* Mobile add button */}
         <button
@@ -209,7 +245,11 @@ export default function ProductCard({
           disabled={outOfStock || adding}
           className={cn(
             'sm:hidden mt-2 w-full flex items-center justify-center gap-1 py-2 rounded-lg text-xs font-bold transition-all active:scale-95',
-            outOfStock ? 'bg-muted text-muted-foreground cursor-not-allowed' : adding ? 'bg-emerald-500 text-white' : 'bg-primary text-primary-foreground'
+            outOfStock
+              ? 'bg-muted text-muted-foreground cursor-not-allowed'
+              : adding
+                ? 'bg-emerald-500 text-white'
+                : 'bg-primary/10 text-primary border border-primary/20'
           )}
         >
           <ShoppingCart className="w-3 h-3" />
