@@ -196,7 +196,7 @@ export default function StorePage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'hsl(var(--muted))' }}>
+    <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
 
       {/* ── SEARCH + CATEGORIES ROW (not sticky, clean) ── */}
@@ -257,7 +257,7 @@ export default function StorePage() {
         </div>
       </div>
 
-      {/* ── PAGE CONTENT on light-gray bg ── */}
+      {/* ── PAGE CONTENT ── */}
       <div className="flex-1">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 py-4">
 
