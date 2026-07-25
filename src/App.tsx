@@ -1,10 +1,10 @@
-import { ReactNode, useState, useEffect, lazy, Suspense } from 'react';
+import { ReactNode, useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { Toaster } from 'sonner';
 import { AuthProvider, useAuthStore } from '@/store/authStore';
 import { ThemeProvider, ThemeSync } from '@/store/themeStore';
 import { UIProvider } from '@/store/uiStore';
 import { ConfigProvider, useConfig } from '@/store/configStore';
-import { BackendProvider } from '@/lib/backend';
+import { BackendProvider, useDatabase } from '@/lib/backend';
 import { Router, Routes, Route, Navigate, useLocation } from '@/lib/router';
 import DashboardLayout from '@/layouts/DashboardLayout';
 import WhatsAppButton from '@/components/WhatsAppButton';
@@ -196,6 +196,52 @@ function MaintenanceGate({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
+// Watches the maintenance countdown. When it reaches zero, automatically
+// disables maintenance_mode in system_config so the public site comes back
+// online and the dashboard maintenance banner disappears.
+function MaintenanceAutoDisable() {
+  const { company } = useConfig();
+  const database = useDatabase();
+  const ranRef = useRef(false);
+
+  const isMaintenanceOn = company.maintenance_mode === 'true';
+  const showCountdown = company.maintenance_countdown_enabled === 'true';
+  const countdownDate = company.maintenance_countdown_date || '';
+  const remaining = useCountdown(countdownDate);
+
+  useEffect(() => {
+    if (!isMaintenanceOn || !showCountdown || !countdownDate || ranRef.current) return;
+    if (remaining === null) return;
+    if (remaining > 0) return;
+
+    // Countdown finished — disable maintenance mode once.
+    ranRef.current = true;
+    database
+      .upsert(
+        'system_config',
+        {
+          key: 'maintenance_mode',
+          value: 'false',
+          category: 'general',
+          updated_at: new Date().toISOString(),
+        },
+        'key',
+      )
+      .then(({ error }) => {
+        if (error) {
+          console.error('No se pudo desactivar el modo mantenimiento:', error);
+          ranRef.current = false;
+        }
+      })
+      .catch((e) => {
+        console.error('Error al desactivar el modo mantenimiento:', e);
+        ranRef.current = false;
+      });
+  }, [isMaintenanceOn, showCountdown, countdownDate, remaining, database]);
+
+  return null;
+}
+
 function AppRoutes() {
   const { loading: configLoading, company } = useConfig();
   const { loading: authLoading } = useAuthStore();
@@ -220,6 +266,7 @@ function AppRoutes() {
   return (
     <MaintenanceGate>
       <ThemeSync globalTheme={globalTheme} />
+      <MaintenanceAutoDisable />
       <Suspense fallback={<AppSkeleton />}>
         <Routes>
           <Route path="/" element={<LandingPage />} />
