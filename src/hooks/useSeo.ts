@@ -114,9 +114,15 @@ export function useSeo() {
     setOgMeta('og:description', description);
     setOgMeta('og:site_name', companyName);
     setOgMeta('og:type', 'website');
-    if (websiteUrl) setOgMeta('og:url', websiteUrl);
-    if (ogImage) setOgMeta('og:image', ogImage);
-    if (ogImage) setOgMeta('og:image:secure_url', ogImage);
+    // Always point og:url at the live page URL so social previews match the
+    // exact shared link, even when website_url is not configured.
+    if (typeof window !== 'undefined') setOgMeta('og:url', window.location.href.split('#')[0]);
+    if (ogImage) {
+      setOgMeta('og:image', ogImage);
+      setOgMeta('og:image:secure_url', ogImage);
+      setOgMeta('og:image:width', '1200');
+      setOgMeta('og:image:height', '630');
+    }
     setOgMeta('og:locale', 'es_PE');
 
     // ── Twitter Cards ──

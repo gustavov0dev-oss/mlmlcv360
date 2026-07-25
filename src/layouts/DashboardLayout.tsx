@@ -1,11 +1,13 @@
 import { Navigate, useLocation } from '@/lib/router';
 import { useAuthStore } from '@/store/authStore';
+import { useConfig } from '@/store/configStore';
 import { useUIStore } from '@/store/uiStore';
 import { cn } from '@/lib/utils';
 import Sidebar from '@/components/dashboard/Sidebar';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import { Skeleton } from '@/components/ui/skeleton';
-import { lazy, Suspense, useEffect } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
+import { Wrench, X } from 'lucide-react';
 
 const DashboardPage = lazy(() => import('@/pages/dashboard/DashboardPage'));
 const ProfilePage = lazy(() => import('@/pages/dashboard/ProfilePage'));
@@ -152,12 +154,40 @@ export default function DashboardLayout() {
       <div className={cn('flex-1 flex flex-col min-w-0 h-[100dvh] overflow-hidden transition-[margin] duration-200 lg:ml-auto',
         sidebarCollapsed ? 'lg:ml-[72px]' : 'lg:ml-[260px]')}>
         <DashboardHeader />
+        <MaintenanceBanner />
         <main className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 lg:p-8 bg-background dashboard-scroll">
           <div className="max-w-[1400px] mx-auto w-full">
             <DashboardContent />
           </div>
         </main>
       </div>
+    </div>
+  );
+}
+
+// Persistent banner shown to admins while the public site is under maintenance,
+// so they remember the site is closed to regular users even while they browse
+// the dashboard. Dismissable per-session.
+function MaintenanceBanner() {
+  const { company } = useConfig();
+  const isMaintenanceOn = company.maintenance_mode === 'true';
+  const [dismissed, setDismissed] = useState(false);
+
+  if (!isMaintenanceOn || dismissed) return null;
+
+  return (
+    <div className="flex items-center gap-3 px-4 sm:px-6 py-2.5 bg-amber-500/10 border-b border-amber-500/20 text-amber-700 dark:text-amber-300 text-sm">
+      <Wrench className="w-4 h-4 flex-shrink-0" />
+      <span className="flex-1 min-w-0">
+        El sitio público está en <strong>mantenimiento</strong>. Los visitantes ven la página de mantenimiento; solo administradores acceden al panel.
+      </span>
+      <button
+        onClick={() => setDismissed(true)}
+        aria-label="Ocultar aviso"
+        className="p-1 rounded hover:bg-amber-500/20 transition-colors flex-shrink-0"
+      >
+        <X className="w-4 h-4" />
+      </button>
     </div>
   );
 }

@@ -64,7 +64,8 @@ function formatCountdown(ms: number) {
 }
 
 function MaintenancePage() {
-  const { company } = useConfig();
+  const { company, refresh } = useConfig();
+  const database = useDatabase();
   const name = company.company_name || 'MLM 360';
   const msg = company.maintenance_message || 'Estamos realizando mejoras en nuestra plataforma. Volveremos pronto con una experiencia renovada.';
   const title = company.maintenance_title || 'Volveremos pronto';
@@ -72,6 +73,22 @@ function MaintenancePage() {
   const showCountdown = company.maintenance_countdown_enabled === 'true';
   const countdownDate = company.maintenance_countdown_date || '';
   const remaining = useCountdown(countdownDate);
+
+  // If a visitor lands on the maintenance page AFTER the countdown already
+  // expired but the DB still says maintenance is on, ask the database to
+  // self-disable and refresh config so the site comes back online without
+  // needing an admin to toggle it manually.
+  useEffect(() => {
+    if (!showCountdown || !countdownDate) return;
+    if (remaining === null) return;
+    if (remaining > 0) return;
+    database
+      .rpc<boolean>('auto_disable_maintenance')
+      .then(({ error }) => {
+        if (!error) refresh();
+      })
+      .catch(() => {});
+  }, [showCountdown, countdownDate, remaining, database, refresh]);
 
   return (
     <div className="min-h-[100dvh] w-full overflow-y-auto bg-background flex flex-col items-center justify-center px-4 py-10 relative">
@@ -197,10 +214,13 @@ function MaintenanceGate({ children }: { children: ReactNode }) {
 }
 
 // Watches the maintenance countdown. When it reaches zero, automatically
-// disables maintenance_mode in system_config so the public site comes back
-// online and the dashboard maintenance banner disappears.
+// disables maintenance_mode so the public site comes back online and the
+// dashboard maintenance banner disappears. The actual write is done via a
+// SECURITY DEFINER RPC (auto_disable_maintenance) so the disable happens
+// server-side even when no admin browser is open, and so the anon key never
+// needs direct UPDATE access to system_config.
 function MaintenanceAutoDisable() {
-  const { company } = useConfig();
+  const { company, refresh } = useConfig();
   const database = useDatabase();
   const ranRef = useRef(false);
 
@@ -214,30 +234,23 @@ function MaintenanceAutoDisable() {
     if (remaining === null) return;
     if (remaining > 0) return;
 
-    // Countdown finished — disable maintenance mode once.
+    // Countdown finished — ask the database to disable maintenance mode once.
     ranRef.current = true;
     database
-      .upsert(
-        'system_config',
-        {
-          key: 'maintenance_mode',
-          value: 'false',
-          category: 'general',
-          updated_at: new Date().toISOString(),
-        },
-        'key',
-      )
+      .rpc<boolean>('auto_disable_maintenance')
       .then(({ error }) => {
         if (error) {
           console.error('No se pudo desactivar el modo mantenimiento:', error);
           ranRef.current = false;
+          return;
         }
+        refresh();
       })
       .catch((e) => {
         console.error('Error al desactivar el modo mantenimiento:', e);
         ranRef.current = false;
       });
-  }, [isMaintenanceOn, showCountdown, countdownDate, remaining, database]);
+  }, [isMaintenanceOn, showCountdown, countdownDate, remaining, database, refresh]);
 
   return null;
 }

@@ -5,22 +5,52 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <!-- Theme color for mobile browser chrome - matches our premium color system -->
     <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#0a0a0d" media="(prefers-color-scheme: dark)" />
 
     <!-- Primary Meta Tags — populated dynamically by useSeo hook from system_config.
          A cached company name is restored synchronously here to prevent any URL
          or fallback-title flash on reload. useSeo overwrites it once config loads. -->
     <title>MLM 360</title>
+    <meta name="description" content="Tecnologia, bienes raices, inversiones, bienestar y salud en una sola plataforma digital" />
+    <meta name="author" content="MLM 360" />
+
+    <!-- Static Open Graph / Twitter fallback for social crawlers.
+         WhatsApp, Facebook, X and LinkedIn do NOT execute JavaScript, so they only
+         read these server-returned tags. useSeo() overwrites them at runtime for
+         browser users, but these static defaults guarantee rich link previews
+         (image, title, description) when the page is shared — even on first share
+         before any crawler cache warms up. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="MLM 360" />
+    <meta property="og:title" content="MLM 360" />
+    <meta property="og:description" content="Tecnologia, bienes raices, inversiones, bienestar y salud en una sola plataforma digital" />
+    <meta property="og:image" content="https://cluv360.com/wp-content/uploads/2026/02/CLUV360-GOLD.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="es_PE" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="MLM 360" />
+    <meta name="twitter:description" content="Tecnologia, bienes raices, inversiones, bienestar y salud en una sola plataforma digital" />
+    <meta name="twitter:image" content="https://cluv360.com/wp-content/uploads/2026/02/CLUV360-GOLD.png" />
     <script>
       (function() {
         try {
           var cachedName = localStorage.getItem('mlm360-company-name');
           var cachedTitle = localStorage.getItem('mlm360-seo-title');
-          if (cachedTitle) {
-            document.title = cachedTitle;
-          } else if (cachedName) {
-            document.title = cachedName + ' - Sistema Empresarial Premium';
+          var finalTitle = cachedTitle || (cachedName ? cachedName + ' - Sistema Empresarial Premium' : null);
+          if (finalTitle) {
+            document.title = finalTitle;
+            var ogTitle = document.querySelector('meta[property="og:title"]');
+            if (ogTitle) ogTitle.setAttribute('content', finalTitle);
+            var twTitle = document.querySelector('meta[name="twitter:title"]');
+            if (twTitle) twTitle.setAttribute('content', finalTitle);
+            var ogSite = document.querySelector('meta[property="og:site_name"]');
+            if (ogSite && cachedName) ogSite.setAttribute('content', cachedName);
           }
+          // Always point og:url at the current page so social previews match the shared URL.
+          var ogUrl = document.querySelector('meta[property="og:url"]');
+          if (ogUrl) ogUrl.setAttribute('content', window.location.href.split('#')[0]);
         } catch (e) {}
       })();
     </script>

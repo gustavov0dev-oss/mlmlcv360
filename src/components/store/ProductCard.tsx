@@ -106,20 +106,24 @@ export default function ProductCard({
           : <div className="absolute inset-0 flex items-center justify-center"><ShoppingBag className="w-10 h-10 text-muted-foreground/15" /></div>
         }
 
-        {/* Badge top-left */}
-        {outOfStock ? (
-          <span className="absolute top-2 left-2 bg-black/70 text-white text-[10px] font-bold px-1.5 py-0.5 rounded leading-none z-10 backdrop-blur-sm">
-            Agotado
-          </span>
-        ) : lowStock ? (
-          <span className="absolute top-2 left-2 bg-orange-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded leading-none z-10">
-            ¡Últimos!
-          </span>
-        ) : discount > 0 ? (
-          <span className="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded leading-none z-10">
-            -{discount}%
-          </span>
-        ) : null}
+        {/* Badge top-left — discount always wins the top spot; agotado stacks below it */}
+        <div className="absolute top-2 left-2 z-10 flex flex-col gap-1 items-start">
+          {discount > 0 && (
+            <span className="bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded leading-none shadow-sm">
+              -{discount}%
+            </span>
+          )}
+          {!outOfStock && lowStock && discount <= 0 && (
+            <span className="bg-orange-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded leading-none shadow-sm">
+              ¡Últimos!
+            </span>
+          )}
+          {outOfStock && (
+            <span className="bg-black/70 text-white text-[10px] font-bold px-1.5 py-0.5 rounded leading-none backdrop-blur-sm shadow-sm">
+              Agotado
+            </span>
+          )}
+        </div>
 
         {/* Top-right: wishlist + compare */}
         <div className="absolute top-2 right-2 z-10 flex flex-col gap-1.5">
@@ -151,22 +155,27 @@ export default function ProductCard({
           )}
         </div>
 
-        {/* Add to cart button — bottom-right of image, always visible on mobile, hover on desktop */}
+        {/* Add to cart button — icon-only on mobile/tablet, icon+text pill on desktop hover */}
         {!outOfStock && (
           <button
             onClick={handleAdd}
             disabled={adding}
             aria-label="Agregar al carrito"
             className={cn(
-              'absolute bottom-2 right-2 z-10 w-8 h-8 rounded-full flex items-center justify-center shadow-md transition-all duration-200',
+              'absolute bottom-2 right-2 z-10 flex items-center justify-center gap-1.5 rounded-full shadow-md transition-all duration-200 font-semibold whitespace-nowrap',
               adding
-                ? 'bg-emerald-500 text-white scale-110'
-                : 'bg-primary text-primary-foreground hover:scale-110 active:scale-95',
-              // Desktop: hidden until hover; mobile: always visible
-              'sm:opacity-0 sm:group-hover:opacity-100 opacity-100'
+                ? 'bg-emerald-500 text-white'
+                : 'bg-primary text-primary-foreground hover:bg-primary/90 active:scale-95',
+              // Mobile/tablet (below lg): round icon-only, always visible
+              'w-8 h-8 lg:w-auto lg:h-auto',
+              // Desktop (lg+): pill with text, hidden until hover
+              'lg:opacity-0 lg:group-hover:opacity-100 lg:translate-y-1 lg:group-hover:translate-y-0',
+              'lg:px-3.5 lg:py-2 lg:text-xs',
+              'opacity-100'
             )}
           >
-            <ShoppingBag className="w-4 h-4" />
+            <ShoppingBag className={cn('w-4 h-4', adding && 'animate-bounce')} />
+            <span className="hidden lg:inline">{adding ? 'Agregado' : 'Agregar'}</span>
           </button>
         )}
       </div>
