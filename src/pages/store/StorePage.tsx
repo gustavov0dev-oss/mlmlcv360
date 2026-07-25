@@ -6,8 +6,8 @@ import { useConfig } from '@/store/configStore';
 import { useNavigate } from '@/lib/router';
 import {
   Search, X, ShoppingCart, Package, SlidersHorizontal,
-  Sparkles, TrendingUp, Clock, ArrowUpDown, Star, ChevronDown,
-  DollarSign, ChevronRight,
+  Sparkles, TrendingUp, ChevronDown,
+  DollarSign,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Product, ProductCategory } from '@/lib/storeTypes';
@@ -18,23 +18,23 @@ import FreeShippingBar from '@/components/store/FreeShippingBar';
 import ProductCard from '@/components/store/ProductCard';
 
 const SORT_OPTIONS = [
-  { value: 'relevance', label: 'Relevancia', icon: Sparkles },
-  { value: 'best_sellers', label: 'Más vendidos', icon: TrendingUp },
-  { value: 'newest', label: 'Más recientes', icon: Clock },
-  { value: 'price_asc', label: 'Menor precio', icon: ArrowUpDown },
-  { value: 'price_desc', label: 'Mayor precio', icon: ArrowUpDown },
-  { value: 'rating', label: 'Mejor valorados', icon: Star },
+  { value: 'relevance', label: 'Más relevantes' },
+  { value: 'best_sellers', label: 'Más vendidos' },
+  { value: 'newest', label: 'Más recientes' },
+  { value: 'price_asc', label: 'Menor precio' },
+  { value: 'price_desc', label: 'Mayor precio' },
+  { value: 'rating', label: 'Mejor valorados' },
 ];
 
 function CardSkeleton() {
   return (
-    <div className="bg-card rounded-2xl overflow-hidden border border-border/50">
-      <div className="aspect-square bg-muted animate-pulse" />
-      <div className="p-3 space-y-2">
+    <div className="flex flex-col">
+      <div className="aspect-square bg-muted animate-pulse rounded-lg" />
+      <div className="pt-2 space-y-1.5">
         <div className="h-2 bg-muted rounded animate-pulse w-1/3" />
-        <div className="h-3.5 bg-muted rounded animate-pulse" />
-        <div className="h-3.5 bg-muted rounded animate-pulse w-3/4" />
-        <div className="h-5 bg-muted rounded animate-pulse w-1/2 mt-3" />
+        <div className="h-3 bg-muted rounded animate-pulse" />
+        <div className="h-3 bg-muted rounded animate-pulse w-3/4" />
+        <div className="h-4 bg-muted rounded animate-pulse w-1/2 mt-1" />
       </div>
     </div>
   );
@@ -49,10 +49,9 @@ function CompareBar({ products, onRemove, onClear }: {
   if (products.length === 0) return null;
 
   return (
-    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 px-4 w-full max-w-md pointer-events-none">
-      <div className="bg-card border border-border/80 rounded-2xl shadow-2xl shadow-black/30 p-3 flex items-center gap-3 pointer-events-auto">
-        {/* Thumbnails */}
-        <div className="flex gap-2 flex-1">
+    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 px-4 w-full max-w-md">
+      <div className="bg-card border border-border shadow-2xl shadow-black/20 rounded-2xl p-3 flex items-center gap-3">
+        <div className="flex gap-2 flex-1 min-w-0">
           {products.map(p => (
             <div key={p.id} className="relative flex-shrink-0">
               <div className="w-12 h-12 rounded-xl overflow-hidden border border-border bg-muted">
@@ -72,7 +71,6 @@ function CompareBar({ products, onRemove, onClear }: {
             <div key={i} className="flex-shrink-0 w-12 h-12 rounded-xl border-2 border-dashed border-border/40 flex items-center justify-center text-lg text-muted-foreground/30 font-light">+</div>
           ))}
         </div>
-        {/* Actions */}
         <div className="flex items-center gap-2 flex-shrink-0">
           {products.length >= 2 && (
             <button
@@ -84,29 +82,13 @@ function CompareBar({ products, onRemove, onClear }: {
           )}
           <button
             onClick={onClear}
-            className="p-2 border border-border/60 rounded-xl hover:bg-muted transition-colors"
+            className="p-2 border border-border rounded-xl hover:bg-muted transition-colors"
             title="Limpiar comparación"
           >
             <X className="w-4 h-4 text-muted-foreground" />
           </button>
         </div>
       </div>
-    </div>
-  );
-}
-
-function SectionHeader({ icon, title, onSeeAll }: { icon: React.ReactNode; title: string; onSeeAll?: () => void }) {
-  return (
-    <div className="flex items-center justify-between mb-3">
-      <div className="flex items-center gap-2">
-        {icon}
-        <h2 className="text-sm font-bold text-foreground uppercase tracking-wider">{title}</h2>
-      </div>
-      {onSeeAll && (
-        <button onClick={onSeeAll} className="flex items-center gap-0.5 text-xs text-primary font-semibold">
-          Ver todo <ChevronRight className="w-3.5 h-3.5" />
-        </button>
-      )}
     </div>
   );
 }
@@ -204,12 +186,11 @@ export default function StorePage() {
     return list;
   }, [products, catFilter, search, sort, priceMin, priceMax]);
 
-  const featured = products.filter(p => p.featured).slice(0, 8);
+  const featured = products.filter(p => p.featured).slice(0, 6);
   const paginated = filtered.slice(0, page * PER_PAGE);
   const hasMore = paginated.length < filtered.length;
   const hasActiveFilters = !!(priceMin || priceMax || search);
   const activeCat = categories.find(c => c.id === catFilter);
-  const storeName = company.store_name || 'Tienda';
   const showHomeSections = !catFilter && !search;
   const compareIds = new Set(compareList.map(p => p.id));
 
@@ -230,21 +211,21 @@ export default function StorePage() {
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
 
-      <main className="pt-16 flex-1">
+      <main className="flex-1">
 
-        {/* ── SEARCH BAR ── */}
-        <div className="bg-card border-b border-border/60">
-          <div className="max-w-7xl mx-auto px-3 sm:px-6 py-3">
-            <div className="flex items-center gap-2">
-              {/* Search */}
+        {/* ── SEARCH + CATEGORIES (sticky, solid bg) ── */}
+        <div className="sticky top-16 z-30 bg-card border-b border-border shadow-sm">
+          <div className="max-w-7xl mx-auto px-3 sm:px-6">
+            {/* Search row */}
+            <div className="flex items-center gap-2 py-2.5">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
                 <input
                   ref={searchRef}
                   value={search}
                   onChange={e => setSearch(e.target.value)}
-                  placeholder={`Buscar en ${storeName}...`}
-                  className="w-full pl-9 pr-8 py-2.5 bg-muted/60 border border-border/60 rounded-xl text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-primary/60 focus:bg-background transition-colors"
+                  placeholder="Buscar productos..."
+                  className="w-full pl-9 pr-8 py-2 bg-muted/50 border border-border/50 rounded-lg text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-primary focus:bg-card transition-colors"
                 />
                 {search && (
                   <button onClick={() => setSearch('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-muted transition-colors">
@@ -253,52 +234,37 @@ export default function StorePage() {
                 )}
               </div>
 
-              {/* Cart */}
               <button
                 onClick={() => navigate('/carrito')}
-                className="relative flex items-center gap-1.5 px-3.5 py-2.5 bg-muted/60 border border-border/60 hover:border-primary/40 rounded-xl text-sm font-semibold transition-colors flex-shrink-0"
+                className="relative flex items-center gap-1.5 px-3 py-2 hover:bg-muted rounded-lg text-sm font-semibold transition-colors flex-shrink-0"
               >
                 <ShoppingCart className="w-4 h-4" />
-                <span className="hidden sm:inline text-foreground">Carrito</span>
                 {itemCount > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
                     {itemCount > 9 ? '9+' : itemCount}
                   </span>
                 )}
               </button>
 
-              {/* Currency */}
               <button
                 onClick={() => setShowUsd(!showUsd)}
                 className={cn(
-                  'flex items-center gap-1 px-3 py-2.5 rounded-xl text-xs font-bold border transition-colors flex-shrink-0',
-                  showUsd
-                    ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30 dark:text-emerald-400'
-                    : 'bg-muted/60 border-border/60 text-muted-foreground hover:border-primary/40'
+                  'flex items-center gap-1 px-2.5 py-2 rounded-lg text-xs font-bold transition-colors flex-shrink-0',
+                  showUsd ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground hover:text-foreground'
                 )}
               >
                 <DollarSign className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">{showUsd ? 'USD' : 'PEN'}</span>
+                {showUsd ? 'USD' : 'PEN'}
               </button>
             </div>
 
-            {subtotal > 0 && (
-              <div className="mt-2">
-                <FreeShippingBar subtotal={subtotal} threshold={freeShipThreshold} />
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* ── CATEGORY PILLS (sticky) ── */}
-        <div className="sticky top-16 z-30 bg-card/98 backdrop-blur-md border-b border-border/60 shadow-sm">
-          <div className="max-w-7xl mx-auto px-3 sm:px-6">
-            <div className="flex items-center gap-1 py-2 overflow-x-auto scrollbar-hide">
+            {/* Category pills */}
+            <div className="flex items-center gap-1.5 pb-2 overflow-x-auto scrollbar-hide">
               <button
                 onClick={() => setCatFilter('')}
                 className={cn(
-                  'flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all',
-                  !catFilter ? 'bg-primary text-primary-foreground shadow-sm' : 'text-foreground/70 hover:text-foreground hover:bg-muted/80'
+                  'flex-shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all',
+                  !catFilter ? 'bg-primary text-primary-foreground' : 'text-foreground/60 hover:text-foreground hover:bg-muted'
                 )}
               >
                 Todo
@@ -308,8 +274,8 @@ export default function StorePage() {
                   key={cat.id}
                   onClick={() => setCatFilter(catFilter === cat.id ? '' : cat.id)}
                   className={cn(
-                    'flex-shrink-0 flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all',
-                    catFilter === cat.id ? 'bg-primary text-primary-foreground shadow-sm' : 'text-foreground/70 hover:text-foreground hover:bg-muted/80'
+                    'flex-shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all',
+                    catFilter === cat.id ? 'bg-primary text-primary-foreground' : 'text-foreground/60 hover:text-foreground hover:bg-muted'
                   )}
                 >
                   {cat.image_url && <img src={cat.image_url} alt="" className="w-3.5 h-3.5 rounded-full object-cover" />}
@@ -320,24 +286,27 @@ export default function StorePage() {
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-6 space-y-6">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-6">
+
+          {/* Free shipping bar */}
+          {subtotal > 0 && (
+            <div className="mb-4">
+              <FreeShippingBar subtotal={subtotal} threshold={freeShipThreshold} />
+            </div>
+          )}
 
           {/* ── FEATURED ── */}
           {showHomeSections && !loading && featured.length > 0 && (
-            <section>
-              <SectionHeader
-                icon={<Sparkles className="w-4 h-4 text-amber-500" />}
-                title="Destacados"
-              />
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-3">
+            <section className="mb-8">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-amber-500" />
+                  <h2 className="text-sm font-bold text-foreground">Destacados</h2>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-4">
                 {featured.map(p => (
-                  <ProductCard
-                    key={p.id} product={p}
-                    isWishlisted={wishlist.has(p.id)}
-                    onWishlistToggle={handleWishlist}
-                    onCompareToggle={toggleCompare}
-                    isComparing={compareIds.has(p.id)}
-                  />
+                  <ProductCard key={p.id} product={p} isWishlisted={wishlist.has(p.id)} onWishlistToggle={handleWishlist} onCompareToggle={toggleCompare} isComparing={compareIds.has(p.id)} />
                 ))}
               </div>
             </section>
@@ -345,20 +314,16 @@ export default function StorePage() {
 
           {/* ── BESTSELLERS ── */}
           {showHomeSections && !loading && bestsellers.length > 0 && (
-            <section>
-              <SectionHeader
-                icon={<TrendingUp className="w-4 h-4 text-emerald-500" />}
-                title="Más vendidos"
-              />
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-3">
+            <section className="mb-8">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-emerald-500" />
+                  <h2 className="text-sm font-bold text-foreground">Más vendidos</h2>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-4">
                 {bestsellers.map(p => (
-                  <ProductCard
-                    key={p.id} product={p}
-                    isWishlisted={wishlist.has(p.id)}
-                    onWishlistToggle={handleWishlist}
-                    onCompareToggle={toggleCompare}
-                    isComparing={compareIds.has(p.id)}
-                  />
+                  <ProductCard key={p.id} product={p} isWishlisted={wishlist.has(p.id)} onWishlistToggle={handleWishlist} onCompareToggle={toggleCompare} isComparing={compareIds.has(p.id)} />
                 ))}
               </div>
             </section>
@@ -366,20 +331,22 @@ export default function StorePage() {
 
           {/* ── CATALOG ── */}
           <section>
-            {showHomeSections && (
-              <SectionHeader
-                icon={<Package className="w-4 h-4 text-muted-foreground" />}
-                title={activeCat ? activeCat.name : 'Todos los productos'}
-              />
-            )}
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-base font-bold text-foreground">
+                {activeCat ? activeCat.name : 'Todos los productos'}
+              </h2>
+              <span className="text-xs text-muted-foreground">
+                {loading ? '...' : `${filtered.length} productos`}
+              </span>
+            </div>
 
             {/* Toolbar */}
-            <div className="flex items-center gap-2 mb-3 flex-wrap">
+            <div className="flex items-center gap-2 mb-4 flex-wrap">
               <div className="relative flex-shrink-0">
                 <select
                   value={sort}
                   onChange={e => setSort(e.target.value)}
-                  className="appearance-none pl-3 pr-8 py-2 bg-muted/60 border border-border/60 rounded-xl text-xs font-semibold text-foreground outline-none focus:border-primary/60 transition-colors cursor-pointer"
+                  className="appearance-none pl-3 pr-8 py-2 bg-card border border-border rounded-lg text-xs font-semibold text-foreground outline-none focus:border-primary transition-colors cursor-pointer"
                 >
                   {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                 </select>
@@ -389,10 +356,8 @@ export default function StorePage() {
               <button
                 onClick={() => setShowFilters(v => !v)}
                 className={cn(
-                  'flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border transition-colors flex-shrink-0',
-                  showFilters || hasActiveFilters
-                    ? 'bg-primary/10 text-primary border-primary/30'
-                    : 'bg-muted/60 text-foreground/70 border-border/60 hover:border-primary/40'
+                  'flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold border transition-colors flex-shrink-0',
+                  showFilters || hasActiveFilters ? 'bg-primary/10 text-primary border-primary/30' : 'bg-card text-foreground/70 border-border hover:border-primary/40'
                 )}
               >
                 <SlidersHorizontal className="w-3.5 h-3.5" />
@@ -410,29 +375,25 @@ export default function StorePage() {
                   "{search}" <X className="w-3 h-3" />
                 </button>
               )}
-
-              <span className="ml-auto text-xs text-muted-foreground">
-                {loading ? '...' : `${filtered.length} productos`}
-              </span>
             </div>
 
             {/* Filter panel */}
             {showFilters && (
-              <div className="bg-muted/40 border border-border/60 rounded-xl p-3 mb-3 flex flex-wrap gap-3 items-end">
+              <div className="bg-card border border-border rounded-lg p-3 mb-4 flex flex-wrap gap-3 items-end">
                 <div className="flex-1 min-w-[120px]">
                   <label className="block text-xs font-bold text-foreground/70 mb-1">Precio mín. (S/)</label>
                   <input type="number" value={priceMin} onChange={e => setPriceMin(e.target.value)} placeholder="0"
-                    className="w-full px-3 py-2 bg-card border border-border/60 rounded-xl text-sm outline-none focus:border-primary/60 transition-colors" />
+                    className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm outline-none focus:border-primary transition-colors" />
                 </div>
                 <div className="flex-1 min-w-[120px]">
                   <label className="block text-xs font-bold text-foreground/70 mb-1">Precio máx. (S/)</label>
                   <input type="number" value={priceMax} onChange={e => setPriceMax(e.target.value)} placeholder="Sin límite"
-                    className="w-full px-3 py-2 bg-card border border-border/60 rounded-xl text-sm outline-none focus:border-primary/60 transition-colors" />
+                    className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm outline-none focus:border-primary transition-colors" />
                 </div>
                 {hasActiveFilters && (
                   <button
                     onClick={() => { setPriceMin(''); setPriceMax(''); setSearch(''); setCatFilter(''); setShowFilters(false); }}
-                    className="text-red-500 text-xs font-bold py-2 px-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 transition-colors"
+                    className="text-red-500 text-xs font-bold py-2 px-3 rounded-lg bg-red-500/10 hover:bg-red-500/20 transition-colors"
                   >
                     Limpiar todo
                   </button>
@@ -442,7 +403,7 @@ export default function StorePage() {
 
             {/* Grid */}
             {loading ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-4">
                 {Array.from({ length: 12 }).map((_, i) => <CardSkeleton key={i} />)}
               </div>
             ) : filtered.length === 0 ? (
@@ -454,32 +415,26 @@ export default function StorePage() {
                 <p className="text-muted-foreground text-sm mt-1 mb-5">Intenta con otros filtros o búsqueda</p>
                 <button
                   onClick={() => { setSearch(''); setCatFilter(''); setPriceMin(''); setPriceMax(''); }}
-                  className="px-6 py-2.5 bg-primary text-primary-foreground rounded-xl font-semibold text-sm transition-all active:scale-95"
+                  className="px-6 py-2.5 bg-primary text-primary-foreground rounded-lg font-semibold text-sm transition-all active:scale-95"
                 >
                   Ver todo
                 </button>
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-4">
                   {paginated.map(p => (
-                    <ProductCard
-                      key={p.id} product={p}
-                      isWishlisted={wishlist.has(p.id)}
-                      onWishlistToggle={handleWishlist}
-                      onCompareToggle={toggleCompare}
-                      isComparing={compareIds.has(p.id)}
-                    />
+                    <ProductCard key={p.id} product={p} isWishlisted={wishlist.has(p.id)} onWishlistToggle={handleWishlist} onCompareToggle={toggleCompare} isComparing={compareIds.has(p.id)} />
                   ))}
                 </div>
                 {hasMore && (
                   <div className="text-center mt-8">
                     <button
                       onClick={() => setPage(p => p + 1)}
-                      className="inline-flex items-center gap-2 px-8 py-3 border-2 border-border hover:border-primary text-foreground hover:text-primary rounded-xl font-bold text-sm transition-all"
+                      className="inline-flex items-center gap-2 px-8 py-3 bg-card border border-border hover:border-primary text-foreground hover:text-primary rounded-lg font-bold text-sm transition-all"
                     >
                       <ChevronDown className="w-4 h-4" />
-                      Ver más ({filtered.length - paginated.length} productos)
+                      Ver más ({filtered.length - paginated.length})
                     </button>
                   </div>
                 )}

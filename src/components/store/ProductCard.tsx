@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { ShoppingCart, Star, Heart } from 'lucide-react';
+import { ShoppingCart, Star, Heart, GitCompareArrows } from 'lucide-react';
 import type { Product, ProductVariant } from '@/lib/storeTypes';
 import { useCart } from '@/store/cartStore';
 import { useAuthStore } from '@/store/authStore';
@@ -88,52 +88,40 @@ export default function ProductCard({
     <div
       onClick={() => navigate(`/tienda/${product.slug}`)}
       className={cn(
-        'group relative bg-card border rounded-2xl overflow-hidden cursor-pointer flex flex-col h-full transition-all duration-200',
-        isComparing
-          ? 'border-primary/60 ring-1 ring-primary/30 shadow-md'
-          : 'border-border/60 hover:border-border hover:shadow-md'
+        'group relative flex flex-col cursor-pointer bg-card rounded-lg overflow-hidden transition-all duration-200',
+        isComparing ? 'ring-2 ring-primary shadow-md' : 'hover:shadow-md'
       )}
     >
       {/* Image */}
-      <div className="relative w-full bg-muted/40" style={{ aspectRatio: '1 / 1' }}>
+      <div className="relative w-full bg-muted/30" style={{ aspectRatio: '1 / 1' }}>
         {img
-          ? <img src={img} alt={product.name} className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500" loading="lazy" />
+          ? <img src={img} alt={product.name} className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500" loading="lazy" />
           : <div className="absolute inset-0 flex items-center justify-center"><ShoppingCart className="w-8 h-8 text-muted-foreground/15" /></div>
         }
 
-        {/* Overlay on hover - desktop */}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/8 transition-colors duration-200 hidden sm:block pointer-events-none" />
+        {/* Discount badge */}
+        {discount > 0 && (
+          <span className="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded leading-none z-10">
+            -{discount}%
+          </span>
+        )}
+        {outOfStock && (
+          <span className="absolute top-2 left-2 bg-black/70 text-white text-[10px] font-bold px-1.5 py-0.5 rounded leading-none z-10 backdrop-blur-sm">
+            Agotado
+          </span>
+        )}
+        {lowStock && !outOfStock && !discount && (
+          <span className="absolute top-2 left-2 bg-orange-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded leading-none z-10">
+            ¡Últimos!
+          </span>
+        )}
 
-        {/* Badges - left */}
-        <div className="absolute top-2 left-2 flex flex-col gap-1 z-10 pointer-events-none">
-          {discount > 0 && (
-            <span className="bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-md shadow leading-none">
-              -{discount}%
-            </span>
-          )}
-          {outOfStock && (
-            <span className="bg-black/70 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow leading-none backdrop-blur-sm">
-              Agotado
-            </span>
-          )}
-          {lowStock && !outOfStock && (
-            <span className="bg-orange-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow leading-none">
-              ¡Últimos!
-            </span>
-          )}
-        </div>
-
-        {/* Badges + actions - right */}
-        <div className="absolute top-2 right-2 z-10 flex flex-col gap-1.5 items-end">
-          {product.featured && (
-            <span className="bg-amber-400 text-amber-900 text-[9px] font-black px-1.5 py-0.5 rounded-md leading-none uppercase tracking-wide">
-              Dest
-            </span>
-          )}
+        {/* Actions */}
+        <div className="absolute top-2 right-2 z-10 flex flex-col gap-1.5">
           <button
             onClick={handleWishlist}
             className={cn(
-              'w-7 h-7 rounded-full flex items-center justify-center shadow-md transition-all',
+              'w-7 h-7 rounded-full flex items-center justify-center shadow-sm transition-all',
               wishlisted
                 ? 'bg-red-500 text-white'
                 : 'bg-card/90 text-muted-foreground hover:text-red-500 backdrop-blur-sm opacity-100 sm:opacity-0 sm:group-hover:opacity-100'
@@ -145,37 +133,31 @@ export default function ProductCard({
             <button
               onClick={handleCompare}
               className={cn(
-                'hidden sm:flex w-7 h-7 rounded-full items-center justify-center shadow-md transition-all text-[10px] font-black backdrop-blur-sm',
+                'w-7 h-7 rounded-full flex items-center justify-center shadow-sm transition-all backdrop-blur-sm',
                 isComparing
                   ? 'bg-primary text-white opacity-100'
-                  : 'bg-card/90 text-muted-foreground opacity-0 group-hover:opacity-100 hover:bg-primary hover:text-white'
+                  : 'bg-card/90 text-muted-foreground opacity-100 sm:opacity-0 sm:group-hover:opacity-100 hover:bg-primary hover:text-white'
               )}
+              title="Comparar"
             >
-              VS
+              <GitCompareArrows className="w-3.5 h-3.5" />
             </button>
           )}
         </div>
 
-        {/* Add to cart - hover slide (desktop) */}
+        {/* Desktop add-to-cart slide-up */}
         {!outOfStock && (
           <button
             onClick={handleAdd}
             disabled={adding}
             className={cn(
-              'absolute inset-x-0 bottom-0 h-9 hidden sm:flex items-center justify-center gap-1.5 text-xs font-bold',
-              'translate-y-full group-hover:translate-y-0 transition-transform duration-200',
+              'absolute inset-x-0 bottom-0 h-9 hidden sm:flex items-center justify-center gap-1.5 text-xs font-bold translate-y-full group-hover:translate-y-0 transition-transform duration-200',
               adding ? 'bg-emerald-500 text-white' : 'bg-primary text-primary-foreground'
             )}
           >
             <ShoppingCart className="w-3.5 h-3.5" />
-            {adding ? '¡Agregado!' : 'Agregar al carrito'}
+            {adding ? '¡Agregado!' : 'Agregar'}
           </button>
-        )}
-        {outOfStock && (
-          <div className="absolute inset-x-0 bottom-0 h-9 hidden sm:flex items-center justify-center gap-1.5 text-xs font-bold translate-y-full group-hover:translate-y-0 transition-transform duration-200 bg-muted/90 text-muted-foreground backdrop-blur-sm">
-            <ShoppingCart className="w-3.5 h-3.5" />
-            Sin stock
-          </div>
         )}
       </div>
 
@@ -187,7 +169,7 @@ export default function ProductCard({
           </span>
         )}
 
-        <h3 className="text-xs font-semibold text-foreground leading-snug line-clamp-2" style={{ minHeight: '2.4em' }}>
+        <h3 className="text-xs font-medium text-foreground leading-snug line-clamp-2" style={{ minHeight: '2.4em' }}>
           {product.name}
         </h3>
 
@@ -205,7 +187,7 @@ export default function ProductCard({
 
         <div className="mt-auto pt-1.5">
           <div className="flex items-baseline gap-1 flex-wrap">
-            <span className={cn('text-sm font-black', outOfStock ? 'text-muted-foreground' : 'text-foreground')}>
+            <span className={cn('text-base font-bold', outOfStock ? 'text-muted-foreground' : 'text-foreground')}>
               {fmtPrice(price, showUsd, exchangeRate)}
             </span>
             {comparePrice && comparePrice > price && (
@@ -221,17 +203,13 @@ export default function ProductCard({
           )}
         </div>
 
-        {/* Mobile: add button */}
+        {/* Mobile add button */}
         <button
           onClick={handleAdd}
           disabled={outOfStock || adding}
           className={cn(
-            'sm:hidden mt-2 w-full flex items-center justify-center gap-1 py-2 rounded-xl text-xs font-bold transition-all active:scale-95',
-            outOfStock
-              ? 'bg-muted text-muted-foreground cursor-not-allowed'
-              : adding
-                ? 'bg-emerald-500 text-white'
-                : 'bg-primary text-primary-foreground'
+            'sm:hidden mt-2 w-full flex items-center justify-center gap-1 py-2 rounded-lg text-xs font-bold transition-all active:scale-95',
+            outOfStock ? 'bg-muted text-muted-foreground cursor-not-allowed' : adding ? 'bg-emerald-500 text-white' : 'bg-primary text-primary-foreground'
           )}
         >
           <ShoppingCart className="w-3 h-3" />
