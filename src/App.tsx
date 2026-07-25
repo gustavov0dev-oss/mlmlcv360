@@ -32,11 +32,9 @@ const StorePage = lazy(() => import('@/pages/store/StorePage'));
 const ProductDetailPage = lazy(() => import('@/pages/store/ProductDetailPage'));
 const CartPage = lazy(() => import('@/pages/store/CartPage'));
 const CheckoutPage = lazy(() => import('@/pages/store/CheckoutPage'));
-const ComparePage = lazy(() => import('@/pages/store/ComparePage'));
-const WishlistPage = lazy(() => import('@/pages/store/WishlistPage'));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 
-const LANDING_PATHS = ['/', '/nosotros', '/precios', '/empresa', '/contacto', '/planes', '/blog', '/pago', '/login', '/registro', '/reset-password', '/tienda', '/carrito', '/checkout', '/favoritos', '/tienda/comparar', '/libro-reclamaciones', '/legal'];
+const LANDING_PATHS = ['/', '/nosotros', '/precios', '/empresa', '/contacto', '/planes', '/blog', '/pago', '/login', '/registro', '/reset-password', '/tienda', '/carrito', '/checkout', '/pedidos', '/favoritos', '/tienda/comparar', '/libro-reclamaciones', '/legal'];
 const ADMIN_BYPASS_ROLES = ['super_admin', 'admin'];
 
 function useCountdown(targetIso: string) {
@@ -239,12 +237,12 @@ function AppRoutes() {
           <Route path="/registro" element={<RegisterPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/tienda" element={<StorePage />} />
-          <Route path="/tienda/comparar" element={<ComparePage />} />
+          <Route path="/tienda/comparar" element={<ProtectedRoute><PedidosPage initialTab="comparar" /></ProtectedRoute>} />
           <Route path="/tienda/*" element={<ProductDetailPage />} />
           <Route path="/carrito" element={<CartPage />} />
           <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
-          <Route path="/favoritos" element={<ProtectedRoute><WishlistPage /></ProtectedRoute>} />
-          <Route path="/pedidos" element={<ProtectedRoute><PedidosPage /></ProtectedRoute>} />
+          <Route path="/favoritos" element={<ProtectedRoute><PedidosPage initialTab="favoritos" /></ProtectedRoute>} />
+          <Route path="/pedidos" element={<ProtectedRoute><PedidosPage initialTab="pedidos" /></ProtectedRoute>} />
           <Route path="/dashboard/*" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
