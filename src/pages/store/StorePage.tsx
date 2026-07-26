@@ -25,18 +25,18 @@ const SORT_OPTIONS = [
 ];
 
 function Skeleton({ className }: { className?: string }) {
-  return <div className={cn('animate-pulse rounded', className)} />;
+  return <div className={cn('animate-pulse rounded-lg', className)} />;
 }
 
 function ProductRowSkeleton() {
   return (
     <div className="flex flex-col">
       <Skeleton className="aspect-square bg-muted w-full" />
-      <div className="pt-2.5 space-y-1.5">
-        <Skeleton className="h-2.5 bg-muted w-full" />
-        <Skeleton className="h-2.5 bg-muted w-3/4" />
-        <Skeleton className="h-4 bg-muted w-1/2 mt-2" />
-        <Skeleton className="h-2.5 bg-muted w-2/5" />
+      <div className="pt-3 space-y-2">
+        <Skeleton className="h-2 w-1/3 bg-muted rounded-full" />
+        <Skeleton className="h-3 w-full bg-muted rounded" />
+        <Skeleton className="h-3 w-4/5 bg-muted rounded" />
+        <Skeleton className="h-4 w-2/5 bg-muted rounded mt-1" />
       </div>
     </div>
   );
@@ -196,13 +196,13 @@ export default function StorePage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-muted/30">
+    <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
 
-      {/* ── HERO SEARCH BAR (Mercado Libre style) ── */}
-      <div className="bg-primary pt-16">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 py-3">
-          <div className="flex items-center gap-2">
+      {/* ── SEARCH BAR ── */}
+      <div className="pt-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+          <div className="flex items-center gap-2.5">
             {/* Search */}
             <div className="relative flex-1">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
@@ -210,7 +210,7 @@ export default function StorePage() {
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 placeholder="Buscar productos, marcas y más..."
-                className="w-full pl-10 pr-9 py-3 bg-white text-foreground border-0 rounded-xl text-sm font-medium placeholder:text-muted-foreground/70 outline-none shadow-sm focus:ring-2 focus:ring-white/40 transition-all"
+                className="w-full pl-10 pr-9 py-2.5 bg-muted/50 text-foreground border border-border/60 rounded-xl text-sm font-medium placeholder:text-muted-foreground/70 outline-none focus:border-primary focus:bg-card transition-all"
               />
               {search && (
                 <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-muted transition-colors">
@@ -223,15 +223,15 @@ export default function StorePage() {
             <button
               onClick={() => setShowUsd(!showUsd)}
               className={cn(
-                'flex items-center gap-1.5 px-3.5 py-3 rounded-xl text-xs font-bold flex-shrink-0 shadow-sm transition-all active:scale-95',
+                'flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-bold flex-shrink-0 transition-all active:scale-95',
                 showUsd
-                  ? 'bg-white text-emerald-600'
-                  : 'bg-white/15 text-white hover:bg-white/25'
+                  ? 'bg-primary/10 text-primary border border-primary/30'
+                  : 'bg-muted/50 text-foreground/70 border border-border/60 hover:bg-muted'
               )}
               title="Cambiar moneda"
             >
               <span className={cn('w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black',
-                showUsd ? 'bg-emerald-500 text-white' : 'bg-white/30 text-white')}>
+                showUsd ? 'bg-primary text-primary-foreground' : 'bg-muted-foreground/20 text-muted-foreground')}>
                 {showUsd ? '$' : 'S'}
               </span>
               {showUsd ? 'USD' : 'PEN'}
@@ -240,17 +240,17 @@ export default function StorePage() {
         </div>
       </div>
 
-      {/* ── CATEGORIES BAR (sticky, ML-style) ── */}
-      <div className="sticky top-16 z-30 bg-card border-b border-border shadow-sm">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6">
-          <div className="flex items-center gap-1.5 py-2 overflow-x-auto scrollbar-hide">
+      {/* ── CATEGORIES BAR (sticky) ── */}
+      <div className="sticky top-16 z-30 bg-background/95 backdrop-blur-sm border-b border-border/40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="flex items-center gap-1.5 py-2.5 overflow-x-auto scrollbar-hide">
             <button
               onClick={() => setCatFilter('')}
               className={cn(
-                'flex-shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all',
+                'flex-shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all',
                 !catFilter
                   ? 'bg-primary text-primary-foreground'
-                  : 'text-foreground/70 hover:text-foreground hover:bg-muted'
+                  : 'text-foreground/60 hover:text-foreground hover:bg-muted/60'
               )}
             >
               <Package className="w-3.5 h-3.5" />
@@ -261,10 +261,10 @@ export default function StorePage() {
                 key={cat.id}
                 onClick={() => setCatFilter(catFilter === cat.id ? '' : cat.id)}
                 className={cn(
-                  'flex-shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all',
+                  'flex-shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all',
                   catFilter === cat.id
                     ? 'bg-primary text-primary-foreground'
-                    : 'text-foreground/70 hover:text-foreground hover:bg-muted'
+                    : 'text-foreground/60 hover:text-foreground hover:bg-muted/60'
                 )}
               >
                 {cat.image_url
@@ -279,16 +279,16 @@ export default function StorePage() {
 
       {/* ── PAGE CONTENT ── */}
       <div className="flex-1">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 py-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
 
           {/* Free shipping notice */}
           {subtotal > 0 && subtotal < freeShipThreshold && (
-            <div className="bg-card rounded-xl px-4 py-3 mb-4 flex items-center gap-2 border border-border">
+            <div className="mb-6 flex items-center gap-2.5">
               <Truck className="w-4 h-4 text-primary flex-shrink-0" />
-              <div className="text-xs text-foreground/70">
+              <div className="text-xs text-muted-foreground">
                 Agrega <strong className="text-primary">{currencySymbol} {(freeShipThreshold - subtotal).toFixed(2)}</strong> más para envío gratis
               </div>
-              <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden ml-2">
+              <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden ml-2 max-w-xs">
                 <div
                   className="h-full bg-primary rounded-full transition-all duration-500"
                   style={{ width: `${Math.min((subtotal / freeShipThreshold) * 100, 100)}%` }}
@@ -297,7 +297,7 @@ export default function StorePage() {
             </div>
           )}
           {subtotal >= freeShipThreshold && subtotal > 0 && (
-            <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-4 py-2.5 mb-4 text-xs font-semibold text-emerald-700 dark:text-emerald-400 flex items-center gap-2">
+            <div className="mb-6 text-xs font-medium text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
               <Truck className="w-4 h-4" />
               ¡Tienes envío gratis en tu pedido!
             </div>
@@ -305,12 +305,12 @@ export default function StorePage() {
 
           {/* ── FEATURED SECTION ── */}
           {showHome && !loading && featured.length > 0 && (
-            <section className="bg-card rounded-2xl p-4 mb-4 border border-border">
-              <div className="flex items-center gap-2 mb-3">
+            <section className="mb-10">
+              <div className="flex items-center gap-2 mb-4">
                 <Sparkles className="w-4 h-4 text-amber-500" />
-                <h2 className="text-sm font-bold text-foreground">Destacados</h2>
+                <h2 className="text-base font-semibold text-foreground">Destacados</h2>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-5 lg:gap-6">
                 {featured.map(p => (
                   <ProductCard key={p.id} product={p} isWishlisted={wishlist.has(p.id)} onWishlistToggle={handleWishlist} onCompareToggle={toggleCompare} isComparing={compareIds.has(p.id)} freeShipThreshold={freeShipThreshold} />
                 ))}
@@ -320,12 +320,12 @@ export default function StorePage() {
 
           {/* ── BESTSELLERS ── */}
           {showHome && !loading && bestsellers.length > 0 && (
-            <section className="bg-card rounded-2xl p-4 mb-4 border border-border">
-              <div className="flex items-center gap-2 mb-3">
+            <section className="mb-10">
+              <div className="flex items-center gap-2 mb-4">
                 <TrendingUp className="w-4 h-4 text-emerald-500" />
-                <h2 className="text-sm font-bold text-foreground">Más vendidos</h2>
+                <h2 className="text-base font-semibold text-foreground">Más vendidos</h2>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-5 lg:gap-6">
                 {bestsellers.map(p => (
                   <ProductCard key={p.id} product={p} isWishlisted={wishlist.has(p.id)} onWishlistToggle={handleWishlist} onCompareToggle={toggleCompare} isComparing={compareIds.has(p.id)} freeShipThreshold={freeShipThreshold} />
                 ))}
@@ -334,10 +334,10 @@ export default function StorePage() {
           )}
 
           {/* ── CATALOG ── */}
-          <section className="bg-card rounded-2xl p-4 border border-border">
+          <section>
             {/* Header */}
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-bold text-foreground">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-base font-semibold text-foreground">
                 {activeCat ? activeCat.name : 'Todos los productos'}
               </h2>
               <span className="text-xs text-muted-foreground">
@@ -346,23 +346,23 @@ export default function StorePage() {
             </div>
 
             {/* Toolbar */}
-            <div className="flex items-center gap-2 mb-4 flex-wrap">
+            <div className="flex items-center gap-2 mb-6 flex-wrap">
               <div className="relative">
                 <select
                   value={sort}
                   onChange={e => setSort(e.target.value)}
-                  className="appearance-none pl-3 pr-7 py-1.5 bg-muted/60 border border-border rounded-lg text-xs font-semibold text-foreground outline-none focus:border-primary transition-colors cursor-pointer"
+                  className="appearance-none pl-3 pr-8 py-1.5 bg-muted/40 border border-border/60 rounded-lg text-xs font-medium text-foreground outline-none focus:border-primary transition-colors cursor-pointer"
                 >
                   {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                 </select>
-                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground pointer-events-none" />
+                <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground pointer-events-none" />
               </div>
 
               <button
                 onClick={() => setShowFilters(v => !v)}
                 className={cn(
-                  'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors',
-                  showFilters || hasActiveFilters ? 'bg-primary/10 text-primary border-primary/30' : 'bg-muted/60 text-foreground/70 border-border hover:border-primary/40'
+                  'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors',
+                  showFilters || hasActiveFilters ? 'bg-primary/10 text-primary border-primary/30' : 'bg-muted/40 text-foreground/60 border-border/60 hover:bg-muted'
                 )}
               >
                 <SlidersHorizontal className="w-3.5 h-3.5" />
@@ -371,12 +371,12 @@ export default function StorePage() {
               </button>
 
               {catFilter && activeCat && (
-                <button onClick={() => setCatFilter('')} className="flex items-center gap-1 px-2.5 py-1.5 bg-primary/10 text-primary rounded-full text-xs font-semibold">
+                <button onClick={() => setCatFilter('')} className="flex items-center gap-1 px-2.5 py-1.5 bg-primary/10 text-primary rounded-full text-xs font-medium">
                   {activeCat.name} <X className="w-3 h-3" />
                 </button>
               )}
               {search && (
-                <button onClick={() => setSearch('')} className="flex items-center gap-1 px-2.5 py-1.5 bg-primary/10 text-primary rounded-full text-xs font-semibold">
+                <button onClick={() => setSearch('')} className="flex items-center gap-1 px-2.5 py-1.5 bg-primary/10 text-primary rounded-full text-xs font-medium">
                   "{search}" <X className="w-3 h-3" />
                 </button>
               )}
@@ -384,21 +384,21 @@ export default function StorePage() {
 
             {/* Filter panel */}
             {showFilters && (
-              <div className="bg-muted/40 border border-border rounded-xl p-3 mb-4 flex flex-wrap gap-3 items-end">
-                <div className="flex-1 min-w-[120px]">
-                  <label className="block text-xs font-bold text-foreground/70 mb-1">Precio mín. ({currencySymbol})</label>
+              <div className="mb-6 flex flex-wrap gap-4 items-end pb-5 border-b border-border/40">
+                <div className="flex-1 min-w-[140px]">
+                  <label className="block text-[11px] font-medium text-muted-foreground mb-1.5 uppercase tracking-wide">Precio mín. ({currencySymbol})</label>
                   <input type="number" value={priceMin} onChange={e => setPriceMin(e.target.value)} placeholder="0"
-                    className="w-full px-3 py-2 bg-card border border-border rounded-lg text-sm outline-none focus:border-primary transition-colors" />
+                    className="w-full px-3 py-2 bg-muted/40 border border-border/60 rounded-lg text-sm outline-none focus:border-primary transition-colors" />
                 </div>
-                <div className="flex-1 min-w-[120px]">
-                  <label className="block text-xs font-bold text-foreground/70 mb-1">Precio máx. ({currencySymbol})</label>
+                <div className="flex-1 min-w-[140px]">
+                  <label className="block text-[11px] font-medium text-muted-foreground mb-1.5 uppercase tracking-wide">Precio máx. ({currencySymbol})</label>
                   <input type="number" value={priceMax} onChange={e => setPriceMax(e.target.value)} placeholder="Sin límite"
-                    className="w-full px-3 py-2 bg-card border border-border rounded-lg text-sm outline-none focus:border-primary transition-colors" />
+                    className="w-full px-3 py-2 bg-muted/40 border border-border/60 rounded-lg text-sm outline-none focus:border-primary transition-colors" />
                 </div>
                 {hasActiveFilters && (
                   <button
                     onClick={() => { setPriceMin(''); setPriceMax(''); setSearch(''); setCatFilter(''); setShowFilters(false); }}
-                    className="px-3 py-2 text-red-500 text-xs font-bold bg-red-500/10 hover:bg-red-500/20 rounded-lg transition-colors"
+                    className="px-3 py-2 text-red-500 text-xs font-medium bg-red-500/10 hover:bg-red-500/15 rounded-lg transition-colors"
                   >
                     Limpiar
                   </button>
@@ -408,26 +408,26 @@ export default function StorePage() {
 
             {/* Product grid */}
             {loading ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-5 lg:gap-6">
                 {Array.from({ length: 12 }).map((_, i) => <ProductRowSkeleton key={i} />)}
               </div>
             ) : filtered.length === 0 ? (
-              <div className="text-center py-16">
-                <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
+              <div className="text-center py-20">
+                <div className="w-14 h-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
                   <Package className="w-7 h-7 text-muted-foreground/30" />
                 </div>
-                <h3 className="text-sm font-bold text-foreground">Sin resultados</h3>
+                <h3 className="text-sm font-semibold text-foreground">Sin resultados</h3>
                 <p className="text-muted-foreground text-xs mt-1 mb-5">Intenta con otros filtros o búsqueda</p>
                 <button
                   onClick={() => { setSearch(''); setCatFilter(''); setPriceMin(''); setPriceMax(''); }}
-                  className="px-6 py-2.5 bg-primary text-primary-foreground rounded-lg font-semibold text-sm transition-all active:scale-95"
+                  className="px-6 py-2.5 bg-primary text-primary-foreground rounded-lg font-medium text-sm transition-all active:scale-95"
                 >
                   Ver todo
                 </button>
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-5 lg:gap-6">
                   {paginated.map(p => (
                     <ProductCard
                       key={p.id}
@@ -441,10 +441,10 @@ export default function StorePage() {
                   ))}
                 </div>
                 {hasMore && (
-                  <div className="text-center mt-8">
+                  <div className="text-center mt-10">
                     <button
                       onClick={() => setPage(p => p + 1)}
-                      className="inline-flex items-center gap-2 px-8 py-3 bg-muted hover:bg-primary/10 hover:text-primary border border-border hover:border-primary text-foreground rounded-xl font-bold text-sm transition-all"
+                      className="inline-flex items-center gap-2 px-8 py-3 bg-muted/50 hover:bg-muted text-foreground/80 hover:text-foreground rounded-xl font-medium text-sm transition-all"
                     >
                       <ChevronDown className="w-4 h-4" />
                       Ver más ({filtered.length - paginated.length} productos)
