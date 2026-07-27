@@ -8,21 +8,37 @@ import ProductCard from '@/components/store/ProductCard';
 import { useNavigate } from '@/lib/router';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import type { Product, ProductVariant, ProductReview } from '@/lib/storeTypes';
+import type { Product, ProductVariant, ProductReview, ProductReviewReply } from '@/lib/storeTypes';
 import {
   ShoppingCart, Star, ChevronLeft, ChevronRight, Plus, Minus,
   Truck, Shield, RotateCcw, Heart, Share2, Package, Tag, MessageSquare,
-  Layers, Upload, ThumbsUp, Flag, ChevronDown, CircleCheck as CheckCircle,
+  Layers, Upload, ThumbsUp, ThumbsDown, Flag, ChevronDown, CircleCheck as CheckCircle,
   Play, Download, Eye, Lock, Zap, Info, ExternalLink, Image as ImageIcon,
-  SlidersHorizontal, X, Award,
+  SlidersHorizontal, X, Award, CornerDownRight, MessageCircle, Send,
 } from 'lucide-react';
 import Navbar from '@/components/landing/Navbar';
 import Footer from '@/components/landing/Footer';
 
 /* ─── helpers ─── */
 function fmtPrice(n: number, showUsd: boolean, rate: number, symbol: string) {
-  if (showUsd) return `$${(n / rate).toFixed(2)}`;
+  if (showUsd) return `${(n / rate).toFixed(2)}`;
   return `${symbol} ${n.toFixed(2)}`;
+}
+
+function timeAgo(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const sec = Math.floor(diff / 1000);
+  const min = Math.floor(sec / 60);
+  const hr = Math.floor(min / 60);
+  const day = Math.floor(hr / 24);
+  const month = Math.floor(day / 30);
+  const year = Math.floor(day / 365);
+  if (year >= 1) return `hace ${year} ${year === 1 ? 'año' : 'años'}`;
+  if (month >= 1) return `hace ${month} ${month === 1 ? 'mes' : 'meses'}`;
+  if (day >= 1) return `hace ${day} ${day === 1 ? 'día' : 'días'}`;
+  if (hr >= 1) return `hace ${hr} ${hr === 1 ? 'hora' : 'horas'}`;
+  if (min >= 1) return `hace ${min} ${min === 1 ? 'minuto' : 'minutos'}`;
+  return 'hace un momento';
 }
 
 function StarsDisplay({ value, size = 14 }: { value: number; size?: number }) {
@@ -289,13 +305,17 @@ function SwipeGallery({
 type SortKey = 'helpful' | 'recent' | 'high' | 'low';
 
 function ReviewsSection({
-  reviews, avgRating, ratingDist, helpfulIds, reportedIds, onMarkHelpful, onReport, onOpenLightbox,
+  reviews, avgRating, ratingDist, helpfulIds, reportedIds, likedReplyIds,
+  onMarkHelpful, onLikeReply, onReport, onOpenLightbox, onReply,
   reviewForm, setReviewForm, uploadingImg, onUploadImg, submittingReview, onSubmitReview, user, navigate,
 }: {
   reviews: ProductReview[]; avgRating: number; ratingDist: { n: number; count: number; pct: number }[];
-  helpfulIds: Set<string>; reportedIds: Set<string>;
-  onMarkHelpful: (id: string, count: number) => void; onReport: (id: string) => void;
+  helpfulIds: Set<string>; reportedIds: Set<string>; likedReplyIds: Set<string>;
+  onMarkHelpful: (id: string, count: number) => void;
+  onLikeReply: (id: string) => void;
+  onReport: (id: string) => void;
   onOpenLightbox: (url: string) => void;
+  onReply: (reviewId: string, body: string) => Promise<void>;
   reviewForm: { rating: number; title: string; body: string; images: string[] };
   setReviewForm: React.Dispatch<React.SetStateAction<{ rating: number; title: string; body: string; images: string[] }>>;
   uploadingImg: boolean; onUploadImg: (f: File) => void;
@@ -439,16 +459,18 @@ function ReviewsSection({
           <div className="flex items-center gap-2 text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wide">
             <Award className="w-4 h-4" /> Reseña destacada
           </div>
-          <ReviewCard r={featured} helpfulIds={helpfulIds} reportedIds={reportedIds}
-            onMarkHelpful={onMarkHelpful} onReport={onReport} onOpenLightbox={onOpenLightbox} />
+          <ReviewCard r={featured} helpfulIds={helpfulIds} reportedIds={reportedIds} likedReplyIds={likedReplyIds}
+            onMarkHelpful={onMarkHelpful} onLikeReply={onLikeReply} onReport={onReport} onOpenLightbox={onOpenLightbox}
+            onReply={onReply} user={user} />
         </div>
       )}
 
       {/* ── Review list ── */}
       <div className="space-y-0 divide-y divide-border">
         {filtered.slice(0, visible).map(r => (
-          <ReviewCard key={r.id} r={r} helpfulIds={helpfulIds} reportedIds={reportedIds}
-            onMarkHelpful={onMarkHelpful} onReport={onReport} onOpenLightbox={onOpenLightbox} />
+          <ReviewCard key={r.id} r={r} helpfulIds={helpfulIds} reportedIds={reportedIds} likedReplyIds={likedReplyIds}
+            onMarkHelpful={onMarkHelpful} onLikeReply={onLikeReply} onReport={onReport} onOpenLightbox={onOpenLightbox}
+            onReply={onReply} user={user} />
         ))}
 
         {filtered.length === 0 && reviews.length > 0 && (
@@ -560,59 +582,207 @@ function ReviewsSection({
 }
 
 function ReviewCard({
-  r, helpfulIds, reportedIds, onMarkHelpful, onReport, onOpenLightbox,
+  r, helpfulIds, reportedIds, likedReplyIds, onMarkHelpful, onLikeReply, onReport, onOpenLightbox,
+  onReply, user,
 }: {
   r: ProductReview; helpfulIds: Set<string>; reportedIds: Set<string>;
-  onMarkHelpful: (id: string, count: number) => void; onReport: (id: string) => void;
+  likedReplyIds: Set<string>;
+  onMarkHelpful: (id: string, count: number) => void;
+  onLikeReply: (id: string) => void;
+  onReport: (id: string) => void;
   onOpenLightbox: (url: string) => void;
+  onReply: (reviewId: string, body: string) => Promise<void>;
+  user: any;
 }) {
+  const [expanded, setExpanded] = useState(false);
+  const [showReplies, setShowReplies] = useState(false);
+  const [replyText, setReplyText] = useState('');
+  const [replyOpen, setReplyOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [showFullMedia, setShowFullMedia] = useState(false);
+
+  const replies = (r.replies as ProductReviewReply[]) || [];
+  const isLong = (r.body || '').length > 280;
+  const displayBody = expanded || !isLong ? r.body : (r.body || '').slice(0, 280) + '…';
+  const media = (r.images as string[]) || [];
+  const visibleMedia = showFullMedia ? media : media.slice(0, 4);
+  const fullName = (r.profile as any)?.full_name || 'Cliente';
+  const avatarUrl = (r.profile as any)?.avatar_url;
+
+  const handleReplySubmit = async () => {
+    if (!replyText.trim()) return;
+    setSubmitting(true);
+    await onReply(r.id, replyText.trim());
+    setReplyText('');
+    setReplyOpen(false);
+    setShowReplies(true);
+    setSubmitting(false);
+  };
+
   return (
-    <div className="py-5 first:pt-0 space-y-2.5">
-      <div className="flex items-start justify-between gap-3 flex-wrap">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-sm flex-shrink-0">
-            {((r.profile as any)?.full_name || 'U')[0].toUpperCase()}
-          </div>
-          <div>
-            <p className="text-sm font-semibold text-foreground">{(r.profile as any)?.full_name || 'Cliente'}</p>
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs text-muted-foreground">
-                {new Date(r.created_at).toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric' })}
+    <div className="py-5 first:pt-0">
+      <div className="flex gap-3">
+        {/* Avatar */}
+        <div className="w-10 h-10 rounded-full overflow-hidden bg-primary/10 flex items-center justify-center text-primary font-semibold text-sm flex-shrink-0">
+          {avatarUrl
+            ? <img src={avatarUrl} alt={fullName} className="w-full h-full object-cover" />
+            : <span>{fullName[0].toUpperCase()}</span>}
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 min-w-0 space-y-2">
+          {/* Header row */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-sm font-semibold text-foreground">{fullName}</span>
+            {r.verified_purchase && (
+              <span className="inline-flex items-center gap-1 text-[11px] text-emerald-600 dark:text-emerald-400 font-medium bg-emerald-500/10 px-1.5 py-0.5 rounded-full">
+                <CheckCircle className="w-3 h-3" /> Compra verificada
               </span>
-              {r.verified_purchase && (
-                <span className="text-xs text-emerald-600 font-medium flex items-center gap-1">
-                  <CheckCircle className="w-3 h-3" /> Compra verificada
-                </span>
+            )}
+            <span className="text-xs text-muted-foreground">{timeAgo(r.created_at)}</span>
+            <StarsDisplay value={r.rating} size={12} />
+          </div>
+
+          {/* Title */}
+          {r.title && <p className="text-sm font-semibold text-foreground">{r.title}</p>}
+
+          {/* Body — expandable */}
+          {displayBody && (
+            <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">
+              {displayBody}
+              {isLong && (
+                <button onClick={() => setExpanded(v => !v)}
+                  className="ml-1.5 text-xs font-medium text-primary hover:underline">
+                  {expanded ? 'Mostrar menos' : 'Mostrar más'}
+                </button>
+              )}
+            </p>
+          )}
+
+          {/* Media */}
+          {media.length > 0 && (
+            <div className="flex gap-2 flex-wrap pt-1">
+              {visibleMedia.map((img, i) => (
+                <button key={i} onClick={() => onOpenLightbox(img)}
+                  className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden border border-border hover:opacity-80 transition-opacity">
+                  <img src={img} alt="" className="w-full h-full object-cover" />
+                </button>
+              ))}
+              {media.length > 4 && !showFullMedia && (
+                <button onClick={() => setShowFullMedia(true)}
+                  className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl border border-border bg-muted/50 flex items-center justify-center text-xs font-medium text-muted-foreground hover:bg-muted transition-colors">
+                  +{media.length - 4}
+                </button>
               )}
             </div>
-          </div>
-        </div>
-        <StarsDisplay value={r.rating} size={14} />
-      </div>
-      {r.title && <p className="text-sm font-semibold text-foreground">{r.title}</p>}
-      {r.body && <p className="text-sm text-muted-foreground leading-relaxed">{r.body}</p>}
-      {(r.images || []).length > 0 && (
-        <div className="flex gap-2 flex-wrap">
-          {(r.images as string[]).map((img, i) => (
-            <button key={i} onClick={() => onOpenLightbox(img)}
-              className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border border-border hover:scale-105 transition-transform">
-              <img src={img} alt="" className="w-full h-full object-cover" />
+          )}
+
+          {/* Action buttons */}
+          <div className="flex items-center gap-1 pt-1">
+            <button onClick={() => onMarkHelpful(r.id, r.helpful_count ?? 0)} disabled={helpfulIds.has(r.id)}
+              className={cn('flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium transition-colors',
+                helpfulIds.has(r.id) ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted')}>
+              <ThumbsUp className={cn('w-3.5 h-3.5', helpfulIds.has(r.id) && 'fill-current')} />
+              {r.helpful_count ?? 0}
             </button>
-          ))}
+            <button onClick={() => onLikeReply(r.id)} disabled={likedReplyIds.has(r.id)}
+              className={cn('flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium transition-colors',
+                likedReplyIds.has(r.id) ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted')}>
+              <ThumbsDown className={cn('w-3.5 h-3.5', likedReplyIds.has(r.id) && 'fill-current')} />
+            </button>
+            <button onClick={() => setReplyOpen(v => !v)}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium text-muted-foreground hover:bg-muted transition-colors">
+              <MessageCircle className="w-3.5 h-3.5" /> Responder
+            </button>
+            <button onClick={() => onReport(r.id)} disabled={reportedIds.has(r.id)}
+              className={cn('flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium transition-colors ml-auto',
+                reportedIds.has(r.id) ? 'text-red-400' : 'text-muted-foreground hover:text-red-500')}>
+              <Flag className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {/* Reply input */}
+          {replyOpen && (
+            <div className="flex gap-2 pt-2">
+              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-xs flex-shrink-0">
+                {user?.full_name?.[0]?.toUpperCase() || 'U'}
+              </div>
+              <div className="flex-1 space-y-2">
+                <textarea
+                  value={replyText}
+                  onChange={e => setReplyText(e.target.value)}
+                  placeholder="Escribe una respuesta..."
+                  rows={2}
+                  className="w-full px-3 py-2 bg-muted/40 border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary resize-none placeholder:text-muted-foreground"
+                />
+                <div className="flex items-center gap-2 justify-end">
+                  <button onClick={() => { setReplyOpen(false); setReplyText(''); }}
+                    className="px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors">
+                    Cancelar
+                  </button>
+                  <button onClick={handleReplySubmit} disabled={!replyText.trim() || submitting}
+                    className="flex items-center gap-1.5 px-4 py-1.5 bg-primary text-primary-foreground rounded-lg text-xs font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50">
+                    {submitting ? <div className="w-3 h-3 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" /> : <Send className="w-3 h-3" />}
+                    Responder
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Replies toggle */}
+          {replies.length > 0 && (
+            <button onClick={() => setShowReplies(v => !v)}
+              className="flex items-center gap-1.5 text-xs font-medium text-primary hover:underline pt-1">
+              <CornerDownRight className="w-3.5 h-3.5" />
+              {showReplies ? 'Ocultar' : `${replies.length} ${replies.length === 1 ? 'respuesta' : 'respuestas'}`}
+            </button>
+          )}
+
+          {/* Threaded replies */}
+          {showReplies && replies.length > 0 && (
+            <div className="space-y-3 pt-2 pl-2 border-l-2 border-border/40 ml-1">
+              {replies.map(reply => (
+                <ReplyCard
+                  key={reply.id}
+                  reply={reply}
+                  liked={likedReplyIds.has(reply.id)}
+                  onLike={() => onLikeReply(reply.id)}
+                />
+              ))}
+            </div>
+          )}
         </div>
-      )}
-      <div className="flex items-center gap-4 text-xs">
-        <button onClick={() => onMarkHelpful(r.id, r.helpful_count ?? 0)} disabled={helpfulIds.has(r.id)}
-          className={cn('flex items-center gap-1.5 font-medium transition-colors',
-            helpfulIds.has(r.id) ? 'text-primary' : 'text-muted-foreground hover:text-primary')}>
-          <ThumbsUp className={cn('w-3.5 h-3.5', helpfulIds.has(r.id) && 'fill-current')} />
-          Útil ({r.helpful_count ?? 0})
-        </button>
-        <button onClick={() => onReport(r.id)} disabled={reportedIds.has(r.id)}
-          className={cn('flex items-center gap-1.5 font-medium transition-colors',
-            reportedIds.has(r.id) ? 'text-red-400' : 'text-muted-foreground hover:text-red-500')}>
-          <Flag className="w-3.5 h-3.5" />
-          {reportedIds.has(r.id) ? 'Reportada' : 'Reportar'}
+      </div>
+    </div>
+  );
+}
+
+function ReplyCard({ reply, liked, onLike }: {
+  reply: ProductReviewReply; liked: boolean; onLike: () => void;
+}) {
+  return (
+    <div className="flex gap-2.5">
+      <div className={cn('w-8 h-8 rounded-full flex items-center justify-center font-semibold text-xs flex-shrink-0',
+        reply.is_company ? 'bg-primary text-primary-foreground' : 'bg-primary/10 text-primary')}>
+        {reply.author_name?.[0]?.toUpperCase() || 'U'}
+      </div>
+      <div className="flex-1 min-w-0 space-y-1">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-xs font-semibold text-foreground">{reply.author_name}</span>
+          {reply.is_company && (
+            <span className="text-[10px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded-full">Empresa</span>
+          )}
+          {reply.author_role && !reply.is_company && (
+            <span className="text-[10px] text-muted-foreground">{reply.author_role}</span>
+          )}
+          <span className="text-[11px] text-muted-foreground">{timeAgo(reply.created_at)}</span>
+        </div>
+        <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">{reply.body}</p>
+        <button onClick={onLike} disabled={liked}
+          className={cn('flex items-center gap-1 text-xs font-medium transition-colors',
+            liked ? 'text-primary' : 'text-muted-foreground hover:text-primary')}>
+          <ThumbsUp className={cn('w-3 h-3', liked && 'fill-current')} />
         </button>
       </div>
     </div>
@@ -646,6 +816,7 @@ export default function ProductDetailPage() {
   const [compareList, setCompareList] = useState<string[]>([]);
   const [helpfulIds, setHelpfulIds] = useState<Set<string>>(new Set());
   const [reportedIds, setReportedIds] = useState<Set<string>>(new Set());
+  const [likedReplyIds, setLikedReplyIds] = useState<Set<string>>(new Set());
   const [lightboxImg, setLightboxImg] = useState<string | null>(null);
   const isAdmin = ['admin', 'super_admin'].includes((user as any)?.role || '');
 
@@ -690,7 +861,23 @@ export default function ProductDetailPage() {
       user ? database.select('wishlists', { select: 'id', filter: [{ column: 'user_id', operator: 'eq', value: user.id }, { column: 'product_id', operator: 'eq', value: p.id }], maybeSingle: true })
            : Promise.resolve({ data: null }),
     ]);
-    setReviews((revs || []) as ProductReview[]);
+    const reviewsList = (revs || []) as ProductReview[];
+    // Fetch replies for all reviews in one query
+    if (reviewsList.length > 0) {
+      const reviewIds = reviewsList.map(r => r.id);
+      const { data: repliesData } = await database.select<ProductReviewReply>('product_review_replies', {
+        filter: [{ column: 'review_id', operator: 'in', value: reviewIds }],
+        order: { column: 'created_at', ascending: true },
+      });
+      const repliesByReview = new Map<string, ProductReviewReply[]>();
+      ((repliesData as ProductReviewReply[]) || []).forEach((rp: ProductReviewReply) => {
+        const arr = repliesByReview.get(rp.review_id) || [];
+        arr.push(rp);
+        repliesByReview.set(rp.review_id, arr);
+      });
+      reviewsList.forEach(r => { r.replies = repliesByReview.get(r.id) || []; });
+    }
+    setReviews(reviewsList);
     setIsWishlisted(!!wl);
 
     const saved = sessionStorage.getItem('compare');
@@ -846,6 +1033,38 @@ export default function ProductDetailPage() {
     if (reportedIds.has(reviewId)) { toast.info('Ya reportaste esta reseña'); return; }
     setReportedIds(s => new Set([...s, reviewId]));
     toast.success('Reseña reportada — la revisaremos pronto');
+  };
+
+  const submitReply = async (reviewId: string, body: string) => {
+    if (!user) { navigate('/login'); return; }
+    if (!body.trim()) { toast.error('Escribe una respuesta'); return; }
+    const role = (user as any)?.role || 'user';
+    const isCompany = role === 'admin' || role === 'super_admin';
+    const authorName = user.full_name || user.username || user.email || 'Usuario';
+    const authorRole = isCompany ? 'Empresa' : (role === 'support' ? 'Soporte' : null);
+    const { data, error } = await database.insert<ProductReviewReply>('product_review_replies', {
+      review_id: reviewId,
+      user_id: user.id,
+      author_name: authorName,
+      author_role: authorRole,
+      is_company: isCompany,
+      body: body.trim(),
+    });
+    if (error) { toast.error('Error al enviar respuesta'); return; }
+    const newReply = data as ProductReviewReply;
+    setReviews(prev => prev.map(r => r.id === reviewId
+      ? { ...r, replies: [...(r.replies || []), newReply] }
+      : r));
+    toast.success('Respuesta publicada');
+  };
+
+  const onLikeReply = (replyId: string) => {
+    setLikedReplyIds(prev => {
+      const next = new Set(prev);
+      if (next.has(replyId)) next.delete(replyId);
+      else next.add(replyId);
+      return next;
+    });
   };
 
   const avgRating = reviews.length > 0
@@ -1235,8 +1454,9 @@ export default function ProductDetailPage() {
             {activeTab === 'reviews' && (
               <ReviewsSection
                 reviews={reviews} avgRating={avgRating} ratingDist={ratingDist}
-                helpfulIds={helpfulIds} reportedIds={reportedIds}
-                onMarkHelpful={markHelpful} onReport={reportReview} onOpenLightbox={setLightboxImg}
+                helpfulIds={helpfulIds} reportedIds={reportedIds} likedReplyIds={likedReplyIds}
+                onMarkHelpful={markHelpful} onLikeReply={onLikeReply} onReport={reportReview} onOpenLightbox={setLightboxImg}
+                onReply={submitReply}
                 reviewForm={reviewForm} setReviewForm={setReviewForm}
                 uploadingImg={uploadingImg} onUploadImg={uploadReviewImg}
                 submittingReview={submittingReview} onSubmitReview={submitReview}

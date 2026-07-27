@@ -205,4 +205,16 @@ export interface ProductReview {
   created_at: string;
   profile?: { full_name: string; avatar_url?: string };
   product?: { name: string; images: Array<{ url: string }> };
+  replies?: ProductReviewReply[];
+}
+
+export interface ProductReviewReply {
+  id: string;
+  review_id: string;
+  user_id: string | null;
+  author_name: string;
+  author_role?: string | null;
+  is_company: boolean;
+  body: string;
+  created_at: string;
 }
