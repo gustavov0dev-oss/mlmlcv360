@@ -13,7 +13,7 @@ import {
   ShoppingCart, Star, ChevronLeft, ChevronRight, Plus, Minus,
   Truck, Shield, RotateCcw, Heart, Share2, Package, Tag, MessageSquare,
   Layers, Upload, ThumbsUp, ThumbsDown, Flag, ChevronDown, CircleCheck as CheckCircle,
-  Play, Download, Eye, Lock, Zap, Info, ExternalLink, Image as ImageIcon,
+  Play, Eye, Lock, Zap, Info, ExternalLink, Image as ImageIcon,
   SlidersHorizontal, X, Award, CornerDownRight, MessageCircle, Send,
 } from 'lucide-react';
 import Navbar from '@/components/landing/Navbar';
@@ -259,11 +259,11 @@ function SwipeGallery({
         {/* Arrows (desktop) */}
         {media.length > 1 && (<>
           <button onClick={() => scrollToIdx(active - 1 < 0 ? media.length - 1 : active - 1)}
-            className="hidden sm:flex absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-background/90 backdrop-blur-sm rounded-full items-center justify-center shadow-sm z-10 hover:bg-background transition-colors">
+            className="hidden sm:flex absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-card border border-border rounded-full items-center justify-center shadow-md z-10 hover:bg-muted transition-colors text-foreground">
             <ChevronLeft className="w-4 h-4" />
           </button>
           <button onClick={() => scrollToIdx(active + 1 >= media.length ? 0 : active + 1)}
-            className="hidden sm:flex absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-background/90 backdrop-blur-sm rounded-full items-center justify-center shadow-sm z-10 hover:bg-background transition-colors">
+            className="hidden sm:flex absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-card border border-border rounded-full items-center justify-center shadow-md z-10 hover:bg-muted transition-colors text-foreground">
             <ChevronRight className="w-4 h-4" />
           </button>
           <div className="absolute bottom-3 right-3 z-20 bg-black/50 text-white text-[11px] font-medium px-2 py-0.5 rounded-full backdrop-blur-sm pointer-events-none">
@@ -287,16 +287,6 @@ function SwipeGallery({
         </div>
       )}
 
-      {/* Dots (mobile) */}
-      {media.length > 1 && (
-        <div className="flex sm:hidden justify-center gap-1.5">
-          {media.map((_, i) => (
-            <button key={i} onClick={() => scrollToIdx(i)}
-              className={cn('h-1.5 rounded-full transition-all', active === i ? 'w-6 bg-primary' : 'w-1.5 bg-muted-foreground/30')}
-              aria-label={`Imagen ${i + 1}`} />
-          ))}
-        </div>
-      )}
     </div>
   );
 }
@@ -445,7 +435,7 @@ function ReviewsSection({
 
           <div className="relative sm:ml-auto">
             <select value={sort} onChange={e => setSort(e.target.value as SortKey)}
-              className="appearance-none pl-3 pr-8 py-1.5 bg-muted/40 border border-border rounded-lg text-xs font-medium text-foreground outline-none focus:border-primary cursor-pointer">
+              className="has-chevron appearance-none pl-3 pr-8 py-1.5 bg-muted/40 border border-border rounded-lg text-xs font-medium text-foreground outline-none focus:border-primary cursor-pointer">
               {sortOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
             </select>
             <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground pointer-events-none" />
@@ -1083,7 +1073,6 @@ export default function ProductDetailPage() {
     { id: 'description' as const, label: 'Descripción', icon: Info },
     ...(hasSpecs ? [{ id: 'specs' as const, label: 'Especificaciones', icon: Layers }] : []),
     { id: 'reviews' as const, label: `Reseñas (${reviews.length})`, icon: MessageSquare },
-    ...(product?.is_digital ? [{ id: 'digital' as const, label: 'Producto digital', icon: Download }] : []),
   ];
 
   if (loading) {
@@ -1351,34 +1340,36 @@ export default function ProductDetailPage() {
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-3">
                 <button onClick={handleBuyNow} disabled={outOfStock}
                   className={cn('flex items-center justify-center gap-2 py-3.5 sm:py-4 rounded-xl font-semibold text-sm transition-all',
                     outOfStock ? 'bg-muted text-muted-foreground cursor-not-allowed' : 'bg-primary text-primary-foreground hover:bg-primary/90 active:scale-[0.98]')}>
                   <Zap className="w-4 h-4" />
                   {outOfStock ? 'Sin stock' : 'Comprar ahora'}
                 </button>
-                <button onClick={handleAdd} disabled={outOfStock}
-                  className={cn('flex items-center justify-center gap-2 py-3.5 sm:py-4 rounded-xl font-semibold text-sm border-2 transition-all',
-                    addedToCart ? 'border-emerald-500 text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20' :
-                    outOfStock ? 'border-border text-muted-foreground cursor-not-allowed' :
-                    'border-primary text-primary hover:bg-primary/5 active:scale-[0.98]')}>
-                  {addedToCart
-                    ? <><CheckCircle className="w-4 h-4" /> ¡En tu carrito!</>
-                    : <><ShoppingCart className="w-4 h-4" /> Agregar al carrito</>}
-                </button>
+                {addedToCart ? (
+                  <button onClick={() => navigate('/carrito')}
+                    className="flex items-center justify-center gap-2 py-3.5 sm:py-4 rounded-xl font-semibold text-sm border-2 border-emerald-500 text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-all">
+                    <CheckCircle className="w-4 h-4" /> Ver carrito
+                  </button>
+                ) : inCart ? (
+                  <button onClick={() => navigate('/carrito')}
+                    className="flex items-center justify-center gap-2 py-3.5 sm:py-4 rounded-xl font-semibold text-sm border-2 border-emerald-500 text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-all">
+                    <ShoppingCart className="w-4 h-4" /> Ver carrito
+                  </button>
+                ) : (
+                  <button onClick={handleAdd} disabled={outOfStock}
+                    className={cn('flex items-center justify-center gap-2 py-3.5 sm:py-4 rounded-xl font-semibold text-sm border-2 transition-all',
+                      outOfStock ? 'border-border text-muted-foreground cursor-not-allowed' :
+                      'border-primary text-primary hover:bg-primary/5 active:scale-[0.98]')}>
+                    <ShoppingCart className="w-4 h-4" /> Agregar
+                  </button>
+                )}
               </div>
-
-              {inCart && !addedToCart && (
-                <button onClick={() => navigate('/carrito')}
-                  className="w-full text-center text-sm text-primary font-medium hover:underline">
-                  Ya tienes este producto en el carrito → ver carrito
-                </button>
-              )}
 
               {product.is_digital && (product as any).digital_demo_url && (
                 <button onClick={() => setShowDemo(true)}
-                  className="w-full flex items-center justify-center gap-2 py-3 border border-primary/30 text-primary bg-primary/5 rounded-xl font-semibold text-sm hover:bg-primary/10 transition-colors">
+                  className="w-full flex items-center justify-center gap-1.5 py-2 text-sm text-primary font-medium hover:underline transition-colors">
                   <Eye className="w-4 h-4" />
                   Ver demostración gratuita
                 </button>
@@ -1411,8 +1402,25 @@ export default function ProductDetailPage() {
           {/* Tab content — uses full width for reviews, constrained for text */}
           <div className="pt-6 sm:pt-8">
             {activeTab === 'description' && (
-              <div className="max-w-4xl">
+              <div className="max-w-4xl space-y-6">
                 <DescriptionRenderer text={product.description || ''} />
+                {product.is_digital && (
+                  <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 sm:p-5 space-y-4">
+                    <div className="flex items-start gap-3">
+                      <Zap className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-semibold text-foreground">Producto digital — entrega instantánea</p>
+                        <p className="text-sm text-muted-foreground mt-1">Recibirás acceso inmediato tras confirmar el pago.</p>
+                      </div>
+                    </div>
+                    {product.digital_instructions && (
+                      <div>
+                        <h4 className="text-sm font-semibold text-foreground mb-2">Instrucciones de acceso</h4>
+                        <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{product.digital_instructions}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 
@@ -1425,30 +1433,6 @@ export default function ProductDetailPage() {
                   </div>
                 ))}
               </dl>
-            )}
-
-            {activeTab === 'digital' && product.is_digital && (
-              <div className="max-w-4xl space-y-5">
-                <div className="flex items-start gap-3">
-                  <Zap className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-semibold text-foreground">Producto digital — entrega instantánea</p>
-                    <p className="text-sm text-muted-foreground mt-1">Recibirás acceso inmediato tras confirmar el pago.</p>
-                  </div>
-                </div>
-                {product.digital_instructions && (
-                  <div>
-                    <h4 className="text-sm font-semibold text-foreground mb-2">Instrucciones de acceso</h4>
-                    <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{product.digital_instructions}</p>
-                  </div>
-                )}
-                {(product as any).digital_demo_url && (
-                  <button onClick={() => setShowDemo(true)}
-                    className="flex items-center gap-2 px-5 py-3 bg-primary text-primary-foreground rounded-xl font-semibold text-sm hover:bg-primary/90 transition-colors">
-                    <Play className="w-4 h-4" /> Ver demostración gratuita
-                  </button>
-                )}
-              </div>
             )}
 
             {activeTab === 'reviews' && (

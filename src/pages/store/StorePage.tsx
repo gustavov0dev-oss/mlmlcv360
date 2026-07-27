@@ -351,7 +351,7 @@ export default function StorePage() {
                 <select
                   value={sort}
                   onChange={e => setSort(e.target.value)}
-                  className="appearance-none pl-3 pr-8 py-1.5 bg-muted/40 border border-border/60 rounded-lg text-xs font-medium text-foreground outline-none focus:border-primary transition-colors cursor-pointer"
+                  className="has-chevron appearance-none pl-3 pr-8 py-1.5 bg-muted/40 border border-border/60 rounded-lg text-xs font-medium text-foreground outline-none focus:border-primary transition-colors cursor-pointer"
                 >
                   {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                 </select>

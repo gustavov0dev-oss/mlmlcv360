@@ -1106,7 +1106,9 @@ select {
   box-shadow: none !important;
 }
 
-/* Native select: ensure room for the browser dropdown chevron */
+/* Native select: strip the browser's default dropdown arrow so the manual
+   ChevronDown icon rendered by each component is the only one shown.
+   Components are responsible for adding their own ChevronDown + padding-right. */
 select {
   appearance: none;
   -webkit-appearance: none;
@@ -1118,9 +1120,15 @@ select {
   padding-right: 2.25rem !important;
 }
 
-/* Hide default arrow on Firefox — we provide our own */
+/* Hide default arrow on Firefox/Edge */
 select::-ms-expand {
   display: none;
+}
+
+/* When a component renders its own ChevronDown, suppress the global arrow
+   so we don't get a double icon. Add `has-chevron` to the <select>. */
+select.has-chevron {
+  background-image: none !important;
 }
 
 input:focus,
