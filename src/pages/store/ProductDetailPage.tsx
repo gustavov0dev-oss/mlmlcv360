@@ -1146,56 +1146,72 @@ export default function ProductDetailPage() {
               media={allMedia} altName={product.name}
               discount={discount} featured={product.featured} isDigital={!!product.is_digital}
               onOpenLightbox={setLightboxImg} />
-
-            {/* Trust badges */}
-            <div className="hidden sm:flex items-center gap-6 pt-2 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1.5"><Truck className="w-4 h-4 text-primary" /> Envío rápido</span>
-              <span className="flex items-center gap-1.5"><Shield className="w-4 h-4 text-primary" /> Pago seguro</span>
-              <span className="flex items-center gap-1.5"><RotateCcw className="w-4 h-4 text-primary" /> 30 días devolución</span>
-            </div>
           </div>
 
           {/* ── RIGHT: Info ── */}
-          <div className="lg:col-span-7 space-y-5">
-            {product.category && (
-              <button onClick={() => navigate(`/tienda?cat=${product.category_id}`)}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline">
-                <Tag className="w-3 h-3" />
-                {(product.category as any).name}
-              </button>
-            )}
+          <div className="lg:col-span-7">
+            {/* ── Category + secondary actions row ── */}
+            <div className="flex items-center justify-between mb-3">
+              {product.category ? (
+                <button onClick={() => navigate(`/tienda?cat=${product.category_id}`)}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline">
+                  <Tag className="w-3 h-3" />
+                  {(product.category as any).name}
+                </button>
+              ) : <span />}
+              <div className="flex items-center gap-2">
+                <button onClick={toggleWishlist} title={isWishlisted ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+                  className={cn('w-8 h-8 rounded-lg border flex items-center justify-center transition-all',
+                    isWishlisted ? 'border-red-300 bg-red-50 dark:bg-red-900/20 text-red-500' : 'border-border text-muted-foreground hover:border-red-300 hover:text-red-400')}>
+                  <Heart className={cn('w-4 h-4', isWishlisted && 'fill-current')} />
+                </button>
+                <button title="Compartir" onClick={() => { navigator.clipboard?.writeText(window.location.href); toast.success('Enlace copiado'); }}
+                  className="w-8 h-8 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-all">
+                  <Share2 className="w-4 h-4" />
+                </button>
+                <button title="Comparar" onClick={toggleCompare}
+                  className={cn('w-8 h-8 rounded-lg border flex items-center justify-center text-xs font-bold transition-all',
+                    compareList.includes(product.id) ? 'border-primary bg-primary/10 text-primary' : 'border-border text-muted-foreground hover:border-primary/40 hover:text-foreground')}>
+                  VS
+                </button>
+              </div>
+            </div>
 
-            <h1 className="text-2xl sm:text-3xl font-semibold text-foreground leading-tight">{product.name}</h1>
+            {/* ── Title ── */}
+            <h1 className="text-2xl sm:text-3xl font-semibold text-foreground leading-snug mb-3">{product.name}</h1>
 
-            {reviews.length > 0 ? (
-              <button onClick={() => { setActiveTab('reviews'); document.getElementById('product-tabs')?.scrollIntoView({ behavior: 'smooth' }); }}
-                className="flex items-center gap-2 group">
-                <StarsDisplay value={avgRating} size={16} />
-                <span className="text-sm font-semibold text-foreground">{avgRating.toFixed(1)}</span>
-                <span className="text-sm text-primary underline-offset-2 group-hover:underline">
-                  {reviews.length} valoraciones
-                </span>
-              </button>
-            ) : (
-              <button onClick={() => { setActiveTab('reviews'); document.getElementById('product-tabs')?.scrollIntoView({ behavior: 'smooth' }); }}
-                className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                Sin valoraciones — ¡sé el primero!
-              </button>
-            )}
+            {/* ── Rating ── */}
+            <div className="mb-4">
+              {reviews.length > 0 ? (
+                <button onClick={() => { setActiveTab('reviews'); document.getElementById('product-tabs')?.scrollIntoView({ behavior: 'smooth' }); }}
+                  className="flex items-center gap-2 group">
+                  <StarsDisplay value={avgRating} size={15} />
+                  <span className="text-sm font-semibold text-foreground">{avgRating.toFixed(1)}</span>
+                  <span className="text-sm text-muted-foreground group-hover:text-primary transition-colors">
+                    ({reviews.length} {reviews.length === 1 ? 'valoración' : 'valoraciones'})
+                  </span>
+                </button>
+              ) : (
+                <button onClick={() => { setActiveTab('reviews'); document.getElementById('product-tabs')?.scrollIntoView({ behavior: 'smooth' }); }}
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                  Sin valoraciones — ¡sé el primero!
+                </button>
+              )}
+            </div>
 
-            {/* Price */}
-            <div className="space-y-1.5">
+            {/* ── Price block ── */}
+            <div className="bg-muted/30 rounded-2xl px-5 py-4 mb-5 space-y-1">
               <div className="flex items-end gap-3 flex-wrap">
-                <span className="text-3xl sm:text-4xl font-semibold text-foreground tracking-tight">
+                <span className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
                   {fmtPrice(currentPrice, showUsd, exchangeRate, currencySymbol)}
                 </span>
                 {currentCompare && currentCompare > currentPrice && (
-                  <span className="text-lg text-muted-foreground line-through pb-1">
+                  <span className="text-lg text-muted-foreground line-through pb-0.5">
                     {fmtPrice(currentCompare, showUsd, exchangeRate, currencySymbol)}
                   </span>
                 )}
                 {discount > 0 && (
-                  <span className="text-sm font-bold text-red-500">-{discount}% OFF</span>
+                  <span className="text-sm font-bold bg-red-500 text-white px-2 py-0.5 rounded-lg">-{discount}% OFF</span>
                 )}
               </div>
               {discount > 0 && (
@@ -1210,175 +1226,175 @@ export default function ProductDetailPage() {
                   </span>
                 )}
                 <button onClick={() => setShowUsd(!showUsd)}
-                  className={cn('text-xs font-semibold px-2.5 py-1 rounded-lg border transition-all',
+                  className={cn('text-xs font-semibold px-2 py-0.5 rounded border transition-all',
                     showUsd ? 'bg-primary/10 text-primary border-primary/30' : 'text-muted-foreground border-border hover:border-primary/40 hover:text-foreground')}>
                   {showUsd ? 'USD' : 'PEN'}
                 </button>
               </div>
             </div>
 
+            {/* ── Short description ── */}
             {product.short_description && (
-              <p className="text-sm sm:text-[15px] text-muted-foreground leading-relaxed">{product.short_description}</p>
+              <p className="text-sm sm:text-[15px] text-muted-foreground leading-relaxed mb-5">{product.short_description}</p>
             )}
 
-            {/* Variant selectors */}
-            {attrKeys.map(key => {
-              const uniqueVals = [...new Set(variants.map(v => v.attributes[key]).filter(Boolean))];
-              if (!uniqueVals.length) return null;
-              const isColorAttr = key.toLowerCase().includes('color');
-              const selectedVal = selectedAttrs[key];
+            {/* ── Variant selectors ── */}
+            <div className="space-y-5 mb-5">
+              {attrKeys.map(key => {
+                const uniqueVals = [...new Set(variants.map(v => v.attributes[key]).filter(Boolean))];
+                if (!uniqueVals.length) return null;
+                const isColorAttr = key.toLowerCase().includes('color');
+                const selectedVal = selectedAttrs[key];
 
-              return (
-                <div key={key} className="space-y-2.5">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-foreground">{key}:</span>
-                    {selectedVal && (
-                      <span className="text-sm text-muted-foreground">
-                        {(() => {
-                          const v = variants.find(vv => vv.attributes[key] === selectedVal);
-                          return (v as any)?.color_name || selectedVal;
-                        })()}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {uniqueVals.map(val => {
-                      const variantForVal = variants.find(v => v.attributes[key] === val);
-                      const isSelected = selectedAttrs[key] === val;
-                      const isOos = product.track_stock && variantForVal && variantForVal.stock === 0;
-                      const attrType = (variantForVal as any)?.attribute_type || (isColorAttr ? 'color' : 'text');
-                      const colorName = (variantForVal as any)?.color_name || val;
-                      const isHex = /^#[0-9a-f]{3,8}$/i.test(val);
+                return (
+                  <div key={key} className="space-y-2.5">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-semibold text-foreground">{key}:</span>
+                      {selectedVal && (
+                        <span className="text-sm text-muted-foreground">
+                          {(() => {
+                            const v = variants.find(vv => vv.attributes[key] === selectedVal);
+                            return (v as any)?.color_name || selectedVal;
+                          })()}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {uniqueVals.map(val => {
+                        const variantForVal = variants.find(v => v.attributes[key] === val);
+                        const isSelected = selectedAttrs[key] === val;
+                        const isOos = product.track_stock && variantForVal && variantForVal.stock === 0;
+                        const attrType = (variantForVal as any)?.attribute_type || (isColorAttr ? 'color' : 'text');
+                        const colorName = (variantForVal as any)?.color_name || val;
+                        const isHex = /^#[0-9a-f]{3,8}$/i.test(val);
 
-                      if (attrType === 'color' || (isColorAttr && isHex)) {
+                        if (attrType === 'color' || (isColorAttr && isHex)) {
+                          return (
+                            <button key={val} onClick={() => !isOos && handleAttrSelect(key, val)}
+                              disabled={!!isOos} title={colorName}
+                              className={cn('relative w-10 h-10 rounded-full border-2 transition-all',
+                                isSelected ? 'border-primary scale-110' : 'border-border hover:border-primary/50',
+                                isOos && 'opacity-40 cursor-not-allowed')}
+                              style={{ backgroundColor: val }}>
+                              {isSelected && <div className="absolute inset-0 flex items-center justify-center"><div className="w-2.5 h-2.5 rounded-full bg-white shadow" /></div>}
+                            </button>
+                          );
+                        }
+
+                        const swatchImg = variantForVal?.images?.[0]?.url;
+                        if (attrType === 'image' && swatchImg) {
+                          return (
+                            <button key={val} onClick={() => !isOos && handleAttrSelect(key, val)}
+                              disabled={!!isOos} title={val}
+                              className={cn('w-12 h-12 rounded-xl overflow-hidden border-2 transition-all',
+                                isSelected ? 'border-primary' : 'border-border hover:border-primary/50',
+                                isOos && 'opacity-40 cursor-not-allowed')}>
+                              <img src={swatchImg} alt={val} className="w-full h-full object-cover" />
+                            </button>
+                          );
+                        }
+
                         return (
                           <button key={val} onClick={() => !isOos && handleAttrSelect(key, val)}
-                            disabled={!!isOos} title={colorName}
-                            className={cn('relative w-10 h-10 rounded-full border-2 transition-all',
-                              isSelected ? 'border-primary scale-110' : 'border-border hover:border-primary/50',
-                              isOos && 'opacity-40 cursor-not-allowed')}
-                            style={{ backgroundColor: val }}>
-                            {isSelected && <div className="absolute inset-0 flex items-center justify-center"><div className="w-2.5 h-2.5 rounded-full bg-white shadow" /></div>}
+                            disabled={!!isOos}
+                            className={cn('px-4 py-2 rounded-xl text-sm font-medium border transition-all',
+                              isSelected ? 'border-primary bg-primary/10 text-primary' : 'border-border text-foreground hover:border-primary/50 hover:bg-muted/50',
+                              isOos && 'opacity-40 cursor-not-allowed line-through')}>
+                            {val}
                           </button>
                         );
-                      }
-
-                      const swatchImg = variantForVal?.images?.[0]?.url;
-                      if (attrType === 'image' && swatchImg) {
-                        return (
-                          <button key={val} onClick={() => !isOos && handleAttrSelect(key, val)}
-                            disabled={!!isOos} title={val}
-                            className={cn('w-12 h-12 rounded-xl overflow-hidden border-2 transition-all',
-                              isSelected ? 'border-primary' : 'border-border hover:border-primary/50',
-                              isOos && 'opacity-40 cursor-not-allowed')}>
-                            <img src={swatchImg} alt={val} className="w-full h-full object-cover" />
-                          </button>
-                        );
-                      }
-
-                      return (
-                        <button key={val} onClick={() => !isOos && handleAttrSelect(key, val)}
-                          disabled={!!isOos}
-                          className={cn('px-4 py-2 rounded-xl text-sm font-medium border transition-all',
-                            isSelected ? 'border-primary bg-primary/10 text-primary' : 'border-border text-foreground hover:border-primary/50 hover:bg-muted/50',
-                            isOos && 'opacity-40 cursor-not-allowed line-through')}>
-                          {val}
-                        </button>
-                      );
-                    })}
+                      })}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-
-            {/* Stock indicator */}
-            <div className="flex items-center gap-2">
-              {outOfStock ? (
-                <span className="inline-flex items-center gap-1.5 text-sm font-medium text-red-500">
-                  <span className="w-2 h-2 rounded-full bg-red-500" /> Sin stock
-                </span>
-              ) : lowStock ? (
-                <span className="inline-flex items-center gap-1.5 text-sm font-medium text-orange-500">
-                  <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
-                  ¡Solo {stock} disponibles!
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-600 dark:text-emerald-400">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500" /> En stock
-                </span>
-              )}
+                );
+              })}
             </div>
 
-            {/* Qty + actions */}
-            <div className="space-y-4 pt-1">
-              <div className="flex items-center gap-3 flex-wrap">
-                <div className="flex items-center border border-border rounded-xl overflow-hidden">
-                  <button onClick={() => setQty(q => Math.max(1, q - 1))}
-                    className="w-10 h-10 flex items-center justify-center hover:bg-muted transition-colors active:bg-muted/80">
-                    <Minus className="w-4 h-4" />
-                  </button>
-                  <span className="w-11 text-center text-sm font-semibold select-none">{qty}</span>
-                  <button onClick={() => !outOfStock && setQty(q => Math.min(q + 1, stock > 0 ? stock : 99))}
-                    className="w-10 h-10 flex items-center justify-center hover:bg-muted transition-colors active:bg-muted/80">
-                    <Plus className="w-4 h-4" />
-                  </button>
-                </div>
-
-                <button onClick={toggleWishlist}
-                  className={cn('w-10 h-10 rounded-xl border flex items-center justify-center transition-all',
-                    isWishlisted ? 'border-red-300 bg-red-50 dark:bg-red-900/20 text-red-500' : 'border-border text-muted-foreground hover:border-red-300 hover:text-red-400')}>
-                  <Heart className={cn('w-5 h-5', isWishlisted && 'fill-current')} />
-                </button>
-                <button onClick={() => { navigator.clipboard?.writeText(window.location.href); toast.success('Enlace copiado'); }}
-                  className="w-10 h-10 rounded-xl border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-all">
-                  <Share2 className="w-4 h-4" />
-                </button>
-                <button onClick={toggleCompare}
-                  className={cn('w-10 h-10 rounded-xl border flex items-center justify-center text-xs font-bold transition-all',
-                    compareList.includes(product.id) ? 'border-primary bg-primary/10 text-primary' : 'border-border text-muted-foreground hover:border-primary/40 hover:text-foreground')}>
-                  VS
-                </button>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <button onClick={handleBuyNow} disabled={outOfStock}
-                  className={cn('flex items-center justify-center gap-2 py-3.5 sm:py-4 rounded-xl font-semibold text-sm transition-all',
-                    outOfStock ? 'bg-muted text-muted-foreground cursor-not-allowed' : 'bg-primary text-primary-foreground hover:bg-primary/90 active:scale-[0.98]')}>
-                  <Zap className="w-4 h-4" />
-                  {outOfStock ? 'Sin stock' : 'Comprar ahora'}
-                </button>
-                {addedToCart ? (
-                  <button onClick={() => navigate('/carrito')}
-                    className="flex items-center justify-center gap-2 py-3.5 sm:py-4 rounded-xl font-semibold text-sm border-2 border-emerald-500 text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-all">
-                    <CheckCircle className="w-4 h-4" /> Ver carrito
-                  </button>
-                ) : inCart ? (
-                  <button onClick={() => navigate('/carrito')}
-                    className="flex items-center justify-center gap-2 py-3.5 sm:py-4 rounded-xl font-semibold text-sm border-2 border-emerald-500 text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-all">
-                    <ShoppingCart className="w-4 h-4" /> Ver carrito
-                  </button>
+            {/* ── Stock + qty row ── */}
+            <div className="flex items-center justify-between mb-5">
+              <div>
+                {outOfStock ? (
+                  <span className="inline-flex items-center gap-1.5 text-sm font-medium text-red-500">
+                    <span className="w-2 h-2 rounded-full bg-red-500" /> Sin stock
+                  </span>
+                ) : lowStock ? (
+                  <span className="inline-flex items-center gap-1.5 text-sm font-medium text-orange-500">
+                    <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
+                    ¡Solo {stock} disponibles!
+                  </span>
                 ) : (
-                  <button onClick={handleAdd} disabled={outOfStock}
-                    className={cn('flex items-center justify-center gap-2 py-3.5 sm:py-4 rounded-xl font-semibold text-sm border-2 transition-all',
-                      outOfStock ? 'border-border text-muted-foreground cursor-not-allowed' :
-                      'border-primary text-primary hover:bg-primary/5 active:scale-[0.98]')}>
-                    <ShoppingCart className="w-4 h-4" /> Agregar
-                  </button>
+                  <span className="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-600 dark:text-emerald-400">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500" /> En stock
+                  </span>
                 )}
               </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">Cantidad:</span>
+                <div className="flex items-center border border-border rounded-xl overflow-hidden">
+                  <button onClick={() => setQty(q => Math.max(1, q - 1))}
+                    className="w-9 h-9 flex items-center justify-center hover:bg-muted transition-colors active:bg-muted/80">
+                    <Minus className="w-3.5 h-3.5" />
+                  </button>
+                  <span className="w-10 text-center text-sm font-semibold select-none">{qty}</span>
+                  <button onClick={() => !outOfStock && setQty(q => Math.min(q + 1, stock > 0 ? stock : 99))}
+                    className="w-9 h-9 flex items-center justify-center hover:bg-muted transition-colors active:bg-muted/80">
+                    <Plus className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* ── CTA buttons (stacked, full-width like MercadoLibre) ── */}
+            <div className="space-y-3">
+              <button onClick={handleBuyNow} disabled={outOfStock}
+                className={cn('w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-semibold text-[15px] transition-all',
+                  outOfStock ? 'bg-muted text-muted-foreground cursor-not-allowed' : 'bg-primary text-primary-foreground hover:bg-primary/90 active:scale-[0.99]')}>
+                <Zap className="w-4 h-4" />
+                {outOfStock ? 'Sin stock' : 'Comprar ahora'}
+              </button>
+
+              <button onClick={handleAdd} disabled={outOfStock}
+                className={cn('w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-semibold text-[15px] border-2 transition-all',
+                  outOfStock ? 'border-border text-muted-foreground cursor-not-allowed' :
+                  addedToCart ? 'border-emerald-500 text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20' :
+                  'border-primary text-primary hover:bg-primary/5 active:scale-[0.99]')}>
+                {addedToCart
+                  ? <><CheckCircle className="w-4 h-4" /> ¡Agregado al carrito!</>
+                  : <><ShoppingCart className="w-4 h-4" /> Agregar al carrito</>}
+              </button>
+
+              {(inCart || addedToCart) && (
+                <button onClick={() => navigate('/carrito')}
+                  className="w-full text-center text-sm text-primary font-medium hover:underline py-1 transition-colors">
+                  Ver carrito →
+                </button>
+              )}
 
               {product.is_digital && (product as any).digital_demo_url && (
                 <button onClick={() => setShowDemo(true)}
-                  className="w-full flex items-center justify-center gap-1.5 py-2 text-sm text-primary font-medium hover:underline transition-colors">
+                  className="w-full flex items-center justify-center gap-1.5 py-2 text-sm text-muted-foreground font-medium hover:text-primary transition-colors">
                   <Eye className="w-4 h-4" />
                   Ver demostración gratuita
                 </button>
               )}
             </div>
 
+            {/* ── Trust badges ── */}
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mt-5 pt-5 border-t border-border">
+              <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Truck className="w-4 h-4 text-primary" /> Envío rápido
+              </span>
+              <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Shield className="w-4 h-4 text-primary" /> Pago seguro
+              </span>
+              <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <RotateCcw className="w-4 h-4 text-primary" /> 30 días devolución
+              </span>
+            </div>
+
             {compareList.length >= 2 && (
               <button onClick={() => navigate(`/tienda/comparar?ids=${compareList.join(',')}`)}
-                className="w-full py-2.5 text-sm font-semibold text-primary hover:bg-primary/5 rounded-xl transition-colors">
+                className="mt-3 w-full py-2.5 text-sm font-semibold text-primary hover:bg-primary/5 rounded-xl transition-colors">
                 Comparar {compareList.length} productos seleccionados →
               </button>
             )}
