@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useDatabase, useStorage } from '@/lib/backend';
 import { useCart } from '@/store/cartStore';
 import { useAuthStore } from '@/store/authStore';
@@ -13,7 +13,8 @@ import {
   ShoppingCart, Star, ChevronLeft, ChevronRight, Plus, Minus,
   Truck, Shield, RotateCcw, Heart, Share2, Package, Tag, MessageSquare,
   Layers, Upload, ThumbsUp, Flag, ChevronDown, CircleCheck as CheckCircle,
-  Play, Download, Eye, Lock, Zap, Info, ExternalLink,
+  Play, Download, Eye, Lock, Zap, Info, ExternalLink, Image as ImageIcon,
+  SlidersHorizontal, X, Award,
 } from 'lucide-react';
 import Navbar from '@/components/landing/Navbar';
 import Footer from '@/components/landing/Footer';
@@ -26,10 +27,10 @@ function fmtPrice(n: number, showUsd: boolean, rate: number, symbol: string) {
 
 function StarsDisplay({ value, size = 14 }: { value: number; size?: number }) {
   return (
-    <div className="flex gap-0.5">
+    <div className="flex gap-0.5" aria-label={`${value} de 5`}>
       {Array.from({ length: 5 }).map((_, i) => (
         <Star key={i} style={{ width: size, height: size }}
-          className={i < Math.round(value) ? 'text-amber-400 fill-amber-400' : 'text-muted-foreground/30'} />
+          className={i < Math.round(value) ? 'text-amber-400 fill-amber-400' : 'text-muted-foreground/25'} />
       ))}
     </div>
   );
@@ -130,6 +131,495 @@ function DescriptionRenderer({ text }: { text: string }) {
   );
 }
 
+/* ─── Swipe gallery: native scroll-snap + pointer drag ─── */
+interface MediaItem { url: string; alt?: string; isVideo: boolean; thumbnail?: string }
+
+function SwipeGallery({
+  media, altName, discount, featured, isDigital, onOpenLightbox,
+}: {
+  media: MediaItem[]; altName: string; discount: number; featured: boolean; isDigital: boolean;
+  onOpenLightbox: (url: string) => void;
+}) {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [active, setActive] = useState(0);
+  const dragState = useRef({ down: false, startX: 0, startScroll: 0, moved: false });
+
+  const scrollToIdx = useCallback((idx: number, smooth = true) => {
+    const el = trackRef.current;
+    if (!el) return;
+    const slide = el.children[idx] as HTMLElement | undefined;
+    if (slide) slide.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', inline: 'center', block: 'nearest' });
+  }, []);
+
+  // Track active slide via scroll
+  useEffect(() => {
+    const el = trackRef.current;
+    if (!el) return;
+    let raf = 0;
+    const onScroll = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const slideW = el.clientWidth || 1;
+        setActive(Math.round(el.scrollLeft / slideW));
+      });
+    };
+    el.addEventListener('scroll', onScroll, { passive: true });
+    return () => { el.removeEventListener('scroll', onScroll); cancelAnimationFrame(raf); };
+  }, [media.length]);
+
+  // Pointer drag for mouse/hybrid
+  const onPointerDown = (e: React.PointerEvent) => {
+    const el = trackRef.current; if (!el) return;
+    if (e.pointerType === 'touch') return; // native scroll handles touch
+    dragState.current = { down: true, startX: e.clientX, startScroll: el.scrollLeft, moved: false };
+    el.setPointerCapture(e.pointerId);
+    el.style.scrollSnapType = 'none';
+  };
+  const onPointerMove = (e: React.PointerEvent) => {
+    const el = trackRef.current; if (!el) return;
+    if (!dragState.current.down) return;
+    const dx = e.clientX - dragState.current.startX;
+    if (Math.abs(dx) > 4) dragState.current.moved = true;
+    el.scrollLeft = dragState.current.startScroll - dx;
+  };
+  const onPointerUp = (e: React.PointerEvent) => {
+    const el = trackRef.current; if (!el) return;
+    dragState.current.down = false;
+    el.releasePointerCapture(e.pointerId);
+    el.style.scrollSnapType = 'x mandatory';
+    if (dragState.current.moved) scrollToIdx(active, true);
+  };
+
+  if (media.length === 0) {
+    return (
+      <div className="relative w-full overflow-hidden bg-muted/30 rounded-2xl flex items-center justify-center" style={{ aspectRatio: '1 / 1' }}>
+        <Package className="w-20 h-20 text-muted-foreground/20" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="relative w-full overflow-hidden bg-muted/30 rounded-2xl">
+        {discount > 0 && (
+          <span className="absolute top-3 left-3 z-20 bg-red-500 text-white text-xs font-bold px-2.5 py-1 rounded-lg shadow-sm">-{discount}%</span>
+        )}
+        {featured && (
+          <span className="absolute top-3 right-3 z-20 bg-amber-400 text-amber-900 text-xs font-bold px-2.5 py-1 rounded-lg shadow-sm flex items-center gap-1">
+            <Star className="w-3 h-3 fill-current" /> Destacado
+          </span>
+        )}
+        {isDigital && (
+          <span className="absolute bottom-3 left-3 z-20 bg-primary text-primary-foreground text-xs font-bold px-2.5 py-1 rounded-lg shadow-sm flex items-center gap-1">
+            <Zap className="w-3 h-3" /> Digital
+          </span>
+        )}
+
+        {/* Track */}
+        <div
+          ref={trackRef}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          onPointerCancel={onPointerUp}
+          className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide touch-pan-y"
+          style={{ scrollSnapType: 'x mandatory', cursor: 'grab' }}
+        >
+          {media.map((m, i) => (
+            <div key={i} className="snap-center shrink-0 w-full relative" style={{ aspectRatio: '1 / 1' }}>
+              {m.isVideo ? (
+                <video src={m.url} controls poster={m.thumbnail}
+                  className="w-full h-full object-cover" />
+              ) : (
+                <img src={m.url} alt={m.alt || altName} draggable={false}
+                  className="w-full h-full object-cover select-none"
+                  onClick={(e) => { if (!dragState.current.moved) onOpenLightbox(m.url); e.stopPropagation(); }}
+                  onDragStart={(e) => e.preventDefault()} loading={i === 0 ? 'eager' : 'lazy'} />
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Arrows (desktop) */}
+        {media.length > 1 && (<>
+          <button onClick={() => scrollToIdx(active - 1 < 0 ? media.length - 1 : active - 1)}
+            className="hidden sm:flex absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-background/90 backdrop-blur-sm rounded-full items-center justify-center shadow-sm z-10 hover:bg-background transition-colors">
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <button onClick={() => scrollToIdx(active + 1 >= media.length ? 0 : active + 1)}
+            className="hidden sm:flex absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-background/90 backdrop-blur-sm rounded-full items-center justify-center shadow-sm z-10 hover:bg-background transition-colors">
+            <ChevronRight className="w-4 h-4" />
+          </button>
+          <div className="absolute bottom-3 right-3 z-20 bg-black/50 text-white text-[11px] font-medium px-2 py-0.5 rounded-full backdrop-blur-sm pointer-events-none">
+            {active + 1} / {media.length}
+          </div>
+        </>)}
+      </div>
+
+      {/* Thumbnails */}
+      {media.length > 1 && (
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+          {media.map((m, i) => (
+            <button key={i} onClick={() => scrollToIdx(i)}
+              className={cn('flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden border-2 transition-all',
+                active === i ? 'border-primary' : 'border-transparent hover:border-primary/40 opacity-70 hover:opacity-100')}>
+              {m.isVideo
+                ? <div className="w-full h-full bg-muted flex items-center justify-center"><Play className="w-4 h-4 text-muted-foreground" /></div>
+                : <img src={m.url} alt="" className="w-full h-full object-cover" loading="lazy" />}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Dots (mobile) */}
+      {media.length > 1 && (
+        <div className="flex sm:hidden justify-center gap-1.5">
+          {media.map((_, i) => (
+            <button key={i} onClick={() => scrollToIdx(i)}
+              className={cn('h-1.5 rounded-full transition-all', active === i ? 'w-6 bg-primary' : 'w-1.5 bg-muted-foreground/30')}
+              aria-label={`Imagen ${i + 1}`} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─── Reviews section ─── */
+type SortKey = 'helpful' | 'recent' | 'high' | 'low';
+
+function ReviewsSection({
+  reviews, avgRating, ratingDist, helpfulIds, reportedIds, onMarkHelpful, onReport, onOpenLightbox,
+  reviewForm, setReviewForm, uploadingImg, onUploadImg, submittingReview, onSubmitReview, user, navigate,
+}: {
+  reviews: ProductReview[]; avgRating: number; ratingDist: { n: number; count: number; pct: number }[];
+  helpfulIds: Set<string>; reportedIds: Set<string>;
+  onMarkHelpful: (id: string, count: number) => void; onReport: (id: string) => void;
+  onOpenLightbox: (url: string) => void;
+  reviewForm: { rating: number; title: string; body: string; images: string[] };
+  setReviewForm: React.Dispatch<React.SetStateAction<{ rating: number; title: string; body: string; images: string[] }>>;
+  uploadingImg: boolean; onUploadImg: (f: File) => void;
+  submittingReview: boolean; onSubmitReview: () => void;
+  user: any; navigate: (path: string) => void;
+}) {
+  const [starFilter, setStarFilter] = useState(0);
+  const [photosOnly, setPhotosOnly] = useState(false);
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [sort, setSort] = useState<SortKey>('helpful');
+  const [visible, setVisible] = useState(5);
+
+  const allPhotos = useMemo(
+    () => reviews.flatMap(r => (r.images || []).map(url => ({ url, reviewId: r.id }))),
+    [reviews]
+  );
+
+  const filtered = useMemo(() => {
+    let list = [...reviews];
+    if (starFilter > 0) list = list.filter(r => r.rating === starFilter);
+    if (photosOnly) list = list.filter(r => (r.images || []).length > 0);
+    if (verifiedOnly) list = list.filter(r => r.verified_purchase);
+    switch (sort) {
+      case 'recent': list.sort((a, b) => b.created_at.localeCompare(a.created_at)); break;
+      case 'high': list.sort((a, b) => b.rating - a.rating); break;
+      case 'low': list.sort((a, b) => a.rating - b.rating); break;
+      default: list.sort((a, b) => (b.helpful_count ?? 0) - (a.helpful_count ?? 0)); break;
+    }
+    return list;
+  }, [reviews, starFilter, photosOnly, verifiedOnly, sort]);
+
+  const featured = useMemo(() => {
+    if (reviews.length === 0) return null;
+    return [...reviews].sort((a, b) => (b.helpful_count ?? 0) - (a.helpful_count ?? 0))[0];
+  }, [reviews]);
+
+  const activeFilters = starFilter > 0 || photosOnly || verifiedOnly;
+  const clearFilters = () => { setStarFilter(0); setPhotosOnly(false); setVerifiedOnly(false); };
+
+  const sortOptions: { value: SortKey; label: string }[] = [
+    { value: 'helpful', label: 'Más útiles' },
+    { value: 'recent', label: 'Más recientes' },
+    { value: 'high', label: 'Mayor calificación' },
+    { value: 'low', label: 'Menor calificación' },
+  ];
+
+  return (
+    <div className="space-y-8">
+      {/* ── Summary + distribution ── */}
+      {reviews.length > 0 && (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10">
+          {/* Big score */}
+          <div className="lg:col-span-4 flex flex-row lg:flex-col items-center lg:items-start gap-4 lg:gap-2">
+            <div className="flex flex-col items-center lg:items-start">
+              <span className="text-5xl lg:text-6xl font-semibold text-foreground leading-none tracking-tight">{avgRating.toFixed(1)}</span>
+              <StarsDisplay value={avgRating} size={20} />
+              <span className="text-sm text-muted-foreground mt-1">{reviews.length} reseñas en total</span>
+            </div>
+            <button onClick={() => { window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); }}
+              className="lg:mt-3 px-5 py-2.5 bg-primary text-primary-foreground rounded-xl font-semibold text-sm hover:bg-primary/90 active:scale-95 transition-all">
+              Escribir reseña
+            </button>
+          </div>
+
+          {/* Distribution */}
+          <div className="lg:col-span-5 space-y-2">
+            {ratingDist.map(({ n, count, pct }) => (
+              <button key={n} onClick={() => setStarFilter(starFilter === n ? 0 : n)}
+                className={cn('w-full flex items-center gap-2.5 group rounded-lg px-1 py-0.5 transition-colors',
+                  starFilter === n ? 'bg-amber-50 dark:bg-amber-900/20' : 'hover:bg-muted/40')}>
+                <div className="flex items-center gap-0.5 w-14 flex-shrink-0">
+                  <span className="text-xs font-medium text-foreground w-3 text-right">{n}</span>
+                  <Star className={cn('w-3.5 h-3.5 ml-0.5', count > 0 ? 'text-amber-400 fill-amber-400' : 'text-muted-foreground/25')} />
+                </div>
+                <div className="flex-1 h-2.5 bg-muted rounded-full overflow-hidden">
+                  <div className="h-full bg-amber-400 rounded-full transition-all duration-700 ease-out" style={{ width: `${pct}%` }} />
+                </div>
+                <span className="text-xs text-muted-foreground w-8 text-right flex-shrink-0">{count}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Aggregated photos */}
+          {allPhotos.length > 0 && (
+            <div className="lg:col-span-3">
+              <p className="text-xs font-semibold text-foreground mb-2 flex items-center gap-1.5">
+                <ImageIcon className="w-3.5 h-3.5" /> Fotos de clientes ({allPhotos.length})
+              </p>
+              <div className="grid grid-cols-4 lg:grid-cols-3 gap-1.5">
+                {allPhotos.slice(0, 9).map((p, i) => (
+                  <button key={i} onClick={() => onOpenLightbox(p.url)}
+                    className="aspect-square rounded-lg overflow-hidden border border-border hover:scale-105 transition-transform">
+                    <img src={p.url} alt="" className="w-full h-full object-cover" loading="lazy" />
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Filters + sort ── */}
+      {reviews.length > 0 && (
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-2 border-t border-border">
+          <div className="flex items-center gap-2 flex-wrap">
+            <SlidersHorizontal className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+            {starFilter > 0 && (
+              <button onClick={() => setStarFilter(0)}
+                className="flex items-center gap-1 px-2.5 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium">
+                {starFilter} ★ <X className="w-3 h-3" />
+              </button>
+            )}
+            <button onClick={() => setPhotosOnly(v => !v)}
+              className={cn('flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all',
+                photosOnly ? 'bg-primary text-primary-foreground border-primary' : 'border-border text-muted-foreground hover:text-foreground hover:border-primary/40')}>
+              <ImageIcon className="w-3.5 h-3.5" /> Con fotos
+            </button>
+            <button onClick={() => setVerifiedOnly(v => !v)}
+              className={cn('flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all',
+                verifiedOnly ? 'bg-primary text-primary-foreground border-primary' : 'border-border text-muted-foreground hover:text-foreground hover:border-primary/40')}>
+              <CheckCircle className="w-3.5 h-3.5" /> Verificadas
+            </button>
+            {activeFilters && (
+              <button onClick={clearFilters} className="text-xs text-red-500 hover:underline font-medium px-2">Limpiar</button>
+            )}
+          </div>
+
+          <div className="relative sm:ml-auto">
+            <select value={sort} onChange={e => setSort(e.target.value as SortKey)}
+              className="appearance-none pl-3 pr-8 py-1.5 bg-muted/40 border border-border rounded-lg text-xs font-medium text-foreground outline-none focus:border-primary cursor-pointer">
+              {sortOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+            </select>
+            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground pointer-events-none" />
+          </div>
+        </div>
+      )}
+
+      {/* ── Featured review ── */}
+      {featured && !activeFilters && sort === 'helpful' && (
+        <div className="rounded-2xl border border-amber-300/50 bg-amber-50/50 dark:bg-amber-900/10 p-5 space-y-3">
+          <div className="flex items-center gap-2 text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wide">
+            <Award className="w-4 h-4" /> Reseña destacada
+          </div>
+          <ReviewCard r={featured} helpfulIds={helpfulIds} reportedIds={reportedIds}
+            onMarkHelpful={onMarkHelpful} onReport={onReport} onOpenLightbox={onOpenLightbox} />
+        </div>
+      )}
+
+      {/* ── Review list ── */}
+      <div className="space-y-0 divide-y divide-border">
+        {filtered.slice(0, visible).map(r => (
+          <ReviewCard key={r.id} r={r} helpfulIds={helpfulIds} reportedIds={reportedIds}
+            onMarkHelpful={onMarkHelpful} onReport={onReport} onOpenLightbox={onOpenLightbox} />
+        ))}
+
+        {filtered.length === 0 && reviews.length > 0 && (
+          <div className="text-center py-12 space-y-2">
+            <MessageSquare className="w-12 h-12 mx-auto text-muted-foreground/20" />
+            <p className="text-base font-semibold text-foreground">Sin reseñas con estos filtros</p>
+            <button onClick={clearFilters} className="text-sm text-primary hover:underline font-medium">Ver todas las reseñas</button>
+          </div>
+        )}
+
+        {reviews.length === 0 && (
+          <div className="text-center py-12 space-y-2">
+            <MessageSquare className="w-12 h-12 mx-auto text-muted-foreground/20" />
+            <p className="text-base font-semibold text-foreground">Sin reseñas aún</p>
+            <p className="text-sm text-muted-foreground">Sé el primero en compartir tu experiencia</p>
+          </div>
+        )}
+
+        {filtered.length > visible && (
+          <button onClick={() => setVisible(v => v + 5)}
+            className="w-full flex items-center justify-center gap-2 py-4 text-sm font-medium text-primary hover:bg-primary/5 rounded-xl transition-colors">
+            <ChevronDown className="w-4 h-4" /> Ver más reseñas ({filtered.length - visible} restantes)
+          </button>
+        )}
+      </div>
+
+      {/* ── Write review ── */}
+      <div className="pt-6 border-t border-border space-y-5">
+        <div>
+          <h3 className="text-base font-semibold text-foreground">¿Ya compraste este producto?</h3>
+          <p className="text-sm text-muted-foreground mt-0.5">Comparte tu opinión con otros compradores</p>
+        </div>
+
+        {!user ? (
+          <div className="flex flex-col items-start gap-3">
+            <p className="text-sm text-foreground">Inicia sesión para escribir una reseña</p>
+            <button onClick={() => navigate('/login')}
+              className="px-6 py-2.5 bg-primary text-primary-foreground rounded-xl font-semibold text-sm hover:bg-primary/90 transition-colors">
+              Iniciar sesión
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-5">
+            <div>
+              <p className="text-sm font-semibold text-foreground mb-3">1. ¿Cómo calificarías este producto? *</p>
+              <StarPicker value={reviewForm.rating} onChange={v => setReviewForm(p => ({ ...p, rating: v }))} />
+            </div>
+
+            {reviewForm.rating > 0 && (<>
+              <div>
+                <p className="text-sm font-semibold text-foreground mb-2">2. Ponle un título a tu reseña</p>
+                <input value={reviewForm.title}
+                  onChange={e => setReviewForm(p => ({ ...p, title: e.target.value }))}
+                  placeholder={reviewForm.rating >= 4 ? 'Ej: Excelente calidad, muy recomendado' : reviewForm.rating === 3 ? 'Ej: Bueno pero mejorable' : 'Ej: No cumplió mis expectativas'}
+                  maxLength={100}
+                  className="w-full px-4 py-3 bg-muted/40 border border-border rounded-xl text-sm text-foreground outline-none focus:border-primary transition-colors" />
+              </div>
+
+              <div>
+                <p className="text-sm font-semibold text-foreground mb-2">3. Cuéntanos más</p>
+                <textarea value={reviewForm.body}
+                  onChange={e => setReviewForm(p => ({ ...p, body: e.target.value }))}
+                  placeholder="¿Qué te gustó? ¿Qué no? ¿Volverías a comprarlo?"
+                  rows={4} maxLength={1000}
+                  className="w-full px-4 py-3 bg-muted/40 border border-border rounded-xl text-sm text-foreground outline-none focus:border-primary resize-none transition-colors" />
+                <p className="text-xs text-muted-foreground text-right mt-1">{reviewForm.body.length}/1000</p>
+              </div>
+
+              <div>
+                <p className="text-sm font-semibold text-foreground mb-2">4. Agrega fotos <span className="font-normal text-muted-foreground">(opcional)</span></p>
+                <div className="flex gap-2 flex-wrap">
+                  {reviewForm.images.map((img, i) => (
+                    <div key={i} className="relative" style={{ width: 80, height: 80 }}>
+                      <img src={img} alt="" className="w-full h-full rounded-xl object-cover border-2 border-primary/30" />
+                      <button onClick={() => setReviewForm(p => ({ ...p, images: p.images.filter((_, j) => j !== i) }))}
+                        className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold shadow-md">×</button>
+                    </div>
+                  ))}
+                  {reviewForm.images.length < 5 && (
+                    <label className={cn('rounded-xl border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-colors group',
+                      uploadingImg ? 'opacity-50 cursor-not-allowed border-border' : 'border-border hover:border-primary hover:bg-primary/5')}
+                      style={{ width: 80, height: 80 }}>
+                      {uploadingImg
+                        ? <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                        : <>
+                          <Upload className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                          <span className="text-[10px] text-muted-foreground mt-1 group-hover:text-primary transition-colors">Foto</span>
+                        </>}
+                      <input type="file" accept="image/*" className="hidden" disabled={uploadingImg}
+                        onChange={e => e.target.files?.[0] && onUploadImg(e.target.files[0])} />
+                    </label>
+                  )}
+                </div>
+              </div>
+
+              <button onClick={onSubmitReview}
+                disabled={submittingReview || reviewForm.rating === 0}
+                className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3.5 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:bg-primary/90 disabled:opacity-50 active:scale-[0.98] transition-all">
+                {submittingReview
+                  ? <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Publicando...</>
+                  : 'Publicar reseña'}
+              </button>
+            </>)}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ReviewCard({
+  r, helpfulIds, reportedIds, onMarkHelpful, onReport, onOpenLightbox,
+}: {
+  r: ProductReview; helpfulIds: Set<string>; reportedIds: Set<string>;
+  onMarkHelpful: (id: string, count: number) => void; onReport: (id: string) => void;
+  onOpenLightbox: (url: string) => void;
+}) {
+  return (
+    <div className="py-5 first:pt-0 space-y-2.5">
+      <div className="flex items-start justify-between gap-3 flex-wrap">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-sm flex-shrink-0">
+            {((r.profile as any)?.full_name || 'U')[0].toUpperCase()}
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-foreground">{(r.profile as any)?.full_name || 'Cliente'}</p>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-xs text-muted-foreground">
+                {new Date(r.created_at).toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric' })}
+              </span>
+              {r.verified_purchase && (
+                <span className="text-xs text-emerald-600 font-medium flex items-center gap-1">
+                  <CheckCircle className="w-3 h-3" /> Compra verificada
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+        <StarsDisplay value={r.rating} size={14} />
+      </div>
+      {r.title && <p className="text-sm font-semibold text-foreground">{r.title}</p>}
+      {r.body && <p className="text-sm text-muted-foreground leading-relaxed">{r.body}</p>}
+      {(r.images || []).length > 0 && (
+        <div className="flex gap-2 flex-wrap">
+          {(r.images as string[]).map((img, i) => (
+            <button key={i} onClick={() => onOpenLightbox(img)}
+              className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border border-border hover:scale-105 transition-transform">
+              <img src={img} alt="" className="w-full h-full object-cover" />
+            </button>
+          ))}
+        </div>
+      )}
+      <div className="flex items-center gap-4 text-xs">
+        <button onClick={() => onMarkHelpful(r.id, r.helpful_count ?? 0)} disabled={helpfulIds.has(r.id)}
+          className={cn('flex items-center gap-1.5 font-medium transition-colors',
+            helpfulIds.has(r.id) ? 'text-primary' : 'text-muted-foreground hover:text-primary')}>
+          <ThumbsUp className={cn('w-3.5 h-3.5', helpfulIds.has(r.id) && 'fill-current')} />
+          Útil ({r.helpful_count ?? 0})
+        </button>
+        <button onClick={() => onReport(r.id)} disabled={reportedIds.has(r.id)}
+          className={cn('flex items-center gap-1.5 font-medium transition-colors',
+            reportedIds.has(r.id) ? 'text-red-400' : 'text-muted-foreground hover:text-red-500')}>
+          <Flag className="w-3.5 h-3.5" />
+          {reportedIds.has(r.id) ? 'Reportada' : 'Reportar'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Main page ─── */
 export default function ProductDetailPage() {
   const database = useDatabase();
   const storage = useStorage();
@@ -146,14 +636,12 @@ export default function ProductDetailPage() {
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
   const [selectedAttrs, setSelectedAttrs] = useState<Record<string, string>>({});
   const [qty, setQty] = useState(1);
-  const [imgIdx, setImgIdx] = useState(0);
   const [addedToCart, setAddedToCart] = useState(false);
   const [activeTab, setActiveTab] = useState<'description' | 'specs' | 'reviews' | 'digital'>('description');
   const [reviewForm, setReviewForm] = useState({ rating: 0, title: '', body: '', images: [] as string[] });
   const [submittingReview, setSubmittingReview] = useState(false);
   const [uploadingImg, setUploadingImg] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
-  const [reviewsPage, setReviewsPage] = useState(5);
   const [showDemo, setShowDemo] = useState(false);
   const [compareList, setCompareList] = useState<string[]>([]);
   const [helpfulIds, setHelpfulIds] = useState<Set<string>>(new Set());
@@ -272,10 +760,10 @@ export default function ProductDetailPage() {
   const outOfStock = !!(product?.track_stock && stock === 0);
   const lowStock = !!(product?.track_stock && stock > 0 && stock <= 10);
 
-  const allMedia = [
-    ...(product?.images || []).map(i => ({ ...i, isVideo: false })),
+  const allMedia: MediaItem[] = useMemo(() => [
+    ...(product?.images || []).map(i => ({ url: i.url, alt: i.alt, isVideo: false })),
     ...(product?.videos || []).map(v => ({ url: v.url, alt: 'Video', isVideo: true, thumbnail: v.thumbnail })),
-  ];
+  ], [product]);
 
   const handleAdd = () => {
     if (!product || outOfStock) return;
@@ -417,7 +905,7 @@ export default function ProductDetailPage() {
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
 
-      {/* Breadcrumb — flat, no background band */}
+      {/* Breadcrumb */}
       <div className="pt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-1.5 text-xs text-muted-foreground flex-wrap">
           <button onClick={() => navigate('/')} className="hover:text-foreground transition-colors">Inicio</button>
@@ -430,7 +918,7 @@ export default function ProductDetailPage() {
             </button>
           </>)}
           <span className="text-muted-foreground/40">/</span>
-          <span className="text-foreground font-medium truncate max-w-[160px] sm:max-w-[240px]">{product.name}</span>
+          <span className="text-foreground font-medium truncate max-w-[140px] sm:max-w-[240px]">{product.name}</span>
           {isAdmin && (
             <button onClick={() => navigate(`/dashboard/admin/productos/${product.id}`)}
               className="ml-auto flex items-center gap-1.5 text-xs font-semibold text-primary hover:bg-primary/10 px-3 py-1.5 rounded-lg transition-colors">
@@ -446,67 +934,12 @@ export default function ProductDetailPage() {
 
           {/* ── LEFT: Gallery ── */}
           <div className="lg:col-span-5 space-y-3">
-            {/* Main image */}
-            <div className="relative w-full overflow-hidden bg-muted/30 rounded-2xl" style={{ aspectRatio: '1 / 1' }}>
-              {discount > 0 && (
-                <span className="absolute top-3 left-3 z-10 bg-red-500 text-white text-xs font-bold px-2.5 py-1 rounded-lg shadow-sm">
-                  -{discount}%
-                </span>
-              )}
-              {product.featured && (
-                <span className="absolute top-3 right-3 z-10 bg-amber-400 text-amber-900 text-xs font-bold px-2.5 py-1 rounded-lg shadow-sm flex items-center gap-1">
-                  <Star className="w-3 h-3 fill-current" /> Destacado
-                </span>
-              )}
-              {product.is_digital && (
-                <span className="absolute bottom-3 left-3 z-10 bg-primary text-primary-foreground text-xs font-bold px-2.5 py-1 rounded-lg shadow-sm flex items-center gap-1">
-                  <Zap className="w-3 h-3" /> Digital
-                </span>
-              )}
+            <SwipeGallery
+              media={allMedia} altName={product.name}
+              discount={discount} featured={product.featured} isDigital={!!product.is_digital}
+              onOpenLightbox={setLightboxImg} />
 
-              {allMedia.length === 0 ? (
-                <div className="w-full h-full flex items-center justify-center">
-                  <Package className="w-20 h-20 text-muted-foreground/20" />
-                </div>
-              ) : (allMedia[imgIdx] as any).isVideo ? (
-                <video src={allMedia[imgIdx].url} controls className="w-full h-full object-cover" />
-              ) : (
-                <img src={allMedia[imgIdx].url} alt={(allMedia[imgIdx] as any).alt || product.name}
-                  className="w-full h-full object-cover transition-opacity duration-300 cursor-zoom-in"
-                  onClick={() => setLightboxImg(allMedia[imgIdx].url)} />
-              )}
-
-              {allMedia.length > 1 && (<>
-                <button onClick={() => setImgIdx(i => (i - 1 + allMedia.length) % allMedia.length)}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-background/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm z-10 hover:bg-background transition-colors">
-                  <ChevronLeft className="w-4 h-4" />
-                </button>
-                <button onClick={() => setImgIdx(i => (i + 1) % allMedia.length)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-background/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm z-10 hover:bg-background transition-colors">
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-                <div className="absolute bottom-3 right-3 z-10 bg-black/50 text-white text-[11px] font-medium px-2 py-0.5 rounded-full backdrop-blur-sm">
-                  {imgIdx + 1} / {allMedia.length}
-                </div>
-              </>)}
-            </div>
-
-            {/* Thumbnails */}
-            {allMedia.length > 1 && (
-              <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
-                {allMedia.map((m, i) => (
-                  <button key={i} onClick={() => setImgIdx(i)}
-                    className={cn('flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden border-2 transition-all',
-                      imgIdx === i ? 'border-primary' : 'border-transparent hover:border-primary/40')}>
-                    {(m as any).isVideo
-                      ? <div className="w-full h-full bg-muted flex items-center justify-center"><Play className="w-4 h-4 text-muted-foreground" /></div>
-                      : <img src={m.url} alt="" className="w-full h-full object-cover" loading="lazy" />}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* Trust badges — inline row, no boxes */}
+            {/* Trust badges */}
             <div className="hidden sm:flex items-center gap-6 pt-2 text-xs text-muted-foreground">
               <span className="flex items-center gap-1.5"><Truck className="w-4 h-4 text-primary" /> Envío rápido</span>
               <span className="flex items-center gap-1.5"><Shield className="w-4 h-4 text-primary" /> Pago seguro</span>
@@ -516,7 +949,6 @@ export default function ProductDetailPage() {
 
           {/* ── RIGHT: Info ── */}
           <div className="lg:col-span-7 space-y-5">
-
             {product.category && (
               <button onClick={() => navigate(`/tienda?cat=${product.category_id}`)}
                 className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline">
@@ -527,9 +959,9 @@ export default function ProductDetailPage() {
 
             <h1 className="text-2xl sm:text-3xl font-semibold text-foreground leading-tight">{product.name}</h1>
 
-            {/* Rating row */}
             {reviews.length > 0 ? (
-              <button onClick={() => setActiveTab('reviews')} className="flex items-center gap-2 group">
+              <button onClick={() => { setActiveTab('reviews'); document.getElementById('product-tabs')?.scrollIntoView({ behavior: 'smooth' }); }}
+                className="flex items-center gap-2 group">
                 <StarsDisplay value={avgRating} size={16} />
                 <span className="text-sm font-semibold text-foreground">{avgRating.toFixed(1)}</span>
                 <span className="text-sm text-primary underline-offset-2 group-hover:underline">
@@ -537,13 +969,13 @@ export default function ProductDetailPage() {
                 </span>
               </button>
             ) : (
-              <button onClick={() => setActiveTab('reviews')}
+              <button onClick={() => { setActiveTab('reviews'); document.getElementById('product-tabs')?.scrollIntoView({ behavior: 'smooth' }); }}
                 className="text-sm text-muted-foreground hover:text-primary transition-colors">
                 Sin valoraciones — ¡sé el primero!
               </button>
             )}
 
-            {/* Price — no card wrapper, just typography */}
+            {/* Price */}
             <div className="space-y-1.5">
               <div className="flex items-end gap-3 flex-wrap">
                 <span className="text-3xl sm:text-4xl font-semibold text-foreground tracking-tight">
@@ -555,9 +987,7 @@ export default function ProductDetailPage() {
                   </span>
                 )}
                 {discount > 0 && (
-                  <span className="text-sm font-bold text-red-500">
-                    -{discount}% OFF
-                  </span>
+                  <span className="text-sm font-bold text-red-500">-{discount}% OFF</span>
                 )}
               </div>
               {discount > 0 && (
@@ -653,7 +1083,7 @@ export default function ProductDetailPage() {
               );
             })}
 
-            {/* Stock indicator — minimal, no box */}
+            {/* Stock indicator */}
             <div className="flex items-center gap-2">
               {outOfStock ? (
                 <span className="inline-flex items-center gap-1.5 text-sm font-medium text-red-500">
@@ -702,7 +1132,6 @@ export default function ProductDetailPage() {
                 </button>
               </div>
 
-              {/* Action buttons — full width on mobile, side-by-side on sm+ */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <button onClick={handleBuyNow} disabled={outOfStock}
                   className={cn('flex items-center justify-center gap-2 py-3.5 sm:py-4 rounded-xl font-semibold text-sm transition-all',
@@ -747,7 +1176,7 @@ export default function ProductDetailPage() {
         </div>
 
         {/* ── STICKY TABS ── */}
-        <div className="mt-10 sm:mt-12">
+        <div className="mt-10 sm:mt-12" id="product-tabs">
           <div className="sticky top-16 z-30 bg-background/95 backdrop-blur-sm border-b border-border -mx-4 sm:mx-0 px-4 sm:px-0">
             <div className="flex gap-1 overflow-x-auto scrollbar-hide">
               {tabs.map(t => (
@@ -760,28 +1189,27 @@ export default function ProductDetailPage() {
             </div>
           </div>
 
-          {/* Tab content */}
-          <div className="pt-6 sm:pt-8 max-w-4xl">
-            {/* Description */}
+          {/* Tab content — uses full width for reviews, constrained for text */}
+          <div className="pt-6 sm:pt-8">
             {activeTab === 'description' && (
-              <DescriptionRenderer text={product.description || ''} />
+              <div className="max-w-4xl">
+                <DescriptionRenderer text={product.description || ''} />
+              </div>
             )}
 
-            {/* Specs — clean two-column definition list, no boxed table */}
             {activeTab === 'specs' && hasSpecs && (
-              <dl className="divide-y divide-border">
+              <dl className="max-w-4xl grid grid-cols-1 sm:grid-cols-2 gap-x-8">
                 {Object.entries(specs).map(([k, v]) => (
-                  <div key={k} className="grid grid-cols-1 sm:grid-cols-3 gap-1 sm:gap-4 py-3.5">
-                    <dt className="text-sm font-semibold text-foreground capitalize">{k}</dt>
-                    <dd className="text-sm text-muted-foreground sm:col-span-2">{String(v)}</dd>
+                  <div key={k} className="flex justify-between gap-4 py-3 border-b border-border">
+                    <dt className="text-sm font-semibold text-foreground capitalize flex-shrink-0">{k}</dt>
+                    <dd className="text-sm text-muted-foreground text-right">{String(v)}</dd>
                   </div>
                 ))}
               </dl>
             )}
 
-            {/* Digital */}
             {activeTab === 'digital' && product.is_digital && (
-              <div className="space-y-5">
+              <div className="max-w-4xl space-y-5">
                 <div className="flex items-start gap-3">
                   <Zap className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
                   <div>
@@ -804,191 +1232,16 @@ export default function ProductDetailPage() {
               </div>
             )}
 
-            {/* Reviews */}
             {activeTab === 'reviews' && (
-              <div className="space-y-8">
-                {/* Rating overview — no card, just spacing */}
-                {reviews.length > 0 && (
-                  <div className="grid grid-cols-1 sm:grid-cols-5 gap-6">
-                    <div className="sm:col-span-2 flex flex-col items-center sm:items-start gap-2">
-                      <span className="text-5xl font-semibold text-foreground leading-none">{avgRating.toFixed(1)}</span>
-                      <StarsDisplay value={avgRating} size={18} />
-                      <span className="text-sm text-muted-foreground">{reviews.length} reseñas</span>
-                    </div>
-                    <div className="sm:col-span-3 space-y-2">
-                      {ratingDist.map(({ n, count, pct }) => (
-                        <div key={n} className="flex items-center gap-2.5">
-                          <div className="flex items-center gap-0.5 w-12 flex-shrink-0">
-                            <span className="text-xs text-muted-foreground w-3 text-right">{n}</span>
-                            <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400 ml-0.5" />
-                          </div>
-                          <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                            <div className="h-full bg-amber-400 rounded-full transition-all duration-700" style={{ width: `${pct}%` }} />
-                          </div>
-                          <span className="text-xs text-muted-foreground w-5 text-right flex-shrink-0">{count}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Review list — no card per review, separated by hairlines */}
-                <div className="space-y-0 divide-y divide-border">
-                  {reviews.slice(0, reviewsPage).map(r => (
-                    <div key={r.id} className="py-5 first:pt-0 space-y-2.5">
-                      <div className="flex items-start justify-between gap-3 flex-wrap">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-sm flex-shrink-0">
-                            {((r.profile as any)?.full_name || 'U')[0].toUpperCase()}
-                          </div>
-                          <div>
-                            <p className="text-sm font-semibold text-foreground">{(r.profile as any)?.full_name || 'Cliente'}</p>
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-xs text-muted-foreground">
-                                {new Date(r.created_at).toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric' })}
-                              </span>
-                              {r.verified_purchase && (
-                                <span className="text-xs text-emerald-600 font-medium flex items-center gap-1">
-                                  <CheckCircle className="w-3 h-3" /> Compra verificada
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                        <StarsDisplay value={r.rating} size={14} />
-                      </div>
-                      {r.title && <p className="text-sm font-semibold text-foreground">{r.title}</p>}
-                      {r.body && <p className="text-sm text-muted-foreground leading-relaxed">{r.body}</p>}
-                      {(r.images || []).length > 0 && (
-                        <div className="flex gap-2 flex-wrap">
-                          {(r.images as string[]).map((img, i) => (
-                            <button key={i} onClick={() => setLightboxImg(img)}
-                              className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border border-border hover:scale-105 transition-transform">
-                              <img src={img} alt="" className="w-full h-full object-cover" />
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                      <div className="flex items-center gap-4 text-xs">
-                        <button
-                          onClick={() => markHelpful(r.id, r.helpful_count ?? 0)}
-                          disabled={helpfulIds.has(r.id)}
-                          className={cn('flex items-center gap-1.5 font-medium transition-colors',
-                            helpfulIds.has(r.id) ? 'text-primary' : 'text-muted-foreground hover:text-primary')}>
-                          <ThumbsUp className={cn('w-3.5 h-3.5', helpfulIds.has(r.id) && 'fill-current')} />
-                          Útil ({r.helpful_count ?? 0})
-                        </button>
-                        <button
-                          onClick={() => reportReview(r.id)}
-                          disabled={reportedIds.has(r.id)}
-                          className={cn('flex items-center gap-1.5 font-medium transition-colors',
-                            reportedIds.has(r.id) ? 'text-red-400' : 'text-muted-foreground hover:text-red-500')}>
-                          <Flag className="w-3.5 h-3.5" />
-                          {reportedIds.has(r.id) ? 'Reportada' : 'Reportar'}
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-
-                  {reviews.length === 0 && (
-                    <div className="text-center py-12 space-y-2">
-                      <MessageSquare className="w-12 h-12 mx-auto text-muted-foreground/20" />
-                      <p className="text-base font-semibold text-foreground">Sin reseñas aún</p>
-                      <p className="text-sm text-muted-foreground">Sé el primero en compartir tu experiencia</p>
-                    </div>
-                  )}
-
-                  {reviews.length > reviewsPage && (
-                    <button onClick={() => setReviewsPage(p => p + 5)}
-                      className="w-full flex items-center justify-center gap-2 py-3.5 text-sm font-medium text-primary hover:bg-primary/5 rounded-xl transition-colors">
-                      <ChevronDown className="w-4 h-4" /> Ver más reseñas
-                    </button>
-                  )}
-                </div>
-
-                {/* Write review — no card wrapper */}
-                <div className="pt-6 border-t border-border space-y-5">
-                  <div>
-                    <h3 className="text-base font-semibold text-foreground">¿Ya compraste este producto?</h3>
-                    <p className="text-sm text-muted-foreground mt-0.5">Comparte tu opinión con otros compradores</p>
-                  </div>
-
-                  {!user ? (
-                    <div className="flex flex-col items-start gap-3">
-                      <p className="text-sm text-foreground">Inicia sesión para escribir una reseña</p>
-                      <button onClick={() => navigate('/login')}
-                        className="px-6 py-2.5 bg-primary text-primary-foreground rounded-xl font-semibold text-sm hover:bg-primary/90 transition-colors">
-                        Iniciar sesión
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="space-y-5">
-                      <div>
-                        <p className="text-sm font-semibold text-foreground mb-3">1. ¿Cómo calificarías este producto? *</p>
-                        <StarPicker value={reviewForm.rating} onChange={v => setReviewForm(p => ({ ...p, rating: v }))} />
-                      </div>
-
-                      {reviewForm.rating > 0 && (
-                        <>
-                          <div>
-                            <p className="text-sm font-semibold text-foreground mb-2">2. Ponle un título a tu reseña</p>
-                            <input value={reviewForm.title}
-                              onChange={e => setReviewForm(p => ({ ...p, title: e.target.value }))}
-                              placeholder={reviewForm.rating >= 4 ? 'Ej: Excelente calidad, muy recomendado' : reviewForm.rating === 3 ? 'Ej: Bueno pero mejorable' : 'Ej: No cumplió mis expectativas'}
-                              maxLength={100}
-                              className="w-full px-4 py-3 bg-muted/40 border border-border rounded-xl text-sm text-foreground outline-none focus:border-primary transition-colors" />
-                          </div>
-
-                          <div>
-                            <p className="text-sm font-semibold text-foreground mb-2">3. Cuéntanos más</p>
-                            <textarea value={reviewForm.body}
-                              onChange={e => setReviewForm(p => ({ ...p, body: e.target.value }))}
-                              placeholder="¿Qué te gustó? ¿Qué no? ¿Volverías a comprarlo?"
-                              rows={4} maxLength={1000}
-                              className="w-full px-4 py-3 bg-muted/40 border border-border rounded-xl text-sm text-foreground outline-none focus:border-primary resize-none transition-colors" />
-                            <p className="text-xs text-muted-foreground text-right mt-1">{reviewForm.body.length}/1000</p>
-                          </div>
-
-                          <div>
-                            <p className="text-sm font-semibold text-foreground mb-2">4. Agrega fotos <span className="font-normal text-muted-foreground">(opcional)</span></p>
-                            <div className="flex gap-2 flex-wrap">
-                              {reviewForm.images.map((img, i) => (
-                                <div key={i} className="relative">
-                                  <img src={img} alt="" className="w-18 h-18 sm:w-20 sm:h-20 rounded-xl object-cover border-2 border-primary/30" style={{ width: 80, height: 80 }} />
-                                  <button onClick={() => setReviewForm(p => ({ ...p, images: p.images.filter((_, j) => j !== i) }))}
-                                    className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold shadow-md">×</button>
-                                </div>
-                              ))}
-                              {reviewForm.images.length < 5 && (
-                                <label className={cn('rounded-xl border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-colors group',
-                                  uploadingImg ? 'opacity-50 cursor-not-allowed border-border' : 'border-border hover:border-primary hover:bg-primary/5')}
-                                  style={{ width: 80, height: 80 }}>
-                                  {uploadingImg
-                                    ? <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                                    : <>
-                                      <Upload className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
-                                      <span className="text-[10px] text-muted-foreground mt-1 group-hover:text-primary transition-colors">Foto</span>
-                                    </>}
-                                  <input type="file" accept="image/*" className="hidden" disabled={uploadingImg}
-                                    onChange={e => e.target.files?.[0] && uploadReviewImg(e.target.files[0])} />
-                                </label>
-                              )}
-                            </div>
-                          </div>
-
-                          <button onClick={submitReview}
-                            disabled={submittingReview || reviewForm.rating === 0}
-                            className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3.5 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:bg-primary/90 disabled:opacity-50 active:scale-[0.98] transition-all">
-                            {submittingReview
-                              ? <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Publicando...</>
-                              : 'Publicar reseña'}
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
+              <ReviewsSection
+                reviews={reviews} avgRating={avgRating} ratingDist={ratingDist}
+                helpfulIds={helpfulIds} reportedIds={reportedIds}
+                onMarkHelpful={markHelpful} onReport={reportReview} onOpenLightbox={setLightboxImg}
+                reviewForm={reviewForm} setReviewForm={setReviewForm}
+                uploadingImg={uploadingImg} onUploadImg={uploadReviewImg}
+                submittingReview={submittingReview} onSubmitReview={submitReview}
+                user={user} navigate={navigate}
+              />
             )}
           </div>
         </div>
