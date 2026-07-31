@@ -15,7 +15,7 @@ import {
   Layers, Upload, ThumbsUp, ThumbsDown, Flag, ChevronDown, CircleCheck as CheckCircle,
   Play, Eye, Lock, Zap, Info, ExternalLink, Image as ImageIcon,
   SlidersHorizontal, X, Award, CornerDownRight, MessageCircle, Send,
-  ZoomIn, BadgeCheck, Wallet,
+  BadgeCheck,
 } from 'lucide-react';
 import Navbar from '@/components/landing/Navbar';
 import Footer from '@/components/landing/Footer';
@@ -62,15 +62,14 @@ function StarPicker({ value, onChange }: { value: number; onChange: (v: number) 
         {Array.from({ length: 5 }).map((_, i) => (
           <button key={i} type="button"
             onMouseEnter={() => setHover(i + 1)} onMouseLeave={() => setHover(0)}
-            onClick={() => onChange(i + 1)}
-            className="transition-transform hover:scale-110 active:scale-95">
-            <Star className={cn('w-8 h-8 sm:w-9 sm:h-9 transition-colors',
+            onClick={() => onChange(i + 1)}>
+            <Star className={cn('w-7 h-7 transition-colors',
               i < (hover || value) ? 'text-amber-400 fill-amber-400' : 'text-muted-foreground/20')} />
           </button>
         ))}
       </div>
       {(hover || value) > 0 && (
-        <span className="text-sm font-bold text-amber-600 bg-amber-50 dark:bg-amber-900/20 px-3 py-1 rounded-lg">
+        <span className="text-xs font-medium text-muted-foreground">
           {labels[hover || value]}
         </span>
       )}
@@ -80,11 +79,11 @@ function StarPicker({ value, onChange }: { value: number; onChange: (v: number) 
 
 /* Rich description renderer */
 function DescriptionRenderer({ text }: { text: string }) {
-  if (!text) return <p className="text-muted-foreground italic text-sm">Sin descripción disponible.</p>;
+  if (!text) return <p className="text-muted-foreground text-sm">Sin descripción disponible.</p>;
 
   const blocks = text.split(/\n{2,}/g);
   return (
-    <div className="space-y-4 max-w-none">
+    <div className="space-y-4 max-w-3xl">
       {blocks.map((block, bi) => {
         const trimmed = block.trim();
         if (!trimmed) return null;
@@ -92,9 +91,9 @@ function DescriptionRenderer({ text }: { text: string }) {
         const imgMatch = trimmed.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
         if (imgMatch) {
           return (
-            <figure key={bi} className="rounded-xl overflow-hidden">
+            <figure key={bi} className="rounded-lg overflow-hidden">
               <img src={imgMatch[2]} alt={imgMatch[1]}
-                className="w-full object-cover max-h-[480px]" loading="lazy" />
+                className="w-full object-cover max-h-[420px]" loading="lazy" />
               {imgMatch[1] && <figcaption className="text-xs text-muted-foreground text-center pt-2">{imgMatch[1]}</figcaption>}
             </figure>
           );
@@ -105,7 +104,7 @@ function DescriptionRenderer({ text }: { text: string }) {
           return (
             <div key={bi} className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {galleryMatches.map((m, i) => (
-                <div key={i} className="rounded-xl overflow-hidden aspect-square">
+                <div key={i} className="rounded-lg overflow-hidden aspect-square">
                   <img src={m[2]} alt={m[1]} className="w-full h-full object-cover" loading="lazy" />
                 </div>
               ))}
@@ -114,10 +113,10 @@ function DescriptionRenderer({ text }: { text: string }) {
         }
 
         if (trimmed.startsWith('## ')) {
-          return <h3 key={bi} className="text-lg font-semibold text-foreground pt-2">{trimmed.slice(3)}</h3>;
+          return <h3 key={bi} className="text-base font-semibold text-foreground pt-2">{trimmed.slice(3)}</h3>;
         }
         if (trimmed.startsWith('# ')) {
-          return <h2 key={bi} className="text-xl font-semibold text-foreground pt-2">{trimmed.slice(2)}</h2>;
+          return <h2 key={bi} className="text-lg font-semibold text-foreground pt-2">{trimmed.slice(2)}</h2>;
         }
 
         const lines = trimmed.split('\n');
@@ -126,8 +125,8 @@ function DescriptionRenderer({ text }: { text: string }) {
           return (
             <ul key={bi} className="space-y-2">
               {lines.map((l, i) => (
-                <li key={i} className="flex items-start gap-2.5 text-sm text-foreground/90 leading-relaxed">
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 flex-shrink-0" />
+                <li key={i} className="flex items-start gap-2.5 text-sm text-foreground/80 leading-relaxed">
+                  <span className="w-1 h-1 rounded-full bg-muted-foreground/40 mt-2 flex-shrink-0" />
                   <span dangerouslySetInnerHTML={{ __html: l.slice(2).replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>') }} />
                 </li>
               ))}
@@ -140,7 +139,7 @@ function DescriptionRenderer({ text }: { text: string }) {
         ).replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
 
         return (
-          <p key={bi} className="text-sm sm:text-[15px] text-foreground/80 leading-relaxed"
+          <p key={bi} className="text-sm text-foreground/70 leading-relaxed"
             dangerouslySetInnerHTML={{ __html: inlined }} />
         );
       })}
@@ -148,7 +147,7 @@ function DescriptionRenderer({ text }: { text: string }) {
   );
 }
 
-/* ─── Swipe gallery: native scroll-snap + pointer drag + desktop zoom ─── */
+/* ─── Swipe gallery ─── */
 interface MediaItem { url: string; alt?: string; isVideo: boolean; thumbnail?: string }
 
 function SwipeGallery({
@@ -206,7 +205,6 @@ function SwipeGallery({
     if (dragState.current.moved) scrollToIdx(active, true);
   };
 
-  // Desktop zoom on hover
   const onZoomMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!media[active] || media[active].isVideo) return;
     const rect = e.currentTarget.getBoundingClientRect();
@@ -217,41 +215,31 @@ function SwipeGallery({
 
   if (media.length === 0) {
     return (
-      <div className="relative w-full overflow-hidden bg-muted/30 rounded-2xl flex items-center justify-center" style={{ aspectRatio: '1 / 1' }}>
-        <Package className="w-20 h-20 text-muted-foreground/20" />
+      <div className="relative w-full overflow-hidden bg-muted/30 rounded-lg flex items-center justify-center border border-border" style={{ aspectRatio: '1 / 1' }}>
+        <Package className="w-16 h-16 text-muted-foreground/20" />
       </div>
     );
   }
 
-  const currentMedia = media[active];
-
   return (
-    <div className="space-y-3">
-      <div className="relative w-full overflow-hidden bg-muted/20 rounded-2xl border border-border/30 group">
+    <div className="space-y-2.5">
+      <div className="relative w-full overflow-hidden bg-muted/20 rounded-lg border border-border group">
         {discount > 0 && (
-          <span className="absolute top-3 left-3 z-20 bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-lg flex items-center gap-1">
+          <span className="absolute top-3 left-3 z-20 bg-red-500 text-white text-xs font-medium px-2 py-1 rounded-md flex items-center gap-1">
             <Tag className="w-3 h-3" /> -{discount}%
           </span>
         )}
         {featured && (
-          <span className="absolute top-3 right-3 z-20 bg-amber-400 text-amber-900 text-xs font-bold px-3 py-1.5 rounded-lg shadow-lg flex items-center gap-1">
+          <span className="absolute top-3 right-3 z-20 bg-foreground text-background text-xs font-medium px-2 py-1 rounded-md flex items-center gap-1">
             <Star className="w-3 h-3 fill-current" /> Destacado
           </span>
         )}
         {isDigital && (
-          <span className="absolute bottom-3 left-3 z-20 bg-primary text-primary-foreground text-xs font-bold px-3 py-1.5 rounded-lg shadow-lg flex items-center gap-1">
+          <span className="absolute bottom-3 left-3 z-20 bg-foreground/80 text-background text-xs font-medium px-2 py-1 rounded-md flex items-center gap-1">
             <Zap className="w-3 h-3" /> Digital
           </span>
         )}
 
-        {/* Zoom indicator (desktop) */}
-        {!currentMedia?.isVideo && (
-          <div className="hidden sm:flex absolute bottom-3 right-3 z-20 items-center gap-1 bg-black/50 text-white text-[11px] font-medium px-2.5 py-1 rounded-full backdrop-blur-sm pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
-            <ZoomIn className="w-3 h-3" /> Pasa el cursor para zoom
-          </div>
-        )}
-
-        {/* Track */}
         <div
           ref={trackRef}
           onPointerDown={onPointerDown}
@@ -259,7 +247,7 @@ function SwipeGallery({
           onPointerUp={onPointerUp}
           onPointerCancel={onPointerUp}
           className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide touch-pan-y"
-          style={{ scrollSnapType: 'x mandatory', cursor: 'grab' }}
+          style={{ scrollSnapType: 'x mandatory', cursor: 'zoom-in' }}
         >
           {media.map((m, i) => (
             <div
@@ -280,7 +268,7 @@ function SwipeGallery({
                   className="w-full h-full object-cover select-none transition-transform duration-200"
                   style={
                     i === active && zoomPos.active
-                      ? { transformOrigin: `${zoomPos.x}% ${zoomPos.y}%`, transform: 'scale(2)' }
+                      ? { transformOrigin: `${zoomPos.x}% ${zoomPos.y}%`, transform: 'scale(1.8)' }
                       : undefined
                   }
                   onClick={(e) => { if (!dragState.current.moved) onOpenLightbox(m.url); e.stopPropagation(); }}
@@ -292,37 +280,32 @@ function SwipeGallery({
           ))}
         </div>
 
-        {/* Arrows (desktop) */}
         {media.length > 1 && (<>
           <button onClick={() => scrollToIdx(active - 1 < 0 ? media.length - 1 : active - 1)}
-            className="hidden sm:flex absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-card/90 border border-border rounded-full items-center justify-center shadow-lg z-10 hover:bg-card hover:scale-110 transition-all text-foreground">
+            className="hidden sm:flex absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-background/90 border border-border rounded-full items-center justify-center z-10 hover:bg-background transition-colors text-foreground">
             <ChevronLeft className="w-4 h-4" />
           </button>
           <button onClick={() => scrollToIdx(active + 1 >= media.length ? 0 : active + 1)}
-            className="hidden sm:flex absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-card/90 border border-border rounded-full items-center justify-center shadow-lg z-10 hover:bg-card hover:scale-110 transition-all text-foreground">
+            className="hidden sm:flex absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-background/90 border border-border rounded-full items-center justify-center z-10 hover:bg-background transition-colors text-foreground">
             <ChevronRight className="w-4 h-4" />
           </button>
-          <div className="absolute bottom-3 right-3 z-20 bg-black/50 text-white text-[11px] font-medium px-2.5 py-1 rounded-full backdrop-blur-sm pointer-events-none sm:hidden">
+          <div className="absolute bottom-3 right-3 z-20 bg-foreground/70 text-background text-[11px] font-medium px-2 py-0.5 rounded-md sm:hidden">
             {active + 1} / {media.length}
           </div>
         </>)}
       </div>
 
-      {/* Thumbnails — elegant */}
       {media.length > 1 && (
         <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
           {media.map((m, i) => (
             <button key={i} onClick={() => scrollToIdx(i)}
               className={cn(
-                'flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border-2 transition-all relative',
-                active === i
-                  ? 'border-primary ring-2 ring-primary/20 opacity-100'
-                  : 'border-border opacity-60 hover:opacity-100 hover:border-primary/40'
+                'flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-md overflow-hidden border transition-colors',
+                active === i ? 'border-primary' : 'border-border hover:border-muted-foreground/40'
               )}>
               {m.isVideo
-                ? <div className="w-full h-full bg-muted flex items-center justify-center"><Play className="w-4 h-4 text-muted-foreground" /></div>
+                ? <div className="w-full h-full bg-muted flex items-center justify-center"><Play className="w-3.5 h-3.5 text-muted-foreground" /></div>
                 : <img src={m.url} alt="" className="w-full h-full object-cover" loading="lazy" />}
-              {active === i && <div className="absolute inset-0 bg-primary/5" />}
             </button>
           ))}
         </div>
@@ -340,15 +323,13 @@ function BenefitsStrip() {
     { icon: BadgeCheck, label: 'Garantía', desc: 'Producto original' },
   ];
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-3 py-4 border-y border-border">
       {items.map((item, i) => (
-        <div key={i} className="flex items-center gap-2.5 p-3 rounded-xl bg-muted/30 border border-border/40 hover:border-primary/20 hover:bg-primary/5 transition-all group">
-          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-            <item.icon className="w-4.5 h-4.5 text-primary" />
-          </div>
+        <div key={i} className="flex items-center gap-2.5">
+          <item.icon className="w-4 h-4 text-muted-foreground flex-shrink-0" />
           <div className="min-w-0">
-            <p className="text-xs font-bold text-foreground truncate">{item.label}</p>
-            <p className="text-[11px] text-muted-foreground truncate">{item.desc}</p>
+            <p className="text-xs font-medium text-foreground truncate leading-tight">{item.label}</p>
+            <p className="text-[11px] text-muted-foreground truncate leading-tight">{item.desc}</p>
           </div>
         </div>
       ))}
@@ -418,51 +399,48 @@ function ReviewsSection({
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* ── Summary + distribution ── */}
       {reviews.length > 0 && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10">
-          {/* Big score */}
-          <div className="lg:col-span-4 flex flex-row lg:flex-col items-center lg:items-start gap-4 lg:gap-2">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
+          <div className="lg:col-span-4 flex flex-row lg:flex-col items-center lg:items-start gap-4 lg:gap-1">
             <div className="flex flex-col items-center lg:items-start">
-              <span className="text-5xl lg:text-6xl font-semibold text-foreground leading-none tracking-tight">{avgRating.toFixed(1)}</span>
-              <StarsDisplay value={avgRating} size={20} />
-              <span className="text-sm text-muted-foreground mt-1">{reviews.length} reseñas en total</span>
+              <span className="text-4xl font-semibold text-foreground leading-none tracking-tight">{avgRating.toFixed(1)}</span>
+              <StarsDisplay value={avgRating} size={18} />
+              <span className="text-xs text-muted-foreground mt-1">{reviews.length} reseñas</span>
             </div>
             <button onClick={() => { window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); }}
-              className="lg:mt-3 px-5 py-2.5 bg-primary text-primary-foreground rounded-xl font-semibold text-sm hover:bg-primary/90 active:scale-95 transition-all">
+              className="lg:mt-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-xs font-medium hover:bg-primary/90 transition-colors">
               Escribir reseña
             </button>
           </div>
 
-          {/* Distribution */}
-          <div className="lg:col-span-5 space-y-2">
+          <div className="lg:col-span-5 space-y-1.5">
             {ratingDist.map(({ n, count, pct }) => (
               <button key={n} onClick={() => setStarFilter(starFilter === n ? 0 : n)}
-                className={cn('w-full flex items-center gap-2.5 group rounded-lg px-1 py-0.5 transition-colors',
-                  starFilter === n ? 'bg-amber-50 dark:bg-amber-900/20' : 'hover:bg-muted/40')}>
-                <div className="flex items-center gap-0.5 w-14 flex-shrink-0">
+                className={cn('w-full flex items-center gap-2.5 rounded-md px-1 py-0.5 transition-colors',
+                  starFilter === n ? 'bg-muted/60' : 'hover:bg-muted/40')}>
+                <div className="flex items-center gap-0.5 w-12 flex-shrink-0">
                   <span className="text-xs font-medium text-foreground w-3 text-right">{n}</span>
-                  <Star className={cn('w-3.5 h-3.5 ml-0.5', count > 0 ? 'text-amber-400 fill-amber-400' : 'text-muted-foreground/25')} />
+                  <Star className={cn('w-3 h-3 ml-0.5', count > 0 ? 'text-amber-400 fill-amber-400' : 'text-muted-foreground/25')} />
                 </div>
-                <div className="flex-1 h-2.5 bg-muted rounded-full overflow-hidden">
-                  <div className="h-full bg-amber-400 rounded-full transition-all duration-700 ease-out" style={{ width: `${pct}%` }} />
+                <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+                  <div className="h-full bg-amber-400 rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
                 </div>
-                <span className="text-xs text-muted-foreground w-8 text-right flex-shrink-0">{count}</span>
+                <span className="text-xs text-muted-foreground w-7 text-right flex-shrink-0">{count}</span>
               </button>
             ))}
           </div>
 
-          {/* Aggregated photos */}
           {allPhotos.length > 0 && (
             <div className="lg:col-span-3">
-              <p className="text-xs font-semibold text-foreground mb-2 flex items-center gap-1.5">
-                <ImageIcon className="w-3.5 h-3.5" /> Fotos de clientes ({allPhotos.length})
+              <p className="text-xs font-medium text-foreground mb-2 flex items-center gap-1.5">
+                <ImageIcon className="w-3.5 h-3.5 text-muted-foreground" /> Fotos ({allPhotos.length})
               </p>
               <div className="grid grid-cols-4 lg:grid-cols-3 gap-1.5">
                 {allPhotos.slice(0, 9).map((p, i) => (
                   <button key={i} onClick={() => onOpenLightbox(p.url)}
-                    className="aspect-square rounded-lg overflow-hidden border border-border hover:scale-105 transition-transform">
+                    className="aspect-square rounded-md overflow-hidden border border-border hover:border-muted-foreground/40 transition-colors">
                     <img src={p.url} alt="" className="w-full h-full object-cover" loading="lazy" />
                   </button>
                 ))}
@@ -474,33 +452,33 @@ function ReviewsSection({
 
       {/* ── Filters + sort ── */}
       {reviews.length > 0 && (
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-2 border-t border-border">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-1 border-t border-border">
           <div className="flex items-center gap-2 flex-wrap">
-            <SlidersHorizontal className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+            <SlidersHorizontal className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
             {starFilter > 0 && (
               <button onClick={() => setStarFilter(0)}
-                className="flex items-center gap-1 px-2.5 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium">
+                className="flex items-center gap-1 px-2.5 py-1 bg-muted text-foreground rounded-md text-xs font-medium">
                 {starFilter} ★ <X className="w-3 h-3" />
               </button>
             )}
             <button onClick={() => setPhotosOnly(v => !v)}
-              className={cn('flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all',
-                photosOnly ? 'bg-primary text-primary-foreground border-primary' : 'border-border text-muted-foreground hover:text-foreground hover:border-primary/40')}>
+              className={cn('flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium border transition-colors',
+                photosOnly ? 'bg-foreground text-background border-foreground' : 'border-border text-muted-foreground hover:text-foreground hover:border-muted-foreground/40')}>
               <ImageIcon className="w-3.5 h-3.5" /> Con fotos
             </button>
             <button onClick={() => setVerifiedOnly(v => !v)}
-              className={cn('flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all',
-                verifiedOnly ? 'bg-primary text-primary-foreground border-primary' : 'border-border text-muted-foreground hover:text-foreground hover:border-primary/40')}>
+              className={cn('flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium border transition-colors',
+                verifiedOnly ? 'bg-foreground text-background border-foreground' : 'border-border text-muted-foreground hover:text-foreground hover:border-muted-foreground/40')}>
               <CheckCircle className="w-3.5 h-3.5" /> Verificadas
             </button>
             {activeFilters && (
-              <button onClick={clearFilters} className="text-xs text-red-500 hover:underline font-medium px-2">Limpiar</button>
+              <button onClick={clearFilters} className="text-xs text-muted-foreground hover:text-foreground font-medium px-1 underline">Limpiar</button>
             )}
           </div>
 
           <div className="relative sm:ml-auto">
             <select value={sort} onChange={e => setSort(e.target.value as SortKey)}
-              className="has-chevron appearance-none pl-3 pr-8 py-1.5 bg-muted/40 border border-border rounded-lg text-xs font-medium text-foreground outline-none focus:border-primary cursor-pointer">
+              className="has-chevron appearance-none pl-3 pr-8 py-1 bg-transparent border border-border rounded-md text-xs font-medium text-foreground outline-none focus:border-primary cursor-pointer">
               {sortOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
             </select>
             <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground pointer-events-none" />
@@ -510,9 +488,9 @@ function ReviewsSection({
 
       {/* ── Featured review ── */}
       {featured && !activeFilters && sort === 'helpful' && (
-        <div className="rounded-2xl border border-amber-300/50 bg-amber-50/50 dark:bg-amber-900/10 p-5 space-y-3">
-          <div className="flex items-center gap-2 text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wide">
-            <Award className="w-4 h-4" /> Reseña destacada
+        <div className="rounded-lg border border-border p-4 space-y-3">
+          <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+            <Award className="w-3.5 h-3.5" /> Reseña destacada
           </div>
           <ReviewCard r={featured} helpfulIds={helpfulIds} reportedIds={reportedIds} likedReplyIds={likedReplyIds}
             onMarkHelpful={onMarkHelpful} onLikeReply={onLikeReply} onReport={onReport} onOpenLightbox={onOpenLightbox}
@@ -529,90 +507,90 @@ function ReviewsSection({
         ))}
 
         {filtered.length === 0 && reviews.length > 0 && (
-          <div className="text-center py-12 space-y-2">
-            <MessageSquare className="w-12 h-12 mx-auto text-muted-foreground/20" />
-            <p className="text-base font-semibold text-foreground">Sin reseñas con estos filtros</p>
-            <button onClick={clearFilters} className="text-sm text-primary hover:underline font-medium">Ver todas las reseñas</button>
+          <div className="text-center py-10 space-y-2">
+            <MessageSquare className="w-10 h-10 mx-auto text-muted-foreground/20" />
+            <p className="text-sm font-medium text-foreground">Sin reseñas con estos filtros</p>
+            <button onClick={clearFilters} className="text-xs text-primary hover:underline font-medium">Ver todas</button>
           </div>
         )}
 
         {reviews.length === 0 && (
-          <div className="text-center py-12 space-y-2">
-            <MessageSquare className="w-12 h-12 mx-auto text-muted-foreground/20" />
-            <p className="text-base font-semibold text-foreground">Sin reseñas aún</p>
-            <p className="text-sm text-muted-foreground">Sé el primero en compartir tu experiencia</p>
+          <div className="text-center py-10 space-y-2">
+            <MessageSquare className="w-10 h-10 mx-auto text-muted-foreground/20" />
+            <p className="text-sm font-medium text-foreground">Sin reseñas aún</p>
+            <p className="text-xs text-muted-foreground">Sé el primero en compartir tu experiencia</p>
           </div>
         )}
 
         {filtered.length > visible && (
           <button onClick={() => setVisible(v => v + 5)}
-            className="w-full flex items-center justify-center gap-2 py-4 text-sm font-medium text-primary hover:bg-primary/5 rounded-xl transition-colors">
-            <ChevronDown className="w-4 h-4" /> Ver más reseñas ({filtered.length - visible} restantes)
+            className="w-full flex items-center justify-center gap-2 py-3 text-xs font-medium text-primary hover:bg-muted/40 rounded-lg transition-colors">
+            <ChevronDown className="w-4 h-4" /> Ver más ({filtered.length - visible} restantes)
           </button>
         )}
       </div>
 
       {/* ── Write review ── */}
-      <div className="pt-6 border-t border-border space-y-5">
+      <div className="pt-5 border-t border-border space-y-4">
         <div>
-          <h3 className="text-base font-semibold text-foreground">¿Ya compraste este producto?</h3>
-          <p className="text-sm text-muted-foreground mt-0.5">Comparte tu opinión con otros compradores</p>
+          <h3 className="text-sm font-semibold text-foreground">¿Ya compraste este producto?</h3>
+          <p className="text-xs text-muted-foreground mt-0.5">Comparte tu opinión con otros compradores</p>
         </div>
 
         {!user ? (
           <div className="flex flex-col items-start gap-3">
             <p className="text-sm text-foreground">Inicia sesión para escribir una reseña</p>
             <button onClick={() => navigate('/login')}
-              className="px-6 py-2.5 bg-primary text-primary-foreground rounded-xl font-semibold text-sm hover:bg-primary/90 transition-colors">
+              className="px-5 py-2 bg-primary text-primary-foreground rounded-lg text-xs font-medium hover:bg-primary/90 transition-colors">
               Iniciar sesión
             </button>
           </div>
         ) : (
-          <div className="space-y-5">
+          <div className="space-y-4">
             <div>
-              <p className="text-sm font-semibold text-foreground mb-3">1. ¿Cómo calificarías este producto? *</p>
+              <p className="text-xs font-medium text-foreground mb-2.5">1. ¿Cómo calificarías este producto? *</p>
               <StarPicker value={reviewForm.rating} onChange={v => setReviewForm(p => ({ ...p, rating: v }))} />
             </div>
 
             {reviewForm.rating > 0 && (<>
               <div>
-                <p className="text-sm font-semibold text-foreground mb-2">2. Ponle un título a tu reseña</p>
+                <p className="text-xs font-medium text-foreground mb-2">2. Ponle un título a tu reseña</p>
                 <input value={reviewForm.title}
                   onChange={e => setReviewForm(p => ({ ...p, title: e.target.value }))}
                   placeholder={reviewForm.rating >= 4 ? 'Ej: Excelente calidad, muy recomendado' : reviewForm.rating === 3 ? 'Ej: Bueno pero mejorable' : 'Ej: No cumplió mis expectativas'}
                   maxLength={100}
-                  className="w-full px-4 py-3 bg-muted/40 border border-border rounded-xl text-sm text-foreground outline-none focus:border-primary transition-colors" />
+                  className="w-full px-3.5 py-2.5 bg-background border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors" />
               </div>
 
               <div>
-                <p className="text-sm font-semibold text-foreground mb-2">3. Cuéntanos más</p>
+                <p className="text-xs font-medium text-foreground mb-2">3. Cuéntanos más</p>
                 <textarea value={reviewForm.body}
                   onChange={e => setReviewForm(p => ({ ...p, body: e.target.value }))}
                   placeholder="¿Qué te gustó? ¿Qué no? ¿Volverías a comprarlo?"
                   rows={4} maxLength={1000}
-                  className="w-full px-4 py-3 bg-muted/40 border border-border rounded-xl text-sm text-foreground outline-none focus:border-primary resize-none transition-colors" />
+                  className="w-full px-3.5 py-2.5 bg-background border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary resize-none transition-colors" />
                 <p className="text-xs text-muted-foreground text-right mt-1">{reviewForm.body.length}/1000</p>
               </div>
 
               <div>
-                <p className="text-sm font-semibold text-foreground mb-2">4. Agrega fotos <span className="font-normal text-muted-foreground">(opcional)</span></p>
+                <p className="text-xs font-medium text-foreground mb-2">4. Agrega fotos <span className="font-normal text-muted-foreground">(opcional)</span></p>
                 <div className="flex gap-2 flex-wrap">
                   {reviewForm.images.map((img, i) => (
-                    <div key={i} className="relative" style={{ width: 80, height: 80 }}>
-                      <img src={img} alt="" className="w-full h-full rounded-xl object-cover border-2 border-primary/30" />
+                    <div key={i} className="relative" style={{ width: 72, height: 72 }}>
+                      <img src={img} alt="" className="w-full h-full rounded-lg object-cover border border-border" />
                       <button onClick={() => setReviewForm(p => ({ ...p, images: p.images.filter((_, j) => j !== i) }))}
-                        className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold shadow-md">×</button>
+                        className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-foreground text-background rounded-full flex items-center justify-center text-xs font-bold">×</button>
                     </div>
                   ))}
                   {reviewForm.images.length < 5 && (
-                    <label className={cn('rounded-xl border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-colors group',
-                      uploadingImg ? 'opacity-50 cursor-not-allowed border-border' : 'border-border hover:border-primary hover:bg-primary/5')}
-                      style={{ width: 80, height: 80 }}>
+                    <label className={cn('rounded-lg border border-dashed flex flex-col items-center justify-center cursor-pointer transition-colors',
+                      uploadingImg ? 'opacity-50 cursor-not-allowed border-border' : 'border-border hover:border-primary')}
+                      style={{ width: 72, height: 72 }}>
                       {uploadingImg
-                        ? <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                        ? <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
                         : <>
-                          <Upload className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
-                          <span className="text-[10px] text-muted-foreground mt-1 group-hover:text-primary transition-colors">Foto</span>
+                          <Upload className="w-4 h-4 text-muted-foreground" />
+                          <span className="text-[10px] text-muted-foreground mt-1">Foto</span>
                         </>}
                       <input type="file" accept="image/*" className="hidden" disabled={uploadingImg}
                         onChange={e => e.target.files?.[0] && onUploadImg(e.target.files[0])} />
@@ -623,7 +601,7 @@ function ReviewsSection({
 
               <button onClick={onSubmitReview}
                 disabled={submittingReview || reviewForm.rating === 0}
-                className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3.5 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:bg-primary/90 disabled:opacity-50 active:scale-[0.98] transition-all">
+                className="flex items-center justify-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors">
                 {submittingReview
                   ? <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Publicando...</>
                   : 'Publicar reseña'}
@@ -675,22 +653,19 @@ function ReviewCard({
   };
 
   return (
-    <div className="py-5 first:pt-0">
+    <div className="py-4 first:pt-0">
       <div className="flex gap-3">
-        {/* Avatar */}
-        <div className="w-10 h-10 rounded-full overflow-hidden bg-primary/10 flex items-center justify-center text-primary font-semibold text-sm flex-shrink-0">
+        <div className="w-9 h-9 rounded-full overflow-hidden bg-muted flex items-center justify-center text-muted-foreground font-medium text-xs flex-shrink-0">
           {avatarUrl
             ? <img src={avatarUrl} alt={fullName} className="w-full h-full object-cover" />
             : <span>{fullName[0].toUpperCase()}</span>}
         </div>
 
-        {/* Content */}
-        <div className="flex-1 min-w-0 space-y-2">
-          {/* Header row */}
+        <div className="flex-1 min-w-0 space-y-1.5">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm font-semibold text-foreground">{fullName}</span>
+            <span className="text-sm font-medium text-foreground">{fullName}</span>
             {r.verified_purchase && (
-              <span className="inline-flex items-center gap-1 text-[11px] text-emerald-600 dark:text-emerald-400 font-medium bg-emerald-500/10 px-1.5 py-0.5 rounded-full">
+              <span className="inline-flex items-center gap-1 text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
                 <CheckCircle className="w-3 h-3" /> Compra verificada
               </span>
             )}
@@ -698,12 +673,10 @@ function ReviewCard({
             <StarsDisplay value={r.rating} size={12} />
           </div>
 
-          {/* Title */}
-          {r.title && <p className="text-sm font-semibold text-foreground">{r.title}</p>}
+          {r.title && <p className="text-sm font-medium text-foreground">{r.title}</p>}
 
-          {/* Body — expandable */}
           {displayBody && (
-            <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">
+            <p className="text-sm text-foreground/70 leading-relaxed whitespace-pre-wrap">
               {displayBody}
               {isLong && (
                 <button onClick={() => setExpanded(v => !v)}
@@ -714,52 +687,51 @@ function ReviewCard({
             </p>
           )}
 
-          {/* Media */}
           {media.length > 0 && (
             <div className="flex gap-2 flex-wrap pt-1">
               {visibleMedia.map((img, i) => (
                 <button key={i} onClick={() => onOpenLightbox(img)}
-                  className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden border border-border hover:opacity-80 transition-opacity">
+                  className="w-18 h-18 sm:w-20 sm:h-20 rounded-md overflow-hidden border border-border hover:border-muted-foreground/40 transition-colors"
+                  style={{ width: 72, height: 72 }}>
                   <img src={img} alt="" className="w-full h-full object-cover" />
                 </button>
               ))}
               {media.length > 4 && !showFullMedia && (
                 <button onClick={() => setShowFullMedia(true)}
-                  className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl border border-border bg-muted/50 flex items-center justify-center text-xs font-medium text-muted-foreground hover:bg-muted transition-colors">
+                  className="rounded-md border border-border bg-muted/30 flex items-center justify-center text-xs font-medium text-muted-foreground hover:bg-muted/50 transition-colors"
+                  style={{ width: 72, height: 72 }}>
                   +{media.length - 4}
                 </button>
               )}
             </div>
           )}
 
-          {/* Action buttons */}
           <div className="flex items-center gap-1 pt-1">
             <button onClick={() => onMarkHelpful(r.id, r.helpful_count ?? 0)} disabled={helpfulIds.has(r.id)}
-              className={cn('flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium transition-colors',
-                helpfulIds.has(r.id) ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted')}>
+              className={cn('flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium transition-colors',
+                helpfulIds.has(r.id) ? 'text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50')}>
               <ThumbsUp className={cn('w-3.5 h-3.5', helpfulIds.has(r.id) && 'fill-current')} />
               {r.helpful_count ?? 0}
             </button>
             <button onClick={() => onLikeReply(r.id)} disabled={likedReplyIds.has(r.id)}
-              className={cn('flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium transition-colors',
-                likedReplyIds.has(r.id) ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted')}>
+              className={cn('flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium transition-colors',
+                likedReplyIds.has(r.id) ? 'text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50')}>
               <ThumbsDown className={cn('w-3.5 h-3.5', likedReplyIds.has(r.id) && 'fill-current')} />
             </button>
             <button onClick={() => setReplyOpen(v => !v)}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium text-muted-foreground hover:bg-muted transition-colors">
+              className="flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors">
               <MessageCircle className="w-3.5 h-3.5" /> Responder
             </button>
             <button onClick={() => onReport(r.id)} disabled={reportedIds.has(r.id)}
-              className={cn('flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium transition-colors ml-auto',
-                reportedIds.has(r.id) ? 'text-red-400' : 'text-muted-foreground hover:text-red-500')}>
+              className={cn('flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium transition-colors ml-auto',
+                reportedIds.has(r.id) ? 'text-muted-foreground/50' : 'text-muted-foreground/60 hover:text-foreground')}>
               <Flag className="w-3.5 h-3.5" />
             </button>
           </div>
 
-          {/* Reply input */}
           {replyOpen && (
-            <div className="flex gap-2 pt-2">
-              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-xs flex-shrink-0">
+            <div className="flex gap-2 pt-1.5">
+              <div className="w-7 h-7 rounded-full bg-muted flex items-center justify-center text-muted-foreground font-medium text-[11px] flex-shrink-0">
                 {user?.full_name?.[0]?.toUpperCase() || 'U'}
               </div>
               <div className="flex-1 space-y-2">
@@ -768,7 +740,7 @@ function ReviewCard({
                   onChange={e => setReplyText(e.target.value)}
                   placeholder="Escribe una respuesta..."
                   rows={2}
-                  className="w-full px-3 py-2 bg-muted/40 border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary resize-none placeholder:text-muted-foreground"
+                  className="w-full px-3 py-2 bg-background border border-border rounded-md text-sm text-foreground outline-none focus:border-primary resize-none placeholder:text-muted-foreground"
                 />
                 <div className="flex items-center gap-2 justify-end">
                   <button onClick={() => { setReplyOpen(false); setReplyText(''); }}
@@ -776,7 +748,7 @@ function ReviewCard({
                     Cancelar
                   </button>
                   <button onClick={handleReplySubmit} disabled={!replyText.trim() || submitting}
-                    className="flex items-center gap-1.5 px-4 py-1.5 bg-primary text-primary-foreground rounded-lg text-xs font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50">
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 bg-primary text-primary-foreground rounded-md text-xs font-medium hover:bg-primary/90 transition-colors disabled:opacity-50">
                     {submitting ? <div className="w-3 h-3 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" /> : <Send className="w-3 h-3" />}
                     Responder
                   </button>
@@ -785,7 +757,6 @@ function ReviewCard({
             </div>
           )}
 
-          {/* Replies toggle */}
           {replies.length > 0 && (
             <button onClick={() => setShowReplies(v => !v)}
               className="flex items-center gap-1.5 text-xs font-medium text-primary hover:underline pt-1">
@@ -794,9 +765,8 @@ function ReviewCard({
             </button>
           )}
 
-          {/* Threaded replies */}
           {showReplies && replies.length > 0 && (
-            <div className="space-y-3 pt-2 pl-2 border-l-2 border-border/40 ml-1">
+            <div className="space-y-3 pt-2 pl-2 border-l border-border ml-1">
               {replies.map(reply => (
                 <ReplyCard
                   key={reply.id}
@@ -818,25 +788,25 @@ function ReplyCard({ reply, liked, onLike }: {
 }) {
   return (
     <div className="flex gap-2.5">
-      <div className={cn('w-8 h-8 rounded-full flex items-center justify-center font-semibold text-xs flex-shrink-0',
-        reply.is_company ? 'bg-primary text-primary-foreground' : 'bg-primary/10 text-primary')}>
+      <div className={cn('w-7 h-7 rounded-full flex items-center justify-center font-medium text-[11px] flex-shrink-0',
+        reply.is_company ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground')}>
         {reply.author_name?.[0]?.toUpperCase() || 'U'}
       </div>
       <div className="flex-1 min-w-0 space-y-1">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-xs font-semibold text-foreground">{reply.author_name}</span>
+          <span className="text-xs font-medium text-foreground">{reply.author_name}</span>
           {reply.is_company && (
-            <span className="text-[10px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded-full">Empresa</span>
+            <span className="text-[10px] font-medium text-primary">Empresa</span>
           )}
           {reply.author_role && !reply.is_company && (
             <span className="text-[10px] text-muted-foreground">{reply.author_role}</span>
           )}
           <span className="text-[11px] text-muted-foreground">{timeAgo(reply.created_at)}</span>
         </div>
-        <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">{reply.body}</p>
+        <p className="text-sm text-foreground/70 leading-relaxed whitespace-pre-wrap">{reply.body}</p>
         <button onClick={onLike} disabled={liked}
           className={cn('flex items-center gap-1 text-xs font-medium transition-colors',
-            liked ? 'text-primary' : 'text-muted-foreground hover:text-primary')}>
+            liked ? 'text-primary' : 'text-muted-foreground hover:text-foreground')}>
           <ThumbsUp className={cn('w-3 h-3', liked && 'fill-current')} />
         </button>
       </div>
@@ -918,7 +888,6 @@ export default function ProductDetailPage() {
            : Promise.resolve({ data: null }),
     ]);
     const reviewsList = (revs || []) as ProductReview[];
-    // Fetch replies for all reviews in one query
     if (reviewsList.length > 0) {
       const reviewIds = reviewsList.map(r => r.id);
       const { data: repliesData } = await database.select<ProductReviewReply>('product_review_replies', {
@@ -968,7 +937,6 @@ export default function ProductDetailPage() {
     return () => clearProductSchema();
   }, [product, company.company_name, company.website_url]);
 
-  // Show sticky bar when user scrolls past the buy section
   useEffect(() => {
     const handler = () => {
       const buySection = document.getElementById('buy-section');
@@ -1157,13 +1125,13 @@ export default function ProductDetailPage() {
     return (
       <div className="min-h-screen bg-background flex flex-col">
         <Navbar />
-        <div className="pt-16 max-w-7xl mx-auto px-4 sm:px-6 py-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="space-y-3">
-            <div className="aspect-square bg-muted rounded-2xl animate-pulse" />
-            <div className="flex gap-2">{[...Array(4)].map((_, i) => <div key={i} className="w-16 h-16 bg-muted rounded-xl animate-pulse" />)}</div>
+        <div className="pt-16 max-w-6xl mx-auto px-4 sm:px-6 py-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="space-y-2.5">
+            <div className="aspect-square bg-muted/40 rounded-lg animate-pulse" />
+            <div className="flex gap-2">{[...Array(4)].map((_, i) => <div key={i} className="w-14 h-14 bg-muted/40 rounded-md animate-pulse" />)}</div>
           </div>
           <div className="space-y-4">
-            {[...Array(6)].map((_, i) => <div key={i} className="h-6 bg-muted rounded animate-pulse" style={{ width: `${60 + i * 5}%` }} />)}
+            {[...Array(6)].map((_, i) => <div key={i} className="h-5 bg-muted/40 rounded animate-pulse" style={{ width: `${60 + i * 5}%` }} />)}
           </div>
         </div>
       </div>
@@ -1175,10 +1143,10 @@ export default function ProductDetailPage() {
       <div className="min-h-screen bg-background flex flex-col">
         <Navbar />
         <div className="pt-16 flex flex-col items-center justify-center gap-4 px-4 text-center min-h-[60vh]">
-          <Package className="w-16 h-16 text-muted-foreground/20" />
-          <h2 className="text-xl font-semibold text-foreground">Producto no encontrado</h2>
+          <Package className="w-14 h-14 text-muted-foreground/20" />
+          <h2 className="text-lg font-semibold text-foreground">Producto no encontrado</h2>
           <button onClick={() => navigate('/tienda')}
-            className="px-6 py-3 bg-primary text-primary-foreground rounded-xl font-semibold text-sm">
+            className="px-5 py-2.5 bg-primary text-primary-foreground rounded-lg font-medium text-sm hover:bg-primary/90 transition-colors">
             Ir a la tienda
           </button>
         </div>
@@ -1191,9 +1159,9 @@ export default function ProductDetailPage() {
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
 
-      {/* Breadcrumb — compact */}
+      {/* Breadcrumb */}
       <div className="pt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 flex items-center gap-1.5 text-xs text-muted-foreground flex-wrap">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-1.5 text-xs text-muted-foreground flex-wrap">
           <button onClick={() => navigate('/')} className="hover:text-foreground transition-colors">Inicio</button>
           <span className="text-muted-foreground/40">/</span>
           <button onClick={() => navigate('/tienda')} className="hover:text-foreground transition-colors">Tienda</button>
@@ -1207,65 +1175,65 @@ export default function ProductDetailPage() {
           <span className="text-foreground font-medium truncate max-w-[140px] sm:max-w-[240px]">{product.name}</span>
           {isAdmin && (
             <button onClick={() => navigate(`/dashboard/admin/productos/${product.id}`)}
-              className="ml-auto flex items-center gap-1.5 text-xs font-semibold text-primary hover:bg-primary/10 px-3 py-1.5 rounded-lg transition-colors">
+              className="ml-auto text-xs font-medium text-primary hover:underline">
               Editar producto
             </button>
           )}
         </div>
       </div>
 
-      {/* ── MAIN GRID — compact, premium ── */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6 w-full">
+      {/* ── MAIN GRID ── */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 w-full">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10">
 
-          {/* ── LEFT: Gallery ── */}
-          <div className="space-y-3">
+          {/* LEFT: Gallery */}
+          <div>
             <SwipeGallery
               media={allMedia} altName={product.name}
               discount={discount} featured={product.featured} isDigital={!!product.is_digital}
               onOpenLightbox={setLightboxImg} />
           </div>
 
-          {/* ── RIGHT: Info — redesigned for max conversion ── */}
-          <div className="space-y-4">
-            {/* ── Category + actions row ── */}
+          {/* RIGHT: Info */}
+          <div className="space-y-5">
+            {/* Category + actions */}
             <div className="flex items-center justify-between">
               {product.category ? (
                 <button onClick={() => navigate(`/tienda?cat=${product.category_id}`)}
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline">
+                  className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors">
                   <Tag className="w-3 h-3" />
                   {(product.category as any).name}
                 </button>
               ) : <span />}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <button onClick={toggleWishlist} title={isWishlisted ? 'Quitar de favoritos' : 'Agregar a favoritos'}
-                  className={cn('w-9 h-9 rounded-xl border flex items-center justify-center transition-all hover:scale-105 active:scale-95',
-                    isWishlisted ? 'border-red-300 bg-red-50 dark:bg-red-900/20 text-red-500' : 'border-border text-muted-foreground hover:border-red-300 hover:text-red-400')}>
+                  className={cn('w-8 h-8 rounded-lg border flex items-center justify-center transition-colors',
+                    isWishlisted ? 'border-red-300 text-red-500' : 'border-border text-muted-foreground hover:text-foreground hover:border-muted-foreground/40')}>
                   <Heart className={cn('w-4 h-4', isWishlisted && 'fill-current')} />
                 </button>
                 <button title="Compartir" onClick={() => { navigator.clipboard?.writeText(window.location.href); toast.success('Enlace copiado'); }}
-                  className="w-9 h-9 rounded-xl border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:scale-105 active:scale-95 transition-all">
+                  className="w-8 h-8 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-muted-foreground/40 transition-colors">
                   <Share2 className="w-4 h-4" />
                 </button>
                 <button title="Comparar" onClick={toggleCompare}
-                  className={cn('w-9 h-9 rounded-xl border flex items-center justify-center text-xs font-bold transition-all hover:scale-105 active:scale-95',
-                    compareList.includes(product.id) ? 'border-primary bg-primary/10 text-primary' : 'border-border text-muted-foreground hover:border-primary/40 hover:text-foreground')}>
+                  className={cn('w-8 h-8 rounded-lg border flex items-center justify-center text-xs font-bold transition-colors',
+                    compareList.includes(product.id) ? 'border-primary text-primary' : 'border-border text-muted-foreground hover:text-foreground hover:border-muted-foreground/40')}>
                   VS
                 </button>
               </div>
             </div>
 
-            {/* ── Title ── */}
-            <h1 className="text-xl sm:text-2xl lg:text-[28px] font-bold text-foreground leading-tight">{product.name}</h1>
+            {/* Title */}
+            <h1 className="text-xl sm:text-2xl font-semibold text-foreground leading-snug">{product.name}</h1>
 
-            {/* ── Rating — compact inline ── */}
+            {/* Rating */}
             <div>
               {reviews.length > 0 ? (
                 <button onClick={() => { setActiveTab('reviews'); document.getElementById('product-tabs')?.scrollIntoView({ behavior: 'smooth' }); }}
                   className="flex items-center gap-2 group">
-                  <StarsDisplay value={avgRating} size={16} />
-                  <span className="text-sm font-bold text-foreground">{avgRating.toFixed(1)}</span>
-                  <span className="text-sm text-muted-foreground group-hover:text-primary transition-colors">
+                  <StarsDisplay value={avgRating} size={15} />
+                  <span className="text-sm font-medium text-foreground">{avgRating.toFixed(1)}</span>
+                  <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
                     ({reviews.length} {reviews.length === 1 ? 'valoración' : 'valoraciones'})
                   </span>
                   <span className="text-muted-foreground/30">·</span>
@@ -1275,90 +1243,78 @@ export default function ProductDetailPage() {
                 </button>
               ) : (
                 <button onClick={() => { setActiveTab('reviews'); document.getElementById('product-tabs')?.scrollIntoView({ behavior: 'smooth' }); }}
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                   Sin valoraciones — ¡sé el primero!
                 </button>
               )}
             </div>
 
-            {/* ── PRICE BLOCK — the star of the show ── */}
-            <div className="relative rounded-2xl bg-gradient-to-br from-primary/8 via-primary/4 to-transparent border border-primary/15 p-4 sm:p-5 overflow-hidden">
-              {/* Decorative glow */}
-              <div className="absolute -top-12 -right-12 w-40 h-40 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
-
-              <div className="relative flex items-end gap-3 flex-wrap">
-                {/* Main price — HUGE */}
+            {/* ── PRICE + STOCK BLOCK ── */}
+            <div className="rounded-lg bg-muted/20 border border-border p-4 space-y-3">
+              <div className="flex items-baseline gap-2.5 flex-wrap">
                 <div className="flex items-baseline gap-1">
-                  <span className="text-2xl font-bold text-primary/70">{showUsd ? '$' : currencySymbol}</span>
-                  <span className="text-4xl sm:text-5xl font-black text-foreground tracking-tight tabular-nums">
+                  <span className="text-base font-medium text-muted-foreground">{showUsd ? '$' : currencySymbol}</span>
+                  <span className="text-3xl font-semibold text-foreground tracking-tight tabular-nums">
                     {showUsd ? fmtPrice(currentPrice, true, exchangeRate, currencySymbol) : currentPrice.toFixed(2)}
                   </span>
                 </div>
-
-                {/* Compare price — strikethrough */}
                 {currentCompare && currentCompare > currentPrice && (
-                  <span className="text-lg text-muted-foreground line-through pb-1.5">
+                  <span className="text-sm text-muted-foreground line-through">
                     {fmtPrice(currentCompare, showUsd, exchangeRate, currencySymbol)}
                   </span>
                 )}
-
-                {/* Discount badge */}
                 {discount > 0 && (
-                  <span className="text-sm font-black bg-red-500 text-white px-2.5 py-1 rounded-lg shadow-md flex items-center gap-1">
-                    -{discount}%
+                  <span className="text-xs font-semibold text-red-500">
+                    -{discount}% OFF
                   </span>
                 )}
               </div>
 
-              {/* Savings + stock — combined attractive row */}
-              <div className="relative flex items-center gap-4 flex-wrap mt-2.5">
+              {/* Savings + stock */}
+              <div className="flex items-center gap-3 flex-wrap text-xs">
                 {discount > 0 && (
-                  <span className="inline-flex items-center gap-1.5 text-sm font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-lg">
-                    <Wallet className="w-3.5 h-3.5" />
+                  <span className="text-emerald-600 dark:text-emerald-400 font-medium">
                     Ahorras {fmtPrice(currentCompare! - currentPrice, showUsd, exchangeRate, currencySymbol)}
                   </span>
                 )}
-
-                {/* Stock indicator */}
                 {outOfStock ? (
-                  <span className="inline-flex items-center gap-1.5 text-sm font-bold text-red-500 bg-red-500/10 px-3 py-1 rounded-lg">
-                    <span className="w-2 h-2 rounded-full bg-red-500" /> Sin stock
+                  <span className="flex items-center gap-1.5 text-red-500 font-medium">
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-500" /> Sin stock
                   </span>
                 ) : lowStock ? (
-                  <span className="inline-flex items-center gap-1.5 text-sm font-bold text-orange-500 bg-orange-500/10 px-3 py-1 rounded-lg animate-pulse">
-                    <span className="w-2 h-2 rounded-full bg-orange-500" />
-                    ¡Solo {stock} disponibles!
+                  <span className="flex items-center gap-1.5 text-orange-500 font-medium">
+                    <span className="w-1.5 h-1.5 rounded-full bg-orange-500" /> Solo {stock} disponibles
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1.5 text-sm font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-lg">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500" /> En stock
+                  <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-medium">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> En stock
                   </span>
                 )}
               </div>
 
               {/* SKU + currency toggle */}
-              <div className="relative flex items-center gap-3 mt-3 pt-3 border-t border-primary/10">
+              <div className="flex items-center gap-3 pt-2 border-t border-border/60">
                 {product.sku && (
                   <span className="text-xs text-muted-foreground">
-                    SKU: <span className="font-mono font-medium text-foreground/80">{selectedVariant?.sku || product.sku}</span>
+                    SKU: <span className="font-mono text-foreground/80">{selectedVariant?.sku || product.sku}</span>
                   </span>
                 )}
                 <button onClick={() => setShowUsd(!showUsd)}
-                  className={cn('text-xs font-bold px-2.5 py-1 rounded-lg border transition-all ml-auto',
-                    showUsd ? 'bg-primary/10 text-primary border-primary/30' : 'text-muted-foreground border-border hover:border-primary/40 hover:text-foreground')}>
-                  {showUsd ? '🇺🇸 USD' : '🇵🇪 PEN'}
+                  className={cn('text-xs font-medium px-2.5 py-1 rounded-md border transition-colors ml-auto',
+                    showUsd ? 'bg-foreground/5 text-foreground border-border' : 'text-muted-foreground border-border hover:text-foreground hover:border-muted-foreground/40')}>
+                  {showUsd ? 'USD' : 'PEN'}
                 </button>
               </div>
             </div>
 
-            {/* ── Short description ── */}
+            {/* Short description */}
             {product.short_description && (
               <p className="text-sm text-muted-foreground leading-relaxed">{product.short_description}</p>
             )}
 
-            {/* ── Variant selectors ── */}
+            {/* Variant selectors */}
             {attrKeys.length > 0 && (
-              <div className="space-y-4">
+              <div className="space-y-3.5">
                 {attrKeys.map(key => {
                   const uniqueVals = [...new Set(variants.map(v => v.attributes[key]).filter(Boolean))];
                   if (!uniqueVals.length) return null;
@@ -1368,7 +1324,7 @@ export default function ProductDetailPage() {
                   return (
                     <div key={key} className="space-y-2">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-bold text-foreground capitalize">{key}:</span>
+                        <span className="text-sm font-medium text-foreground capitalize">{key}:</span>
                         {selectedVal && (
                           <span className="text-sm text-muted-foreground">
                             {(() => {
@@ -1391,11 +1347,11 @@ export default function ProductDetailPage() {
                             return (
                               <button key={val} onClick={() => !isOos && handleAttrSelect(key, val)}
                                 disabled={!!isOos} title={colorName}
-                                className={cn('relative w-10 h-10 rounded-full border-2 transition-all hover:scale-110 active:scale-95',
-                                  isSelected ? 'border-primary scale-110 ring-2 ring-primary/20' : 'border-border hover:border-primary/50',
+                                className={cn('relative w-9 h-9 rounded-full border-2 transition-colors',
+                                  isSelected ? 'border-primary' : 'border-border hover:border-muted-foreground/50',
                                   isOos && 'opacity-40 cursor-not-allowed')}
                                 style={{ backgroundColor: val }}>
-                                {isSelected && <div className="absolute inset-0 flex items-center justify-center"><div className="w-2.5 h-2.5 rounded-full bg-white shadow" /></div>}
+                                {isSelected && <div className="absolute inset-0 flex items-center justify-center"><div className="w-2 h-2 rounded-full bg-white" /></div>}
                               </button>
                             );
                           }
@@ -1405,8 +1361,8 @@ export default function ProductDetailPage() {
                             return (
                               <button key={val} onClick={() => !isOos && handleAttrSelect(key, val)}
                                 disabled={!!isOos} title={val}
-                                className={cn('w-12 h-12 rounded-xl overflow-hidden border-2 transition-all hover:scale-105 active:scale-95',
-                                  isSelected ? 'border-primary ring-2 ring-primary/20' : 'border-border hover:border-primary/50',
+                                className={cn('w-11 h-11 rounded-md overflow-hidden border-2 transition-colors',
+                                  isSelected ? 'border-primary' : 'border-border hover:border-muted-foreground/50',
                                   isOos && 'opacity-40 cursor-not-allowed')}>
                                 <img src={swatchImg} alt={val} className="w-full h-full object-cover" />
                               </button>
@@ -1416,8 +1372,8 @@ export default function ProductDetailPage() {
                           return (
                             <button key={val} onClick={() => !isOos && handleAttrSelect(key, val)}
                               disabled={!!isOos}
-                              className={cn('px-4 py-2 rounded-xl text-sm font-medium border transition-all hover:scale-105 active:scale-95',
-                                isSelected ? 'border-primary bg-primary/10 text-primary' : 'border-border text-foreground hover:border-primary/50 hover:bg-muted/50',
+                              className={cn('px-3.5 py-2 rounded-md text-sm font-medium border transition-colors',
+                                isSelected ? 'border-primary bg-primary/5 text-primary' : 'border-border text-foreground hover:border-muted-foreground/50',
                                 isOos && 'opacity-40 cursor-not-allowed line-through')}>
                               {val}
                             </button>
@@ -1430,91 +1386,82 @@ export default function ProductDetailPage() {
               </div>
             )}
 
-            {/* ── QUANTITY + CTA — side by side, compact ── */}
-            <div id="buy-section" className="space-y-3 pt-2">
-              {/* Quantity selector + Buy now — same row on desktop */}
-              <div className="flex flex-col sm:flex-row gap-3">
-                {/* Quantity */}
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-muted-foreground hidden sm:inline">Cantidad:</span>
-                  <div className="flex items-center border-2 border-border rounded-xl overflow-hidden bg-card">
-                    <button onClick={() => setQty(q => Math.max(1, q - 1))}
-                      className="w-11 h-12 flex items-center justify-center hover:bg-muted transition-colors active:bg-muted/80 disabled:opacity-40"
-                      disabled={qty <= 1}>
-                      <Minus className="w-4 h-4" />
-                    </button>
-                    <span className="w-12 text-center text-base font-bold select-none tabular-nums">{qty}</span>
-                    <button onClick={() => !outOfStock && setQty(q => Math.min(q + 1, stock > 0 ? stock : 99))}
-                      className="w-11 h-12 flex items-center justify-center hover:bg-muted transition-colors active:bg-muted/80 disabled:opacity-40"
-                      disabled={outOfStock || (stock > 0 && qty >= stock)}>
-                      <Plus className="w-4 h-4" />
-                    </button>
-                  </div>
-                  {stock > 0 && stock <= 10 && product.track_stock && (
-                    <span className="text-xs text-orange-500 font-medium hidden sm:inline">({stock} disponibles)</span>
-                  )}
+            {/* ── QUANTITY + CTA ── */}
+            <div id="buy-section" className="space-y-3">
+              {/* Quantity selector */}
+              <div className="flex items-center gap-3">
+                <div className="flex items-center border border-border rounded-lg overflow-hidden bg-background">
+                  <button onClick={() => setQty(q => Math.max(1, q - 1))}
+                    className="w-10 h-10 flex items-center justify-center hover:bg-muted/50 transition-colors disabled:opacity-40"
+                    disabled={qty <= 1}>
+                    <Minus className="w-4 h-4" />
+                  </button>
+                  <span className="w-10 text-center text-sm font-medium select-none tabular-nums">{qty}</span>
+                  <button onClick={() => !outOfStock && setQty(q => Math.min(q + 1, stock > 0 ? stock : 99))}
+                    className="w-10 h-10 flex items-center justify-center hover:bg-muted/50 transition-colors disabled:opacity-40"
+                    disabled={outOfStock || (stock > 0 && qty >= stock)}>
+                    <Plus className="w-4 h-4" />
+                  </button>
                 </div>
+                {stock > 0 && stock <= 10 && product.track_stock && (
+                  <span className="text-xs text-muted-foreground font-medium">({stock} disponibles)</span>
+                )}
+              </div>
 
-                {/* Buy now — primary, takes remaining space */}
+              {/* Buttons — side by side */}
+              <div className="flex gap-2.5">
+                <button onClick={handleAdd} disabled={outOfStock}
+                  className={cn('flex-1 flex items-center justify-center gap-2 h-11 rounded-lg font-medium text-sm border transition-colors',
+                    outOfStock ? 'border-border text-muted-foreground cursor-not-allowed' :
+                    addedToCart ? 'border-emerald-500 text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20' :
+                    'border-primary text-primary hover:bg-primary/5')}>
+                  {addedToCart
+                    ? <><CheckCircle className="w-4 h-4" /> ¡Agregado!</>
+                    : <><ShoppingCart className="w-4 h-4" /> Agregar al carrito</>}
+                </button>
                 <button onClick={handleBuyNow} disabled={outOfStock}
-                  className={cn('flex-1 flex items-center justify-center gap-2 h-12 rounded-xl font-bold text-[15px] transition-all',
-                    outOfStock ? 'bg-muted text-muted-foreground cursor-not-allowed' : 'bg-primary text-primary-foreground hover:bg-primary/90 active:scale-[0.98] shadow-lg shadow-primary/20 hover:shadow-primary/30')}>
+                  className={cn('flex-1 flex items-center justify-center gap-2 h-11 rounded-lg font-medium text-sm transition-colors',
+                    outOfStock ? 'bg-muted text-muted-foreground cursor-not-allowed' : 'bg-primary text-primary-foreground hover:bg-primary/90')}>
                   <Zap className="w-4 h-4" />
                   {outOfStock ? 'Sin stock' : 'Comprar ahora'}
                 </button>
               </div>
 
-              {/* Add to cart — full width, secondary style */}
-              <button onClick={handleAdd} disabled={outOfStock}
-                className={cn('w-full flex items-center justify-center gap-2 h-12 rounded-xl font-bold text-[15px] border-2 transition-all',
-                  outOfStock ? 'border-border text-muted-foreground cursor-not-allowed' :
-                  addedToCart ? 'border-emerald-500 text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20' :
-                  'border-primary text-primary hover:bg-primary/5 active:scale-[0.98]')}>
-                {addedToCart
-                  ? <><CheckCircle className="w-4 h-4" /> ¡Agregado al carrito!</>
-                  : <><ShoppingCart className="w-4 h-4" /> Agregar al carrito</>}
-              </button>
-
-              {/* In cart link */}
               {(inCart || addedToCart) && (
                 <button onClick={() => navigate('/carrito')}
-                  className="w-full text-center text-sm text-primary font-medium hover:underline py-0.5 transition-colors">
+                  className="text-xs text-primary font-medium hover:underline transition-colors">
                   Ver carrito →
                 </button>
               )}
 
-              {/* Digital demo */}
               {product.is_digital && (product as any).digital_demo_url && (
                 <button onClick={() => setShowDemo(true)}
-                  className="w-full flex items-center justify-center gap-1.5 py-2.5 text-sm text-muted-foreground font-medium hover:text-primary transition-colors border-t border-border/50">
+                  className="flex items-center gap-1.5 text-sm text-muted-foreground font-medium hover:text-foreground transition-colors">
                   <Eye className="w-4 h-4" />
                   Ver demostración gratuita
                 </button>
               )}
             </div>
 
-            {/* ── Benefits strip ── */}
-            <div className="pt-2">
-              <BenefitsStrip />
-            </div>
+            {/* Benefits */}
+            <BenefitsStrip />
 
-            {/* Compare CTA */}
             {compareList.length >= 2 && (
               <button onClick={() => navigate(`/tienda/comparar?ids=${compareList.join(',')}`)}
-                className="w-full py-2.5 text-sm font-semibold text-primary hover:bg-primary/5 rounded-xl transition-colors border border-primary/20">
+                className="text-sm font-medium text-primary hover:underline transition-colors">
                 Comparar {compareList.length} productos seleccionados →
               </button>
             )}
           </div>
         </div>
 
-        {/* ── STICKY TABS ── */}
-        <div className="mt-8 sm:mt-10" id="product-tabs">
-          <div className="sticky top-16 z-30 bg-background/95 backdrop-blur-sm border-b border-border -mx-4 sm:mx-0 px-4 sm:px-0">
+        {/* ── TABS ── */}
+        <div className="mt-6" id="product-tabs">
+          <div className="sticky top-16 z-30 bg-background border-b border-border -mx-4 sm:mx-0 px-4 sm:px-0">
             <div className="flex gap-1 overflow-x-auto scrollbar-hide">
               {tabs.map(t => (
                 <button key={t.id} onClick={() => setActiveTab(t.id)}
-                  className={cn('flex items-center gap-2 py-3.5 px-4 text-sm font-medium whitespace-nowrap border-b-2 -mb-px transition-colors flex-shrink-0',
+                  className={cn('flex items-center gap-2 py-3 px-3 text-sm font-medium whitespace-nowrap border-b-2 -mb-px transition-colors flex-shrink-0',
                     activeTab === t.id ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground')}>
                   <t.icon className="w-4 h-4" /> {t.label}
                 </button>
@@ -1522,23 +1469,22 @@ export default function ProductDetailPage() {
             </div>
           </div>
 
-          {/* Tab content */}
-          <div className="pt-6 sm:pt-8">
+          <div className="pt-6">
             {activeTab === 'description' && (
-              <div className="max-w-4xl space-y-6">
+              <div className="space-y-5">
                 <DescriptionRenderer text={product.description || ''} />
                 {product.is_digital && (
-                  <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 sm:p-5 space-y-4">
+                  <div className="rounded-lg border border-border bg-muted/20 p-4 space-y-3">
                     <div className="flex items-start gap-3">
-                      <Zap className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                      <Zap className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
                       <div>
-                        <p className="text-sm font-semibold text-foreground">Producto digital — entrega instantánea</p>
-                        <p className="text-sm text-muted-foreground mt-1">Recibirás acceso inmediato tras confirmar el pago.</p>
+                        <p className="text-sm font-medium text-foreground">Producto digital — entrega instantánea</p>
+                        <p className="text-sm text-muted-foreground mt-0.5">Recibirás acceso inmediato tras confirmar el pago.</p>
                       </div>
                     </div>
                     {product.digital_instructions && (
                       <div>
-                        <h4 className="text-sm font-semibold text-foreground mb-2">Instrucciones de acceso</h4>
+                        <h4 className="text-sm font-medium text-foreground mb-1.5">Instrucciones de acceso</h4>
                         <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{product.digital_instructions}</p>
                       </div>
                     )}
@@ -1548,10 +1494,10 @@ export default function ProductDetailPage() {
             )}
 
             {activeTab === 'specs' && hasSpecs && (
-              <dl className="max-w-4xl grid grid-cols-1 sm:grid-cols-2 gap-x-8">
+              <dl className="max-w-3xl grid grid-cols-1 sm:grid-cols-2 gap-x-8">
                 {Object.entries(specs).map(([k, v]) => (
                   <div key={k} className="flex justify-between gap-4 py-3 border-b border-border">
-                    <dt className="text-sm font-semibold text-foreground capitalize flex-shrink-0">{k}</dt>
+                    <dt className="text-sm font-medium text-foreground capitalize flex-shrink-0">{k}</dt>
                     <dd className="text-sm text-muted-foreground text-right">{String(v)}</dd>
                   </div>
                 ))}
@@ -1573,19 +1519,17 @@ export default function ProductDetailPage() {
           </div>
         </div>
 
-        {/* Related products — attractive section */}
+        {/* Related products */}
         {related.length > 0 && (
-          <div className="mt-10 sm:mt-14">
-            <div className="flex items-center gap-3 mb-5">
-              <div className="w-1 h-7 bg-primary rounded-full" />
-              <h2 className="text-lg sm:text-xl font-bold text-foreground">También te puede interesar</h2>
-              <div className="flex-1 h-px bg-border/40" />
+          <div className="mt-8">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-base sm:text-lg font-semibold text-foreground">También te puede interesar</h2>
               <button onClick={() => navigate(`/tienda?cat=${product.category_id}`)}
-                className="text-xs font-semibold text-primary hover:underline whitespace-nowrap">
+                className="text-xs font-medium text-primary hover:underline whitespace-nowrap">
                 Ver más →
               </button>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-5 lg:gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
               {related.map(p => (
                 <ProductCard key={p.id} product={p} />
               ))}
@@ -1594,35 +1538,32 @@ export default function ProductDetailPage() {
         )}
       </div>
 
-      {/* ── MOBILE STICKY BUY BAR ── */}
+      {/* Mobile sticky buy bar */}
       {showStickyBar && !outOfStock && (
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-card/95 backdrop-blur-xl border-t border-border shadow-2xl pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] px-3 animate-fade-in-up">
-          <div className="flex items-center gap-3">
-            {/* Compact price */}
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-background border-t border-border pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] px-3">
+          <div className="flex items-center gap-2.5">
             <div className="flex-shrink-0">
-              <div className="flex items-baseline gap-1">
-                <span className="text-xs font-bold text-primary/70">{showUsd ? '$' : currencySymbol}</span>
-                <span className="text-lg font-black text-foreground tabular-nums">
+              <div className="flex items-baseline gap-0.5">
+                <span className="text-xs font-medium text-muted-foreground">{showUsd ? '$' : currencySymbol}</span>
+                <span className="text-base font-semibold text-foreground tabular-nums">
                   {showUsd ? fmtPrice(currentPrice, true, exchangeRate, currencySymbol) : currentPrice.toFixed(2)}
                 </span>
               </div>
               {discount > 0 && (
-                <span className="text-[10px] font-bold text-red-500 line-through">
+                <span className="text-[10px] text-muted-foreground line-through">
                   {fmtPrice(currentCompare!, showUsd, exchangeRate, currencySymbol)}
                 </span>
               )}
             </div>
 
-            {/* Buy now */}
             <button onClick={handleBuyNow}
-              className="flex-1 flex items-center justify-center gap-1.5 h-11 bg-primary text-primary-foreground rounded-xl font-bold text-sm active:scale-95 transition-transform">
+              className="flex-1 flex items-center justify-center gap-1.5 h-10 bg-primary text-primary-foreground rounded-lg font-medium text-sm">
               <Zap className="w-4 h-4" /> Comprar ahora
             </button>
 
-            {/* Add to cart icon */}
             <button onClick={handleAdd}
-              className={cn('w-11 h-11 flex items-center justify-center rounded-xl border-2 transition-all active:scale-95',
-                addedToCart ? 'border-emerald-500 text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20' : 'border-primary text-primary hover:bg-primary/5')}>
+              className={cn('w-10 h-10 flex items-center justify-center rounded-lg border transition-colors',
+                addedToCart ? 'border-emerald-500 text-emerald-600' : 'border-primary text-primary')}>
               {addedToCart ? <CheckCircle className="w-4 h-4" /> : <ShoppingCart className="w-4 h-4" />}
             </button>
           </div>
@@ -1633,8 +1574,8 @@ export default function ProductDetailPage() {
       {lightboxImg && (
         <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
           onClick={() => setLightboxImg(null)}>
-          <button className="absolute top-4 right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white text-lg transition-colors">✕</button>
-          <img src={lightboxImg} alt="" className="max-w-full max-h-full rounded-xl object-contain" onClick={e => e.stopPropagation()} />
+          <button className="absolute top-4 right-4 w-9 h-9 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors">✕</button>
+          <img src={lightboxImg} alt="" className="max-w-full max-h-full rounded-lg object-contain" onClick={e => e.stopPropagation()} />
         </div>
       )}
 
@@ -1653,27 +1594,27 @@ export default function ProductDetailPage() {
 
         return (
           <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4" onClick={() => setShowDemo(false)}>
-            <div className="bg-card rounded-2xl overflow-hidden shadow-2xl w-full max-w-3xl" onClick={e => e.stopPropagation()}>
-              <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+            <div className="bg-card rounded-lg overflow-hidden border border-border w-full max-w-3xl" onClick={e => e.stopPropagation()}>
+              <div className="flex items-center justify-between px-5 py-3.5 border-b border-border">
                 <div className="flex items-center gap-2 min-w-0">
-                  <Eye className="w-5 h-5 text-primary flex-shrink-0" />
-                  <span className="font-semibold text-foreground truncate">Demostración — {product.name}</span>
-                  <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium flex-shrink-0">GRATIS</span>
+                  <Eye className="w-4 h-4 text-primary flex-shrink-0" />
+                  <span className="font-medium text-foreground text-sm truncate">Demostración — {product.name}</span>
+                  <span className="text-[11px] text-primary font-medium flex-shrink-0">GRATIS</span>
                 </div>
-                <button onClick={() => setShowDemo(false)} className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-muted text-muted-foreground flex-shrink-0">✕</button>
+                <button onClick={() => setShowDemo(false)} className="w-7 h-7 rounded-md flex items-center justify-center hover:bg-muted text-muted-foreground flex-shrink-0">✕</button>
               </div>
 
               {isWebPage ? (
                 <div className="p-6 text-center space-y-4">
-                  <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mx-auto">
-                    <ExternalLink className="w-7 h-7 text-primary" />
+                  <div className="w-12 h-12 rounded-lg bg-muted/50 flex items-center justify-center mx-auto">
+                    <ExternalLink className="w-6 h-6 text-primary" />
                   </div>
                   <div>
-                    <p className="font-semibold text-foreground mb-1">Demo disponible en sitio externo</p>
+                    <p className="font-medium text-foreground text-sm mb-1">Demo disponible en sitio externo</p>
                     <p className="text-xs text-muted-foreground break-all mt-1">{raw}</p>
                   </div>
                   <a href={raw} target="_blank" rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-xl font-semibold text-sm transition-colors"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-lg font-medium text-sm transition-colors"
                     onClick={() => setShowDemo(false)}>
                     <ExternalLink className="w-4 h-4" /> Abrir demostración
                   </a>
@@ -1688,13 +1629,13 @@ export default function ProductDetailPage() {
                 </div>
               )}
 
-              <div className="p-4 flex items-center justify-between gap-3">
+              <div className="p-4 flex items-center justify-between gap-3 border-t border-border">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground min-w-0">
                   <Lock className="w-4 h-4 flex-shrink-0" />
-                  <span className="truncate">Contenido completo disponible tras la compra</span>
+                  <span className="truncate text-xs">Contenido completo disponible tras la compra</span>
                 </div>
                 <button onClick={() => { setShowDemo(false); handleBuyNow(); }}
-                  className="px-5 py-2.5 bg-primary text-primary-foreground rounded-xl font-semibold text-sm hover:bg-primary/90 transition-colors flex-shrink-0">
+                  className="px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium text-sm hover:bg-primary/90 transition-colors flex-shrink-0">
                   Comprar ahora
                 </button>
               </div>
