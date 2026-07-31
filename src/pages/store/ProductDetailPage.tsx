@@ -314,23 +314,20 @@ function SwipeGallery({
   );
 }
 
-/* ─── Benefits strip ─── */
+/* ─── Benefits strip — plain inline row, no cards ─── */
 function BenefitsStrip() {
   const items = [
-    { icon: Truck, label: 'Envío rápido', desc: 'A todo el país' },
-    { icon: Shield, label: 'Pago seguro', desc: 'Compra protegida' },
-    { icon: RotateCcw, label: '30 días', desc: 'Devolución gratis' },
-    { icon: BadgeCheck, label: 'Garantía', desc: 'Producto original' },
+    { icon: Truck, label: 'Envío rápido' },
+    { icon: Shield, label: 'Pago seguro' },
+    { icon: RotateCcw, label: '30 días de devolución' },
+    { icon: BadgeCheck, label: 'Garantía' },
   ];
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-3 py-4 border-y border-border">
+    <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground">
       {items.map((item, i) => (
-        <div key={i} className="flex items-center gap-2.5">
-          <item.icon className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-          <div className="min-w-0">
-            <p className="text-xs font-medium text-foreground truncate leading-tight">{item.label}</p>
-            <p className="text-[11px] text-muted-foreground truncate leading-tight">{item.desc}</p>
-          </div>
+        <div key={i} className="flex items-center gap-1.5">
+          <item.icon className="w-4 h-4 flex-shrink-0" />
+          <span>{item.label}</span>
         </div>
       ))}
     </div>
@@ -400,7 +397,6 @@ function ReviewsSection({
 
   return (
     <div className="space-y-6">
-      {/* ── Summary + distribution ── */}
       {reviews.length > 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
           <div className="lg:col-span-4 flex flex-row lg:flex-col items-center lg:items-start gap-4 lg:gap-1">
@@ -450,7 +446,6 @@ function ReviewsSection({
         </div>
       )}
 
-      {/* ── Filters + sort ── */}
       {reviews.length > 0 && (
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-1 border-t border-border">
           <div className="flex items-center gap-2 flex-wrap">
@@ -486,7 +481,6 @@ function ReviewsSection({
         </div>
       )}
 
-      {/* ── Featured review ── */}
       {featured && !activeFilters && sort === 'helpful' && (
         <div className="rounded-lg border border-border p-4 space-y-3">
           <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
@@ -498,7 +492,6 @@ function ReviewsSection({
         </div>
       )}
 
-      {/* ── Review list ── */}
       <div className="space-y-0 divide-y divide-border">
         {filtered.slice(0, visible).map(r => (
           <ReviewCard key={r.id} r={r} helpfulIds={helpfulIds} reportedIds={reportedIds} likedReplyIds={likedReplyIds}
@@ -530,7 +523,6 @@ function ReviewsSection({
         )}
       </div>
 
-      {/* ── Write review ── */}
       <div className="pt-5 border-t border-border space-y-4">
         <div>
           <h3 className="text-sm font-semibold text-foreground">¿Ya compraste este producto?</h3>
@@ -691,7 +683,7 @@ function ReviewCard({
             <div className="flex gap-2 flex-wrap pt-1">
               {visibleMedia.map((img, i) => (
                 <button key={i} onClick={() => onOpenLightbox(img)}
-                  className="w-18 h-18 sm:w-20 sm:h-20 rounded-md overflow-hidden border border-border hover:border-muted-foreground/40 transition-colors"
+                  className="rounded-md overflow-hidden border border-border hover:border-muted-foreground/40 transition-colors"
                   style={{ width: 72, height: 72 }}>
                   <img src={img} alt="" className="w-full h-full object-cover" />
                 </button>
@@ -1194,8 +1186,9 @@ export default function ProductDetailPage() {
               onOpenLightbox={setLightboxImg} />
           </div>
 
-          {/* RIGHT: Info */}
-          <div className="space-y-5">
+          {/* RIGHT: Info — flows with spacing & typography, minimal cards */}
+          <div className="space-y-4">
+
             {/* Category + actions */}
             <div className="flex items-center justify-between">
               {product.category ? (
@@ -1249,29 +1242,27 @@ export default function ProductDetailPage() {
               )}
             </div>
 
-            {/* ── PRICE + STOCK BLOCK ── */}
-            <div className="rounded-lg bg-muted/20 border border-border p-4 space-y-3">
-              <div className="flex items-baseline gap-2.5 flex-wrap">
+            {/* ── PRICE — pure typography, no card ── */}
+            <div className="space-y-2">
+              <div className="flex items-baseline gap-3 flex-wrap">
                 <div className="flex items-baseline gap-1">
-                  <span className="text-base font-medium text-muted-foreground">{showUsd ? '$' : currencySymbol}</span>
-                  <span className="text-3xl font-semibold text-foreground tracking-tight tabular-nums">
+                  <span className="text-lg font-medium text-muted-foreground">{showUsd ? '$' : currencySymbol}</span>
+                  <span className="text-4xl font-semibold text-foreground tracking-tight tabular-nums">
                     {showUsd ? fmtPrice(currentPrice, true, exchangeRate, currencySymbol) : currentPrice.toFixed(2)}
                   </span>
                 </div>
                 {currentCompare && currentCompare > currentPrice && (
-                  <span className="text-sm text-muted-foreground line-through">
+                  <span className="text-base text-muted-foreground line-through">
                     {fmtPrice(currentCompare, showUsd, exchangeRate, currencySymbol)}
                   </span>
                 )}
                 {discount > 0 && (
-                  <span className="text-xs font-semibold text-red-500">
-                    -{discount}% OFF
-                  </span>
+                  <span className="text-sm font-semibold text-red-500">-{discount}%</span>
                 )}
               </div>
 
-              {/* Savings + stock */}
-              <div className="flex items-center gap-3 flex-wrap text-xs">
+              {/* Savings + stock + meta — single inline row */}
+              <div className="flex items-center gap-3 flex-wrap text-sm">
                 {discount > 0 && (
                   <span className="text-emerald-600 dark:text-emerald-400 font-medium">
                     Ahorras {fmtPrice(currentCompare! - currentPrice, showUsd, exchangeRate, currencySymbol)}
@@ -1290,20 +1281,15 @@ export default function ProductDetailPage() {
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> En stock
                   </span>
                 )}
-              </div>
-
-              {/* SKU + currency toggle */}
-              <div className="flex items-center gap-3 pt-2 border-t border-border/60">
-                {product.sku && (
-                  <span className="text-xs text-muted-foreground">
-                    SKU: <span className="font-mono text-foreground/80">{selectedVariant?.sku || product.sku}</span>
-                  </span>
-                )}
-                <button onClick={() => setShowUsd(!showUsd)}
-                  className={cn('text-xs font-medium px-2.5 py-1 rounded-md border transition-colors ml-auto',
-                    showUsd ? 'bg-foreground/5 text-foreground border-border' : 'text-muted-foreground border-border hover:text-foreground hover:border-muted-foreground/40')}>
-                  {showUsd ? 'USD' : 'PEN'}
-                </button>
+                <div className="flex items-center gap-3 ml-auto">
+                  {product.sku && (
+                    <span className="text-xs text-muted-foreground">SKU <span className="font-mono text-foreground/70">{selectedVariant?.sku || product.sku}</span></span>
+                  )}
+                  <button onClick={() => setShowUsd(!showUsd)}
+                    className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors">
+                    {showUsd ? 'USD' : 'PEN'}
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -1386,9 +1372,8 @@ export default function ProductDetailPage() {
               </div>
             )}
 
-            {/* ── QUANTITY + CTA ── */}
-            <div id="buy-section" className="space-y-3">
-              {/* Quantity selector */}
+            {/* ── QUANTITY + CTA — grouped tight under price ── */}
+            <div id="buy-section" className="space-y-2.5">
               <div className="flex items-center gap-3">
                 <div className="flex items-center border border-border rounded-lg overflow-hidden bg-background">
                   <button onClick={() => setQty(q => Math.max(1, q - 1))}
@@ -1408,7 +1393,6 @@ export default function ProductDetailPage() {
                 )}
               </div>
 
-              {/* Buttons — side by side */}
               <div className="flex gap-2.5">
                 <button onClick={handleAdd} disabled={outOfStock}
                   className={cn('flex-1 flex items-center justify-center gap-2 h-11 rounded-lg font-medium text-sm border transition-colors',
@@ -1443,7 +1427,7 @@ export default function ProductDetailPage() {
               )}
             </div>
 
-            {/* Benefits */}
+            {/* Benefits — plain inline row */}
             <BenefitsStrip />
 
             {compareList.length >= 2 && (
@@ -1456,7 +1440,7 @@ export default function ProductDetailPage() {
         </div>
 
         {/* ── TABS ── */}
-        <div className="mt-6" id="product-tabs">
+        <div className="mt-4" id="product-tabs">
           <div className="sticky top-16 z-30 bg-background border-b border-border -mx-4 sm:mx-0 px-4 sm:px-0">
             <div className="flex gap-1 overflow-x-auto scrollbar-hide">
               {tabs.map(t => (
@@ -1469,25 +1453,20 @@ export default function ProductDetailPage() {
             </div>
           </div>
 
-          <div className="pt-6">
+          <div className="pt-4">
             {activeTab === 'description' && (
-              <div className="space-y-5">
+              <div className="space-y-4">
                 <DescriptionRenderer text={product.description || ''} />
                 {product.is_digital && (
-                  <div className="rounded-lg border border-border bg-muted/20 p-4 space-y-3">
-                    <div className="flex items-start gap-3">
-                      <Zap className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-sm font-medium text-foreground">Producto digital — entrega instantánea</p>
-                        <p className="text-sm text-muted-foreground mt-0.5">Recibirás acceso inmediato tras confirmar el pago.</p>
-                      </div>
+                  <div className="flex items-start gap-2.5 pt-1">
+                    <Zap className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium text-foreground">Producto digital — entrega instantánea</p>
+                      <p className="text-sm text-muted-foreground">Recibirás acceso inmediato tras confirmar el pago.</p>
+                      {product.digital_instructions && (
+                        <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line pt-1">{product.digital_instructions}</p>
+                      )}
                     </div>
-                    {product.digital_instructions && (
-                      <div>
-                        <h4 className="text-sm font-medium text-foreground mb-1.5">Instrucciones de acceso</h4>
-                        <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{product.digital_instructions}</p>
-                      </div>
-                    )}
                   </div>
                 )}
               </div>
@@ -1521,8 +1500,8 @@ export default function ProductDetailPage() {
 
         {/* Related products */}
         {related.length > 0 && (
-          <div className="mt-8">
-            <div className="flex items-center justify-between mb-4">
+          <div className="mt-6">
+            <div className="flex items-center justify-between mb-3">
               <h2 className="text-base sm:text-lg font-semibold text-foreground">También te puede interesar</h2>
               <button onClick={() => navigate(`/tienda?cat=${product.category_id}`)}
                 className="text-xs font-medium text-primary hover:underline whitespace-nowrap">
