@@ -323,9 +323,9 @@ function BenefitsStrip() {
     { icon: BadgeCheck, label: 'Garantía' },
   ];
   return (
-    <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground">
+    <div className="flex flex-wrap items-center gap-x-6 gap-y-2.5 text-sm text-muted-foreground">
       {items.map((item, i) => (
-        <div key={i} className="flex items-center gap-1.5">
+        <div key={i} className="flex items-center gap-2">
           <item.icon className="w-4 h-4 flex-shrink-0" />
           <span>{item.label}</span>
         </div>
@@ -1261,7 +1261,7 @@ export default function ProductDetailPage() {
                 )}
               </div>
 
-              {/* Savings + stock + meta — single inline row */}
+              {/* Stock + savings — clean info row */}
               <div className="flex items-center gap-3 flex-wrap text-sm">
                 {discount > 0 && (
                   <span className="text-emerald-600 dark:text-emerald-400 font-medium">
@@ -1281,16 +1281,18 @@ export default function ProductDetailPage() {
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> En stock
                   </span>
                 )}
-                <div className="flex items-center gap-3 ml-auto">
-                  {product.sku && (
-                    <span className="text-xs text-muted-foreground">SKU <span className="font-mono text-foreground/70">{selectedVariant?.sku || product.sku}</span></span>
-                  )}
-                  <button onClick={() => setShowUsd(!showUsd)}
-                    className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors">
-                    {showUsd ? 'USD' : 'PEN'}
-                  </button>
-                </div>
+                <button onClick={() => setShowUsd(!showUsd)}
+                  className="ml-auto text-xs font-medium px-2.5 py-1 rounded-md border border-border text-muted-foreground hover:text-foreground hover:border-muted-foreground/40 transition-colors">
+                  {showUsd ? 'USD' : 'PEN'}
+                </button>
               </div>
+
+              {/* SKU — subtle standalone line */}
+              {product.sku && (
+                <p className="text-xs text-muted-foreground">
+                  SKU <span className="font-mono text-foreground/60">{selectedVariant?.sku || product.sku}</span>
+                </p>
+              )}
             </div>
 
             {/* Short description */}
@@ -1372,28 +1374,23 @@ export default function ProductDetailPage() {
               </div>
             )}
 
-            {/* ── QUANTITY + CTA — grouped tight under price ── */}
+            {/* ── QUANTITY + CTA — stepper paired with add-to-cart, buy-now full width below ── */}
             <div id="buy-section" className="space-y-2.5">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center border border-border rounded-lg overflow-hidden bg-background">
+              {/* Row 1: quantity stepper + add to cart */}
+              <div className="flex items-center gap-2.5">
+                <div className="flex items-center border border-border rounded-lg overflow-hidden bg-background flex-shrink-0">
                   <button onClick={() => setQty(q => Math.max(1, q - 1))}
-                    className="w-10 h-10 flex items-center justify-center hover:bg-muted/50 transition-colors disabled:opacity-40"
+                    className="w-11 h-11 flex items-center justify-center hover:bg-muted/50 transition-colors disabled:opacity-40"
                     disabled={qty <= 1}>
                     <Minus className="w-4 h-4" />
                   </button>
-                  <span className="w-10 text-center text-sm font-medium select-none tabular-nums">{qty}</span>
+                  <span className="w-11 text-center text-sm font-medium select-none tabular-nums">{qty}</span>
                   <button onClick={() => !outOfStock && setQty(q => Math.min(q + 1, stock > 0 ? stock : 99))}
-                    className="w-10 h-10 flex items-center justify-center hover:bg-muted/50 transition-colors disabled:opacity-40"
+                    className="w-11 h-11 flex items-center justify-center hover:bg-muted/50 transition-colors disabled:opacity-40"
                     disabled={outOfStock || (stock > 0 && qty >= stock)}>
                     <Plus className="w-4 h-4" />
                   </button>
                 </div>
-                {stock > 0 && stock <= 10 && product.track_stock && (
-                  <span className="text-xs text-muted-foreground font-medium">({stock} disponibles)</span>
-                )}
-              </div>
-
-              <div className="flex gap-2.5">
                 <button onClick={handleAdd} disabled={outOfStock}
                   className={cn('flex-1 flex items-center justify-center gap-2 h-11 rounded-lg font-medium text-sm border transition-colors',
                     outOfStock ? 'border-border text-muted-foreground cursor-not-allowed' :
@@ -1403,13 +1400,19 @@ export default function ProductDetailPage() {
                     ? <><CheckCircle className="w-4 h-4" /> ¡Agregado!</>
                     : <><ShoppingCart className="w-4 h-4" /> Agregar al carrito</>}
                 </button>
-                <button onClick={handleBuyNow} disabled={outOfStock}
-                  className={cn('flex-1 flex items-center justify-center gap-2 h-11 rounded-lg font-medium text-sm transition-colors',
-                    outOfStock ? 'bg-muted text-muted-foreground cursor-not-allowed' : 'bg-primary text-primary-foreground hover:bg-primary/90')}>
-                  <Zap className="w-4 h-4" />
-                  {outOfStock ? 'Sin stock' : 'Comprar ahora'}
-                </button>
               </div>
+
+              {/* Row 2: buy now — full width primary CTA */}
+              <button onClick={handleBuyNow} disabled={outOfStock}
+                className={cn('w-full flex items-center justify-center gap-2 h-12 rounded-lg font-medium text-sm transition-colors',
+                  outOfStock ? 'bg-muted text-muted-foreground cursor-not-allowed' : 'bg-primary text-primary-foreground hover:bg-primary/90')}>
+                <Zap className="w-4 h-4" />
+                {outOfStock ? 'Sin stock' : 'Comprar ahora'}
+              </button>
+
+              {stock > 0 && stock <= 10 && product.track_stock && (
+                <p className="text-xs text-muted-foreground font-medium">Solo {stock} disponibles</p>
+              )}
 
               {(inCart || addedToCart) && (
                 <button onClick={() => navigate('/carrito')}
@@ -1427,8 +1430,10 @@ export default function ProductDetailPage() {
               )}
             </div>
 
-            {/* Benefits — plain inline row */}
-            <BenefitsStrip />
+            {/* Benefits — separated inline row with breathing room */}
+            <div className="pt-5 border-t border-border/60">
+              <BenefitsStrip />
+            </div>
 
             {compareList.length >= 2 && (
               <button onClick={() => navigate(`/tienda/comparar?ids=${compareList.join(',')}`)}
