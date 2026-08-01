@@ -89,11 +89,14 @@ export function useSeo() {
     setMeta('name', 'robots', 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1');
     setMeta('name', 'googlebot', 'index, follow');
 
-    // Cache title so the inline FOUC script in index.html can restore it
-    // instantly on next reload, before useSeo runs.
+    // Cache SEO values so the inline FOUC script in index.html can restore them
+    // instantly on next reload, before useSeo runs. This ensures WhatsApp and
+    // other social crawlers see the correct dynamic data even on first paint.
     try {
       localStorage.setItem('mlm360-company-name', companyName);
       localStorage.setItem('mlm360-seo-title', title);
+      localStorage.setItem('mlm360-seo-desc', description);
+      if (ogImage) localStorage.setItem('mlm360-seo-og-image', ogImage);
     } catch {}
 
     // ── Geo tags (geo-targeting for local SEO) ──
