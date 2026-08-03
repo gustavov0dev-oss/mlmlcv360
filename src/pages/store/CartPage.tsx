@@ -9,8 +9,6 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import type { Coupon, ShippingMethod } from '@/lib/storeTypes';
 import { ShoppingCart, Trash2, Plus, Minus, Tag, X, ArrowRight, ChevronLeft, Truck, CircleCheck as CheckCircle, Package, ShoppingBag } from 'lucide-react';
-import Navbar from '@/components/landing/Navbar';
-import Footer from '@/components/landing/Footer';
 
 function fmt(n: number) { return `S/ ${n.toFixed(2)}`; }
 
@@ -95,8 +93,7 @@ export default function CartPage() {
 
   if (itemCount === 0) {
     return (
-      <div className="min-h-screen bg-background pt-28 flex flex-col">
-        <Navbar />
+      <>
         <div className="flex flex-col items-center justify-center gap-5 px-4 min-h-[80vh]">
           <div className="w-24 h-24 rounded-3xl bg-muted flex items-center justify-center">
             <ShoppingCart className="w-12 h-12 text-muted-foreground/30" />
@@ -110,14 +107,12 @@ export default function CartPage() {
             <ShoppingBag className="w-4 h-4" /> Explorar tienda
           </button>
         </div>
-        <Footer />
-      </div>
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background pt-28">
-      <Navbar />
+    <>
       {/* Header */}
       <div className="border-b border-border bg-card sticky top-0 z-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-3">
@@ -300,7 +295,6 @@ export default function CartPage() {
           </div>
         </div>
       </div>
-      <Footer />
-    </div>
+    </>
   );
 }

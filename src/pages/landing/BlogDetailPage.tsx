@@ -1,6 +1,4 @@
 import { Link, useParams } from '@/lib/router';
-import Navbar from '@/components/landing/Navbar';
-import Footer from '@/components/landing/Footer';
 import { Reveal } from '@/components/landing/Reveal';
 import { Clock, Eye, Share2, Bookmark, ThumbsUp, Play, ArrowLeft, FileText, Video, Newspaper, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -161,8 +159,7 @@ export default function BlogDetailPage() {
   const TypeIcon = typeMeta[article.type].icon;
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Navbar />
+    <>
       <main className="flex-1 pt-28">
         {/* SEO breadcrumb — visually hidden */}
         <nav aria-label="breadcrumb" className="sr-only">
@@ -282,7 +279,6 @@ export default function BlogDetailPage() {
           </section>
         )}
       </main>
-      <Footer />
-    </div>
+    </>
   );
 }

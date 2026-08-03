@@ -1,7 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Link } from '@/lib/router';
-import Navbar from '@/components/landing/Navbar';
-import Footer from '@/components/landing/Footer';
 import { Reveal } from '@/components/landing/Reveal';
 import { Clock, Eye, ArrowRight, Video, Search, FileText, Newspaper, ChevronLeft, ChevronRight, Play, Sparkles, TrendingUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -195,9 +193,7 @@ export default function BlogPage() {
   ] as const;
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Navbar />
-
+    <>
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
       <section className="relative pt-28 pb-10 sm:pb-14 overflow-hidden">
         <div className="absolute inset-0 bg-dub-grid opacity-20 mask-fade-top" />
@@ -346,7 +342,6 @@ export default function BlogPage() {
         </div>
       </section>
 
-      <Footer />
-    </div>
+    </>
   );
 }

@@ -7,6 +7,7 @@ import { ConfigProvider, useConfig } from '@/store/configStore';
 import { BackendProvider, useDatabase } from '@/lib/backend';
 import { Router, Routes, Route, Navigate, useLocation } from '@/lib/router';
 import DashboardLayout from '@/layouts/DashboardLayout';
+import SiteLayout from '@/layouts/SiteLayout';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import { CartProvider } from '@/store/cartStore';
 import { useSeo } from '@/hooks/useSeo';
@@ -282,29 +283,29 @@ function AppRoutes() {
       <MaintenanceAutoDisable />
       <Suspense fallback={<AppSkeleton />}>
         <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/nosotros" element={<NosotrosPage />} />
-          <Route path="/precios" element={<PreciosPage />} />
-          <Route path="/empresa" element={<EmpresaPage />} />
-          <Route path="/contacto" element={<ContactoPage />} />
-          <Route path="/planes" element={<PlanesPage />} />
-          <Route path="/blog" element={<BlogPage />} />
-          <Route path="/blog/:slug" element={<BlogDetailPage />} />
-          <Route path="/libro-reclamaciones" element={<LibroReclamacionesPage />} />
-          <Route path="/legal/:slug" element={<LegalPage />} />
-          <Route path="/pago" element={<PagoPage />} />
+          <Route path="/" element={<SiteLayout><LandingPage /></SiteLayout>} />
+          <Route path="/nosotros" element={<SiteLayout><NosotrosPage /></SiteLayout>} />
+          <Route path="/precios" element={<SiteLayout><PreciosPage /></SiteLayout>} />
+          <Route path="/empresa" element={<SiteLayout><EmpresaPage /></SiteLayout>} />
+          <Route path="/contacto" element={<SiteLayout><ContactoPage /></SiteLayout>} />
+          <Route path="/planes" element={<SiteLayout><PlanesPage /></SiteLayout>} />
+          <Route path="/blog" element={<SiteLayout><BlogPage /></SiteLayout>} />
+          <Route path="/blog/:slug" element={<SiteLayout><BlogDetailPage /></SiteLayout>} />
+          <Route path="/libro-reclamaciones" element={<SiteLayout><LibroReclamacionesPage /></SiteLayout>} />
+          <Route path="/legal/:slug" element={<SiteLayout><LegalPage /></SiteLayout>} />
+          <Route path="/pago" element={<SiteLayout><PagoPage /></SiteLayout>} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/registro" element={<RegisterPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
-          <Route path="/tienda" element={<StorePage />} />
-          <Route path="/tienda/comparar" element={<ProtectedRoute><PedidosPage initialTab="comparar" /></ProtectedRoute>} />
-          <Route path="/tienda/*" element={<ProductDetailPage />} />
-          <Route path="/carrito" element={<CartPage />} />
-          <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
-          <Route path="/favoritos" element={<ProtectedRoute><PedidosPage initialTab="favoritos" /></ProtectedRoute>} />
-          <Route path="/pedidos" element={<ProtectedRoute><PedidosPage initialTab="pedidos" /></ProtectedRoute>} />
+          <Route path="/tienda" element={<SiteLayout><StorePage /></SiteLayout>} />
+          <Route path="/tienda/comparar" element={<SiteLayout><ProtectedRoute><PedidosPage initialTab="comparar" /></ProtectedRoute></SiteLayout>} />
+          <Route path="/tienda/*" element={<SiteLayout><ProductDetailPage /></SiteLayout>} />
+          <Route path="/carrito" element={<SiteLayout><CartPage /></SiteLayout>} />
+          <Route path="/checkout" element={<SiteLayout><ProtectedRoute><CheckoutPage /></ProtectedRoute></SiteLayout>} />
+          <Route path="/favoritos" element={<SiteLayout><ProtectedRoute><PedidosPage initialTab="favoritos" /></ProtectedRoute></SiteLayout>} />
+          <Route path="/pedidos" element={<SiteLayout><ProtectedRoute><PedidosPage initialTab="pedidos" /></ProtectedRoute></SiteLayout>} />
           <Route path="/dashboard/*" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>} />
-          <Route path="*" element={<NotFoundPage />} />
+          <Route path="*" element={<SiteLayout><NotFoundPage /></SiteLayout>} />
         </Routes>
       </Suspense>
     </MaintenanceGate>

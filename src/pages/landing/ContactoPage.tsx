@@ -1,6 +1,4 @@
 import { useState, useEffect } from 'react';
-import Navbar from '@/components/landing/Navbar';
-import Footer from '@/components/landing/Footer';
 import { Reveal } from '@/components/landing/Reveal';
 import { Link } from '@/lib/router';
 import { Mail, MapPin, Send, CircleCheck as CheckCircle, ArrowRight, MessageCircle, ChevronDown, Zap, Phone } from 'lucide-react';
@@ -79,9 +77,7 @@ export default function ContactoPage() {
   const mapsEmbed = `https://www.google.com/maps?q=${mapsQuery}&output=embed`;
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Navbar />
-
+    <>
       {/* ── Hero ── */}
       <section className="relative pt-28 pb-10 sm:pb-14 overflow-hidden">
         <div className="absolute inset-0 bg-dub-grid opacity-20 mask-fade-top" />
@@ -287,7 +283,6 @@ export default function ContactoPage() {
         </div>
       </section>
 
-      <Footer />
-    </div>
+    </>
   );
 }

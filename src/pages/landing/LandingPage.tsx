@@ -1,6 +1,4 @@
 import { Link } from '@/lib/router';
-import Navbar from '@/components/landing/Navbar';
-import Footer from '@/components/landing/Footer';
 import {
   ArrowRight, Check, Star, ChevronDown, Zap, Globe, Award, DollarSign,
   TrendingUp, Users, Lock, ShoppingBag, Bell, Network, CreditCard, Sparkles,
@@ -78,22 +76,6 @@ function useRegionStats() {
   return items;
 }
 
-// ─── payment brands ───────────────────────────────────────────────────────────
-const paymentBrands = [
-  { name: 'Visa', abbr: 'VISA' },
-  { name: 'Mastercard', abbr: 'MC' },
-  { name: 'Yape', abbr: 'YP' },
-  { name: 'Plin', abbr: 'PL' },
-  { name: 'BCP', abbr: 'BCP' },
-  { name: 'BBVA', abbr: 'BB' },
-  { name: 'Culqi', abbr: 'CQ' },
-  { name: 'Izipay', abbr: 'IZ' },
-  { name: 'PayPal', abbr: 'PP' },
-  { name: 'Interbank', abbr: 'IB' },
-  { name: 'Scotiabank', abbr: 'SB' },
-  { name: 'Niubiz', abbr: 'NB' },
-];
-
 // ─── DB testimonials ─────────────────────────────────────────────────────────
 interface DBTestimonial {
   id: string;
@@ -128,30 +110,6 @@ function useTestimonials() {
 
 function SectionDivider() {
   return <div className="section-divider mx-auto max-w-[1100px]" />;
-}
-
-// ─── brands marquee ───────────────────────────────────────────────────────────
-function BrandBadge({ b }: { b: typeof paymentBrands[0] }) {
-  return (
-    <div className="shrink-0 mx-1.5 select-none">
-      <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-border/20 bg-muted/20 dark:bg-white/[0.02] hover:bg-muted/40 dark:hover:bg-white/[0.05] hover:border-border/40 transition-all duration-200 cursor-default">
-        <span className="text-[13px] font-semibold text-muted-foreground dark:text-white/50 tracking-tight">{b.name}</span>
-      </div>
-    </div>
-  );
-}
-
-function BrandsCarousel() {
-  const row = [...paymentBrands, ...paymentBrands];
-  return (
-    <div className="relative overflow-hidden py-2">
-      <div className="absolute left-0 top-0 bottom-0 w-20 sm:w-40 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
-      <div className="absolute right-0 top-0 bottom-0 w-20 sm:w-40 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
-      <div className="flex items-center animate-marquee-brands">
-        {row.map((b, i) => <BrandBadge key={`b-${i}`} b={b} />)}
-      </div>
-    </div>
-  );
 }
 
 // ─── store section ────────────────────────────────────────────────────────────
@@ -500,9 +458,7 @@ export default function LandingPage() {
   const faqRight = faqItems.filter((_, i) => i % 2 !== 0);
 
   return (
-    <div className="min-h-screen bg-background overflow-x-hidden flex flex-col">
-      <Navbar />
-
+    <>
       {/* ── HERO ──────────────────────────────────────────────────────────────── */}
       <section className="relative pt-28 pb-0 overflow-hidden">
         {/* Grid - subtle */}
@@ -632,16 +588,6 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
-
-      {/* ── BRANDS MARQUEE ────────────────────────────────────────────────────── */}
-      <section className="py-10 sm:py-14">
-        <p className="text-center text-[11px] font-semibold text-muted-foreground/50 uppercase tracking-widest mb-6">
-          Métodos de pago aceptados
-        </p>
-        <BrandsCarousel />
-      </section>
-
-      <SectionDivider />
 
       {/* ── FEATURES BENTO ────────────────────────────────────────────────────── */}
       <section className="relative py-16 sm:py-24 overflow-hidden">
@@ -1415,7 +1361,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <Footer />
-    </div>
+    </>
   );
 }

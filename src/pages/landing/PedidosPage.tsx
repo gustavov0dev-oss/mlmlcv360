@@ -10,8 +10,6 @@ import {
   Trash2, Star, Grid3x3 as Grid3X3, List,
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import Navbar from '@/components/landing/Navbar';
-import Footer from '@/components/landing/Footer';
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
   pending:    { label: 'Pendiente',   color: 'text-yellow-600', bg: 'bg-yellow-500/10' },
@@ -128,9 +126,7 @@ export default function PedidosPage({ initialTab = 'pedidos' }: { initialTab?: T
   ];
 
   return (
-    <div className="min-h-screen bg-background flex flex-col overflow-x-hidden">
-      <Navbar />
-
+    <>
       <div className="flex-1 pt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
 
@@ -489,7 +485,6 @@ export default function PedidosPage({ initialTab = 'pedidos' }: { initialTab?: T
         </div>
       </div>
 
-      <Footer />
-    </div>
+    </>
   );
 }

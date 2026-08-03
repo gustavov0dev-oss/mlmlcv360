@@ -1,5 +1,3 @@
-import Navbar from '@/components/landing/Navbar';
-import Footer from '@/components/landing/Footer';
 import { Reveal } from '@/components/landing/Reveal';
 import { Link } from '@/lib/router';
 import { useConfig } from '@/store/configStore';
@@ -77,9 +75,7 @@ export default function EmpresaPage() {
   const commissionUnilevel = company.commission_unilevel || '2';
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Navbar />
-
+    <>
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
       <section className="relative pt-28 pb-12 sm:pb-16 overflow-hidden">
         <div className="absolute inset-0 bg-dub-grid opacity-20 mask-fade-top" />
@@ -461,7 +457,6 @@ export default function EmpresaPage() {
         </div>
       </section>
 
-      <Footer />
-    </div>
+    </>
   );
 }

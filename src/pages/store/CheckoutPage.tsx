@@ -8,8 +8,6 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import type { ShippingMethod, Coupon } from '@/lib/storeTypes';
 import { CircleCheck as CheckCircle, ChevronLeft, ChevronRight, MapPin, Truck, CreditCard, ClipboardList, Tag, Package, Plus, Trash2, Globe, Chrome as Home, X, Loader as Loader2 } from 'lucide-react';
-import Navbar from '@/components/landing/Navbar';
-import Footer from '@/components/landing/Footer';
 
 function fmt(n: number, currency = 'PEN', rate = 1) {
   if (currency === 'USD') return `$${(n / rate).toFixed(2)}`;
@@ -277,8 +275,7 @@ export default function CheckoutPage() {
   // Success screen
   if (step === 5 && placedOrder) {
     return (
-      <div className="min-h-screen bg-background flex flex-col">
-        <Navbar />
+      <>
         <div className="flex-1 flex items-center justify-center px-4 pt-28 pb-10">
         <div className="max-w-md w-full bg-card border border-border rounded-3xl p-8 text-center space-y-5 shadow-2xl">
           <div className="w-20 h-20 bg-green-500/15 rounded-full flex items-center justify-center mx-auto animate-bounce">
@@ -326,8 +323,7 @@ export default function CheckoutPage() {
           </div>
         </div>
         </div>
-        <Footer />
-      </div>
+      </>
     );
   }
 
@@ -339,8 +335,7 @@ export default function CheckoutPage() {
 
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Navbar />
+    <>
       {/* Checkout Header */}
       <div className="border-b border-border bg-card mt-28">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4">
@@ -863,7 +858,6 @@ export default function CheckoutPage() {
           </div>
         </div>
       </div>
-      <Footer />
-    </div>
+    </>
   );
 }

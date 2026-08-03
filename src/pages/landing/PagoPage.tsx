@@ -7,8 +7,6 @@ import {
 import { cn } from '@/lib/utils';
 import { useNavigate, useSearchParams, Link } from '@/lib/router';
 import { toast } from 'sonner';
-import Navbar from '@/components/landing/Navbar';
-import Footer from '@/components/landing/Footer';
 import { useConfig, formatPrice } from '@/store/configStore';
 import { useDatabase } from '@/lib/backend';
 import { useAuthStore } from '@/store/authStore';
@@ -275,8 +273,7 @@ export default function PagoPage() {
   // ── Yape confirm screen ──
   if (paymentStep === 'confirm' && isYape && selectedGateway) {
     return (
-      <div className="min-h-screen bg-background flex flex-col">
-        <Navbar />
+      <>
         <div className="pt-28 pb-16 flex items-center justify-center px-4">
           <div className="bg-card border border-border rounded-2xl p-8 w-full max-w-md shadow-xl">
             <div className="text-center mb-6">
@@ -341,16 +338,14 @@ export default function PagoPage() {
             </div>
           </div>
         </div>
-        <Footer />
-      </div>
+      </>
     );
   }
 
   // ── Success screen ──
   if (paymentStep === 'success') {
     return (
-      <div className="min-h-screen bg-background flex flex-col">
-        <Navbar />
+      <>
         <div className="pt-28 pb-16 flex items-center justify-center px-4">
           <div className="bg-card border border-border rounded-2xl p-8 w-full max-w-md shadow-xl text-center">
             <div className="w-20 h-20 rounded-full bg-green-500/10 border-2 border-green-500/30 flex items-center justify-center mx-auto mb-5">
@@ -380,32 +375,28 @@ export default function PagoPage() {
             </button>
           </div>
         </div>
-        <Footer />
-      </div>
+      </>
     );
   }
 
   // ── Loading screen ──
   if (plansLoading || gatewaysLoading) {
     return (
-      <div className="min-h-screen bg-background flex flex-col">
-        <Navbar />
+      <>
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
             <p className="text-muted-foreground text-sm">Cargando opciones de pago...</p>
           </div>
         </div>
-        <Footer />
-      </div>
+      </>
     );
   }
 
   // ── No paid plans ──
   if (!plan) {
     return (
-      <div className="min-h-screen bg-background flex flex-col">
-        <Navbar />
+      <>
         <div className="flex-1 flex items-center justify-center px-4">
           <div className="text-center max-w-sm">
             <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
@@ -418,15 +409,13 @@ export default function PagoPage() {
             </Link>
           </div>
         </div>
-        <Footer />
-      </div>
+      </>
     );
   }
 
   // ── Main payment screen ──
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Navbar />
+    <>
 
       <div className="flex-1 pt-28 pb-16">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -728,7 +717,6 @@ export default function PagoPage() {
           </div>
         </div>
       </div>
-      <Footer />
-    </div>
+    </>
   );
 }

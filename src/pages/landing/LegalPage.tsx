@@ -4,8 +4,7 @@ import { supabase } from '@/lib/backend/client';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft, FileText, CircleAlert as AlertCircle } from 'lucide-react';
-import Navbar from '@/components/landing/Navbar';
-import Footer from '@/components/landing/Footer';
+
 
 interface LegalPageData {
   title: string;
@@ -41,9 +40,7 @@ export default function LegalPage() {
   }, [slug]);
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Navbar />
-
+    <>
       <main className="flex-1 py-10 sm:py-16">
         <div className="max-w-3xl mx-auto px-4 sm:px-6">
           {/* Back */}
@@ -104,8 +101,6 @@ export default function LegalPage() {
           ) : null}
         </div>
       </main>
-
-      <Footer />
-    </div>
+    </>
   );
 }

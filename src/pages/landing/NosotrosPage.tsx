@@ -1,5 +1,3 @@
-import Navbar from '@/components/landing/Navbar';
-import Footer from '@/components/landing/Footer';
 import { Link } from '@/lib/router';
 import { ArrowRight, Target, Award, HeartHandshake, Users, TrendingUp, Globe, Rocket, Zap, Building2, MapPin, Phone, Mail, Sparkles, Shield, Lock, Cpu, Cloud, Database, CircleCheck as CheckCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -64,9 +62,7 @@ export default function NosotrosPage() {
   const companyName = company.company_name || 'MLM 360';
 
   return (
-    <div className="min-h-screen bg-background overflow-x-hidden flex flex-col">
-      <Navbar />
-
+    <>
       {/* HERO */}
       <section className="pt-28 pb-20">
         <div className="px-6 sm:px-8">
@@ -303,7 +299,6 @@ export default function NosotrosPage() {
         </div>
       </section>
 
-      <Footer />
-    </div>
+    </>
   );
 }

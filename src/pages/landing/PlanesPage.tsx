@@ -1,6 +1,4 @@
 import { useSearchParams, useNavigate } from '@/lib/router';
-import Navbar from '@/components/landing/Navbar';
-import Footer from '@/components/landing/Footer';
 import { CircleCheck as CheckCircle, ArrowRight, Sparkles, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useConfig, formatPrice } from '@/store/configStore';
@@ -45,9 +43,7 @@ export default function PlanesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Navbar />
-
+    <>
       <section className="pt-28 pb-16">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           {isSelectMode && (
@@ -176,8 +172,6 @@ export default function PlanesPage() {
           </div>
         </div>
       </section>
-
-      <Footer />
-    </div>
+    </>
   );
 }

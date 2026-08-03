@@ -17,8 +17,6 @@ import {
   SlidersHorizontal, X, Award, CornerDownRight, MessageCircle, Send,
   BadgeCheck,
 } from 'lucide-react';
-import Navbar from '@/components/landing/Navbar';
-import Footer from '@/components/landing/Footer';
 
 /* ─── helpers ─── */
 function fmtPrice(n: number, showUsd: boolean, rate: number, symbol: string) {
@@ -1115,8 +1113,7 @@ export default function ProductDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex flex-col">
-        <Navbar />
+      <>
         <div className="pt-16 max-w-6xl mx-auto px-4 sm:px-6 py-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="space-y-2.5">
             <div className="aspect-square bg-muted/40 rounded-lg animate-pulse" />
@@ -1126,14 +1123,13 @@ export default function ProductDetailPage() {
             {[...Array(6)].map((_, i) => <div key={i} className="h-5 bg-muted/40 rounded animate-pulse" style={{ width: `${60 + i * 5}%` }} />)}
           </div>
         </div>
-      </div>
+      </>
     );
   }
 
   if (!product) {
     return (
-      <div className="min-h-screen bg-background flex flex-col">
-        <Navbar />
+      <>
         <div className="pt-16 flex flex-col items-center justify-center gap-4 px-4 text-center min-h-[60vh]">
           <Package className="w-14 h-14 text-muted-foreground/20" />
           <h2 className="text-lg font-semibold text-foreground">Producto no encontrado</h2>
@@ -1142,14 +1138,12 @@ export default function ProductDetailPage() {
             Ir a la tienda
           </button>
         </div>
-        <Footer />
-      </div>
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Navbar />
+    <>
 
       {/* Breadcrumb */}
       <div className="pt-16">
@@ -1628,7 +1622,6 @@ export default function ProductDetailPage() {
         );
       })()}
 
-      <Footer />
-    </div>
+    </>
   );
 }

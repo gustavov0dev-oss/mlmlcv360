@@ -4,8 +4,6 @@ import { supabase } from '@/lib/backend/client';
 import { useConfig } from '@/store/configStore';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-import Navbar from '@/components/landing/Navbar';
-import Footer from '@/components/landing/Footer';
 import {
   FileText, User, ChevronRight, ChevronLeft,
   CircleCheck as CheckCircle, CircleAlert as AlertCircle,
@@ -291,9 +289,7 @@ export default function LibroReclamacionesPage() {
   const steps = ['Datos Personales', 'Tu Reclamo', 'Confirmar'];
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Navbar />
-
+    <>
       <main className="flex-1 pt-16">
         {/* ── Hero ──────────────────────────────────────────────────────── */}
         <section className="bg-background border-b border-border/50">
@@ -376,8 +372,7 @@ export default function LibroReclamacionesPage() {
         </section>
       </main>
 
-      <Footer />
-    </div>
+    </>
   );
 }
 

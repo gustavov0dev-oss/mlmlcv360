@@ -1,9 +1,9 @@
 import { Link } from '@/lib/router';
-import { Home, Search, ArrowLeft, Compass, Boxes } from 'lucide-react';
+import { Chrome as Home, Search, ArrowLeft, Compass, Boxes } from 'lucide-react';
 
 export default function NotFoundPage() {
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4 py-12 relative overflow-hidden">
+    <>
       {/* Background grid */}
       <div
         className="absolute inset-0 -z-10 opacity-[0.04] pointer-events-none"
@@ -62,6 +62,6 @@ export default function NotFoundPage() {
           <ArrowLeft className="w-3.5 h-3.5" /> Volver a la página anterior
         </Link>
       </div>
-    </div>
+    </>
   );
 }

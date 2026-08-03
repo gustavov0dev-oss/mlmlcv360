@@ -11,8 +11,6 @@ import {
 import { cn } from '@/lib/utils';
 import type { Product, ProductCategory } from '@/lib/storeTypes';
 import { toast } from 'sonner';
-import Navbar from '@/components/landing/Navbar';
-import Footer from '@/components/landing/Footer';
 import ProductCard from '@/components/store/ProductCard';
 
 const SORT_OPTIONS = [
@@ -196,8 +194,7 @@ export default function StorePage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <Navbar />
+    <>
 
       {/* ── SEARCH BAR ── */}
       <div className="pt-16">
@@ -463,7 +460,6 @@ export default function StorePage() {
         onClear={() => setCompareList([])}
       />
 
-      <Footer />
-    </div>
+    </>
   );
 }
