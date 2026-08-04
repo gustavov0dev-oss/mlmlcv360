@@ -844,54 +844,92 @@ export default function LandingPage() {
             <p className="text-base text-muted-foreground/80 mt-3 max-w-xl">Historias reales de emprendedores que ya ganan con la plataforma.</p>
           </div>
 
-          {/* Region stats — individual subtle cards, no outer container */}
-          {regionStats.length > 0 && (
+          {/* Bento grid — region stats + testimonials mixed */}
+          {(regionStats.length > 0 || dbTestimonials.length > 0) && (
             <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 mb-10 sm:mb-14">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-                {regionStats.slice(0, 3).map(rs => (
-                  <div key={rs.id} className="relative flex flex-col items-center justify-center text-center overflow-hidden min-h-[150px] rounded-2xl border border-border/30 bg-white/60 dark:bg-white/[0.03] backdrop-blur-md">
-                    {rs.image_url && <img src={rs.image_url} alt={rs.city} className="absolute inset-0 w-full h-full object-cover opacity-25 pointer-events-none" />}
-                    <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/70 to-background/40 pointer-events-none" />
-                    <div className="relative z-10 p-5">
-                      <div className="text-3xl sm:text-4xl font-black text-foreground">{rs.members}</div>
-                      <div className="text-xs sm:text-sm text-muted-foreground mt-1 font-medium">afiliados en {rs.city}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+              <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4 sm:gap-5">
 
-          {/* Testimonial cards — individual subtle cards */}
-          {dbTestimonials.length > 0 && (
-            <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 mb-10 sm:mb-14">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-                {dbTestimonials.slice(0, 3).map(t => {
-                  const avatarFallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(t.name)}&background=e2e8f0&color=64748b`;
-                  return (
-                    <div key={t.id} className="bg-white/60 dark:bg-white/[0.03] border border-border/30 rounded-2xl p-5 sm:p-7 backdrop-blur-md flex flex-col min-h-[150px]">
-                      <div>
-                        <div className="flex gap-0.5 mb-3">
-                          {Array.from({ length: t.rating }).map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-primary text-primary" />)}
+                {/* Left: region stat photo cards in a responsive masonry grid */}
+                <div className="space-y-4 sm:space-y-5">
+                  {/* Top row: up to 3 stats */}
+                  {regionStats.length > 0 && (
+                    <div className={cn('grid gap-4 sm:gap-5', regionStats.length >= 3 ? 'grid-cols-3' : regionStats.length === 2 ? 'grid-cols-2' : 'grid-cols-1')}>
+                      {regionStats.slice(0, 3).map(rs => (
+                        <div key={rs.id} className="relative flex flex-col items-center justify-center text-center overflow-hidden min-h-[160px] rounded-2xl border border-border/20 bg-zinc-900">
+                          {rs.image_url && <img src={rs.image_url} alt={rs.city} className="absolute inset-0 w-full h-full object-cover opacity-30 pointer-events-none" />}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20 pointer-events-none" />
+                          <div className="relative z-10 p-5">
+                            <div className="text-3xl sm:text-4xl font-black text-white">{rs.members}</div>
+                            <div className="text-xs sm:text-sm text-white/60 mt-1 font-medium">afiliados en {rs.city}</div>
+                          </div>
                         </div>
-                        <p className="text-foreground/80 leading-relaxed text-sm sm:text-base line-clamp-4">"{t.content}"</p>
-                      </div>
-                      <div className="flex items-center gap-3 pt-3 mt-4 border-t border-border/30">
-                        <img
-                          src={t.avatar_url || avatarFallback}
-                          alt={t.name}
-                          className="w-10 h-10 rounded-full object-cover flex-shrink-0 ring-2 ring-primary/20"
-                          onError={e => { (e.target as HTMLImageElement).src = avatarFallback; }}
-                        />
-                        <div className="flex-1 min-w-0">
-                          <div className="text-sm font-semibold text-foreground truncate">{t.name}</div>
-                          <div className="text-xs text-muted-foreground truncate">{t.role}</div>
-                        </div>
-                        {t.earnings && <div className="text-sm font-bold text-green-500 shrink-0 ml-2">{t.earnings}</div>}
-                      </div>
+                      ))}
                     </div>
-                  );
-                })}
+                  )}
+
+                  {/* Middle row: first testimonial card (if any) */}
+                  {dbTestimonials.length > 0 && (() => {
+                    const t = dbTestimonials[0];
+                    const avatarFallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(t.name)}&background=e2e8f0&color=64748b`;
+                    return (
+                      <div className="bg-white/60 dark:bg-white/[0.03] border border-border/30 rounded-2xl p-5 sm:p-6 backdrop-blur-md flex flex-col">
+                        <div className="flex gap-0.5 mb-3">
+                          {Array.from({ length: 5 }).map((_, i) => <Star key={i} className={cn('w-3.5 h-3.5', i < t.rating ? 'fill-primary text-primary' : 'text-muted-foreground/20')} />)}
+                        </div>
+                        <p className="text-foreground/80 leading-relaxed text-sm sm:text-base mb-4 line-clamp-4">&#8220;{t.content}&#8221;</p>
+                        <div className="flex items-center gap-3 pt-3 border-t border-border/30">
+                          <img src={t.avatar_url || avatarFallback} alt={t.name} className="w-10 h-10 rounded-full object-cover flex-shrink-0 ring-2 ring-primary/20" onError={e => { (e.target as HTMLImageElement).src = avatarFallback; }} />
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-semibold text-foreground truncate">{t.name}</div>
+                            <div className="text-xs text-muted-foreground truncate">{t.role}</div>
+                          </div>
+                          {t.earnings && <div className="text-sm font-bold text-green-500 shrink-0">{t.earnings}</div>}
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Bottom row: remaining stats (4th and 5th) */}
+                  {regionStats.length > 3 && (
+                    <div className={cn('grid gap-4 sm:gap-5', regionStats.length >= 5 ? 'grid-cols-2' : 'grid-cols-1')}>
+                      {regionStats.slice(3, 5).map(rs => (
+                        <div key={rs.id} className="relative flex flex-col items-center justify-center text-center overflow-hidden min-h-[160px] rounded-2xl border border-border/20 bg-zinc-900">
+                          {rs.image_url && <img src={rs.image_url} alt={rs.city} className="absolute inset-0 w-full h-full object-cover opacity-30 pointer-events-none" />}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20 pointer-events-none" />
+                          <div className="relative z-10 p-5">
+                            <div className="text-3xl sm:text-4xl font-black text-white">{rs.members}</div>
+                            <div className="text-xs sm:text-sm text-white/60 mt-1 font-medium">afiliados en {rs.city}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Right: stacked testimonial cards */}
+                {dbTestimonials.length > 1 && (
+                  <div className="space-y-4 sm:space-y-5">
+                    {dbTestimonials.slice(1, 4).map(t => {
+                      const avatarFallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(t.name)}&background=e2e8f0&color=64748b`;
+                      return (
+                        <div key={t.id} className="bg-white/60 dark:bg-white/[0.03] border border-border/30 rounded-2xl p-5 backdrop-blur-md flex flex-col">
+                          <div className="flex gap-0.5 mb-3">
+                            {Array.from({ length: 5 }).map((_, i) => <Star key={i} className={cn('w-3.5 h-3.5', i < t.rating ? 'fill-primary text-primary' : 'text-muted-foreground/20')} />)}
+                          </div>
+                          <p className="text-foreground/80 leading-relaxed text-sm mb-4 line-clamp-4">&#8220;{t.content}&#8221;</p>
+                          <div className="flex items-center gap-3 pt-3 border-t border-border/30">
+                            <img src={t.avatar_url || avatarFallback} alt={t.name} className="w-9 h-9 rounded-full object-cover flex-shrink-0 ring-2 ring-primary/20" onError={e => { (e.target as HTMLImageElement).src = avatarFallback; }} />
+                            <div className="flex-1 min-w-0">
+                              <div className="text-xs font-semibold text-foreground truncate">{t.name}</div>
+                              <div className="text-[11px] text-muted-foreground truncate">{t.role}</div>
+                            </div>
+                            {t.earnings && <div className="text-xs font-bold text-green-500 shrink-0">{t.earnings}</div>}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </div>
           )}
