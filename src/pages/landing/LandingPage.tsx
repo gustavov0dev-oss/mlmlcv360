@@ -844,92 +844,157 @@ export default function LandingPage() {
             <p className="text-base text-muted-foreground/80 mt-3 max-w-xl">Historias reales de emprendedores que ya ganan con la plataforma.</p>
           </div>
 
-          {/* Bento grid — region stats + testimonials mixed */}
+                {/* ── Bento grid — explicit placement, no divide-x/y ─────────────── */}
           {(regionStats.length > 0 || dbTestimonials.length > 0) && (
             <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 mb-10 sm:mb-14">
-              <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4 sm:gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 rounded-2xl border border-border/30 overflow-hidden">
 
-                {/* Left: region stat photo cards in a responsive masonry grid */}
-                <div className="space-y-4 sm:space-y-5">
-                  {/* Top row: up to 3 stats */}
-                  {regionStats.length > 0 && (
-                    <div className={cn('grid gap-4 sm:gap-5', regionStats.length >= 3 ? 'grid-cols-3' : regionStats.length === 2 ? 'grid-cols-2' : 'grid-cols-1')}>
-                      {regionStats.slice(0, 3).map(rs => (
-                        <div key={rs.id} className="relative flex flex-col items-center justify-center text-center overflow-hidden min-h-[160px] rounded-2xl border border-border/20 bg-zinc-900">
-                          {rs.image_url && <img src={rs.image_url} alt={rs.city} className="absolute inset-0 w-full h-full object-cover opacity-30 pointer-events-none" />}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20 pointer-events-none" />
-                          <div className="relative z-10 p-5">
-                            <div className="text-3xl sm:text-4xl font-black text-white">{rs.members}</div>
-                            <div className="text-xs sm:text-sm text-white/60 mt-1 font-medium">afiliados en {rs.city}</div>
-                          </div>
-                        </div>
-                      ))}
+                {/* ── R1 — row1 col1 (all breakpoints) ── */}
+                {regionStats[0] && (
+                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden min-h-[150px] border-b border-border/30">
+                    {regionStats[0].image_url && <img src={regionStats[0].image_url} alt={regionStats[0].city} className="absolute inset-0 w-full h-full object-cover opacity-25 pointer-events-none" />}
+                    <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/70 to-background/40 pointer-events-none" />
+                    <div className="relative z-10 p-5">
+                      <div className="text-3xl sm:text-4xl font-black text-foreground">{regionStats[0].members}</div>
+                      <div className="text-xs sm:text-sm text-muted-foreground mt-1 font-medium">afiliados en {regionStats[0].city}</div>
                     </div>
-                  )}
-
-                  {/* Middle row: first testimonial card (if any) */}
-                  {dbTestimonials.length > 0 && (() => {
-                    const t = dbTestimonials[0];
-                    const avatarFallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(t.name)}&background=e2e8f0&color=64748b`;
-                    return (
-                      <div className="bg-white/60 dark:bg-white/[0.03] border border-border/30 rounded-2xl p-5 sm:p-6 backdrop-blur-md flex flex-col">
-                        <div className="flex gap-0.5 mb-3">
-                          {Array.from({ length: 5 }).map((_, i) => <Star key={i} className={cn('w-3.5 h-3.5', i < t.rating ? 'fill-primary text-primary' : 'text-muted-foreground/20')} />)}
-                        </div>
-                        <p className="text-foreground/80 leading-relaxed text-sm sm:text-base mb-4 line-clamp-4">&#8220;{t.content}&#8221;</p>
-                        <div className="flex items-center gap-3 pt-3 border-t border-border/30">
-                          <img src={t.avatar_url || avatarFallback} alt={t.name} className="w-10 h-10 rounded-full object-cover flex-shrink-0 ring-2 ring-primary/20" onError={e => { (e.target as HTMLImageElement).src = avatarFallback; }} />
-                          <div className="flex-1 min-w-0">
-                            <div className="text-sm font-semibold text-foreground truncate">{t.name}</div>
-                            <div className="text-xs text-muted-foreground truncate">{t.role}</div>
-                          </div>
-                          {t.earnings && <div className="text-sm font-bold text-green-500 shrink-0">{t.earnings}</div>}
-                        </div>
-                      </div>
-                    );
-                  })()}
-
-                  {/* Bottom row: remaining stats (4th and 5th) */}
-                  {regionStats.length > 3 && (
-                    <div className={cn('grid gap-4 sm:gap-5', regionStats.length >= 5 ? 'grid-cols-2' : 'grid-cols-1')}>
-                      {regionStats.slice(3, 5).map(rs => (
-                        <div key={rs.id} className="relative flex flex-col items-center justify-center text-center overflow-hidden min-h-[160px] rounded-2xl border border-border/20 bg-zinc-900">
-                          {rs.image_url && <img src={rs.image_url} alt={rs.city} className="absolute inset-0 w-full h-full object-cover opacity-30 pointer-events-none" />}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20 pointer-events-none" />
-                          <div className="relative z-10 p-5">
-                            <div className="text-3xl sm:text-4xl font-black text-white">{rs.members}</div>
-                            <div className="text-xs sm:text-sm text-white/60 mt-1 font-medium">afiliados en {rs.city}</div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Right: stacked testimonial cards */}
-                {dbTestimonials.length > 1 && (
-                  <div className="space-y-4 sm:space-y-5">
-                    {dbTestimonials.slice(1, 4).map(t => {
-                      const avatarFallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(t.name)}&background=e2e8f0&color=64748b`;
-                      return (
-                        <div key={t.id} className="bg-white/60 dark:bg-white/[0.03] border border-border/30 rounded-2xl p-5 backdrop-blur-md flex flex-col">
-                          <div className="flex gap-0.5 mb-3">
-                            {Array.from({ length: 5 }).map((_, i) => <Star key={i} className={cn('w-3.5 h-3.5', i < t.rating ? 'fill-primary text-primary' : 'text-muted-foreground/20')} />)}
-                          </div>
-                          <p className="text-foreground/80 leading-relaxed text-sm mb-4 line-clamp-4">&#8220;{t.content}&#8221;</p>
-                          <div className="flex items-center gap-3 pt-3 border-t border-border/30">
-                            <img src={t.avatar_url || avatarFallback} alt={t.name} className="w-9 h-9 rounded-full object-cover flex-shrink-0 ring-2 ring-primary/20" onError={e => { (e.target as HTMLImageElement).src = avatarFallback; }} />
-                            <div className="flex-1 min-w-0">
-                              <div className="text-xs font-semibold text-foreground truncate">{t.name}</div>
-                              <div className="text-[11px] text-muted-foreground truncate">{t.role}</div>
-                            </div>
-                            {t.earnings && <div className="text-xs font-bold text-green-500 shrink-0">{t.earnings}</div>}
-                          </div>
-                        </div>
-                      );
-                    })}
                   </div>
                 )}
+
+                {/* ── R2 — row1 col2 ── */}
+                {regionStats[1] && (
+                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden min-h-[150px] border-b border-border/30 sm:border-l border-border/30">
+                    {regionStats[1].image_url && <img src={regionStats[1].image_url} alt={regionStats[1].city} className="absolute inset-0 w-full h-full object-cover opacity-25 pointer-events-none" />}
+                    <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/70 to-background/40 pointer-events-none" />
+                    <div className="relative z-10 p-5">
+                      <div className="text-3xl sm:text-4xl font-black text-foreground">{regionStats[1].members}</div>
+                      <div className="text-xs sm:text-sm text-muted-foreground mt-1 font-medium">afiliados en {regionStats[1].city}</div>
+                    </div>
+                  </div>
+                )}
+
+                {/* ── R_extra — row1 col3: 3rd stat or platform total ── */}
+                <div className="relative flex flex-col items-center justify-center text-center overflow-hidden min-h-[150px] border-b border-border/30 sm:border-l border-border/30 lg:border-l">
+                  {regionStats[4]?.image_url && <img src={regionStats[4].image_url} alt={regionStats[4]?.city} className="absolute inset-0 w-full h-full object-cover opacity-25 pointer-events-none" />}
+                  <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/70 to-background/40 pointer-events-none" />
+                  <div className="relative z-10 p-5">
+                    {regionStats[4] && (
+                      <>
+                        <div className="text-3xl sm:text-4xl font-black text-foreground">{regionStats[4].members}</div>
+                        <div className="text-xs sm:text-sm text-muted-foreground mt-1 font-medium">afiliados en {regionStats[4].city}</div>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* ── T1 Roberto — row2 col3: same row as T2 → equal height, no gap ── */}
+                {dbTestimonials[0] && (
+                  <div className="p-5 sm:p-7 flex flex-col justify-between bg-white/50 dark:bg-white/[0.02] border-b border-border/30
+                    sm:border-l sm:border-border/30
+                    lg:col-start-3 lg:row-start-2 lg:border-l lg:border-b-0
+                    min-h-[150px]">
+                    <div>
+                      <div className="flex gap-0.5 mb-3">
+                        {Array.from({ length: dbTestimonials[0].rating }).map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-primary text-primary" />)}
+                      </div>
+                      <p className="text-foreground/80 leading-relaxed text-sm sm:text-base line-clamp-4">"{dbTestimonials[0].content}"</p>
+                    </div>
+                    <div className="flex items-center gap-3 pt-3 mt-4 border-t border-border/30">
+                      <img
+                        src={dbTestimonials[0].avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(dbTestimonials[0].name)}&background=e2e8f0&color=64748b`}
+                        alt={dbTestimonials[0].name}
+                        className="w-10 h-10 rounded-full object-cover flex-shrink-0 ring-2 ring-primary/20"
+                        onError={e => { (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(dbTestimonials[0].name)}&background=e2e8f0&color=64748b`; }}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-semibold text-foreground truncate">{dbTestimonials[0].name}</div>
+                        <div className="text-xs text-muted-foreground truncate">{dbTestimonials[0].role}</div>
+                      </div>
+                      {dbTestimonials[0].earnings && <div className="text-sm font-bold text-green-500 shrink-0 ml-2">{dbTestimonials[0].earnings}</div>}
+                    </div>
+                  </div>
+                )}
+
+                {/* ── T2 Miguel — lg: col1-2 row2; sm: col1 row2; mobile: stacked ── */}
+                {dbTestimonials[1] && (
+                  <div className="p-5 sm:p-7 flex flex-col justify-between bg-white/50 dark:bg-white/[0.02] border-b border-border/30
+                    sm:border-b sm:border-border/30
+                    lg:col-start-1 lg:col-span-2 lg:row-start-2 lg:border-l-0 lg:border-b-0
+                    min-h-[150px]">
+                    <div>
+                      <div className="flex gap-0.5 mb-3">
+                        {Array.from({ length: dbTestimonials[1].rating }).map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-primary text-primary" />)}
+                      </div>
+                      <p className="text-foreground/80 leading-relaxed text-sm sm:text-base line-clamp-3">"{dbTestimonials[1].content}"</p>
+                    </div>
+                    <div className="flex items-center gap-3 pt-3 mt-4 border-t border-border/30">
+                      <img
+                        src={dbTestimonials[1].avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(dbTestimonials[1].name)}&background=e2e8f0&color=64748b`}
+                        alt={dbTestimonials[1].name}
+                        className="w-10 h-10 rounded-full object-cover flex-shrink-0 ring-2 ring-primary/20"
+                        onError={e => { (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(dbTestimonials[1].name)}&background=e2e8f0&color=64748b`; }}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-semibold text-foreground truncate">{dbTestimonials[1].name}</div>
+                        <div className="text-xs text-muted-foreground truncate">{dbTestimonials[1].role}</div>
+                      </div>
+                      {dbTestimonials[1].earnings && <div className="text-sm font-bold text-green-500 shrink-0 ml-2">{dbTestimonials[1].earnings}</div>}
+                    </div>
+                  </div>
+                )}
+
+                {/* ── R3 — lg: col1 row3; sm: col1 row3; mobile: stacked ── */}
+                {regionStats[2] && (
+                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden min-h-[150px] border-b border-border/30 lg:border-b-0 lg:border-t lg:col-start-1 lg:row-start-3">
+                    {regionStats[2].image_url && <img src={regionStats[2].image_url} alt={regionStats[2].city} className="absolute inset-0 w-full h-full object-cover opacity-25 pointer-events-none" />}
+                    <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/70 to-background/40 pointer-events-none" />
+                    <div className="relative z-10 p-5">
+                      <div className="text-3xl sm:text-4xl font-black text-foreground">{regionStats[2].members}</div>
+                      <div className="text-xs sm:text-sm text-muted-foreground mt-1 font-medium">afiliados en {regionStats[2].city}</div>
+                    </div>
+                  </div>
+                )}
+
+                {/* ── R4 — lg: col2 row3; sm: col2 row3; mobile: stacked ── */}
+                {regionStats[3] && (
+                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden min-h-[150px] border-b border-border/30 sm:border-l lg:border-b-0 lg:border-t lg:col-start-2 lg:row-start-3">
+                    {regionStats[3].image_url && <img src={regionStats[3].image_url} alt={regionStats[3].city} className="absolute inset-0 w-full h-full object-cover opacity-25 pointer-events-none" />}
+                    <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/70 to-background/40 pointer-events-none" />
+                    <div className="relative z-10 p-5">
+                      <div className="text-3xl sm:text-4xl font-black text-foreground">{regionStats[3].members}</div>
+                      <div className="text-xs sm:text-sm text-muted-foreground mt-1 font-medium">afiliados en {regionStats[3].city}</div>
+                    </div>
+                  </div>
+                )}
+
+                {/* ── T3 Sandra — lg: col3 row3; sm: col2 row3; mobile: stacked ── */}
+                {dbTestimonials[2] && (
+                  <div className="p-5 sm:p-7 flex flex-col justify-between bg-white/50 dark:bg-white/[0.02]
+                    sm:border-l sm:border-border/30
+                    lg:col-start-3 lg:col-span-1 lg:row-start-3 lg:border-l lg:border-t lg:border-border/30
+                    min-h-[150px]">
+                    <div>
+                      <div className="flex gap-0.5 mb-3">
+                        {Array.from({ length: dbTestimonials[2].rating }).map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-primary text-primary" />)}
+                      </div>
+                      <p className="text-foreground/80 leading-relaxed text-sm line-clamp-4">"{dbTestimonials[2].content}"</p>
+                    </div>
+                    <div className="flex items-center gap-3 pt-3 mt-4 border-t border-border/30">
+                      <img
+                        src={dbTestimonials[2].avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(dbTestimonials[2].name)}&background=e2e8f0&color=64748b`}
+                        alt={dbTestimonials[2].name}
+                        className="w-10 h-10 rounded-full object-cover flex-shrink-0 ring-2 ring-primary/20"
+                        onError={e => { (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(dbTestimonials[2].name)}&background=e2e8f0&color=64748b`; }}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-semibold text-foreground truncate">{dbTestimonials[2].name}</div>
+                        <div className="text-xs text-muted-foreground truncate">{dbTestimonials[2].role}</div>
+                      </div>
+                      {dbTestimonials[2].earnings && <div className="text-sm font-bold text-green-500 shrink-0 ml-2">{dbTestimonials[2].earnings}</div>}
+                    </div>
+                  </div>
+                )}
+
               </div>
             </div>
           )}
