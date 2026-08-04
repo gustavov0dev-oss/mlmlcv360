@@ -134,7 +134,7 @@ export default function Footer() {
                     { href: '/planes', label: 'Planes' },
                     { href: '/tienda', label: 'Tienda' },
                     { href: '/nosotros', label: 'Nosotros' },
-                    { href: '/empresa', label: 'Empresa' },
+                    { href: '/empresa', label: 'Oportunidad' },
                     { href: '/blog', label: 'Novedades' },
                     { href: '/contacto', label: 'Contacto' },
                   ].map(l => (
