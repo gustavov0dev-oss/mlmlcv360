@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Link } from '@/lib/router';
 import { Reveal } from '@/components/landing/Reveal';
-import { Clock, Eye, ArrowRight, Video, Search, FileText, Newspaper, ChevronLeft, ChevronRight, Play, Sparkles, TrendingUp } from 'lucide-react';
+import { Clock, Eye, Video, Search, FileText, Newspaper, ChevronLeft, ChevronRight, Play, Sparkles, TrendingUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 type ContentType = 'article' | 'video' | 'news';
@@ -40,19 +40,19 @@ const allItems: ContentItem[] = [
 ];
 
 const categories: Category[] = ['Estrategia', 'Rangos', 'Comisiones', 'Marketing', 'Tutoriales', 'Noticias'];
-const ITEMS_PER_PAGE = 6;
+const ITEMS_PER_PAGE = 7;
 
 function formatViews(n: number) { return n >= 1000 ? `${(n / 1000).toFixed(1)}K` : n.toString(); }
 
-const typeMeta: Record<ContentType, { label: string; icon: typeof Video; badge: string; glow: string }> = {
-  article: { label: 'Artículo', icon: FileText, badge: 'bg-primary/10 text-primary border-primary/20', glow: 'group-hover:border-primary/40' },
-  video: { label: 'Video', icon: Video, badge: 'bg-rose-500/10 text-rose-500 border-rose-500/20', glow: 'group-hover:border-rose-500/40' },
-  news: { label: 'Noticia', icon: Newspaper, badge: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20', glow: 'group-hover:border-amber-500/40' },
+const typeMeta: Record<ContentType, { label: string; icon: typeof Video; badge: string }> = {
+  article: { label: 'Artículo', icon: FileText, badge: 'bg-primary/10 text-primary border-primary/20' },
+  video: { label: 'Video', icon: Video, badge: 'bg-rose-500/10 text-rose-500 border-rose-500/20' },
+  news: { label: 'Noticia', icon: Newspaper, badge: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20' },
 };
 
 function SkeletonCard() {
   return (
-    <div className="bg-card border border-border/40 rounded-2xl overflow-hidden">
+    <div className="border border-border/20 rounded-xl overflow-hidden">
       <div className="aspect-video shimmer" />
       <div className="p-4 space-y-3">
         <div className="h-3 w-20 shimmer rounded-full" />
@@ -67,46 +67,55 @@ function SkeletonCard() {
   );
 }
 
-function ContentCard({ item }: { item: ContentItem }) {
-  const meta = typeMeta[item.type];
+function MetaBadge({ type }: { type: ContentType }) {
+  const meta = typeMeta[type];
+  return (
+    <span className={cn('inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold border', meta.badge)}>
+      <meta.icon className="w-3 h-3" /> {meta.label}
+    </span>
+  );
+}
+
+function CardMeta({ item }: { item: ContentItem }) {
+  return (
+    <div className="flex items-center gap-2.5 text-[11px] text-muted-foreground/50 shrink-0">
+      {item.readTime && <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{item.readTime}</span>}
+      {item.duration && <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{item.duration}</span>}
+      <span className="flex items-center gap-1"><Eye className="w-3 h-3" />{formatViews(item.views)}</span>
+    </div>
+  );
+}
+
+function StandardCard({ item }: { item: ContentItem }) {
   return (
     <Link to={`/blog/${item.slug}`} className="group block h-full">
-      <article className={cn('bg-card border border-border/50 rounded-2xl overflow-hidden card-lift h-full flex flex-col', meta.glow)}>
+      <article className="border border-border/20 rounded-xl overflow-hidden transition-all hover:border-border/40 h-full flex flex-col">
         <div className="relative aspect-video overflow-hidden">
           <img src={item.image} alt={item.title} loading="lazy"
             className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500 ease-out" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60" />
-          <span className={cn('absolute top-3 left-3 inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold border backdrop-blur-md', meta.badge)}>
-            <meta.icon className="w-3 h-3" /> {meta.label}
-          </span>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-50" />
+          <div className="absolute top-3 left-3"><MetaBadge type={item.type} /></div>
           {item.type === 'video' && (
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-12 h-12 rounded-full bg-white/15 backdrop-blur-md flex items-center justify-center group-hover:scale-110 group-hover:bg-white/25 transition-all duration-300">
+              <div className="w-11 h-11 rounded-full bg-white/15 flex items-center justify-center group-hover:scale-110 group-hover:bg-white/25 transition-all duration-300">
                 <Play className="w-5 h-5 text-white fill-white ml-0.5" />
               </div>
             </div>
           )}
           {item.duration && (
-            <span className="absolute bottom-3 right-3 px-2 py-0.5 rounded-md bg-black/70 backdrop-blur-sm text-[10px] font-medium text-white">{item.duration}</span>
+            <span className="absolute bottom-3 right-3 px-2 py-0.5 rounded-md bg-black/70 text-[10px] font-medium text-white">{item.duration}</span>
           )}
         </div>
         <div className="p-4 sm:p-5 flex-1 flex flex-col">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-[10px] font-bold text-primary uppercase tracking-wider">{item.category}</span>
-            {item.featured && <Sparkles className="w-3 h-3 text-amber-500" />}
-          </div>
-          <h3 className="font-bold text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-snug text-sm sm:text-base">{item.title}</h3>
+          <span className="text-[10px] font-bold text-primary uppercase tracking-wider mb-1.5">{item.category}</span>
+          <h3 className="font-bold text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-snug text-sm sm:text-[15px]">{item.title}</h3>
           <p className="text-xs sm:text-sm text-muted-foreground/60 line-clamp-2 mt-1.5 mb-4">{item.excerpt}</p>
-          <div className="flex items-center justify-between mt-auto pt-3 border-t border-border/30">
+          <div className="flex items-center justify-between mt-auto pt-3 border-t border-border/20">
             <div className="flex items-center gap-2 min-w-0">
               <img src={item.authorAvatar} alt="" className="w-6 h-6 rounded-full shrink-0" />
               <span className="text-[11px] font-medium text-foreground/70 truncate">{item.author}</span>
             </div>
-            <div className="flex items-center gap-2.5 text-[11px] text-muted-foreground/50 shrink-0">
-              {item.readTime && <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{item.readTime}</span>}
-              {item.duration && <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{item.duration}</span>}
-              <span className="flex items-center gap-1"><Eye className="w-3 h-3" />{formatViews(item.views)}</span>
-            </div>
+            <CardMeta item={item} />
           </div>
         </div>
       </article>
@@ -114,37 +123,75 @@ function ContentCard({ item }: { item: ContentItem }) {
   );
 }
 
-function FeaturedCard({ item }: { item: ContentItem }) {
-  const meta = typeMeta[item.type];
+function WideCard({ item }: { item: ContentItem }) {
   return (
     <Link to={`/blog/${item.slug}`} className="group block h-full">
-      <article className="relative h-full bg-card border border-border/50 rounded-3xl overflow-hidden card-lift flex flex-col sm:flex-row">
-        <div className="relative sm:w-1/2 aspect-[16/9] sm:aspect-auto overflow-hidden">
+      <article className="border border-border/20 rounded-xl overflow-hidden transition-all hover:border-border/40 h-full flex flex-col sm:flex-row">
+        <div className="relative sm:w-2/5 aspect-video sm:aspect-auto overflow-hidden">
           <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500 ease-out" />
-          <div className="absolute inset-0 bg-gradient-to-t sm:bg-gradient-to-r from-black/50 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t sm:bg-gradient-to-r from-black/40 via-transparent to-transparent opacity-50" />
+          <div className="absolute top-3 left-3"><MetaBadge type={item.type} /></div>
           {item.type === 'video' && (
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-14 h-14 rounded-full bg-white/15 backdrop-blur-md flex items-center justify-center group-hover:scale-110 group-hover:bg-white/25 transition-all duration-300">
-                <Play className="w-6 h-6 text-white fill-white ml-0.5" />
+              <div className="w-12 h-12 rounded-full bg-white/15 flex items-center justify-center group-hover:scale-110 group-hover:bg-white/25 transition-all duration-300">
+                <Play className="w-5 h-5 text-white fill-white ml-0.5" />
               </div>
             </div>
           )}
+          {item.duration && (
+            <span className="absolute bottom-3 right-3 px-2 py-0.5 rounded-md bg-black/70 text-[10px] font-medium text-white">{item.duration}</span>
+          )}
         </div>
-        <div className="sm:w-1/2 p-6 sm:p-8 flex flex-col justify-center">
-          <div className="flex items-center gap-2 mb-3">
-            <span className={cn('inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold border', meta.badge)}>
-              <meta.icon className="w-3 h-3" /> {meta.label}
-            </span>
+        <div className="sm:w-3/5 p-5 sm:p-6 flex flex-col justify-center">
+          <div className="flex items-center gap-2 mb-2">
             <span className="text-[10px] font-bold text-primary uppercase tracking-wider">{item.category}</span>
-            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+            {item.featured && <Sparkles className="w-3 h-3 text-amber-500" />}
           </div>
-          <h2 className="text-xl sm:text-2xl font-bold text-foreground group-hover:text-primary transition-colors leading-tight mb-2">{item.title}</h2>
+          <h3 className="text-lg sm:text-xl font-bold text-foreground group-hover:text-primary transition-colors leading-snug mb-2">{item.title}</h3>
           <p className="text-sm text-muted-foreground/70 line-clamp-2 mb-4">{item.excerpt}</p>
-          <div className="flex items-center gap-3">
-            <img src={item.authorAvatar} alt="" className="w-8 h-8 rounded-full" />
-            <div className="leading-tight">
-              <div className="text-xs font-medium text-foreground">{item.author}</div>
-              <div className="text-[10px] text-muted-foreground/50">{item.date} · {formatViews(item.views)} vistas</div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <img src={item.authorAvatar} alt="" className="w-7 h-7 rounded-full" />
+              <div className="leading-tight">
+                <div className="text-[11px] font-medium text-foreground">{item.author}</div>
+                <div className="text-[10px] text-muted-foreground/50">{item.date}</div>
+              </div>
+            </div>
+            <CardMeta item={item} />
+          </div>
+        </div>
+      </article>
+    </Link>
+  );
+}
+
+function HeroCard({ item }: { item: ContentItem }) {
+  return (
+    <Link to={`/blog/${item.slug}`} className="group block h-full">
+      <article className="relative h-full rounded-xl overflow-hidden border border-border/20 transition-all hover:border-border/40">
+        <div className="absolute inset-0">
+          <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500 ease-out" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+        </div>
+        <div className="relative h-full flex flex-col justify-end p-6 sm:p-8 min-h-[340px]">
+          <div className="flex items-center gap-2 mb-3">
+            <MetaBadge type={item.type} />
+            <span className="text-[10px] font-bold text-white/80 uppercase tracking-wider">{item.category}</span>
+            {item.featured && <Sparkles className="w-3.5 h-3.5 text-amber-400" />}
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-bold text-white group-hover:text-primary transition-colors leading-tight mb-2 max-w-lg">{item.title}</h2>
+          <p className="text-sm text-white/70 line-clamp-2 mb-4 max-w-md">{item.excerpt}</p>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <img src={item.authorAvatar} alt="" className="w-8 h-8 rounded-full ring-2 ring-white/20" />
+              <div className="leading-tight">
+                <div className="text-xs font-medium text-white">{item.author}</div>
+                <div className="text-[10px] text-white/50">{item.date} · {formatViews(item.views)} vistas</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 text-[11px] text-white/60">
+              {item.readTime && <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{item.readTime}</span>}
+              {item.duration && <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{item.duration}</span>}
             </div>
           </div>
         </div>
@@ -162,7 +209,7 @@ export default function BlogPage() {
 
   useEffect(() => {
     setLoading(true);
-    const t = setTimeout(() => setLoading(false), 400);
+    const t = setTimeout(() => setLoading(false), 350);
     return () => clearTimeout(t);
   }, [activeTab, activeCategory, search]);
 
@@ -178,8 +225,7 @@ export default function BlogPage() {
   const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
   const currentPage = Math.min(page, totalPages);
   const paginated = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
-  const featured = allItems.filter(i => i.featured);
-  const showFeatured = activeTab === 'all' && activeCategory === 'Todas' && !search && currentPage === 1;
+  const isDefaultView = activeTab === 'all' && activeCategory === 'Todas' && !search && currentPage === 1;
 
   const handleTabChange = (tab: 'all' | ContentType) => { setActiveTab(tab); setPage(1); };
   const handleCategoryChange = (cat: 'Todas' | Category) => { setActiveCategory(cat); setPage(1); };
@@ -194,16 +240,12 @@ export default function BlogPage() {
 
   return (
     <>
-      {/* ── Hero ─────────────────────────────────────────────────────────── */}
-      <section className="relative pt-28 pb-10 sm:pb-14 overflow-hidden">
-        <div className="absolute inset-0 bg-dub-grid opacity-20 mask-fade-top" />
+      {/* ── Hero ── */}
+      <section className="relative pt-28 pb-8 sm:pb-10 overflow-hidden">
+        <div className="absolute inset-0 bg-grid opacity-[0.25] mask-fade-top pointer-events-none dark:opacity-[0.1]" />
         <div className="relative max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
-          <nav aria-label="breadcrumb" className="sr-only">
-            <Link to="/">Inicio</Link> / <span>Novedades</span>
-          </nav>
-
           <Reveal>
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/8 border border-primary/15 text-xs font-medium text-primary mb-5">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/8 border border-primary/15 text-xs font-medium text-primary mb-5">
               <TrendingUp className="w-3.5 h-3.5" />
               Recursos Cluv360
             </div>
@@ -217,23 +259,57 @@ export default function BlogPage() {
         </div>
       </section>
 
-      {/* ── Featured ────────────────────────────────────────────────────── */}
-      {showFeatured && (
-        <section className="pb-6">
+      {/* ── Bento featured + filters ── */}
+      {isDefaultView && (
+        <section className="pb-8">
           <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
             <Reveal>
-              <div className="flex items-center gap-2 mb-4">
-                <Sparkles className="w-4 h-4 text-amber-500" />
-                <h2 className="text-sm font-bold text-foreground uppercase tracking-wider">Destacados</h2>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                {/* Hero card — 2 cols */}
+                <div className="lg:col-span-2">
+                  <HeroCard item={paginated[0]} />
+                </div>
+                {/* Two stacked cards — 1 col */}
+                <div className="flex flex-col gap-4">
+                  {paginated.slice(1, 3).map(item => (
+                    <Link key={item.slug} to={`/blog/${item.slug}`} className="group block flex-1">
+                      <article className="border border-border/20 rounded-xl overflow-hidden transition-all hover:border-border/40 h-full flex flex-col sm:flex-row lg:flex-col">
+                        <div className="relative sm:w-1/3 lg:w-full aspect-video sm:aspect-auto lg:aspect-video overflow-hidden">
+                          <img src={item.image} alt={item.title} loading="lazy"
+                            className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500 ease-out" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-50" />
+                          <div className="absolute top-2.5 left-2.5"><MetaBadge type={item.type} /></div>
+                          {item.type === 'video' && (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <div className="w-9 h-9 rounded-full bg-white/15 flex items-center justify-center group-hover:scale-110 group-hover:bg-white/25 transition-all duration-300">
+                                <Play className="w-4 h-4 text-white fill-white ml-0.5" />
+                              </div>
+                            </div>
+                          )}
+                          {item.duration && (
+                            <span className="absolute bottom-2.5 right-2.5 px-1.5 py-0.5 rounded bg-black/70 text-[10px] font-medium text-white">{item.duration}</span>
+                          )}
+                        </div>
+                        <div className="p-4 flex-1 flex flex-col">
+                          <span className="text-[10px] font-bold text-primary uppercase tracking-wider mb-1">{item.category}</span>
+                          <h3 className="font-bold text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-snug text-sm">{item.title}</h3>
+                          <div className="flex items-center gap-2 mt-auto pt-3">
+                            <img src={item.authorAvatar} alt="" className="w-5 h-5 rounded-full shrink-0" />
+                            <span className="text-[11px] font-medium text-foreground/60 truncate">{item.author}</span>
+                          </div>
+                        </div>
+                      </article>
+                    </Link>
+                  ))}
+                </div>
               </div>
             </Reveal>
-            <Reveal delay={50}>
-              <FeaturedCard item={featured[0]} />
-            </Reveal>
-            {featured.length > 1 && (
-              <Reveal delay={100}>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-                  {featured.slice(1).map(item => <ContentCard key={item.slug} item={item} />)}
+
+            {/* Wide cards row */}
+            {paginated.slice(3, 5).length > 0 && (
+              <Reveal delay={80}>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+                  {paginated.slice(3, 5).map(item => <WideCard key={item.slug} item={item} />)}
                 </div>
               </Reveal>
             )}
@@ -241,37 +317,40 @@ export default function BlogPage() {
         </section>
       )}
 
-      {/* ── Filters ──────────────────────────────────────────────────────── */}
-      <section className="sticky top-[60px] z-30 py-3 border-y border-border/40 bg-background/80 backdrop-blur-xl">
+      {/* ── Filters ── */}
+      <section className={cn(
+        "py-4",
+        !isDefaultView && "pt-10",
+      )}>
         <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-1 p-1 bg-muted rounded-xl overflow-x-auto scrollbar-hide">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border/20">
+            <div className="flex items-center gap-1 p-1 bg-muted/50 rounded-xl overflow-x-auto scrollbar-hide">
               {tabs.map(tab => (
                 <button key={tab.value} onClick={() => handleTabChange(tab.value)}
                   className={cn('inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap',
-                    activeTab === tab.value ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground')}>
+                    activeTab === tab.value ? 'bg-card text-foreground border border-border/20' : 'text-muted-foreground hover:text-foreground')}>
                   {tab.icon && <tab.icon className="w-3.5 h-3.5" />}
                   {tab.label}
                   <span className={cn('text-[10px]', activeTab === tab.value ? 'text-primary' : 'text-muted-foreground/40')}>{tab.count}</span>
                 </button>
               ))}
             </div>
-            <div className="relative w-full sm:w-60">
+            <div className="relative w-full sm:w-56">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input type="text" value={search} onChange={e => handleSearch(e.target.value)} placeholder="Buscar contenido..."
-                className="w-full pl-9 pr-4 py-2 bg-card border border-border/60 rounded-lg text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all" />
+                className="w-full pl-9 pr-4 py-2 bg-muted/30 border border-border/20 rounded-lg text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all" />
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2 mt-3">
             <button onClick={() => handleCategoryChange('Todas')}
               className={cn('px-3 py-1.5 rounded-full text-xs font-medium transition-all',
-                activeCategory === 'Todas' ? 'bg-primary text-white' : 'bg-muted text-muted-foreground hover:text-foreground')}>
+                activeCategory === 'Todas' ? 'bg-primary text-white' : 'bg-muted/50 text-muted-foreground hover:text-foreground')}>
               Todas
             </button>
             {categories.map(cat => (
               <button key={cat} onClick={() => handleCategoryChange(cat)}
                 className={cn('px-3 py-1.5 rounded-full text-xs font-medium transition-all',
-                  activeCategory === cat ? 'bg-primary text-white' : 'bg-muted text-muted-foreground hover:text-foreground')}>
+                  activeCategory === cat ? 'bg-primary text-white' : 'bg-muted/50 text-muted-foreground hover:text-foreground')}>
                 {cat}
               </button>
             ))}
@@ -279,16 +358,16 @@ export default function BlogPage() {
         </div>
       </section>
 
-      {/* ── Content grid ─────────────────────────────────────────────────── */}
-      <section className="py-10 sm:py-12">
+      {/* ── Content grid ── */}
+      <section className="py-8 sm:py-10">
         <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
           {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
             </div>
           ) : paginated.length === 0 ? (
             <div className="text-center py-20">
-              <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+              <div className="w-14 h-14 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4">
                 <Search className="w-6 h-6 text-muted-foreground/40" />
               </div>
               <p className="text-muted-foreground text-sm mb-3">No se encontraron resultados para tu búsqueda.</p>
@@ -297,10 +376,11 @@ export default function BlogPage() {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-                {paginated.map((item, i) => (
+              {/* In default view, items 0-4 are in the bento above; show the rest here */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {(isDefaultView ? paginated.slice(5) : paginated).map((item, i) => (
                   <Reveal key={item.slug} delay={i * 40}>
-                    <ContentCard item={item} />
+                    <StandardCard item={item} />
                   </Reveal>
                 ))}
               </div>
@@ -308,20 +388,20 @@ export default function BlogPage() {
               {totalPages > 1 && (
                 <div className="flex items-center justify-center gap-1.5 mt-10">
                   <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}
-                    className="inline-flex items-center gap-1 px-3.5 py-2 rounded-lg text-sm font-medium border border-border/60 hover:bg-muted transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                    className="inline-flex items-center gap-1 px-3.5 py-2 rounded-lg text-sm font-medium border border-border/20 hover:bg-muted/50 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
                     <ChevronLeft className="w-4 h-4" /> <span className="hidden sm:inline">Anterior</span>
                   </button>
                   <div className="flex items-center gap-1">
                     {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
                       <button key={p} onClick={() => setPage(p)}
                         className={cn('w-9 h-9 rounded-lg text-sm font-medium transition-all',
-                          p === currentPage ? 'bg-primary text-white shadow-sm' : 'text-muted-foreground hover:bg-muted')}>
+                          p === currentPage ? 'bg-primary text-white' : 'text-muted-foreground hover:bg-muted/50')}>
                         {p}
                       </button>
                     ))}
                   </div>
                   <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}
-                    className="inline-flex items-center gap-1 px-3.5 py-2 rounded-lg text-sm font-medium border border-border/60 hover:bg-muted transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                    className="inline-flex items-center gap-1 px-3.5 py-2 rounded-lg text-sm font-medium border border-border/20 hover:bg-muted/50 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
                     <span className="hidden sm:inline">Siguiente</span> <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
@@ -330,18 +410,6 @@ export default function BlogPage() {
           )}
         </div>
       </section>
-
-      {/* ── CTA ──────────────────────────────────────────────────────────── */}
-      <section className="py-14 sm:py-16 bg-muted/20 border-t border-border/40">
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-2">¿Quieres más recursos?</h2>
-          <p className="text-sm text-muted-foreground mb-5">Crea tu cuenta y accede a tutoriales exclusivos, guías avanzadas y contenido premium.</p>
-          <Link to="/registro" className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white font-semibold rounded-xl hover:bg-primary/90 transition-all text-sm">
-            Crear cuenta gratis <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
-      </section>
-
     </>
   );
 }
