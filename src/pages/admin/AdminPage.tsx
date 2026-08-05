@@ -1221,7 +1221,7 @@ export default function AdminPage() {
                     genealógico.
                   </p>
                 </div>
-                <div className="space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="flex items-center justify-between p-3 bg-muted rounded-xl">
                     <div>
                       <div className="text-sm font-semibold text-foreground">
@@ -1590,10 +1590,8 @@ export default function AdminPage() {
                       />
                     </div>
                   </div>
-                </div>
 
-                <div className="space-y-5">
-                  <div>
+                  <div className="pt-4 border-t border-border">
                     <label className="block text-xs font-medium text-foreground mb-1.5">
                       Icono de la app
                     </label>
@@ -1662,8 +1660,10 @@ export default function AdminPage() {
                       </div>
                     )}
                   </div>
+                </div>
 
-                  <div className="pt-4 border-t border-border">
+                <div className="space-y-5">
+                  <div>
                     <label className="block text-xs font-medium text-foreground mb-1.5">
                       Capturas — Móvil (vertical)
                     </label>
@@ -2380,137 +2380,151 @@ export default function AdminPage() {
                 </div>
               </div>
 
-              {/* Estado — ancho completo */}
-              <div className="space-y-3 mb-6">
-                <div
-                  className={cn(
-                    "flex items-center justify-between p-4 rounded-xl border-2 transition-colors gap-3",
-                    c("maintenance_mode") === "true"
-                      ? "bg-amber-500/10 border-amber-500/30"
-                      : "bg-emerald-500/10 border-green-500/20",
-                  )}
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div
-                      className={cn(
-                        "w-2.5 h-2.5 rounded-full shrink-0",
-                        c("maintenance_mode") === "true"
-                          ? "bg-amber-500 animate-pulse"
-                          : "bg-emerald-500",
-                      )}
-                    />
-                    <div className="min-w-0">
-                      <div className="text-sm font-semibold text-foreground">
-                        {c("maintenance_mode") === "true"
-                          ? "Sistema en mantenimiento"
-                          : "Sistema operativo"}
-                      </div>
-                      <div className="text-xs text-muted-foreground mt-0.5">
-                        {c("maintenance_mode") === "true"
-                          ? "Los usuarios no pueden acceder. Solo administradores."
-                          : "Todos los usuarios pueden acceder normalmente."}
-                      </div>
-                    </div>
-                  </div>
-                  <ToggleSwitch
-                    checked={c("maintenance_mode") === "true"}
-                    onChange={(v) => {
-                      setC("maintenance_mode", String(v));
-                    }}
-                  />
-                </div>
-
-                {c("maintenance_mode") === "true" && (
-                  <div className="flex items-start gap-2.5 bg-amber-500/10 border border-amber-500/20 rounded-lg p-3.5">
-                    <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
-                    <p className="text-xs text-amber-700 dark:text-amber-300">
-                      El modo mantenimiento está <strong>ACTIVO</strong>. Solo
-                      los administradores y superadmins pueden acceder al
-                      sistema.
-                    </p>
-                  </div>
+              {/* Estado — ancho completo, siempre visible arriba de las dos columnas */}
+              <div
+                className={cn(
+                  "flex items-center justify-between p-4 rounded-xl border-2 transition-colors gap-3 mb-3",
+                  c("maintenance_mode") === "true"
+                    ? "bg-amber-500/10 border-amber-500/30"
+                    : "bg-emerald-500/10 border-green-500/20",
                 )}
-              </div>
-
-              {/* Título — una sola columna, ancho completo */}
-              <div className="max-w-xl">
-                <label className="block text-xs font-medium text-foreground mb-1.5">
-                  Título de la página
-                </label>
-                <input
-                  type="text"
-                  value={c("maintenance_title")}
-                  onChange={(e) => setC("maintenance_title", e.target.value)}
-                  placeholder="Volveremos pronto"
-                  className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors"
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Título principal que se mostrará en la página de mantenimiento.
-                </p>
-              </div>
-
-              {/* Mensaje — una sola columna, ancho completo */}
-              <div className="max-w-xl mt-4">
-                <label className="block text-xs font-medium text-foreground mb-1.5">
-                  Mensaje para los usuarios
-                </label>
-                <textarea
-                  value={c("maintenance_message")}
-                  onChange={(e) => setC("maintenance_message", e.target.value)}
-                  rows={3}
-                  placeholder="Estamos realizando mejoras. Volvemos pronto."
-                  className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors resize-none"
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Este mensaje se mostrará en la página de mantenimiento.
-                </p>
-              </div>
-
-              {/* Temporizador de cuenta regresiva — opcional */}
-              <div className="max-w-xl mt-6 pt-4 border-t border-border">
-                <div className="flex items-center justify-between p-4 rounded-xl border-2 border-border bg-muted/30 gap-3">
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div
+                    className={cn(
+                      "w-2.5 h-2.5 rounded-full shrink-0",
+                      c("maintenance_mode") === "true"
+                        ? "bg-amber-500 animate-pulse"
+                        : "bg-emerald-500",
+                    )}
+                  />
                   <div className="min-w-0">
                     <div className="text-sm font-semibold text-foreground">
-                      Temporizador de cuenta regresiva
+                      {c("maintenance_mode") === "true"
+                        ? "Sistema en mantenimiento"
+                        : "Sistema operativo"}
                     </div>
                     <div className="text-xs text-muted-foreground mt-0.5">
-                      Muestra un contador en la página de mantenimiento.
+                      {c("maintenance_mode") === "true"
+                        ? "Los usuarios no pueden acceder. Solo administradores."
+                        : "Todos los usuarios pueden acceder normalmente."}
                     </div>
                   </div>
-                  <ToggleSwitch
-                    checked={c("maintenance_countdown_enabled") === "true"}
-                    onChange={(v) => setC("maintenance_countdown_enabled", String(v))}
-                  />
                 </div>
-                {c("maintenance_countdown_enabled") === "true" && (
-                  <div className="mt-3 space-y-3">
-                    <div>
-                      <label className="block text-xs font-medium text-foreground mb-1.5">
-                        Fecha y hora de reapertura
-                      </label>
-                      <input
-                        type="datetime-local"
-                        value={c("maintenance_countdown_date") ? c("maintenance_countdown_date").slice(0, 16) : ""}
-                        onChange={(e) => setC("maintenance_countdown_date", e.target.value ? new Date(e.target.value).toISOString() : "")}
-                        className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors"
-                      />
-                      {c("maintenance_countdown_date") && (() => {
-                        const d = new Date(c("maintenance_countdown_date"));
-                        if (isNaN(d.getTime())) return null;
-                        try {
-                          return (
-                            <p className="text-xs text-primary font-medium mt-1">
-                              {new Intl.DateTimeFormat('es-PE', { dateStyle: 'full', timeStyle: 'short' }).format(d)}
-                            </p>
-                          );
-                        } catch { return null; }
-                      })()}
+                <ToggleSwitch
+                  checked={c("maintenance_mode") === "true"}
+                  onChange={(v) => {
+                    setC("maintenance_mode", String(v));
+                  }}
+                />
+              </div>
+
+              {c("maintenance_mode") === "true" && (
+                <div className="flex items-start gap-2.5 bg-amber-500/10 border border-amber-500/20 rounded-lg p-3.5 mb-6">
+                  <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                  <p className="text-xs text-amber-700 dark:text-amber-300">
+                    El modo mantenimiento está <strong>ACTIVO</strong>. Solo
+                    los administradores y superadmins pueden acceder al
+                    sistema.
+                  </p>
+                </div>
+              )}
+
+              {/* Dos columnas equitativas: mensaje al usuario ← / → temporizador */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Columna 1: Contenido visible para el usuario */}
+                <div className="space-y-4">
+                  <h3 className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                    Mensaje para el usuario
+                  </h3>
+                  <div>
+                    <label className="block text-xs font-medium text-foreground mb-1.5">
+                      Título de la página
+                    </label>
+                    <input
+                      type="text"
+                      value={c("maintenance_title")}
+                      onChange={(e) => setC("maintenance_title", e.target.value)}
+                      placeholder="Volveremos pronto"
+                      className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Título principal que se mostrará en la página de mantenimiento.
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-foreground mb-1.5">
+                      Mensaje para los usuarios
+                    </label>
+                    <textarea
+                      value={c("maintenance_message")}
+                      onChange={(e) => setC("maintenance_message", e.target.value)}
+                      rows={5}
+                      placeholder="Estamos realizando mejoras. Volvemos pronto."
+                      className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors resize-none"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Este mensaje se mostrará en la página de mantenimiento.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Columna 2: Temporizador de cuenta regresiva — opcional */}
+                <div className="space-y-4">
+                  <h3 className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                    Cuenta regresiva
+                  </h3>
+                  <div className="flex items-center justify-between p-4 rounded-xl border-2 border-border bg-muted/30 gap-3">
+                    <div className="min-w-0">
+                      <div className="text-sm font-semibold text-foreground">
+                        Temporizador de cuenta regresiva
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-0.5">
+                        Muestra un contador en la página de mantenimiento.
+                      </div>
                     </div>
-                    <MaintenanceCountdownPreview
-                      dateIso={c("maintenance_countdown_date")}
+                    <ToggleSwitch
+                      checked={c("maintenance_countdown_enabled") === "true"}
+                      onChange={(v) => setC("maintenance_countdown_enabled", String(v))}
                     />
                   </div>
-                )}
+                  {c("maintenance_countdown_enabled") === "true" ? (
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-xs font-medium text-foreground mb-1.5">
+                          Fecha y hora de reapertura
+                        </label>
+                        <input
+                          type="datetime-local"
+                          value={c("maintenance_countdown_date") ? c("maintenance_countdown_date").slice(0, 16) : ""}
+                          onChange={(e) => setC("maintenance_countdown_date", e.target.value ? new Date(e.target.value).toISOString() : "")}
+                          className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors"
+                        />
+                        {c("maintenance_countdown_date") && (() => {
+                          const d = new Date(c("maintenance_countdown_date"));
+                          if (isNaN(d.getTime())) return null;
+                          try {
+                            return (
+                              <p className="text-xs text-primary font-medium mt-1">
+                                {new Intl.DateTimeFormat('es-PE', { dateStyle: 'full', timeStyle: 'short' }).format(d)}
+                              </p>
+                            );
+                          } catch { return null; }
+                        })()}
+                      </div>
+                      <MaintenanceCountdownPreview
+                        dateIso={c("maintenance_countdown_date")}
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center gap-2 h-[168px] rounded-xl border border-dashed border-border bg-muted/20 text-center px-6">
+                      <AlertTriangle className="w-5 h-5 text-muted-foreground/40" />
+                      <p className="text-xs text-muted-foreground/70">
+                        Activa el temporizador para mostrar una cuenta regresiva a tus usuarios.
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="mt-6 pt-4 border-t border-border flex justify-end">
@@ -2565,7 +2579,7 @@ function MaintenanceCountdownPreview({ dateIso }: { dateIso: string }) {
   const units = [{ v: d, l: 'Días' }, { v: h, l: 'Horas' }, { v: m, l: 'Min' }, { v: s, l: 'Seg' }];
 
   return (
-    <div className="mt-4 p-4 bg-muted/40 border border-border rounded-xl">
+    <div className="p-4 bg-muted/40 border border-border rounded-xl">
       <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">Vista previa del contador</p>
       <div className="flex gap-2 justify-center">
         {units.map((u, i) => (
