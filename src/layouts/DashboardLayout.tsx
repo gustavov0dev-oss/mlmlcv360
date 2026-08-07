@@ -156,7 +156,7 @@ export default function DashboardLayout() {
         <DashboardHeader />
         <MaintenanceBanner />
         <main className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 lg:p-8 bg-background dashboard-scroll">
-          <div className="max-w-[1200px] mx-auto w-full">
+          <div className="w-full max-w-[1400px] mx-auto px-1 sm:px-2">
             <DashboardContent />
           </div>
         </main>
