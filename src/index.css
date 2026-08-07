@@ -111,8 +111,8 @@
   --popover-foreground: 0 0% 98%;
 
   /* Brand — luminous gold reads on dark bg */
-  --primary: 43 95% 58%;             /* Bright gold */
-  --primary-foreground: 0 0% 4%;     /* Dark text on gold */
+  --primary: 40 90% 48%;             /* Deep gold — white text readable */
+  --primary-foreground: 0 0% 100%;   /* White text on gold */
 
   /* Secondary */
   --secondary: 0 0% 11%;             /* Elevated surface */
