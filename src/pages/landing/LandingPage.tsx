@@ -453,17 +453,16 @@ function AppMockup() {
     </div>
   );
 }
-
 function TestimonialCard({ t }: { t: DBTestimonial }) {
   const avatarFallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(t.name)}&background=e2e8f0&color=64748b`;
   return (
-    <div className="w-[280px] sm:w-[300px] shrink-0 bg-white/60 dark:bg-white/[0.03] border border-border/30 rounded-2xl p-5 mx-2 backdrop-blur-md flex flex-col">
-      <div className="flex gap-0.5 mb-3 flex-shrink-0">
+    <div className="w-[280px] sm:w-[300px] shrink-0 border-r border-border/20 px-6 py-5 flex flex-col transition-colors hover:bg-foreground/[0.03]">
+      <div className="flex gap-1 mb-3 flex-shrink-0">
         {Array.from({ length: 5 }).map((_, i) => (
           <Star
             key={i}
             className={cn(
-              "w-3.5 h-3.5",
+              "w-3 h-3",
               i < t.rating
                 ? "fill-primary text-primary"
                 : "text-muted-foreground/20",
@@ -474,25 +473,25 @@ function TestimonialCard({ t }: { t: DBTestimonial }) {
       <p className="text-sm text-foreground/75 leading-relaxed mb-4 flex-1 overflow-hidden">
         &#8220;{t.content}&#8221;
       </p>
-      <div className="flex items-center gap-3 pt-3 border-t border-border/30 flex-shrink-0">
+      <div className="flex items-center gap-3 pt-3 border-t border-border/20 flex-shrink-0">
         <img
           src={t.avatar_url || avatarFallback}
           alt={t.name}
-          className="w-8 h-8 rounded-full object-cover ring-2 ring-primary/15 flex-shrink-0"
+          className="w-8 h-8 rounded-full object-cover ring-1 ring-border/40 flex-shrink-0"
           onError={(e) => {
             (e.target as HTMLImageElement).src = avatarFallback;
           }}
         />
         <div className="flex-1 min-w-0">
-          <div className="text-xs font-semibold text-foreground leading-tight truncate">
+          <div className="text-xs font-medium text-foreground leading-tight truncate">
             {t.name}
           </div>
-          <div className="text-[10px] text-muted-foreground truncate">
+          <div className="text-[10px] text-muted-foreground/80 truncate">
             {t.role}
           </div>
         </div>
         {t.earnings && (
-          <div className="text-xs font-bold text-green-500 shrink-0">
+          <div className="text-xs font-semibold text-emerald-500 dark:text-emerald-400 shrink-0 tabular-nums">
             {t.earnings}
           </div>
         )}
@@ -505,10 +504,10 @@ function TestimonialsCarousel({ items }: { items: DBTestimonial[] }) {
   if (items.length === 0) return null;
   const row = [...items, ...items, ...items, ...items, ...items, ...items];
   return (
-    <div className="relative overflow-hidden">
+    <div className="relative overflow-hidden border-y border-border/20">
       <div className="absolute left-0 top-0 bottom-0 w-12 sm:w-24 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
       <div className="absolute right-0 top-0 bottom-0 w-12 sm:w-24 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
-      <div className="flex mb-3 animate-marquee-left">
+      <div className="flex border-b border-border/20 animate-marquee-left">
         {row.map((t, i) => (
           <TestimonialCard key={`r1-${i}`} t={t} />
         ))}
@@ -521,7 +520,6 @@ function TestimonialsCarousel({ items }: { items: DBTestimonial[] }) {
     </div>
   );
 }
-
 function fmtNumber(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1).replace(".0", "")}M`;
   if (n >= 1_000) return `${(n / 1_000).toFixed(1).replace(".0", "")}K`;
@@ -1398,70 +1396,67 @@ export default function LandingPage() {
           </div>
 
           {/* ── Bento grid — explicit placement, no divide-x/y ─────────────── */}
-          {(regionStats.length > 0 || dbTestimonials.length > 0) && (
+{(regionStats.length > 0 || dbTestimonials.length > 0) && (
             <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 mb-10 sm:mb-14">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 rounded-2xl border border-border/30 overflow-hidden">
-                {/* ── R1 — row1 col1 (all breakpoints) ── */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 rounded-2xl border border-border/25 overflow-hidden">
                 {regionStats[0] && (
-                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden min-h-[150px] border-b border-border/30">
+                  <div className="group relative flex flex-col items-center justify-center text-center overflow-hidden min-h-[140px] border-b border-border/20 transition-colors hover:bg-foreground/[0.03]">
                     {regionStats[0].image_url && (
                       <img
                         src={regionStats[0].image_url}
                         alt={regionStats[0].city}
-                        className="absolute inset-0 w-full h-full object-cover opacity-25 pointer-events-none"
+                        className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none"
                       />
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/70 to-background/40 pointer-events-none" />
-                    <div className="relative z-10 p-5">
-                      <div className="text-3xl sm:text-4xl font-black text-foreground">
+                    <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/55 to-background/20 pointer-events-none" />
+                    <div className="relative z-10 px-5 py-7">
+                      <div className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground tabular-nums">
                         {regionStats[0].members}
                       </div>
-                      <div className="text-xs sm:text-sm text-muted-foreground mt-1 font-medium">
+                      <div className="text-xs sm:text-sm text-muted-foreground mt-1.5">
                         afiliados en {regionStats[0].city}
                       </div>
                     </div>
                   </div>
                 )}
 
-                {/* ── R2 — row1 col2 ── */}
                 {regionStats[1] && (
-                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden min-h-[150px] border-b border-border/30 sm:border-l border-border/30">
+                  <div className="group relative flex flex-col items-center justify-center text-center overflow-hidden min-h-[140px] border-b border-border/20 sm:border-l sm:border-border/20 transition-colors hover:bg-foreground/[0.03]">
                     {regionStats[1].image_url && (
                       <img
                         src={regionStats[1].image_url}
                         alt={regionStats[1].city}
-                        className="absolute inset-0 w-full h-full object-cover opacity-25 pointer-events-none"
+                        className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none"
                       />
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/70 to-background/40 pointer-events-none" />
-                    <div className="relative z-10 p-5">
-                      <div className="text-3xl sm:text-4xl font-black text-foreground">
+                    <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/55 to-background/20 pointer-events-none" />
+                    <div className="relative z-10 px-5 py-7">
+                      <div className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground tabular-nums">
                         {regionStats[1].members}
                       </div>
-                      <div className="text-xs sm:text-sm text-muted-foreground mt-1 font-medium">
+                      <div className="text-xs sm:text-sm text-muted-foreground mt-1.5">
                         afiliados en {regionStats[1].city}
                       </div>
                     </div>
                   </div>
                 )}
 
-                {/* ── R_extra — row1 col3: 3rd stat or platform total ── */}
-                <div className="relative flex flex-col items-center justify-center text-center overflow-hidden min-h-[150px] border-b border-border/30 sm:border-l border-border/30 lg:border-l">
+                <div className="group relative flex flex-col items-center justify-center text-center overflow-hidden min-h-[140px] border-b border-border/20 sm:border-l sm:border-border/20 lg:border-l transition-colors hover:bg-foreground/[0.03]">
                   {regionStats[4]?.image_url && (
                     <img
                       src={regionStats[4].image_url}
                       alt={regionStats[4]?.city}
-                      className="absolute inset-0 w-full h-full object-cover opacity-25 pointer-events-none"
+                      className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none"
                     />
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/70 to-background/40 pointer-events-none" />
-                  <div className="relative z-10 p-5">
+                  <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/55 to-background/20 pointer-events-none" />
+                  <div className="relative z-10 px-5 py-7">
                     {regionStats[4] && (
                       <>
-                        <div className="text-3xl sm:text-4xl font-black text-foreground">
+                        <div className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground tabular-nums">
                           {regionStats[4].members}
                         </div>
-                        <div className="text-xs sm:text-sm text-muted-foreground mt-1 font-medium">
+                        <div className="text-xs sm:text-sm text-muted-foreground mt-1.5">
                           afiliados en {regionStats[4].city}
                         </div>
                       </>
@@ -1469,52 +1464,51 @@ export default function LandingPage() {
                   </div>
                 </div>
 
-                {/* ── T1 Roberto — row2 col3: same row as T2 → equal height, no gap ── */}
                 {dbTestimonials[0] && (
                   <div
-                    className="p-5 sm:p-7 flex flex-col justify-between bg-white/50 dark:bg-white/[0.02] border-b border-border/30
-                    sm:border-l sm:border-border/30
+                    className="group p-6 sm:p-7 flex flex-col justify-between border-b border-border/20 transition-colors hover:bg-foreground/[0.03]
+                    sm:border-l sm:border-border/20
                     lg:col-start-3 lg:row-start-2 lg:border-l lg:border-b-0
                     min-h-[150px]"
                   >
                     <div>
-                      <div className="flex gap-0.5 mb-3">
+                      <div className="flex gap-1 mb-2.5">
                         {Array.from({ length: dbTestimonials[0].rating }).map(
                           (_, i) => (
                             <Star
                               key={i}
-                              className="w-3.5 h-3.5 fill-primary text-primary"
+                              className="w-3 h-3 fill-primary text-primary"
                             />
                           ),
                         )}
                       </div>
-                      <p className="text-foreground/80 leading-relaxed text-sm sm:text-base line-clamp-4">
+                      <p className="text-foreground/75 leading-relaxed text-sm sm:text-[15px] line-clamp-4">
                         "{dbTestimonials[0].content}"
                       </p>
                     </div>
-                    <div className="flex items-center gap-3 pt-3 mt-4 border-t border-border/30">
+                    <div className="flex items-center gap-3 pt-3 mt-4 border-t border-border/20">
                       <img
                         src={
                           dbTestimonials[0].avatar_url ||
                           `https://ui-avatars.com/api/?name=${encodeURIComponent(dbTestimonials[0].name)}&background=e2e8f0&color=64748b`
                         }
                         alt={dbTestimonials[0].name}
-                        className="w-10 h-10 rounded-full object-cover flex-shrink-0 ring-2 ring-primary/20"
+                        className="w-9 h-9 rounded-full object-cover flex-shrink-0 ring-1 ring-border/40"
                         onError={(e) => {
                           (e.target as HTMLImageElement).src =
                             `https://ui-avatars.com/api/?name=${encodeURIComponent(dbTestimonials[0].name)}&background=e2e8f0&color=64748b`;
                         }}
                       />
                       <div className="flex-1 min-w-0">
-                        <div className="text-sm font-semibold text-foreground truncate">
+                        <div className="text-sm font-medium text-foreground truncate">
                           {dbTestimonials[0].name}
                         </div>
-                        <div className="text-xs text-muted-foreground truncate">
+                        <div className="text-xs text-muted-foreground/80 truncate">
                           {dbTestimonials[0].role}
                         </div>
                       </div>
                       {dbTestimonials[0].earnings && (
-                        <div className="text-sm font-bold text-green-500 shrink-0 ml-2">
+                        <div className="text-sm font-semibold text-emerald-500 dark:text-emerald-400 shrink-0 ml-2 tabular-nums">
                           {dbTestimonials[0].earnings}
                         </div>
                       )}
@@ -1522,52 +1516,51 @@ export default function LandingPage() {
                   </div>
                 )}
 
-                {/* ── T2 Miguel — lg: col1-2 row2; sm: col1 row2; mobile: stacked ── */}
                 {dbTestimonials[1] && (
                   <div
-                    className="p-5 sm:p-7 flex flex-col justify-between bg-white/50 dark:bg-white/[0.02] border-b border-border/30
-                    sm:border-b sm:border-border/30
+                    className="group p-6 sm:p-7 flex flex-col justify-between border-b border-border/20 transition-colors hover:bg-foreground/[0.03]
+                    sm:border-b sm:border-border/20
                     lg:col-start-1 lg:col-span-2 lg:row-start-2 lg:border-l-0 lg:border-b-0
                     min-h-[150px]"
                   >
                     <div>
-                      <div className="flex gap-0.5 mb-3">
+                      <div className="flex gap-1 mb-2.5">
                         {Array.from({ length: dbTestimonials[1].rating }).map(
                           (_, i) => (
                             <Star
                               key={i}
-                              className="w-3.5 h-3.5 fill-primary text-primary"
+                              className="w-3 h-3 fill-primary text-primary"
                             />
                           ),
                         )}
                       </div>
-                      <p className="text-foreground/80 leading-relaxed text-sm sm:text-base line-clamp-3">
+                      <p className="text-foreground/75 leading-relaxed text-sm sm:text-[15px] line-clamp-3">
                         "{dbTestimonials[1].content}"
                       </p>
                     </div>
-                    <div className="flex items-center gap-3 pt-3 mt-4 border-t border-border/30">
+                    <div className="flex items-center gap-3 pt-3 mt-4 border-t border-border/20">
                       <img
                         src={
                           dbTestimonials[1].avatar_url ||
                           `https://ui-avatars.com/api/?name=${encodeURIComponent(dbTestimonials[1].name)}&background=e2e8f0&color=64748b`
                         }
                         alt={dbTestimonials[1].name}
-                        className="w-10 h-10 rounded-full object-cover flex-shrink-0 ring-2 ring-primary/20"
+                        className="w-9 h-9 rounded-full object-cover flex-shrink-0 ring-1 ring-border/40"
                         onError={(e) => {
                           (e.target as HTMLImageElement).src =
                             `https://ui-avatars.com/api/?name=${encodeURIComponent(dbTestimonials[1].name)}&background=e2e8f0&color=64748b`;
                         }}
                       />
                       <div className="flex-1 min-w-0">
-                        <div className="text-sm font-semibold text-foreground truncate">
+                        <div className="text-sm font-medium text-foreground truncate">
                           {dbTestimonials[1].name}
                         </div>
-                        <div className="text-xs text-muted-foreground truncate">
+                        <div className="text-xs text-muted-foreground/80 truncate">
                           {dbTestimonials[1].role}
                         </div>
                       </div>
                       {dbTestimonials[1].earnings && (
-                        <div className="text-sm font-bold text-green-500 shrink-0 ml-2">
+                        <div className="text-sm font-semibold text-emerald-500 dark:text-emerald-400 shrink-0 ml-2 tabular-nums">
                           {dbTestimonials[1].earnings}
                         </div>
                       )}
@@ -1575,96 +1568,93 @@ export default function LandingPage() {
                   </div>
                 )}
 
-                {/* ── R3 — lg: col1 row3; sm: col1 row3; mobile: stacked ── */}
                 {regionStats[2] && (
-                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden min-h-[150px] border-b border-border/30 lg:border-b-0 lg:border-t lg:col-start-1 lg:row-start-3">
+                  <div className="group relative flex flex-col items-center justify-center text-center overflow-hidden min-h-[140px] border-b border-border/20 lg:border-b-0 lg:border-t lg:col-start-1 lg:row-start-3 transition-colors hover:bg-foreground/[0.03]">
                     {regionStats[2].image_url && (
                       <img
                         src={regionStats[2].image_url}
                         alt={regionStats[2].city}
-                        className="absolute inset-0 w-full h-full object-cover opacity-25 pointer-events-none"
+                        className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none"
                       />
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/70 to-background/40 pointer-events-none" />
-                    <div className="relative z-10 p-5">
-                      <div className="text-3xl sm:text-4xl font-black text-foreground">
+                    <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/55 to-background/20 pointer-events-none" />
+                    <div className="relative z-10 px-5 py-7">
+                      <div className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground tabular-nums">
                         {regionStats[2].members}
                       </div>
-                      <div className="text-xs sm:text-sm text-muted-foreground mt-1 font-medium">
+                      <div className="text-xs sm:text-sm text-muted-foreground mt-1.5">
                         afiliados en {regionStats[2].city}
                       </div>
                     </div>
                   </div>
                 )}
 
-                {/* ── R4 — lg: col2 row3; sm: col2 row3; mobile: stacked ── */}
                 {regionStats[3] && (
-                  <div className="relative flex flex-col items-center justify-center text-center overflow-hidden min-h-[150px] border-b border-border/30 sm:border-l lg:border-b-0 lg:border-t lg:col-start-2 lg:row-start-3">
+                  <div className="group relative flex flex-col items-center justify-center text-center overflow-hidden min-h-[140px] border-b border-border/20 sm:border-l lg:border-b-0 lg:border-t lg:col-start-2 lg:row-start-3 transition-colors hover:bg-foreground/[0.03]">
                     {regionStats[3].image_url && (
                       <img
                         src={regionStats[3].image_url}
                         alt={regionStats[3].city}
-                        className="absolute inset-0 w-full h-full object-cover opacity-25 pointer-events-none"
+                        className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none"
                       />
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/70 to-background/40 pointer-events-none" />
-                    <div className="relative z-10 p-5">
-                      <div className="text-3xl sm:text-4xl font-black text-foreground">
+                    <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/55 to-background/20 pointer-events-none" />
+                    <div className="relative z-10 px-5 py-7">
+                      <div className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground tabular-nums">
                         {regionStats[3].members}
                       </div>
-                      <div className="text-xs sm:text-sm text-muted-foreground mt-1 font-medium">
+                      <div className="text-xs sm:text-sm text-muted-foreground mt-1.5">
                         afiliados en {regionStats[3].city}
                       </div>
                     </div>
                   </div>
                 )}
 
-                {/* ── T3 Sandra — lg: col3 row3; sm: col2 row3; mobile: stacked ── */}
                 {dbTestimonials[2] && (
                   <div
-                    className="p-5 sm:p-7 flex flex-col justify-between bg-white/50 dark:bg-white/[0.02]
-                    sm:border-l sm:border-border/30
-                    lg:col-start-3 lg:col-span-1 lg:row-start-3 lg:border-l lg:border-t lg:border-border/30
+                    className="group p-6 sm:p-7 flex flex-col justify-between transition-colors hover:bg-foreground/[0.03]
+                    sm:border-l sm:border-border/20
+                    lg:col-start-3 lg:col-span-1 lg:row-start-3 lg:border-l lg:border-t lg:border-border/20
                     min-h-[150px]"
                   >
                     <div>
-                      <div className="flex gap-0.5 mb-3">
+                      <div className="flex gap-1 mb-2.5">
                         {Array.from({ length: dbTestimonials[2].rating }).map(
                           (_, i) => (
                             <Star
                               key={i}
-                              className="w-3.5 h-3.5 fill-primary text-primary"
+                              className="w-3 h-3 fill-primary text-primary"
                             />
                           ),
                         )}
                       </div>
-                      <p className="text-foreground/80 leading-relaxed text-sm line-clamp-4">
+                      <p className="text-foreground/75 leading-relaxed text-sm line-clamp-4">
                         "{dbTestimonials[2].content}"
                       </p>
                     </div>
-                    <div className="flex items-center gap-3 pt-3 mt-4 border-t border-border/30">
+                    <div className="flex items-center gap-3 pt-3 mt-4 border-t border-border/20">
                       <img
                         src={
                           dbTestimonials[2].avatar_url ||
                           `https://ui-avatars.com/api/?name=${encodeURIComponent(dbTestimonials[2].name)}&background=e2e8f0&color=64748b`
                         }
                         alt={dbTestimonials[2].name}
-                        className="w-10 h-10 rounded-full object-cover flex-shrink-0 ring-2 ring-primary/20"
+                        className="w-9 h-9 rounded-full object-cover flex-shrink-0 ring-1 ring-border/40"
                         onError={(e) => {
                           (e.target as HTMLImageElement).src =
                             `https://ui-avatars.com/api/?name=${encodeURIComponent(dbTestimonials[2].name)}&background=e2e8f0&color=64748b`;
                         }}
                       />
                       <div className="flex-1 min-w-0">
-                        <div className="text-sm font-semibold text-foreground truncate">
+                        <div className="text-sm font-medium text-foreground truncate">
                           {dbTestimonials[2].name}
                         </div>
-                        <div className="text-xs text-muted-foreground truncate">
+                        <div className="text-xs text-muted-foreground/80 truncate">
                           {dbTestimonials[2].role}
                         </div>
                       </div>
                       {dbTestimonials[2].earnings && (
-                        <div className="text-sm font-bold text-green-500 shrink-0 ml-2">
+                        <div className="text-sm font-semibold text-emerald-500 dark:text-emerald-400 shrink-0 ml-2 tabular-nums">
                           {dbTestimonials[2].earnings}
                         </div>
                       )}
@@ -1682,7 +1672,7 @@ export default function LandingPage() {
       )}
 
       {/* ── RANKS ─────────────────────────────────────────────────────────────── */}
-      {ranks.filter((r) => r.is_active !== false).length > 0 && (
+   {ranks.filter((r) => r.is_active !== false).length > 0 && (
         <section className="py-16 sm:py-24">
           <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid lg:grid-cols-[1fr_1.4fr] gap-10 sm:gap-12 lg:gap-16 items-start">
@@ -1734,7 +1724,7 @@ export default function LandingPage() {
                           <div
                             key={r.id}
                             className={cn(
-                              "relative rounded-xl border border-border/30 bg-white/60 dark:bg-white/[0.03] backdrop-blur-md overflow-hidden",
+                              "group relative rounded-xl border border-border/15 overflow-hidden transition-colors hover:border-border/30 hover:bg-foreground/[0.02]",
                               isCompact ? "p-3" : "p-4",
                             )}
                           >
@@ -1743,7 +1733,7 @@ export default function LandingPage() {
                               aria-hidden
                             >
                               <div
-                                className="w-16 h-16 opacity-[0.07] flex items-center justify-center"
+                                className="w-16 h-16 opacity-[0.06] flex items-center justify-center"
                                 style={iconColorStyle}
                               >
                                 <Award className="w-full h-full" />
@@ -1764,7 +1754,7 @@ export default function LandingPage() {
                               <div className="flex-1 min-w-0">
                                 <div
                                   className={cn(
-                                    "text-sm font-bold leading-tight",
+                                    "text-sm font-semibold leading-tight",
                                     isCompact && "text-[13px]",
                                     textColorClass,
                                   )}
@@ -1779,7 +1769,7 @@ export default function LandingPage() {
                                 )}
                               </div>
                               <div className="text-right shrink-0">
-                                <div className="text-sm font-black text-foreground">
+                                <div className="text-sm font-bold text-foreground tabular-nums">
                                   {formatPrice(
                                     r.bonus,
                                     currency,
