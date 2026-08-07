@@ -151,8 +151,8 @@ export default function DashboardLayout() {
   return (
     <div className="flex h-[100dvh] bg-background overflow-hidden">
       <Sidebar />
-      <div className={cn('flex flex-col min-w-0 h-[100dvh] overflow-hidden w-full max-w-[1400px] transition-[margin] duration-200',
-        sidebarCollapsed ? 'lg:ml-[72px] lg:mr-auto' : 'lg:ml-[260px] lg:mr-auto')}>
+      <div className={cn('flex flex-col min-w-0 h-[100dvh] overflow-hidden w-full transition-[margin] duration-200',
+        sidebarCollapsed ? 'lg:ml-[72px]' : 'lg:ml-[260px]')}>
         <DashboardHeader />
         <MaintenanceBanner />
         <main className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 lg:p-8 bg-background dashboard-scroll">
