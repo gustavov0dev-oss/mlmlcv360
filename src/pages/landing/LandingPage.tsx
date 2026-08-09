@@ -228,7 +228,7 @@ function StoreSection() {
           </div>
           <Link
             to="/tienda"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-border/30 bg-white/60 dark:bg-white/[0.03] backdrop-blur-md text-sm font-medium hover:border-primary/50 hover:text-primary transition-all group shrink-0 self-start sm:self-auto"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-border/40 bg-white/70 dark:bg-white/[0.05] backdrop-blur-md text-sm font-medium hover:border-primary/50 hover:text-primary transition-all group shrink-0 self-start sm:self-auto"
           >
             Ver tienda completa
             <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
@@ -248,7 +248,7 @@ function StoreSection() {
                 "shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all",
                 activeCat === ""
                   ? "bg-foreground/90 text-background backdrop-blur-md"
-                  : "border border-border/30 bg-white/60 dark:bg-white/[0.03] backdrop-blur-md text-muted-foreground hover:text-foreground hover:border-foreground/30",
+                  : "border border-border/40 bg-white/70 dark:bg-white/[0.05] backdrop-blur-md text-muted-foreground hover:text-foreground hover:border-foreground/30",
               )}
             >
               <ShoppingBag className="w-3.5 h-3.5" /> Todos
@@ -261,7 +261,7 @@ function StoreSection() {
                   "shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all",
                   activeCat === cat.id
                     ? "bg-foreground/90 text-background backdrop-blur-md"
-                    : "border border-border/30 bg-white/60 dark:bg-white/[0.03] backdrop-blur-md text-muted-foreground hover:text-foreground hover:border-foreground/30",
+                    : "border border-border/40 bg-white/70 dark:bg-white/[0.05] backdrop-blur-md text-muted-foreground hover:text-foreground hover:border-foreground/30",
                 )}
               >
                 {cat.image_url && (
@@ -282,7 +282,7 @@ function StoreSection() {
             {Array.from({ length: 6 }).map((_, i) => (
               <div
                 key={i}
-                className="bg-white/60 dark:bg-white/[0.03] rounded-xl overflow-hidden border border-border/30"
+                className="bg-white/70 dark:bg-white/[0.05] rounded-xl overflow-hidden border border-border/40"
               >
                 <Skeleton className="aspect-square" />
               </div>
@@ -290,7 +290,7 @@ function StoreSection() {
           </div>
         ) : filtered.length === 0 ? (
           <div className="py-20 flex flex-col items-center justify-center gap-2 text-center">
-            <p className="text-sm text-muted-foreground/50">
+            <p className="text-sm text-muted-foreground/70">
               No hay productos en esta categoría
             </p>
             <button
@@ -317,23 +317,23 @@ function AppMockup() {
     typeof window !== "undefined" ? window.location.host : "app.cluv360.pe";
   return (
     <div className="relative w-full max-w-[780px] mx-auto">
-      <div className="bg-transparent border border-border/30 rounded-2xl shadow-[0_24px_64px_-16px_rgba(0,0,0,0.08)] dark:shadow-[0_24px_64px_-16px_rgba(0,0,0,0.3)] overflow-hidden backdrop-blur-md">
-        <div className="flex items-center gap-3 px-4 sm:px-5 py-3 border-b border-border/30 bg-muted/20 dark:bg-white/[0.02]">
+      <div className="border border-border/40 rounded-2xl overflow-hidden">
+        <div className="flex items-center gap-3 px-4 sm:px-5 py-3 border-b border-border/40">
           <div className="flex gap-1.5">
-            <div className="w-3 h-3 rounded-full bg-[#ff5f57]" />
-            <div className="w-3 h-3 rounded-full bg-[#febc2e]" />
-            <div className="w-3 h-3 rounded-full bg-[#28c840]" />
+            <div className="w-2 h-2 rounded-full bg-border" />
+            <div className="w-2 h-2 rounded-full bg-border" />
+            <div className="w-2 h-2 rounded-full bg-border" />
           </div>
           <div className="flex-1 flex justify-center">
-            <div className="bg-background/40 border border-border/30 rounded-lg px-3 sm:px-4 py-1 text-[11px] sm:text-xs text-muted-foreground w-44 sm:w-56 text-center backdrop-blur-md truncate">
+            <div className="border border-border/40 rounded-lg px-3 sm:px-4 py-1 text-[11px] sm:text-xs text-muted-foreground w-44 sm:w-56 text-center truncate">
               {appHost}/dashboard
             </div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-[160px_1fr] min-h-[280px] sm:min-h-[310px]">
-          <div className="border-r border-border/30 p-3 bg-white/50 dark:bg-white/[0.02] hidden sm:block">
-            <div className="text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-wider mb-3 px-2">
+          <div className="border-r border-border/40 p-3 hidden sm:block">
+            <div className="text-[10px] font-semibold text-muted-foreground/85 uppercase tracking-wider mb-3 px-2">
               Panel
             </div>
             {[
@@ -346,10 +346,10 @@ function AppMockup() {
               <div
                 key={item.label}
                 className={cn(
-                  "flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium mb-0.5",
+                  "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium mb-0.5",
                   item.active
-                    ? "bg-primary/12 text-primary font-semibold"
-                    : "text-muted-foreground/70",
+                    ? "text-primary font-semibold"
+                    : "text-muted-foreground/85",
                 )}
               >
                 <item.icon className="w-3.5 h-3.5 shrink-0" />
@@ -366,9 +366,9 @@ function AppMockup() {
               ].map((s) => (
                 <div
                   key={s.label}
-                  className="bg-muted/20 dark:bg-white/[0.03] rounded-xl p-2.5 sm:p-3 border border-border/20"
+                  className="rounded-xl p-2.5 sm:p-3 border border-border/40"
                 >
-                  <div className="text-[9px] sm:text-[10px] text-muted-foreground/70 mb-1">
+                  <div className="text-[9px] sm:text-[10px] text-muted-foreground/85 mb-1">
                     {s.label}
                   </div>
                   <div className="text-xs sm:text-sm font-bold text-foreground">
@@ -380,9 +380,9 @@ function AppMockup() {
                 </div>
               ))}
             </div>
-            <div className="bg-muted/20 dark:bg-white/[0.02] rounded-xl p-3 border border-border/20">
+            <div className="rounded-xl p-3 border border-border/40">
               <div className="flex items-center justify-between mb-3">
-                <span className="text-[9px] sm:text-[10px] text-muted-foreground/70 font-medium">
+                <span className="text-[9px] sm:text-[10px] text-muted-foreground/85 font-medium">
                   Comisiones — 12 semanas
                 </span>
                 <span className="text-[9px] sm:text-[10px] font-semibold text-primary">
@@ -396,7 +396,7 @@ function AppMockup() {
                       key={i}
                       className={cn(
                         "flex-1 rounded-sm",
-                        i === 11 ? "bg-primary" : "bg-primary/20",
+                        i === 11 ? "bg-primary" : "bg-primary/25",
                       )}
                       style={{ height: `${h}%` }}
                     />
@@ -419,9 +419,9 @@ function AppMockup() {
               ].map((item, i) => (
                 <div
                   key={i}
-                  className="flex items-center gap-2.5 p-2 sm:p-2.5 rounded-xl bg-muted/20 dark:bg-white/[0.02] border border-border/20"
+                  className="flex items-center gap-2.5 p-2 sm:p-2.5 rounded-xl border border-border/40"
                 >
-                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center flex-shrink-0 bg-primary/10 text-primary">
+                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center flex-shrink-0 bg-primary/15 text-primary">
                     <item.icon className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
                   </div>
                   <span className="text-xs text-foreground flex-1 truncate">
@@ -437,9 +437,9 @@ function AppMockup() {
         </div>
       </div>
 
-      <div className="absolute -top-4 sm:-top-5 -right-1 sm:-right-7 bg-white/80 dark:bg-white/[0.05] border border-primary/20 rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2.5 shadow-xl shadow-primary/5 backdrop-blur-md pointer-events-none">
+      <div className="absolute -top-4 sm:-top-5 -right-1 sm:-right-7 border border-border/40 rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2.5 bg-background pointer-events-none shadow-lg">
         <div className="flex items-center gap-2 sm:gap-2.5">
-          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-primary/15 flex items-center justify-center">
             <Bell className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
           </div>
           <div>
@@ -456,7 +456,7 @@ function AppMockup() {
 function TestimonialCard({ t }: { t: DBTestimonial }) {
   const avatarFallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(t.name)}&background=e2e8f0&color=64748b`;
   return (
-    <div className="w-[280px] sm:w-[300px] shrink-0 border-r border-border/20 px-6 py-5 flex flex-col transition-colors hover:bg-foreground/[0.03]">
+    <div className="w-[280px] sm:w-[300px] shrink-0 border-r border-border/30 px-6 py-5 flex flex-col transition-colors hover:bg-foreground/[0.03]">
       <div className="flex gap-1 mb-3 flex-shrink-0">
         {Array.from({ length: 5 }).map((_, i) => (
           <Star
@@ -465,19 +465,19 @@ function TestimonialCard({ t }: { t: DBTestimonial }) {
               "w-3 h-3",
               i < t.rating
                 ? "fill-primary text-primary"
-                : "text-muted-foreground/20",
+                : "text-muted-foreground/30",
             )}
           />
         ))}
       </div>
-      <p className="text-sm text-foreground/75 leading-relaxed mb-4 flex-1 overflow-hidden">
+      <p className="text-sm text-foreground/90 leading-relaxed mb-4 flex-1 overflow-hidden">
         &#8220;{t.content}&#8221;
       </p>
-      <div className="flex items-center gap-3 pt-3 border-t border-border/20 flex-shrink-0">
+      <div className="flex items-center gap-3 pt-3 border-t border-border/30 flex-shrink-0">
         <img
           src={t.avatar_url || avatarFallback}
           alt={t.name}
-          className="w-8 h-8 rounded-full object-cover ring-1 ring-border/40 flex-shrink-0"
+          className="w-8 h-8 rounded-full object-cover ring-1 ring-border/50 flex-shrink-0"
           onError={(e) => {
             (e.target as HTMLImageElement).src = avatarFallback;
           }}
@@ -486,12 +486,12 @@ function TestimonialCard({ t }: { t: DBTestimonial }) {
           <div className="text-xs font-medium text-foreground leading-tight truncate">
             {t.name}
           </div>
-          <div className="text-[10px] text-muted-foreground/80 truncate">
+          <div className="text-[10px] text-muted-foreground/90 truncate">
             {t.role}
           </div>
         </div>
         {t.earnings && (
-          <div className="text-xs font-semibold text-emerald-500 dark:text-emerald-400 shrink-0 tabular-nums">
+          <div className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 shrink-0 tabular-nums">
             {t.earnings}
           </div>
         )}
@@ -504,10 +504,10 @@ function TestimonialsCarousel({ items }: { items: DBTestimonial[] }) {
   if (items.length === 0) return null;
   const row = [...items, ...items, ...items, ...items, ...items, ...items];
   return (
-    <div className="relative overflow-hidden border-y border-border/20">
+    <div className="relative overflow-hidden border-y border-border/30">
       <div className="absolute left-0 top-0 bottom-0 w-12 sm:w-24 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
       <div className="absolute right-0 top-0 bottom-0 w-12 sm:w-24 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
-      <div className="flex border-b border-border/20 animate-marquee-left">
+      <div className="flex border-b border-border/30 animate-marquee-left">
         {row.map((t, i) => (
           <TestimonialCard key={`r1-${i}`} t={t} />
         ))}
@@ -671,7 +671,7 @@ export default function LandingPage() {
         <div className="relative z-10 max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <a
             href="#planes"
-            className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 bg-white/60 dark:bg-white/[0.03] border border-border/30 rounded-full text-xs sm:text-sm text-foreground hover:border-primary/40 transition-all mb-7 sm:mb-8 group shadow-sm backdrop-blur-md"
+            className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 bg-white/70 dark:bg-white/[0.05] border border-border/40 rounded-full text-xs sm:text-sm text-foreground hover:border-primary/40 transition-all mb-7 sm:mb-8 group shadow-sm backdrop-blur-md"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shrink-0" />
             <span className="font-medium">
@@ -689,7 +689,7 @@ export default function LandingPage() {
             <span className="text-gradient-animated">Cobra automático.</span>
           </h1>
 
-          <p className="text-base sm:text-lg text-muted-foreground/80 max-w-xl sm:max-w-2xl mx-auto mb-8 sm:mb-10 leading-relaxed">
+          <p className="text-base sm:text-lg text-muted-foreground/90 max-w-xl sm:max-w-2xl mx-auto mb-8 sm:mb-10 leading-relaxed">
             La plataforma MLM líder del mercado. Comisiones en tiempo real, red
             interactiva y tienda integrada.
           </p>
@@ -704,13 +704,13 @@ export default function LandingPage() {
             </Link>
             <Link
               to="/planes"
-              className="inline-flex items-center justify-center gap-2 px-7 sm:px-8 py-3.5 bg-white/60 dark:bg-white/[0.03] border border-border/30 text-foreground font-medium rounded-xl hover:border-primary/40 hover:text-primary transition-all text-base backdrop-blur-md"
+              className="inline-flex items-center justify-center gap-2 px-7 sm:px-8 py-3.5 bg-white/70 dark:bg-white/[0.05] border border-border/40 text-foreground font-medium rounded-xl hover:border-primary/40 hover:text-primary transition-all text-base backdrop-blur-md"
             >
               Ver planes
             </Link>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs sm:text-sm text-muted-foreground/70 mb-10 sm:mb-12">
+          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs sm:text-sm text-muted-foreground/85 mb-10 sm:mb-12">
             {[
               { icon: Lock, text: "SSL 256-bit", iconClass: "icon-primary" },
               {
@@ -793,17 +793,17 @@ export default function LandingPage() {
                 className="relative text-center overflow-hidden"
               >
                 <stat.icon
-                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 opacity-[0.05] text-foreground pointer-events-none select-none"
+                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 opacity-[0.06] text-foreground pointer-events-none select-none"
                   aria-hidden
                 />
                 <div className="relative">
                   <div className="text-3xl sm:text-4xl lg:text-5xl font-black text-foreground tracking-tight tabular-nums leading-none">
                     {stat.value}
                   </div>
-                  <div className="text-sm font-semibold text-foreground/80 mt-2.5">
+                  <div className="text-sm font-semibold text-foreground/90 mt-2.5">
                     {stat.label}
                   </div>
-                  <div className="text-xs text-muted-foreground/45 mt-0.5">
+                  <div className="text-xs text-muted-foreground/75 mt-0.5">
                     {stat.sub}
                   </div>
                 </div>
@@ -826,13 +826,13 @@ export default function LandingPage() {
               <br />
               para <span className="text-gradient-animated">crecer</span>
             </h2>
-            <p className="text-base text-muted-foreground/80 max-w-xl">
+            <p className="text-base text-muted-foreground/90 max-w-xl">
               Cada herramienta resuelve un problema real del negocio multinivel.
             </p>
           </div>
 
           <div className="flex flex-col">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-14 items-center py-8 sm:py-10 lg:py-12 border-t border-border/10">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-14 items-center py-8 sm:py-10 lg:py-12 border-t border-border/25">
               <div>
                 <div className="flex items-center gap-2.5 mb-3 sm:mb-4">
                   <BarChart3 className="w-4 h-4 text-primary" />
@@ -849,7 +849,7 @@ export default function LandingPage() {
                 </p>
               </div>
               <div className="flex flex-col gap-7 sm:gap-8">
-                <div className="grid grid-cols-3 divide-x divide-border/10">
+                <div className="grid grid-cols-3 divide-x divide-border/25">
                   {[
                     {
                       label: "Red activa",
@@ -877,7 +877,7 @@ export default function LandingPage() {
                       <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground tabular-nums">
                         {s.value}
                       </div>
-                      <div className="text-[10px] sm:text-[11px] text-muted-foreground/60 mt-1 uppercase tracking-wide">
+                      <div className="text-[10px] sm:text-[11px] text-muted-foreground/80 mt-1 uppercase tracking-wide">
                         {s.label}
                       </div>
                     </div>
@@ -890,7 +890,7 @@ export default function LandingPage() {
                         key={i}
                         className={cn(
                           "flex-1 rounded-sm transition-all",
-                          i === 11 ? "bg-primary" : "bg-primary/15",
+                          i === 11 ? "bg-primary" : "bg-primary/25",
                         )}
                         style={{ height: `${h}%` }}
                       />
@@ -900,7 +900,7 @@ export default function LandingPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-14 items-center py-8 sm:py-10 lg:py-12 border-t border-border/10">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-14 items-center py-8 sm:py-10 lg:py-12 border-t border-border/25">
               <div className="order-1 lg:order-2">
                 <div className="flex items-center gap-2.5 mb-3 sm:mb-4">
                   <Network className="w-4 h-4 text-primary" />
@@ -927,7 +927,7 @@ export default function LandingPage() {
                     x2="90"
                     y2="85"
                     stroke="currentColor"
-                    strokeOpacity="0.3"
+                    strokeOpacity="0.45"
                     strokeWidth="2"
                   />
                   <line
@@ -936,7 +936,7 @@ export default function LandingPage() {
                     x2="230"
                     y2="85"
                     stroke="currentColor"
-                    strokeOpacity="0.3"
+                    strokeOpacity="0.45"
                     strokeWidth="2"
                   />
                   <line
@@ -945,7 +945,7 @@ export default function LandingPage() {
                     x2="45"
                     y2="135"
                     stroke="currentColor"
-                    strokeOpacity="0.18"
+                    strokeOpacity="0.3"
                     strokeWidth="2"
                   />
                   <line
@@ -954,7 +954,7 @@ export default function LandingPage() {
                     x2="135"
                     y2="135"
                     stroke="currentColor"
-                    strokeOpacity="0.18"
+                    strokeOpacity="0.3"
                     strokeWidth="2"
                   />
                   <line
@@ -963,7 +963,7 @@ export default function LandingPage() {
                     x2="185"
                     y2="135"
                     stroke="currentColor"
-                    strokeOpacity="0.18"
+                    strokeOpacity="0.3"
                     strokeWidth="2"
                   />
                   <line
@@ -972,7 +972,7 @@ export default function LandingPage() {
                     x2="275"
                     y2="135"
                     stroke="currentColor"
-                    strokeOpacity="0.18"
+                    strokeOpacity="0.3"
                     strokeWidth="2"
                   />
                   <circle cx="160" cy="30" r="11" fill="currentColor" />
@@ -981,14 +981,14 @@ export default function LandingPage() {
                     cy="85"
                     r="8"
                     fill="currentColor"
-                    fillOpacity="0.65"
+                    fillOpacity="0.8"
                   />
                   <circle
                     cx="230"
                     cy="85"
                     r="8"
                     fill="currentColor"
-                    fillOpacity="0.65"
+                    fillOpacity="0.8"
                   />
                   {[45, 135, 185, 275].map((x) => (
                     <circle
@@ -997,94 +997,93 @@ export default function LandingPage() {
                       cy="135"
                       r="6"
                       fill="currentColor"
-                      fillOpacity="0.35"
+                      fillOpacity="0.55"
                     />
                   ))}
                 </svg>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-14 items-center py-8 sm:py-10 lg:py-12 border-t border-border/10">
-              <div>
-                <div className="flex items-center gap-2.5 mb-3 sm:mb-4">
-                  <Award className="w-4 h-4 text-primary" />
-                  <span className="text-xs font-semibold text-primary uppercase tracking-widest">
-                    Progresión
-                  </span>
-                </div>
-                <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground tracking-tight mb-3 sm:mb-4">
-                  Sistema de rangos
-                </h3>
-                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed max-w-sm">
-                  Cada nivel desbloquea bonos y beneficios exclusivos. Tu
-                  esfuerzo siempre tiene recompensa, en orden.
-                </p>
-              </div>
-              {(() => {
-                const activeRanks = ranks.filter((r) => r.is_active !== false);
-                const mid = Math.ceil(activeRanks.length / 2);
-                const columns = [
-                  activeRanks.slice(0, mid),
-                  activeRanks.slice(mid),
-                ];
-                return (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-0">
-                    {columns.map((col, colIdx) => (
-                      <div key={colIdx} className="relative">
-                        <div className="absolute left-[7px] top-2 bottom-2 w-px bg-border/15" />
-                        {col.map((r, i) => {
-                          const globalIdx = colIdx === 0 ? i : mid + i;
-                          const pct = Math.round(
-                            ((globalIdx + 1) / activeRanks.length) * 100,
-                          );
-                          const rankColor = r.color?.startsWith("#")
-                            ? r.color
-                            : "#0ea5e9";
-                          return (
-                            <div
-                              key={r.name}
-                              className="relative flex items-start gap-3 py-2.5"
-                            >
-                              <div
-                                className="relative z-10 w-5 h-5 flex items-center justify-center shrink-0"
-                                style={{ color: rankColor }}
-                              >
-                                <RankIcon rank={r} className="w-4 h-4" />
-                              </div>
-                              <div className="flex-1 min-w-0 -mt-0.5">
-                                <div className="flex items-baseline justify-between gap-2 mb-1.5">
-                                  <span
-                                    className="text-sm font-semibold"
-                                    style={{ color: rankColor }}
-                                  >
-                                    {r.name}
-                                  </span>
-                                  <span className="text-[10px] text-muted-foreground/50 tabular-nums shrink-0">
-                                    {globalIdx + 1}/{activeRanks.length}
-                                  </span>
-                                </div>
-                                <div className="h-[3px] rounded-full relative overflow-hidden bg-muted/20">
-                                  <div
-                                    className="absolute inset-y-0 left-0 rounded-full"
-                                    style={{
-                                      width: `${pct}%`,
-                                      background: rankColor,
-                                      opacity: 0.6,
-                                    }}
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    ))}
+<div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-14 items-center py-8 sm:py-10 lg:py-12 border-t border-border/25">
+  <div>
+    <div className="flex items-center gap-2.5 mb-3 sm:mb-4">
+      <Award className="w-4 h-4 text-primary" />
+      <span className="text-xs font-semibold text-primary uppercase tracking-widest">
+        Progresión
+      </span>
+    </div>
+    <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground tracking-tight mb-3 sm:mb-4">
+      Sistema de rangos
+    </h3>
+    <p className="text-sm sm:text-base text-muted-foreground leading-relaxed max-w-sm">
+      Cada nivel desbloquea bonos y beneficios exclusivos. Tu
+      esfuerzo siempre tiene recompensa, en orden.
+    </p>
+  </div>
+  {(() => {
+    const activeRanks = ranks.filter((r) => r.is_active !== false);
+    const mid = Math.ceil(activeRanks.length / 2);
+    const columns = [
+      activeRanks.slice(0, mid),
+      activeRanks.slice(mid),
+    ];
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-0">
+        {columns.map((col, colIdx) => (
+          <div key={colIdx} className="relative">
+            {col.map((r, i) => {
+              const globalIdx = colIdx === 0 ? i : mid + i;
+              const pct = Math.round(
+                ((globalIdx + 1) / activeRanks.length) * 100,
+              );
+              const rankColor = r.color?.startsWith("#")
+                ? r.color
+                : "#0ea5e9";
+              return (
+                <div
+                  key={r.name}
+                  className="relative flex items-start gap-3 py-2.5"
+                >
+                  <div
+                    className="relative z-10 w-5 h-5 flex items-center justify-center shrink-0"
+                    style={{ color: rankColor }}
+                  >
+                    <RankIcon rank={r} className="w-4 h-4" />
                   </div>
-                );
-              })()}
-            </div>
+                  <div className="flex-1 min-w-0 -mt-0.5">
+                    <div className="flex items-baseline justify-between gap-2 mb-1.5">
+                      <span
+                        className="text-sm font-semibold"
+                        style={{ color: rankColor }}
+                      >
+                        {r.name}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground/75 tabular-nums shrink-0">
+                        {globalIdx + 1}/{activeRanks.length}
+                      </span>
+                    </div>
+                    <div className="h-[3px] rounded-full relative overflow-hidden bg-muted/35">
+                      <div
+                        className="absolute inset-y-0 left-0 rounded-full"
+                        style={{
+                          width: `${pct}%`,
+                          background: rankColor,
+                          opacity: 0.85,
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+    );
+  })()}
+</div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-14 items-center py-8 sm:py-10 lg:py-12 border-t border-b border-border/10">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-14 items-center py-8 sm:py-10 lg:py-12 border-t border-b border-border/25">
               <div>
                 <div className="flex items-center gap-2.5 mb-3 sm:mb-4">
                   <ShoppingBag className="w-4 h-4 text-primary" />
@@ -1106,7 +1105,7 @@ export default function LandingPage() {
                   ).map((tag) => (
                     <span
                       key={tag}
-                      className="text-xs font-medium text-muted-foreground/70"
+                      className="text-xs font-medium text-muted-foreground/85"
                     >
                       {tag}
                     </span>
@@ -1121,7 +1120,7 @@ export default function LandingPage() {
                     <ArrowRight className="w-4 h-4 group-hover/link:translate-x-0.5 transition-transform" />
                   </Link>
                   {platformStats.totalProducts > 0 && (
-                    <div className="text-sm text-muted-foreground/60">
+                    <div className="text-sm text-muted-foreground/80">
                       <span className="text-lg font-bold text-foreground tabular-nums">
                         {fmtNumber(platformStats.totalProducts)}
                       </span>{" "}
@@ -1187,10 +1186,10 @@ export default function LandingPage() {
                                   <img
                                     src={src}
                                     alt=""
-                                    className="w-full h-full object-cover opacity-85 group-hover/thumb:opacity-100 transition-opacity duration-500"
+                                    className="w-full h-full object-cover opacity-90 group-hover/thumb:opacity-100 transition-opacity duration-500"
                                   />
                                   {showOverflow && (
-                                    <div className="absolute inset-0 bg-background/75 backdrop-blur-[2px] flex items-center justify-center">
+                                    <div className="absolute inset-0 bg-background/80 backdrop-blur-[2px] flex items-center justify-center">
                                       <span className="text-sm font-bold text-foreground">
                                         +{overflow}
                                       </span>
@@ -1238,7 +1237,7 @@ export default function LandingPage() {
                 <br />
                 <span className="text-gradient-animated">al máximo nivel</span>
               </h2>
-              <p className="text-sm sm:text-base text-muted-foreground dark:text-white/55 leading-relaxed mb-7 max-w-lg">
+              <p className="text-sm sm:text-base text-muted-foreground dark:text-white/75 leading-relaxed mb-7 max-w-lg">
                 Mientras duermes, el sistema calcula y distribuye comisiones a
                 toda tu red. Sin errores, sin retrasos.
               </p>
@@ -1251,7 +1250,7 @@ export default function LandingPage() {
                 </Link>
                 <Link
                   to="/contacto"
-                  className="inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-3.5 bg-muted/30 border border-border/40 text-foreground dark:bg-white/5 dark:border-white/10 dark:text-white font-medium rounded-xl hover:bg-muted/50 dark:hover:bg-white/8 transition-all backdrop-blur-md text-base"
+                  className="inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-3.5 bg-muted/40 border border-border/50 text-foreground dark:bg-white/10 dark:border-white/20 dark:text-white font-medium rounded-xl hover:bg-muted/60 dark:hover:bg-white/15 transition-all backdrop-blur-md text-base"
                 >
                   Hablar con ventas
                 </Link>
@@ -1264,7 +1263,7 @@ export default function LandingPage() {
                 ].map((t) => (
                   <span
                     key={t}
-                    className="flex items-center gap-1.5 text-xs text-muted-foreground/60 dark:text-white/35"
+                    className="flex items-center gap-1.5 text-xs text-muted-foreground/85 dark:text-white/65"
                   >
                     <Check className="w-3 h-3" /> {t}
                   </span>
@@ -1299,12 +1298,10 @@ export default function LandingPage() {
                   key={item.title}
                   className={cn(
                     "py-6 sm:py-7",
-                    // Mobile: apilado en 1 columna -> línea en todos menos el último
-                    i < 3 && "border-b border-border/10 dark:border-white/10",
+                    i < 3 && "border-b border-border/25 dark:border-white/20",
                     "sm:border-b-0",
-                    // Desktop/tablet: grid 2x2 -> línea solo en la fila superior
                     i < 2 &&
-                      "sm:border-b sm:border-border/10 sm:dark:border-white/10",
+                      "sm:border-b sm:border-border/25 sm:dark:border-white/20",
                     i % 2 === 0 && "sm:pr-6",
                     i % 2 === 1 && "sm:pl-6",
                   )}
@@ -1316,7 +1313,7 @@ export default function LandingPage() {
                   <div className="text-sm sm:text-base font-semibold text-foreground dark:text-white mb-1.5">
                     {item.title}
                   </div>
-                  <div className="text-xs sm:text-sm text-muted-foreground dark:text-white/45 leading-relaxed">
+                  <div className="text-xs sm:text-sm text-muted-foreground dark:text-white/70 leading-relaxed">
                     {item.desc}
                   </div>
                 </div>
@@ -1325,6 +1322,7 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
       {/* ── HOW IT WORKS ──────────────────────────────────────────────────────── */}
       <section className="relative py-16 sm:py-24 overflow-hidden">
         <div className="absolute inset-0 bg-grid opacity-[0.15] mask-fade-center pointer-events-none" />
@@ -1350,13 +1348,11 @@ export default function LandingPage() {
                   i === steps.length - 1 && "sm:pr-0",
                 )}
               >
-                {/* separador mobile: línea horizontal debajo, excepto el último */}
                 {i < steps.length - 1 && (
-                  <div className="absolute left-0 right-0 -bottom-0 h-px bg-border/15 dark:bg-white/10 sm:hidden" />
+                  <div className="absolute left-0 right-0 -bottom-0 h-px bg-border/30 dark:bg-white/20 sm:hidden" />
                 )}
-                {/* separador desktop: línea vertical a la derecha, excepto el último */}
                 {i < steps.length - 1 && (
-                  <div className="hidden sm:block absolute top-0 bottom-0 right-0 w-px bg-border/15 dark:bg-white/10" />
+                  <div className="hidden sm:block absolute top-0 bottom-0 right-0 w-px bg-border/30 dark:bg-white/20" />
                 )}
 
                 <div className="flex items-center justify-between mb-4">
@@ -1364,14 +1360,14 @@ export default function LandingPage() {
                     className="w-5 h-5 text-primary"
                     strokeWidth={1.75}
                   />
-                  <span className="text-3xl sm:text-4xl font-black text-foreground/10 select-none leading-none tracking-tight">
+                  <span className="text-3xl sm:text-4xl font-black text-foreground/15 select-none leading-none tracking-tight">
                     {step.n}
                   </span>
                 </div>
                 <h3 className="text-base sm:text-lg font-bold text-foreground mb-2">
                   {step.title}
                 </h3>
-                <p className="text-muted-foreground/75 leading-relaxed text-sm">
+                <p className="text-muted-foreground/90 leading-relaxed text-sm">
                   {step.desc}
                 </p>
               </div>
@@ -1379,6 +1375,7 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
       {/* ── TESTIMONIALS ──────────────────────────────────────────────────────── */}
       {(dbTestimonials.length > 0 || regionStats.length > 0) && (
         <section className="py-16 sm:py-24 overflow-hidden">
@@ -1390,25 +1387,24 @@ export default function LandingPage() {
               Miles ya <span className="text-gradient-animated">ganan</span> con
               Cluv 360
             </h2>
-            <p className="text-base text-muted-foreground/80 mt-3 max-w-xl">
+            <p className="text-base text-muted-foreground/90 mt-3 max-w-xl">
               Historias reales de emprendedores que ya ganan con la plataforma.
             </p>
           </div>
 
-          {/* ── Bento grid — explicit placement, no divide-x/y ─────────────── */}
-{(regionStats.length > 0 || dbTestimonials.length > 0) && (
+          {(regionStats.length > 0 || dbTestimonials.length > 0) && (
             <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 mb-10 sm:mb-14">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 rounded-2xl border border-border/25 overflow-hidden">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 rounded-2xl border border-border/40 overflow-hidden">
                 {regionStats[0] && (
-                  <div className="group relative flex flex-col items-center justify-center text-center overflow-hidden min-h-[140px] border-b border-border/20 transition-colors hover:bg-foreground/[0.03]">
+                  <div className="group relative flex flex-col items-center justify-center text-center overflow-hidden min-h-[140px] border-b border-border/30 transition-colors hover:bg-foreground/[0.03]">
                     {regionStats[0].image_url && (
                       <img
                         src={regionStats[0].image_url}
                         alt={regionStats[0].city}
-                        className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none"
+                        className="absolute inset-0 w-full h-full object-cover opacity-25 pointer-events-none"
                       />
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/55 to-background/20 pointer-events-none" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/70 to-background/35 pointer-events-none" />
                     <div className="relative z-10 px-5 py-7">
                       <div className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground tabular-nums">
                         {regionStats[0].members}
@@ -1421,15 +1417,15 @@ export default function LandingPage() {
                 )}
 
                 {regionStats[1] && (
-                  <div className="group relative flex flex-col items-center justify-center text-center overflow-hidden min-h-[140px] border-b border-border/20 sm:border-l sm:border-border/20 transition-colors hover:bg-foreground/[0.03]">
+                  <div className="group relative flex flex-col items-center justify-center text-center overflow-hidden min-h-[140px] border-b border-border/30 sm:border-l sm:border-border/30 transition-colors hover:bg-foreground/[0.03]">
                     {regionStats[1].image_url && (
                       <img
                         src={regionStats[1].image_url}
                         alt={regionStats[1].city}
-                        className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none"
+                        className="absolute inset-0 w-full h-full object-cover opacity-25 pointer-events-none"
                       />
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/55 to-background/20 pointer-events-none" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/70 to-background/35 pointer-events-none" />
                     <div className="relative z-10 px-5 py-7">
                       <div className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground tabular-nums">
                         {regionStats[1].members}
@@ -1441,15 +1437,15 @@ export default function LandingPage() {
                   </div>
                 )}
 
-                <div className="group relative flex flex-col items-center justify-center text-center overflow-hidden min-h-[140px] border-b border-border/20 sm:border-l sm:border-border/20 lg:border-l transition-colors hover:bg-foreground/[0.03]">
+                <div className="group relative flex flex-col items-center justify-center text-center overflow-hidden min-h-[140px] border-b border-border/30 sm:border-l sm:border-border/30 lg:border-l transition-colors hover:bg-foreground/[0.03]">
                   {regionStats[4]?.image_url && (
                     <img
                       src={regionStats[4].image_url}
                       alt={regionStats[4]?.city}
-                      className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none"
+                      className="absolute inset-0 w-full h-full object-cover opacity-25 pointer-events-none"
                     />
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/55 to-background/20 pointer-events-none" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/70 to-background/35 pointer-events-none" />
                   <div className="relative z-10 px-5 py-7">
                     {regionStats[4] && (
                       <>
@@ -1466,8 +1462,8 @@ export default function LandingPage() {
 
                 {dbTestimonials[0] && (
                   <div
-                    className="group p-6 sm:p-7 flex flex-col justify-between border-b border-border/20 transition-colors hover:bg-foreground/[0.03]
-                    sm:border-l sm:border-border/20
+                    className="group p-6 sm:p-7 flex flex-col justify-between border-b border-border/30 transition-colors hover:bg-foreground/[0.03]
+                    sm:border-l sm:border-border/30
                     lg:col-start-3 lg:row-start-2 lg:border-l lg:border-b-0
                     min-h-[150px]"
                   >
@@ -1482,18 +1478,18 @@ export default function LandingPage() {
                           ),
                         )}
                       </div>
-                      <p className="text-foreground/75 leading-relaxed text-sm sm:text-[15px] line-clamp-4">
+                      <p className="text-foreground/90 leading-relaxed text-sm sm:text-[15px] line-clamp-4">
                         "{dbTestimonials[0].content}"
                       </p>
                     </div>
-                    <div className="flex items-center gap-3 pt-3 mt-4 border-t border-border/20">
+                    <div className="flex items-center gap-3 pt-3 mt-4 border-t border-border/30">
                       <img
                         src={
                           dbTestimonials[0].avatar_url ||
                           `https://ui-avatars.com/api/?name=${encodeURIComponent(dbTestimonials[0].name)}&background=e2e8f0&color=64748b`
                         }
                         alt={dbTestimonials[0].name}
-                        className="w-9 h-9 rounded-full object-cover flex-shrink-0 ring-1 ring-border/40"
+                        className="w-9 h-9 rounded-full object-cover flex-shrink-0 ring-1 ring-border/50"
                         onError={(e) => {
                           (e.target as HTMLImageElement).src =
                             `https://ui-avatars.com/api/?name=${encodeURIComponent(dbTestimonials[0].name)}&background=e2e8f0&color=64748b`;
@@ -1503,12 +1499,12 @@ export default function LandingPage() {
                         <div className="text-sm font-medium text-foreground truncate">
                           {dbTestimonials[0].name}
                         </div>
-                        <div className="text-xs text-muted-foreground/80 truncate">
+                        <div className="text-xs text-muted-foreground/90 truncate">
                           {dbTestimonials[0].role}
                         </div>
                       </div>
                       {dbTestimonials[0].earnings && (
-                        <div className="text-sm font-semibold text-emerald-500 dark:text-emerald-400 shrink-0 ml-2 tabular-nums">
+                        <div className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 shrink-0 ml-2 tabular-nums">
                           {dbTestimonials[0].earnings}
                         </div>
                       )}
@@ -1518,8 +1514,8 @@ export default function LandingPage() {
 
                 {dbTestimonials[1] && (
                   <div
-                    className="group p-6 sm:p-7 flex flex-col justify-between border-b border-border/20 transition-colors hover:bg-foreground/[0.03]
-                    sm:border-b sm:border-border/20
+                    className="group p-6 sm:p-7 flex flex-col justify-between border-b border-border/30 transition-colors hover:bg-foreground/[0.03]
+                    sm:border-b sm:border-border/30
                     lg:col-start-1 lg:col-span-2 lg:row-start-2 lg:border-l-0 lg:border-b-0
                     min-h-[150px]"
                   >
@@ -1534,18 +1530,18 @@ export default function LandingPage() {
                           ),
                         )}
                       </div>
-                      <p className="text-foreground/75 leading-relaxed text-sm sm:text-[15px] line-clamp-3">
+                      <p className="text-foreground/90 leading-relaxed text-sm sm:text-[15px] line-clamp-3">
                         "{dbTestimonials[1].content}"
                       </p>
                     </div>
-                    <div className="flex items-center gap-3 pt-3 mt-4 border-t border-border/20">
+                    <div className="flex items-center gap-3 pt-3 mt-4 border-t border-border/30">
                       <img
                         src={
                           dbTestimonials[1].avatar_url ||
                           `https://ui-avatars.com/api/?name=${encodeURIComponent(dbTestimonials[1].name)}&background=e2e8f0&color=64748b`
                         }
                         alt={dbTestimonials[1].name}
-                        className="w-9 h-9 rounded-full object-cover flex-shrink-0 ring-1 ring-border/40"
+                        className="w-9 h-9 rounded-full object-cover flex-shrink-0 ring-1 ring-border/50"
                         onError={(e) => {
                           (e.target as HTMLImageElement).src =
                             `https://ui-avatars.com/api/?name=${encodeURIComponent(dbTestimonials[1].name)}&background=e2e8f0&color=64748b`;
@@ -1555,12 +1551,12 @@ export default function LandingPage() {
                         <div className="text-sm font-medium text-foreground truncate">
                           {dbTestimonials[1].name}
                         </div>
-                        <div className="text-xs text-muted-foreground/80 truncate">
+                        <div className="text-xs text-muted-foreground/90 truncate">
                           {dbTestimonials[1].role}
                         </div>
                       </div>
                       {dbTestimonials[1].earnings && (
-                        <div className="text-sm font-semibold text-emerald-500 dark:text-emerald-400 shrink-0 ml-2 tabular-nums">
+                        <div className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 shrink-0 ml-2 tabular-nums">
                           {dbTestimonials[1].earnings}
                         </div>
                       )}
@@ -1569,15 +1565,15 @@ export default function LandingPage() {
                 )}
 
                 {regionStats[2] && (
-                  <div className="group relative flex flex-col items-center justify-center text-center overflow-hidden min-h-[140px] border-b border-border/20 lg:border-b-0 lg:border-t lg:col-start-1 lg:row-start-3 transition-colors hover:bg-foreground/[0.03]">
+                  <div className="group relative flex flex-col items-center justify-center text-center overflow-hidden min-h-[140px] border-b border-border/30 lg:border-b-0 lg:border-t lg:col-start-1 lg:row-start-3 transition-colors hover:bg-foreground/[0.03]">
                     {regionStats[2].image_url && (
                       <img
                         src={regionStats[2].image_url}
                         alt={regionStats[2].city}
-                        className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none"
+                        className="absolute inset-0 w-full h-full object-cover opacity-25 pointer-events-none"
                       />
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/55 to-background/20 pointer-events-none" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/70 to-background/35 pointer-events-none" />
                     <div className="relative z-10 px-5 py-7">
                       <div className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground tabular-nums">
                         {regionStats[2].members}
@@ -1590,15 +1586,15 @@ export default function LandingPage() {
                 )}
 
                 {regionStats[3] && (
-                  <div className="group relative flex flex-col items-center justify-center text-center overflow-hidden min-h-[140px] border-b border-border/20 sm:border-l lg:border-b-0 lg:border-t lg:col-start-2 lg:row-start-3 transition-colors hover:bg-foreground/[0.03]">
+                  <div className="group relative flex flex-col items-center justify-center text-center overflow-hidden min-h-[140px] border-b border-border/30 sm:border-l lg:border-b-0 lg:border-t lg:col-start-2 lg:row-start-3 transition-colors hover:bg-foreground/[0.03]">
                     {regionStats[3].image_url && (
                       <img
                         src={regionStats[3].image_url}
                         alt={regionStats[3].city}
-                        className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none"
+                        className="absolute inset-0 w-full h-full object-cover opacity-25 pointer-events-none"
                       />
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/55 to-background/20 pointer-events-none" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/70 to-background/35 pointer-events-none" />
                     <div className="relative z-10 px-5 py-7">
                       <div className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground tabular-nums">
                         {regionStats[3].members}
@@ -1613,8 +1609,8 @@ export default function LandingPage() {
                 {dbTestimonials[2] && (
                   <div
                     className="group p-6 sm:p-7 flex flex-col justify-between transition-colors hover:bg-foreground/[0.03]
-                    sm:border-l sm:border-border/20
-                    lg:col-start-3 lg:col-span-1 lg:row-start-3 lg:border-l lg:border-t lg:border-border/20
+                    sm:border-l sm:border-border/30
+                    lg:col-start-3 lg:col-span-1 lg:row-start-3 lg:border-l lg:border-t lg:border-border/30
                     min-h-[150px]"
                   >
                     <div>
@@ -1628,18 +1624,18 @@ export default function LandingPage() {
                           ),
                         )}
                       </div>
-                      <p className="text-foreground/75 leading-relaxed text-sm line-clamp-4">
+                      <p className="text-foreground/90 leading-relaxed text-sm line-clamp-4">
                         "{dbTestimonials[2].content}"
                       </p>
                     </div>
-                    <div className="flex items-center gap-3 pt-3 mt-4 border-t border-border/20">
+                    <div className="flex items-center gap-3 pt-3 mt-4 border-t border-border/30">
                       <img
                         src={
                           dbTestimonials[2].avatar_url ||
                           `https://ui-avatars.com/api/?name=${encodeURIComponent(dbTestimonials[2].name)}&background=e2e8f0&color=64748b`
                         }
                         alt={dbTestimonials[2].name}
-                        className="w-9 h-9 rounded-full object-cover flex-shrink-0 ring-1 ring-border/40"
+                        className="w-9 h-9 rounded-full object-cover flex-shrink-0 ring-1 ring-border/50"
                         onError={(e) => {
                           (e.target as HTMLImageElement).src =
                             `https://ui-avatars.com/api/?name=${encodeURIComponent(dbTestimonials[2].name)}&background=e2e8f0&color=64748b`;
@@ -1649,12 +1645,12 @@ export default function LandingPage() {
                         <div className="text-sm font-medium text-foreground truncate">
                           {dbTestimonials[2].name}
                         </div>
-                        <div className="text-xs text-muted-foreground/80 truncate">
+                        <div className="text-xs text-muted-foreground/90 truncate">
                           {dbTestimonials[2].role}
                         </div>
                       </div>
                       {dbTestimonials[2].earnings && (
-                        <div className="text-sm font-semibold text-emerald-500 dark:text-emerald-400 shrink-0 ml-2 tabular-nums">
+                        <div className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 shrink-0 ml-2 tabular-nums">
                           {dbTestimonials[2].earnings}
                         </div>
                       )}
@@ -1672,7 +1668,7 @@ export default function LandingPage() {
       )}
 
       {/* ── RANKS ─────────────────────────────────────────────────────────────── */}
-   {ranks.filter((r) => r.is_active !== false).length > 0 && (
+      {ranks.filter((r) => r.is_active !== false).length > 0 && (
         <section className="py-16 sm:py-24">
           <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid lg:grid-cols-[1fr_1.4fr] gap-10 sm:gap-12 lg:gap-16 items-start">
@@ -1685,7 +1681,7 @@ export default function LandingPage() {
                   <br />
                   <span className="text-gradient-animated">más ingresos</span>
                 </h2>
-                <p className="text-muted-foreground/80 leading-relaxed mb-6 sm:mb-8 max-w-md text-sm">
+                <p className="text-muted-foreground/90 leading-relaxed mb-6 sm:mb-8 max-w-md text-sm">
                   El sistema premia tu esfuerzo con bonos progresivos. Desde
                   Bronce hasta el nivel máximo Corona.
                 </p>
@@ -1724,7 +1720,7 @@ export default function LandingPage() {
                           <div
                             key={r.id}
                             className={cn(
-                              "group relative rounded-xl border border-border/15 overflow-hidden transition-colors hover:border-border/30 hover:bg-foreground/[0.02]",
+                              "group relative rounded-xl border border-border/30 overflow-hidden transition-colors hover:border-border/50 hover:bg-foreground/[0.03]",
                               isCompact ? "p-3" : "p-4",
                             )}
                           >
@@ -1733,7 +1729,7 @@ export default function LandingPage() {
                               aria-hidden
                             >
                               <div
-                                className="w-16 h-16 opacity-[0.06] flex items-center justify-center"
+                                className="w-16 h-16 opacity-[0.07] flex items-center justify-center"
                                 style={iconColorStyle}
                               >
                                 <Award className="w-full h-full" />
@@ -1763,7 +1759,7 @@ export default function LandingPage() {
                                   {r.name}
                                 </div>
                                 {r.min_affiliates > 0 && (
-                                  <div className="text-[11px] text-muted-foreground/55">
+                                  <div className="text-[11px] text-muted-foreground/75">
                                     {r.min_affiliates} afil.
                                   </div>
                                 )}
@@ -1777,7 +1773,7 @@ export default function LandingPage() {
                                     exchangeRate,
                                   )}
                                 </div>
-                                <div className="text-[10px] text-muted-foreground/50">
+                                <div className="text-[10px] text-muted-foreground/70">
                                   bono
                                 </div>
                               </div>
@@ -1795,149 +1791,144 @@ export default function LandingPage() {
       )}
 
       {/* ── PLANS ─────────────────────────────────────────────────────────────── */}
-      {plans.length > 0 && (
-        <section className="py-16 sm:py-24" id="planes">
-          <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="mb-10 sm:mb-14">
-              <span className="text-xs font-semibold text-primary uppercase tracking-widest mb-3 block">
-                Precios
-              </span>
-              <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight leading-tight mb-2">
-                <span className="text-gradient-animated">Planes flexibles</span>
-                <br />
-                <span className="text-foreground">que crecen contigo</span>
-              </h2>
-              <p className="text-base text-muted-foreground/80 max-w-lg mt-3">
-                Comienza gratis y escala cuando tu negocio lo necesite.
-              </p>
-            </div>
+  {plans.length > 0 && (
+  <section className="py-16 sm:py-24" id="planes">
+    <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="mb-10 sm:mb-14 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+        <div>
+          <span className="text-xs font-semibold text-primary uppercase tracking-widest mb-3 block">
+            Precios
+          </span>
+          <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight leading-tight mb-2">
+            <span className="text-gradient-animated">Planes flexibles</span>
+            <br />
+            <span className="text-foreground">que crecen contigo</span>
+          </h2>
+          <p className="text-base text-muted-foreground/90 max-w-lg mt-3">
+            Comienza gratis y escala cuando tu negocio lo necesite.
+          </p>
+        </div>
 
+        <Link
+          to="/planes"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline shrink-0 sm:mb-1"
+        >
+          Ver comparación completa de planes
+          <ArrowRight className="w-4 h-4" />
+        </Link>
+      </div>
+
+      <div
+        className={cn(
+          "grid gap-x-8 gap-y-10 items-stretch",
+          plans.length === 1
+            ? "grid-cols-1 max-w-sm"
+            : plans.length === 2
+              ? "grid-cols-1 sm:grid-cols-2 max-w-2xl mx-auto"
+              : plans.length === 3
+                ? "grid-cols-1 sm:grid-cols-3"
+                : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4",
+        )}
+      >
+        {plans.map((plan) => {
+          const isFree = plan.is_free || plan.price === 0;
+          const isCurrent = user && (user as any).plan === plan.slug;
+
+          return (
             <div
+              key={plan.id}
               className={cn(
-                "grid gap-4",
-                plans.length === 1
-                  ? "grid-cols-1 max-w-sm"
-                  : plans.length === 2
-                    ? "grid-cols-1 sm:grid-cols-2 max-w-2xl mx-auto"
-                    : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
+                "pt-6 flex flex-col h-full",
+                plan.is_popular
+                  ? "border-t-2 border-primary"
+                  : "border-t border-border/50",
               )}
             >
-              {plans.map((plan) => {
-                const isFree = plan.is_free || plan.price === 0;
-                const isCurrent = user && (user as any).plan === plan.slug;
-                return (
-                  <div
-                    key={plan.id}
-                    className={cn(
-                      "rounded-2xl p-6 flex flex-col relative transition-all backdrop-blur-md",
-                      plan.is_popular
-                        ? "bg-white/70 dark:bg-white/[0.04] border border-primary/30 shadow-lg shadow-primary/8"
-                        : "bg-white/50 dark:bg-white/[0.02] border border-border/30 hover:border-border/50",
-                    )}
+              {plan.is_popular && (
+                <span className="text-[11px] font-bold text-primary uppercase tracking-wider block mb-2">
+                  Más popular
+                </span>
+              )}
+              {isCurrent && !plan.is_popular && (
+                <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider block mb-2">
+                  Tu plan actual
+                </span>
+              )}
+
+              <h3 className="text-base font-bold text-foreground">
+                {plan.name}
+              </h3>
+              {plan.description && (
+                <p className="text-sm text-muted-foreground mt-1 mb-5">
+                  {plan.description}
+                </p>
+              )}
+
+              <div className="mb-5">
+                <span className="text-3xl font-bold text-foreground tracking-tight">
+                  {isFree
+                    ? "Gratis"
+                    : formatPrice(
+                        plan.price,
+                        currency,
+                        currencySymbol,
+                        exchangeRate,
+                      )}
+                </span>
+                {!isFree && (
+                  <span className="text-sm text-muted-foreground ml-1">
+                    /mes
+                  </span>
+                )}
+                {plan.trial_days > 0 && (
+                  <span className="text-xs text-primary block mt-1">
+                    {plan.trial_days} días de prueba
+                  </span>
+                )}
+              </div>
+
+              <ul className="space-y-2 mb-6 flex-1">
+                {(plan.features || []).slice(0, 5).map((f: string) => (
+                  <li
+                    key={f}
+                    className="flex items-start gap-2 text-sm text-muted-foreground"
                   >
-                    {plan.is_popular && (
-                      <div className="absolute inset-0 rounded-2xl bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
-                    )}
-                    {plan.badge && (
-                      <div
-                        className={cn(
-                          "absolute -top-3 left-4 text-xs font-bold px-3 py-1 rounded-full",
-                          plan.is_popular
-                            ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
-                            : "bg-muted/40 text-foreground border border-border/30",
-                        )}
-                      >
-                        {plan.badge}
-                      </div>
-                    )}
-                    {isCurrent && (
-                      <div className="absolute -top-3 right-4 text-xs font-bold px-3 py-1 rounded-full bg-primary text-primary-foreground">
-                        Actual
-                      </div>
-                    )}
-                    <div className="mb-4 relative">
-                      <h3 className="text-lg font-bold text-foreground">
-                        {plan.name}
-                      </h3>
-                      {plan.description && (
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {plan.description}
-                        </p>
-                      )}
-                    </div>
-                    <div className="mb-5 relative">
-                      <span className="text-3xl font-bold text-foreground tracking-tight">
-                        {isFree
-                          ? "Gratis"
-                          : formatPrice(
-                              plan.price,
-                              currency,
-                              currencySymbol,
-                              exchangeRate,
-                            )}
-                      </span>
-                      {!isFree && (
-                        <span className="text-sm text-muted-foreground font-normal ml-1">
-                          /mes
-                        </span>
-                      )}
-                      {plan.trial_days > 0 && (
-                        <span className="text-xs text-primary block mt-1">
-                          {plan.trial_days} días de prueba
-                        </span>
-                      )}
-                    </div>
-                    <ul className="space-y-2 mb-6 flex-1 relative">
-                      {(plan.features || []).slice(0, 5).map((f: string) => (
-                        <li
-                          key={f}
-                          className="flex items-start gap-2 text-sm text-muted-foreground"
-                        >
-                          <Check className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-                          <span>{f}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    {isCurrent ? (
-                      <div className="py-2.5 text-center border border-primary/20 rounded-xl bg-primary/5 relative">
-                        <span className="text-sm font-medium text-primary">
-                          Tu plan actual
-                        </span>
-                      </div>
-                    ) : (
-                      <Link
-                        to={
-                          user
-                            ? "/dashboard/mi-plan"
-                            : `/registro?plan=${plan.slug}`
-                        }
-                        className={cn(
-                          "py-3 rounded-xl text-sm font-semibold text-center transition-all block backdrop-blur-md relative",
-                          plan.is_popular
-                            ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-md shadow-primary/15"
-                            : "border border-border/30 bg-white/60 dark:bg-white/[0.03] hover:bg-muted/20 dark:hover:bg-white/[0.05] text-foreground",
-                        )}
-                      >
-                        {isFree ? "Comenzar gratis" : "Activar plan"}
-                      </Link>
-                    )}
-                  </div>
-                );
-              })}
+                    <Check className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                    <span>{f}</span>
+                  </li>
+                ))}
+              </ul>
+
+              {isCurrent ? (
+                <div className="text-center border border-border/50 rounded-lg py-2.5">
+                  <span className="text-sm font-medium text-muted-foreground">
+                    Tu plan actual
+                  </span>
+                </div>
+              ) : (
+                <Link
+                  to={
+                    user
+                      ? "/dashboard/mi-plan"
+                      : `/registro?plan=${plan.slug}`
+                  }
+                  className={cn(
+                    "block text-center py-2.5 rounded-lg text-sm font-semibold transition-colors",
+                    plan.is_popular
+                      ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                      : "border border-border/60 text-foreground hover:bg-white/10",
+                  )}
+                >
+                  {isFree ? "Comenzar gratis" : "Activar plan"}
+                </Link>
+              )}
             </div>
-
-            <p className="text-center text-sm text-muted-foreground/60 mt-8">
-              <Link
-                to="/planes"
-                className="text-primary font-medium hover:underline"
-              >
-                Ver comparación completa de planes →
-              </Link>
-            </p>
-          </div>
-        </section>
-      )}
-
+          );
+        })}
+      </div>
+    </div>
+  </section>
+)}
       {/* ── STORE ─────────────────────────────────────────────────────────────── */}
       <StoreSection />
 
@@ -1955,14 +1946,14 @@ export default function LandingPage() {
                   Preguntas{" "}
                   <span className="text-gradient-animated">frecuentes</span>
                 </h2>
-                <p className="text-muted-foreground/70 text-sm sm:text-base max-w-md">
+                <p className="text-muted-foreground/90 text-sm sm:text-base max-w-md">
                   Todo lo que necesitas saber. Si tienes más preguntas, estamos
                   disponibles 24/7.
                 </p>
               </div>
               <Link
                 to="/contacto"
-                className="inline-flex items-center gap-2 px-5 py-2.5 border border-border/30 bg-white/60 dark:bg-white/[0.03] backdrop-blur-md rounded-xl text-sm font-medium hover:border-primary/40 hover:text-primary transition-all group shrink-0"
+                className="inline-flex items-center gap-2 px-5 py-2.5 border border-border/40 bg-white/70 dark:bg-white/[0.05] backdrop-blur-md rounded-xl text-sm font-medium hover:border-primary/40 hover:text-primary transition-all group shrink-0"
               >
                 Contactar soporte
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
@@ -1972,7 +1963,7 @@ export default function LandingPage() {
 
           {faqItems.length === 0 ? (
             <div className="py-12 text-center">
-              <p className="text-sm text-muted-foreground/50">
+              <p className="text-sm text-muted-foreground/70">
                 No hay preguntas configuradas aún.
               </p>
             </div>
@@ -1985,8 +1976,8 @@ export default function LandingPage() {
                     <div
                       key={i}
                       className={cn(
-                        "border-b border-border/20",
-                        i === 0 && "border-t border-border/20",
+                        "border-b border-border/30",
+                        i === 0 && "border-t border-border/30",
                       )}
                     >
                       <button
@@ -1998,7 +1989,7 @@ export default function LandingPage() {
                             "text-sm sm:text-[15px] leading-snug transition-colors",
                             openFaq === i
                               ? "font-semibold text-foreground"
-                              : "font-medium text-foreground/70 group-hover:text-foreground",
+                              : "font-medium text-foreground/85 group-hover:text-foreground",
                           )}
                         >
                           {faq.question}
@@ -2007,8 +1998,8 @@ export default function LandingPage() {
                           className={cn(
                             "w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-all duration-200",
                             openFaq === i
-                              ? "bg-primary/10 text-primary"
-                              : "text-muted-foreground/40 group-hover:text-foreground/60",
+                              ? "bg-primary/15 text-primary"
+                              : "text-muted-foreground/60 group-hover:text-foreground/80",
                           )}
                         >
                           <ChevronDown
@@ -2041,8 +2032,8 @@ export default function LandingPage() {
                     <div
                       key={i}
                       className={cn(
-                        "border-b border-border/20",
-                        isFirst && "border-t border-border/20",
+                        "border-b border-border/30",
+                        isFirst && "border-t border-border/30",
                       )}
                     >
                       <button
@@ -2054,7 +2045,7 @@ export default function LandingPage() {
                             "text-sm sm:text-[15px] leading-snug transition-colors",
                             openFaq === i
                               ? "font-semibold text-foreground"
-                              : "font-medium text-foreground/70 group-hover:text-foreground",
+                              : "font-medium text-foreground/85 group-hover:text-foreground",
                           )}
                         >
                           {faq.question}
@@ -2063,8 +2054,8 @@ export default function LandingPage() {
                           className={cn(
                             "w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-all duration-200",
                             openFaq === i
-                              ? "bg-primary/10 text-primary"
-                              : "text-muted-foreground/40 group-hover:text-foreground/60",
+                              ? "bg-primary/15 text-primary"
+                              : "text-muted-foreground/60 group-hover:text-foreground/80",
                           )}
                         >
                           <ChevronDown
@@ -2103,7 +2094,7 @@ export default function LandingPage() {
         <div className="absolute bottom-[-15%] left-1/2 -translate-x-1/2 w-[400px] h-[280px] rounded-full bg-primary/6 blur-[100px] pointer-events-none" />
 
         <div className="relative z-10 max-w-[680px] mx-auto px-4 sm:px-6 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-muted/30 border border-border/40 rounded-full text-xs font-medium text-muted-foreground dark:bg-white/5 dark:border-white/10 dark:text-white/55 mb-6 sm:mb-8 backdrop-blur-md">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-muted/40 border border-border/50 rounded-full text-xs font-medium text-muted-foreground dark:bg-white/10 dark:border-white/20 dark:text-white/80 mb-6 sm:mb-8 backdrop-blur-md">
             <Zap className="w-3.5 h-3.5 text-primary" />
             Sin tarjeta de crédito
           </div>
@@ -2113,7 +2104,7 @@ export default function LandingPage() {
           <p className="text-2xl sm:text-3xl font-bold mb-4 text-gradient-animated">
             Empieza hoy mismo.
           </p>
-          <p className="text-sm sm:text-base text-muted-foreground dark:text-white/40 max-w-md mx-auto mb-10 leading-relaxed">
+          <p className="text-sm sm:text-base text-muted-foreground dark:text-white/70 max-w-md mx-auto mb-10 leading-relaxed">
             Unete a miles de emprendedores que ya construyen libertad financiera
             con Cluv 360.
           </p>
@@ -2127,12 +2118,12 @@ export default function LandingPage() {
             </Link>
             <Link
               to="/contacto"
-              className="inline-flex items-center justify-center gap-2 px-7 sm:px-9 py-4 bg-muted/30 border border-border/40 text-foreground dark:bg-white/5 dark:border-white/10 dark:text-white font-medium rounded-xl hover:bg-muted/50 dark:hover:bg-white/8 transition-all backdrop-blur-md text-base"
+              className="inline-flex items-center justify-center gap-2 px-7 sm:px-9 py-4 bg-muted/40 border border-border/50 text-foreground dark:bg-white/10 dark:border-white/20 dark:text-white font-medium rounded-xl hover:bg-muted/60 dark:hover:bg-white/15 transition-all backdrop-blur-md text-base"
             >
               Hablar con ventas
             </Link>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs sm:text-sm text-muted-foreground/55 dark:text-white/30">
+          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs sm:text-sm text-muted-foreground/85 dark:text-white/60">
             {[
               "Cuenta gratuita",
               "Sin permanencia",
@@ -2140,7 +2131,7 @@ export default function LandingPage() {
               "Soporte 24/7",
             ].map((t) => (
               <span key={t} className="flex items-center gap-1.5">
-                <Check className="w-3.5 h-3.5 text-muted-foreground/70 dark:text-white/40" />{" "}
+                <Check className="w-3.5 h-3.5 text-muted-foreground/85 dark:text-white/70" />{" "}
                 {t}
               </span>
             ))}

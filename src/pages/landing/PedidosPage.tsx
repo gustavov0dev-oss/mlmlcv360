@@ -11,14 +11,14 @@ import {
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
-const STATUS_CONFIG: Record<string, { label: string; dot: string; text: string }> = {
-  pending:    { label: 'Pendiente',   dot: 'bg-yellow-500',  text: 'text-yellow-600' },
-  confirmed:  { label: 'Confirmado',  dot: 'bg-blue-500',    text: 'text-blue-600' },
-  processing: { label: 'En proceso',  dot: 'bg-purple-500',  text: 'text-purple-600' },
-  shipped:    { label: 'Enviado',     dot: 'bg-cyan-500',    text: 'text-cyan-600' },
-  delivered:  { label: 'Entregado',   dot: 'bg-green-500',   text: 'text-green-600' },
-  cancelled:  { label: 'Cancelado',   dot: 'bg-red-500',     text: 'text-red-600' },
-  refunded:   { label: 'Reembolsado', dot: 'bg-orange-500',  text: 'text-orange-600' },
+const STATUS_CONFIG: Record<string, { label: string; dot: string; text: string; bg: string }> = {
+  pending:    { label: 'Pendiente',   dot: 'bg-yellow-500',  text: 'text-yellow-700 dark:text-yellow-400',  bg: 'bg-yellow-500/10' },
+  confirmed:  { label: 'Confirmado',  dot: 'bg-blue-500',    text: 'text-blue-700 dark:text-blue-400',      bg: 'bg-blue-500/10' },
+  processing: { label: 'En proceso',  dot: 'bg-purple-500',  text: 'text-purple-700 dark:text-purple-400',  bg: 'bg-purple-500/10' },
+  shipped:    { label: 'Enviado',     dot: 'bg-cyan-500',    text: 'text-cyan-700 dark:text-cyan-400',      bg: 'bg-cyan-500/10' },
+  delivered:  { label: 'Entregado',   dot: 'bg-green-500',   text: 'text-green-700 dark:text-green-400',    bg: 'bg-green-500/10' },
+  cancelled:  { label: 'Cancelado',   dot: 'bg-red-500',     text: 'text-red-700 dark:text-red-400',        bg: 'bg-red-500/10' },
+  refunded:   { label: 'Reembolsado', dot: 'bg-orange-500',  text: 'text-orange-700 dark:text-orange-400',  bg: 'bg-orange-500/10' },
 };
 
 function fmt(n: number, c = 'PEN') { return c === 'USD' ? `$${n.toFixed(2)}` : `S/ ${n.toFixed(2)}`; }
@@ -124,6 +124,7 @@ export default function PedidosPage({ initialTab = 'pedidos' }: { initialTab?: T
   });
 
   const allSpecKeys = [...new Set(compareItems.flatMap(p => Object.keys((p as any).specs || {})))];
+  const lowestPrice = compareItems.length > 1 ? Math.min(...compareItems.map(p => p.base_price)) : null;
 
   const tabs: { id: Tab; label: string; icon: any; count?: number }[] = [
     { id: 'pedidos',   label: 'Mis Pedidos', icon: Package, count: orders.length       },
@@ -137,7 +138,7 @@ export default function PedidosPage({ initialTab = 'pedidos' }: { initialTab?: T
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
 
           {/* Breadcrumb */}
-          <nav className="flex items-center gap-2 mb-8 text-xs text-muted-foreground">
+          <nav className="flex items-center gap-2 mb-6 text-xs text-muted-foreground">
             <button onClick={() => navigate('/')} className="hover:text-foreground transition-colors">Inicio</button>
             <ChevronRight className="w-3 h-3 text-muted-foreground/40" />
             <span className="text-foreground font-medium">Mi Cuenta</span>
@@ -150,7 +151,7 @@ export default function PedidosPage({ initialTab = 'pedidos' }: { initialTab?: T
                 key={t.id}
                 onClick={() => { setTab(t.id); setQuery(''); }}
                 className={cn(
-                  'flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors relative',
+                  'flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors relative outline-none',
                   tab === t.id
                     ? 'text-foreground'
                     : 'text-muted-foreground hover:text-foreground/80',
@@ -160,12 +161,12 @@ export default function PedidosPage({ initialTab = 'pedidos' }: { initialTab?: T
                 <span>{t.label}</span>
                 {t.count !== undefined && t.count > 0 && (
                   <span className={cn(
-                    'text-[10px] font-semibold px-1.5 py-0.5 rounded-full min-w-[18px] text-center',
-                    tab === t.id ? 'bg-foreground text-background' : 'bg-muted text-muted-foreground',
+                    'text-[10px] font-semibold min-w-[20px] h-5 px-1 rounded-full flex items-center justify-center transition-colors',
+                    tab === t.id ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground',
                   )}>{t.count}</span>
                 )}
                 {tab === t.id && (
-                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-foreground" />
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
                 )}
               </button>
             ))}
@@ -188,7 +189,7 @@ export default function PedidosPage({ initialTab = 'pedidos' }: { initialTab?: T
                       value={query}
                       onChange={e => setQuery(e.target.value)}
                       placeholder="Buscar pedidos..."
-                      className="w-full pl-9 pr-4 py-2 bg-transparent border border-border rounded-lg text-sm text-foreground outline-none focus:border-foreground/30 transition-colors"
+                      className="w-full pl-9 pr-4 py-2 bg-transparent border border-border rounded-md text-sm text-foreground outline-none focus:border-foreground/30 transition-colors"
                     />
                   </div>
                 )}
@@ -198,7 +199,7 @@ export default function PedidosPage({ initialTab = 'pedidos' }: { initialTab?: T
                 <div className="divide-y divide-border">
                   {Array.from({ length: 4 }).map((_, i) => (
                     <div key={i} className="py-5 flex items-center gap-4">
-                      <Skeleton className="w-12 h-12 rounded-lg flex-shrink-0" />
+                      <Skeleton className="w-12 h-12 rounded-md flex-shrink-0" />
                       <div className="flex-1 space-y-2">
                         <div className="flex items-center gap-2"><Skeleton className="h-4 w-28" /><Skeleton className="h-3 w-16" /></div>
                         <Skeleton className="h-3 w-40" />
@@ -231,18 +232,18 @@ export default function PedidosPage({ initialTab = 'pedidos' }: { initialTab?: T
                       <button
                         key={order.id}
                         onClick={() => navigate(`/dashboard/pedidos/${order.id}`)}
-                        className="w-full py-5 flex items-center gap-4 hover:bg-muted/20 -mx-2 px-2 rounded-lg transition-colors text-left group"
+                        className="w-full py-4 flex items-center gap-4 text-left group outline-none"
                       >
-                        <div className="w-12 h-12 rounded-lg bg-muted overflow-hidden flex-shrink-0">
+                        <div className="w-12 h-12 rounded-md bg-muted overflow-hidden flex-shrink-0 ring-1 ring-border/50">
                           {img
                             ? <img src={img} alt="" className="w-full h-full object-cover" />
                             : <div className="w-full h-full flex items-center justify-center"><Package className="w-5 h-5 text-muted-foreground/40" /></div>
                           }
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <span className="text-sm font-semibold text-foreground">{order.order_number}</span>
-                            <span className={cn('inline-flex items-center gap-1 text-[11px] font-medium', sc.text)}>
+                            <span className={cn('inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full', sc.bg, sc.text)}>
                               <span className={cn('w-1.5 h-1.5 rounded-full', sc.dot)} />
                               {sc.label}
                             </span>
@@ -252,7 +253,7 @@ export default function PedidosPage({ initialTab = 'pedidos' }: { initialTab?: T
                             {' · '}{itemCount} producto{itemCount !== 1 ? 's' : ''}
                           </p>
                         </div>
-                        <span className="text-sm font-semibold text-foreground hidden sm:block">{fmt(order.total, order.currency)}</span>
+                        <span className="text-sm font-semibold text-foreground whitespace-nowrap">{fmt(order.total, order.currency)}</span>
                         <ChevronRight className="w-4 h-4 text-muted-foreground/40 group-hover:text-foreground transition-colors flex-shrink-0" />
                       </button>
                     );
@@ -276,7 +277,7 @@ export default function PedidosPage({ initialTab = 'pedidos' }: { initialTab?: T
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
                   {Array.from({ length: 6 }).map((_, i) => (
                     <div key={i} className="space-y-2">
-                      <Skeleton className="aspect-square w-full rounded-lg" />
+                      <Skeleton className="aspect-square w-full rounded-md" />
                       <Skeleton className="h-3 w-1/3" />
                       <Skeleton className="h-4 w-full" />
                       <Skeleton className="h-4 w-1/2" />
@@ -301,14 +302,14 @@ export default function PedidosPage({ initialTab = 'pedidos' }: { initialTab?: T
                     const img = p.images?.[0]?.url;
                     return (
                       <div key={p.id} className="group">
-                        <div className="relative aspect-square bg-muted rounded-lg overflow-hidden cursor-pointer" onClick={() => navigate(`/tienda/${p.slug}`)}>
+                        <div className="relative aspect-square bg-muted rounded-md overflow-hidden cursor-pointer ring-1 ring-border/50" onClick={() => navigate(`/tienda/${p.slug}`)}>
                           {img
-                            ? <img src={img} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                            ? <img src={img} alt={p.name} className="w-full h-full object-cover" />
                             : <div className="w-full h-full flex items-center justify-center"><Package className="w-8 h-8 text-muted-foreground/20" /></div>
                           }
                           <button
                             onClick={e => { e.stopPropagation(); removeFromWishlist(p.id); }}
-                            className="absolute top-2 right-2 w-7 h-7 rounded-full bg-background/90 backdrop-blur-sm flex items-center justify-center text-muted-foreground hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100">
+                            className="absolute top-2 right-2 w-7 h-7 rounded-md bg-background/90 backdrop-blur-sm flex items-center justify-center text-muted-foreground hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 outline-none">
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
@@ -326,7 +327,7 @@ export default function PedidosPage({ initialTab = 'pedidos' }: { initialTab?: T
                           <div className="flex items-center justify-between pt-1">
                             <span className="text-sm font-semibold text-foreground">{fmt(p.base_price, p.currency)}</span>
                             <button onClick={() => { addItem(p as any); navigate('/carrito'); }}
-                              className="w-8 h-8 rounded-lg bg-foreground text-background flex items-center justify-center hover:bg-primary transition-colors">
+                              className="w-8 h-8 rounded-md bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/90 transition-colors outline-none">
                               <ShoppingCart className="w-3.5 h-3.5" />
                             </button>
                           </div>
@@ -349,7 +350,7 @@ export default function PedidosPage({ initialTab = 'pedidos' }: { initialTab?: T
 
               {loadingCompare ? (
                 <div className="space-y-4">
-                  {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-16 w-full rounded-lg" />)}
+                  {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-16 w-full rounded-md" />)}
                 </div>
               ) : compareItems.length < 2 ? (
                 <div className="flex flex-col items-center justify-center py-24 gap-3">
@@ -368,21 +369,26 @@ export default function PedidosPage({ initialTab = 'pedidos' }: { initialTab?: T
                   <table className="w-full border-collapse text-sm min-w-[600px]">
                     <thead>
                       <tr>
-                        <th className="text-left p-3 font-medium text-muted-foreground text-xs uppercase tracking-wide w-28"></th>
+                        <th className="sticky left-0 z-10 bg-background text-left p-3 font-medium text-muted-foreground text-xs uppercase tracking-wide w-28"></th>
                         {compareItems.map(p => {
                           const img = p.images?.[0]?.url;
                           return (
                             <th key={p.id} className="p-3 text-left min-w-[180px] align-top">
                               <div className="relative">
                                 <button onClick={() => removeFromCompare(p.id)}
-                                  className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-muted hover:bg-red-500 hover:text-white text-muted-foreground flex items-center justify-center transition-colors z-10">
+                                  className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-muted hover:bg-red-500 hover:text-white text-muted-foreground flex items-center justify-center transition-colors z-10 outline-none">
                                   <X className="w-3 h-3" />
                                 </button>
-                                <div className="w-16 h-16 rounded-lg bg-muted overflow-hidden mb-2 cursor-pointer" onClick={() => navigate(`/tienda/${p.slug}`)}>
+                                <div className="w-16 h-16 rounded-md bg-muted overflow-hidden mb-2 cursor-pointer ring-1 ring-border/50" onClick={() => navigate(`/tienda/${p.slug}`)}>
                                   {img ? <img src={img} alt={p.name} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center"><Package className="w-6 h-6 text-muted-foreground/20" /></div>}
                                 </div>
-                                <button onClick={() => navigate(`/tienda/${p.slug}`)} className="text-sm font-medium text-foreground hover:text-primary line-clamp-2 transition-colors text-left">{p.name}</button>
-                                <p className="text-sm font-semibold text-foreground mt-1">{fmt(p.base_price, p.currency)}</p>
+                                <button onClick={() => navigate(`/tienda/${p.slug}`)} className="text-sm font-medium text-foreground hover:text-primary line-clamp-2 transition-colors text-left outline-none">{p.name}</button>
+                                <p className={cn('text-sm font-semibold mt-1', p.base_price === lowestPrice ? 'text-primary' : 'text-foreground')}>
+                                  {fmt(p.base_price, p.currency)}
+                                  {p.base_price === lowestPrice && (
+                                    <span className="ml-1.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-primary/10 text-primary align-middle">Mejor precio</span>
+                                  )}
+                                </p>
                               </div>
                             </th>
                           );
@@ -391,15 +397,19 @@ export default function PedidosPage({ initialTab = 'pedidos' }: { initialTab?: T
                     </thead>
                     <tbody>
                       <tr className="border-t border-border">
-                        <td className="p-3 text-xs font-medium text-muted-foreground uppercase tracking-wide">Categoría</td>
+                        <td className="sticky left-0 z-10 bg-background p-3 text-xs font-medium text-muted-foreground uppercase tracking-wide">Categoría</td>
                         {compareItems.map(p => <td key={p.id} className="p-3 text-foreground/80">{(p.category as any)?.name || '—'}</td>)}
                       </tr>
                       <tr className="border-t border-border">
-                        <td className="p-3 text-xs font-medium text-muted-foreground uppercase tracking-wide">Precio</td>
-                        {compareItems.map(p => <td key={p.id} className="p-3 font-semibold text-foreground">{fmt(p.base_price, p.currency)}</td>)}
+                        <td className="sticky left-0 z-10 bg-background p-3 text-xs font-medium text-muted-foreground uppercase tracking-wide">Precio</td>
+                        {compareItems.map(p => (
+                          <td key={p.id} className={cn('p-3 font-semibold', p.base_price === lowestPrice ? 'text-primary' : 'text-foreground')}>
+                            {fmt(p.base_price, p.currency)}
+                          </td>
+                        ))}
                       </tr>
                       <tr className="border-t border-border">
-                        <td className="p-3 text-xs font-medium text-muted-foreground uppercase tracking-wide">Stock</td>
+                        <td className="sticky left-0 z-10 bg-background p-3 text-xs font-medium text-muted-foreground uppercase tracking-wide">Stock</td>
                         {compareItems.map(p => {
                           const stock = (p.variants || []).reduce((s: number, v: any) => s + (v.stock || 0), 0) || p.general_stock || 0;
                           return (
@@ -410,7 +420,7 @@ export default function PedidosPage({ initialTab = 'pedidos' }: { initialTab?: T
                         })}
                       </tr>
                       <tr className="border-t border-border">
-                        <td className="p-3 text-xs font-medium text-muted-foreground uppercase tracking-wide">Rating</td>
+                        <td className="sticky left-0 z-10 bg-background p-3 text-xs font-medium text-muted-foreground uppercase tracking-wide">Rating</td>
                         {compareItems.map(p => (
                           <td key={p.id} className="p-3">
                             {(p.avg_rating ?? 0) > 0 ? (
@@ -425,16 +435,16 @@ export default function PedidosPage({ initialTab = 'pedidos' }: { initialTab?: T
                       </tr>
                       {allSpecKeys.map(key => (
                         <tr key={key} className="border-t border-border">
-                          <td className="p-3 text-xs font-medium text-muted-foreground uppercase tracking-wide capitalize">{key}</td>
+                          <td className="sticky left-0 z-10 bg-background p-3 text-xs font-medium text-muted-foreground uppercase tracking-wide capitalize">{key}</td>
                           {compareItems.map(p => <td key={p.id} className="p-3 text-foreground/80">{(p as any).specs?.[key] || '—'}</td>)}
                         </tr>
                       ))}
                       <tr className="border-t border-border">
-                        <td className="p-3"></td>
+                        <td className="sticky left-0 z-10 bg-background p-3"></td>
                         {compareItems.map(p => (
                           <td key={p.id} className="p-3">
                             <button onClick={() => { addItem(p as any); navigate('/carrito'); }}
-                              className="inline-flex items-center gap-1.5 px-4 py-2 bg-foreground text-background rounded-lg text-xs font-medium hover:bg-primary transition-colors">
+                              className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground rounded-md text-xs font-medium hover:bg-primary/90 transition-colors outline-none">
                               <ShoppingCart className="w-3.5 h-3.5" /> Agregar
                             </button>
                           </td>

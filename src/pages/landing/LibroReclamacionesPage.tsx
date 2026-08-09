@@ -8,7 +8,7 @@ import {
   FileText, User, ChevronRight, ChevronLeft,
   CircleCheck as CheckCircle, CircleAlert as AlertCircle,
   Send, Shield, Scale, Search, Clock, ArrowRight,
-  MessageSquare, Info, BookOpen,
+  MessageSquare, BookOpen,
 } from 'lucide-react';
 
 /* ─── Constants ──────────────────────────────────────────────────────────── */
@@ -62,37 +62,37 @@ const STATUS_CONFIG: Record<ComplaintStatus, {
   pendiente: {
     label: 'Pendiente',
     textCls: 'text-amber-600 dark:text-amber-300',
-    bgCls: 'bg-amber-500/10',
-    borderCls: 'border-amber-500/30',
+    bgCls: 'bg-amber-500/8',
+    borderCls: 'border-amber-500/25',
     dotCls: 'bg-amber-500',
-    badgeCls: 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30',
+    badgeCls: 'bg-amber-500/10 text-amber-700 dark:text-amber-300',
     desc: 'Tu reclamo fue recibido y está en espera de revisión',
   },
   en_proceso: {
     label: 'En proceso',
     textCls: 'text-sky-600 dark:text-sky-300',
-    bgCls: 'bg-sky-500/10',
-    borderCls: 'border-sky-500/30',
+    bgCls: 'bg-sky-500/8',
+    borderCls: 'border-sky-500/25',
     dotCls: 'bg-sky-500',
-    badgeCls: 'bg-sky-500/15 text-sky-700 dark:text-sky-300 border-sky-500/30',
+    badgeCls: 'bg-sky-500/10 text-sky-700 dark:text-sky-300',
     desc: 'Estamos revisando tu caso',
   },
   resuelto: {
     label: 'Resuelto',
     textCls: 'text-emerald-600 dark:text-emerald-300',
-    bgCls: 'bg-emerald-500/10',
-    borderCls: 'border-emerald-500/30',
+    bgCls: 'bg-emerald-500/8',
+    borderCls: 'border-emerald-500/25',
     dotCls: 'bg-emerald-500',
-    badgeCls: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30',
+    badgeCls: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300',
     desc: 'Hemos dado respuesta a tu reclamo',
   },
   cerrado: {
     label: 'Cerrado',
     textCls: 'text-foreground/50',
-    bgCls: 'bg-muted/40',
+    bgCls: 'bg-muted/30',
     borderCls: 'border-border',
     dotCls: 'bg-muted-foreground/40',
-    badgeCls: 'bg-muted text-muted-foreground border-border',
+    badgeCls: 'bg-muted text-muted-foreground',
     desc: 'El proceso ha concluido',
   },
 };
@@ -105,7 +105,7 @@ function Field({ label, required, error, hint, children }: {
 }) {
   return (
     <div className="space-y-1.5">
-      <label className="block text-sm font-semibold text-foreground">
+      <label className="block text-sm font-medium text-foreground">
         {label}{required && <span className="text-destructive ml-0.5">*</span>}
       </label>
       {children}
@@ -126,14 +126,14 @@ function TipoCard({ label, desc, icon: Icon, selected, onClick }: {
   return (
     <button type="button" onClick={onClick}
       className={cn(
-        'flex items-start gap-3 p-4 rounded-xl border-2 text-left transition-all w-full',
-        selected ? 'border-primary bg-primary/8 ring-1 ring-primary/20' : 'border-border hover:border-border/80 hover:bg-muted/30'
+        'flex items-start gap-3 p-3.5 rounded-xl border text-left transition-colors w-full',
+        selected ? 'border-primary/50 bg-primary/5' : 'border-border hover:border-border/80'
       )}>
-      <div className={cn('w-9 h-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5 transition-colors', selected ? 'bg-primary/15' : 'bg-muted')}>
-        <Icon className={cn('w-4.5 h-4.5', selected ? 'text-primary' : 'text-muted-foreground')} />
+      <div className={cn('w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5', selected ? 'bg-primary/10' : 'bg-muted')}>
+        <Icon className={cn('w-4 h-4', selected ? 'text-primary' : 'text-muted-foreground')} />
       </div>
       <div>
-        <p className={cn('text-sm font-semibold', selected ? 'text-primary' : 'text-foreground')}>{label}</p>
+        <p className={cn('text-sm font-medium', selected ? 'text-primary' : 'text-foreground')}>{label}</p>
         <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{desc}</p>
       </div>
     </button>
@@ -155,10 +155,9 @@ function BookImage({ src, className }: { src?: string; className?: string }) {
   return (
     <div className={cn('flex items-center justify-center', className)}>
       <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-        <rect width="80" height="80" rx="16" fill="#1e40af" fillOpacity=".12" />
-        <rect x="12" y="18" width="34" height="44" rx="3" fill="#1d4ed8" />
-        <rect x="44" y="18" width="24" height="44" rx="3" fill="#1e3a8a" />
-        <rect x="44" y="20" width="2" height="40" fill="#3b82f6" fillOpacity=".4" />
+        <rect x="12" y="18" width="34" height="44" rx="3" fill="currentColor" className="text-primary/70" />
+        <rect x="44" y="18" width="24" height="44" rx="3" fill="currentColor" className="text-primary" />
+        <rect x="44" y="20" width="2" height="40" fill="white" fillOpacity=".15" />
         <line x1="18" y1="30" x2="40" y2="30" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeOpacity=".9" />
         <line x1="18" y1="37" x2="40" y2="37" stroke="white" strokeWidth="2" strokeLinecap="round" strokeOpacity=".7" />
         <line x1="18" y1="43" x2="33" y2="43" stroke="white" strokeWidth="2" strokeLinecap="round" strokeOpacity=".5" />
@@ -167,7 +166,7 @@ function BookImage({ src, className }: { src?: string; className?: string }) {
   );
 }
 
-const inputCls = 'w-full px-3.5 py-2.5 rounded-xl border border-input bg-background text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 focus:border-primary transition-colors';
+const inputCls = 'w-full px-3.5 py-2.5 rounded-lg border border-input bg-background text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 focus:border-primary transition-colors';
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
 /*  Main Page                                                                  */
@@ -292,54 +291,52 @@ export default function LibroReclamacionesPage() {
     <>
       <main className="flex-1 pt-16">
         {/* ── Hero ──────────────────────────────────────────────────────── */}
-        <section className="bg-background border-b border-border/50">
-          <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-8 pb-6">
+        <section className="bg-background">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-8 pb-6 border-b border-border/40">
             {/* Book image + title row */}
-            <div className="flex flex-row items-center gap-4 sm:gap-6 mb-5">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 shrink-0">
-                <BookImage src={bookImage} className="w-full h-full rounded-xl" />
+            <div className="flex flex-row items-center gap-4 sm:gap-5 mb-5">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 shrink-0">
+                <BookImage src={bookImage} className="w-full h-full rounded-lg" />
               </div>
               <div className="min-w-0">
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 mb-2">
+                <div className="inline-flex items-center gap-1.5 mb-1.5">
                   <Scale className="w-3 h-3 text-blue-500" />
-                  <span className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 leading-none">
+                  <span className="text-[11px] font-medium text-blue-500/90 dark:text-blue-400 tracking-wide leading-none">
                     D.S. 011-2011-PCM · Ley N° 29571
                   </span>
                 </div>
-                <h1 className="text-2xl sm:text-3xl font-black text-foreground leading-tight">
+                <h1 className="text-2xl sm:text-3xl font-bold text-foreground leading-tight tracking-tight">
                   Libro de Reclamaciones
                 </h1>
                 <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
                   Ejerce tu derecho. Tu reclamo será atendido en máx.{' '}
-                  <strong className="text-foreground">30 días calendario</strong>.
+                  <span className="text-foreground font-medium">30 días calendario</span>.
                 </p>
               </div>
             </div>
 
             {/* Company strip — inline on desktop, stacked on mobile */}
-            <div className="text-sm flex flex-col sm:flex-row sm:items-center sm:gap-x-3 gap-y-0.5">
+            <div className="text-xs flex flex-col sm:flex-row sm:items-center sm:gap-x-2 gap-y-0.5 text-muted-foreground">
               <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 shrink-0">
-                <span className="font-bold text-foreground">{companyName}</span>
+                <span className="font-medium text-foreground">{companyName}</span>
                 <span className="text-muted-foreground/40">·</span>
-                <span className="text-muted-foreground text-xs">RUC: {companyRuc}</span>
+                <span>RUC: {companyRuc}</span>
               </div>
               <span className="hidden sm:inline text-muted-foreground/30">·</span>
-              <div className="text-muted-foreground text-xs leading-relaxed">
-                {companyAddress}
-              </div>
+              <span className="leading-relaxed">{companyAddress}</span>
             </div>
           </div>
         </section>
 
-        <section className="max-w-3xl mx-auto px-4 sm:px-6 py-6 space-y-5">
+        <section className="max-w-3xl mx-auto px-4 sm:px-6 py-7 space-y-6">
           {/* ── Tab switcher ──────────────────────────────────────────── */}
-          <div className="grid grid-cols-2 rounded-xl bg-muted/50 p-1 gap-1">
+          <div className="grid grid-cols-2 rounded-lg bg-muted/40 p-1 gap-1">
             {([['registrar', FileText, 'Registrar reclamo'], ['consultar', Search, 'Consultar estado']] as const).map(([t, Icon, label]) => (
               <button key={t} onClick={() => switchTab(t)}
                 className={cn(
-                  'flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-sm font-semibold transition-all duration-200',
+                  'flex items-center justify-center gap-2 py-2.5 px-3 rounded-md text-sm font-medium transition-colors duration-150',
                   tab === t
-                    ? 'bg-background shadow-sm text-foreground'
+                    ? 'bg-background text-foreground'
                     : 'text-muted-foreground hover:text-foreground'
                 )}>
                 <Icon className="w-4 h-4 shrink-0" />
@@ -389,43 +386,37 @@ function RegisterTab({ step, form, errors, submitting, correlativo, steps,
 }) {
   return (
     <div className="space-y-4">
-      {/* Stepper */}
+      {/* Progress — slim bar directly attached above the card, reads as one unit */}
       {step < 3 && (
-        <div className="flex items-center justify-center gap-1">
-          {steps.map((s, i) => (
-            <div key={i} className="flex items-center">
-              <div className={cn(
-                'flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200',
-                i < step ? 'bg-primary/70 text-primary-foreground' :
-                i === step ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/30' :
-                'bg-muted text-muted-foreground'
-              )}>
-                <span className="w-5 h-5 rounded-full flex items-center justify-center bg-white/20 text-xs">
-                  {i < step ? <CheckCircle className="w-3.5 h-3.5" /> : i + 1}
-                </span>
-                <span className="hidden sm:inline">{s}</span>
-              </div>
-              {i < steps.length - 1 && (
-                <div className={cn('w-6 h-0.5 mx-1 transition-colors', i < step ? 'bg-primary' : 'bg-muted')} />
-              )}
-            </div>
-          ))}
+        <div className="px-0.5">
+          <div className="flex items-baseline justify-between mb-2">
+            <span className="text-xs text-muted-foreground">
+              Paso {step + 1} de {steps.length} <span className="text-foreground font-medium">· {steps[step]}</span>
+            </span>
+            <span className="text-xs text-muted-foreground tabular-nums">
+              {Math.round(((step + 1) / steps.length) * 100)}%
+            </span>
+          </div>
+          <div className="h-1 rounded-full bg-muted overflow-hidden">
+            <div
+              className="h-full bg-primary rounded-full transition-all duration-300 ease-out"
+              style={{ width: `${((step + 1) / steps.length) * 100}%` }}
+            />
+          </div>
         </div>
       )}
 
       {/* Card */}
-      <div className="bg-card border border-border/60 rounded-2xl shadow-sm overflow-hidden">
+      <div className="bg-card border border-border/60 rounded-xl overflow-hidden">
         <div className="p-5 sm:p-6 space-y-5">
 
           {/* ── Step 0: Datos personales ── */}
           {step === 0 && (
             <>
-              <div className="flex items-center gap-3 pb-3 border-b border-border/50">
-                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                  <User className="w-4 h-4 text-primary" />
-                </div>
+              <div className="flex items-center gap-3 pb-3 border-b border-border/40">
+                <User className="w-4 h-4 text-muted-foreground shrink-0" />
                 <div>
-                  <h2 className="text-base font-bold text-foreground">¿Quién eres?</h2>
+                  <h2 className="text-base font-semibold text-foreground">¿Quién eres?</h2>
                   <p className="text-xs text-muted-foreground">Tus datos para identificarte y responderte.</p>
                 </div>
               </div>
@@ -485,12 +476,10 @@ function RegisterTab({ step, form, errors, submitting, correlativo, steps,
           {/* ── Step 1: Detalle del reclamo ── */}
           {step === 1 && (
             <>
-              <div className="flex items-center gap-3 pb-3 border-b border-border/50">
-                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                  <FileText className="w-4 h-4 text-primary" />
-                </div>
+              <div className="flex items-center gap-3 pb-3 border-b border-border/40">
+                <FileText className="w-4 h-4 text-muted-foreground shrink-0" />
                 <div>
-                  <h2 className="text-base font-bold text-foreground">¿Qué pasó?</h2>
+                  <h2 className="text-base font-semibold text-foreground">¿Qué pasó?</h2>
                   <p className="text-xs text-muted-foreground">Cuéntanos en detalle para ayudarte mejor.</p>
                 </div>
               </div>
@@ -513,10 +502,10 @@ function RegisterTab({ step, form, errors, submitting, correlativo, steps,
                   {TIPO_BIEN.map(o => (
                     <button key={o.value} type="button" onClick={() => update('tipo_bien', o.value)}
                       className={cn(
-                        'flex-1 py-2.5 rounded-xl border-2 text-sm font-semibold transition-all',
+                        'flex-1 py-2.5 rounded-lg border text-sm font-medium transition-colors',
                         form.tipo_bien === o.value
-                          ? 'border-primary bg-primary/8 text-primary'
-                          : 'border-border text-muted-foreground hover:border-border/80 hover:text-foreground'
+                          ? 'border-primary/50 bg-primary/5 text-primary'
+                          : 'border-border text-muted-foreground hover:text-foreground'
                       )}>
                       {o.label}
                     </button>
@@ -563,47 +552,43 @@ function RegisterTab({ step, form, errors, submitting, correlativo, steps,
           {/* ── Step 2: Confirmar ── */}
           {step === 2 && (
             <>
-              <div className="flex items-center gap-3 pb-3 border-b border-border/50">
-                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                  <Shield className="w-4 h-4 text-primary" />
-                </div>
+              <div className="flex items-center gap-3 pb-3 border-b border-border/40">
+                <Shield className="w-4 h-4 text-muted-foreground shrink-0" />
                 <div>
-                  <h2 className="text-base font-bold text-foreground">Revisa antes de enviar</h2>
+                  <h2 className="text-base font-semibold text-foreground">Revisa antes de enviar</h2>
                   <p className="text-xs text-muted-foreground">Una vez enviado no podrás modificarlo.</p>
                 </div>
               </div>
 
-              <div className="rounded-xl border border-border/60 bg-muted/20 overflow-hidden text-sm">
-                <div className="px-4 py-2 border-b border-border/50 bg-muted/30">
-                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Tus datos</p>
-                </div>
-                <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  <div><span className="text-muted-foreground">Nombre: </span><span className="font-medium">{form.nombre} {form.apellido}</span></div>
-                  <div><span className="text-muted-foreground">Documento: </span><span className="font-medium">{form.tipo_doc} {form.num_doc}</span></div>
-                  <div><span className="text-muted-foreground">Correo: </span><span className="font-medium">{form.email}</span></div>
-                  <div><span className="text-muted-foreground">Región: </span><span className="font-medium">{form.region}</span></div>
-                </div>
-                <div className="px-4 py-2 border-t border-border/50 bg-muted/30">
-                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Tu reclamo</p>
-                </div>
-                <div className="p-4 space-y-2">
-                  <div className="flex gap-2 flex-wrap">
-                    <span className="px-2.5 py-1 rounded-full bg-primary/12 text-primary border border-primary/20 text-xs font-bold capitalize">{form.tipo}</span>
-                    <span className="px-2.5 py-1 rounded-full bg-muted border text-xs font-medium capitalize">{form.tipo_bien}</span>
-                    {form.monto && <span className="px-2.5 py-1 rounded-full bg-muted border text-xs font-medium">{form.moneda === 'PEN' ? 'S/' : '$'} {form.monto}</span>}
+              <div className="rounded-xl border border-border/50 divide-y divide-border/50 text-sm">
+                <div className="p-4">
+                  <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-3">Tus datos</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-1.5 gap-x-4">
+                    <div><span className="text-muted-foreground">Nombre </span><span className="font-medium">{form.nombre} {form.apellido}</span></div>
+                    <div><span className="text-muted-foreground">Documento </span><span className="font-medium">{form.tipo_doc} {form.num_doc}</span></div>
+                    <div><span className="text-muted-foreground">Correo </span><span className="font-medium">{form.email}</span></div>
+                    <div><span className="text-muted-foreground">Región </span><span className="font-medium">{form.region}</span></div>
                   </div>
-                  <p><span className="text-muted-foreground">Producto/Servicio: </span><span className="font-medium">{form.descripcion_bien}</span></p>
-                  <div className="bg-muted/40 rounded-lg p-3 text-foreground/80 leading-relaxed">{form.detalle}</div>
-                  {form.pedido && <p><span className="text-muted-foreground">Solución esperada: </span>{form.pedido}</p>}
+                </div>
+                <div className="p-4 space-y-2.5">
+                  <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Tu reclamo</p>
+                  <div className="flex gap-2 flex-wrap">
+                    <span className="px-2 py-0.5 rounded-md bg-primary/8 text-primary text-xs font-medium capitalize">{form.tipo}</span>
+                    <span className="px-2 py-0.5 rounded-md bg-muted text-muted-foreground text-xs font-medium capitalize">{form.tipo_bien}</span>
+                    {form.monto && <span className="px-2 py-0.5 rounded-md bg-muted text-muted-foreground text-xs font-medium">{form.moneda === 'PEN' ? 'S/' : '$'} {form.monto}</span>}
+                  </div>
+                  <p><span className="text-muted-foreground">Producto/Servicio </span><span className="font-medium">{form.descripcion_bien}</span></p>
+                  <p className="border-l-2 border-border pl-3 text-foreground/80 leading-relaxed">{form.detalle}</p>
+                  {form.pedido && <p><span className="text-muted-foreground">Solución esperada </span>{form.pedido}</p>}
                 </div>
               </div>
 
-              <label className="flex items-start gap-3 cursor-pointer p-4 rounded-xl border border-border/50 hover:bg-muted/20 transition-colors">
+              <label className="flex items-start gap-3 cursor-pointer">
                 <input type="checkbox" checked={form.acepta} onChange={e => update('acepta', e.target.checked)}
                   className="mt-0.5 w-4 h-4 rounded border-input accent-primary" />
                 <span className="text-sm text-muted-foreground leading-relaxed">
                   Declaro que la información es verídica y acepto el tratamiento de mis datos personales conforme a la{' '}
-                  <strong className="text-foreground">Ley N° 29733</strong>.
+                  <span className="text-foreground font-medium">Ley N° 29733</span>.
                 </span>
               </label>
             </>
@@ -611,36 +596,36 @@ function RegisterTab({ step, form, errors, submitting, correlativo, steps,
 
           {/* ── Step 3: Éxito ── */}
           {step === 3 && correlativo && (
-            <div className="text-center py-8 space-y-5">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-500/15 ring-4 ring-emerald-500/10">
-                <CheckCircle className="w-8 h-8 text-emerald-500" />
+            <div className="text-center py-6 space-y-5">
+              <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-emerald-500/10">
+                <CheckCircle className="w-7 h-7 text-emerald-500" />
               </div>
               <div>
-                <h2 className="text-xl font-black text-foreground mb-2">¡Reclamo Registrado!</h2>
+                <h2 className="text-xl font-semibold text-foreground mb-2 tracking-tight">¡Reclamo Registrado!</h2>
                 <p className="text-sm text-muted-foreground max-w-sm mx-auto leading-relaxed">
                   Hemos recibido tu reclamo. Guarda este código para consultar el estado de tu caso.
                 </p>
               </div>
 
               <div className="mx-auto max-w-xs">
-                <p className="text-[10px] text-muted-foreground mb-2 font-bold uppercase tracking-widest">Código de seguimiento</p>
-                <div className="px-6 py-4 rounded-xl border-2 border-dashed border-primary/40 bg-primary/5">
-                  <span className="text-xl font-mono font-black text-primary tracking-wider">{correlativo}</span>
+                <p className="text-[10px] text-muted-foreground mb-2 font-semibold uppercase tracking-widest">Código de seguimiento</p>
+                <div className="px-6 py-3.5 rounded-xl border border-dashed border-primary/40">
+                  <span className="text-xl font-mono font-bold text-primary tracking-wider">{correlativo}</span>
                 </div>
                 <p className="text-xs text-muted-foreground mt-2">Úsalo en "Consultar estado"</p>
               </div>
 
-              <div className="bg-amber-500/8 border border-amber-500/20 rounded-xl p-4 text-sm text-amber-700 dark:text-amber-300 max-w-sm mx-auto">
-                Te contactaremos en máximo <strong>30 días calendario</strong> conforme a la normativa vigente.
-              </div>
+              <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+                Te contactaremos en máximo <span className="text-foreground font-medium">30 días calendario</span> conforme a la normativa vigente.
+              </p>
 
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <div className="flex flex-col sm:flex-row gap-3 justify-center pt-1">
                 <button onClick={onRestart}
-                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 border border-border rounded-xl font-semibold text-sm text-foreground hover:bg-muted transition-colors">
+                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 border border-border rounded-lg font-medium text-sm text-foreground hover:bg-muted/50 transition-colors">
                   Registrar otro reclamo
                 </button>
                 <button onClick={() => onConsultarClick(correlativo)}
-                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-xl font-semibold text-sm hover:bg-primary/90 transition-colors">
+                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-lg font-medium text-sm hover:bg-primary/90 transition-colors">
                   <Search className="w-4 h-4" /> Consultar mi reclamo
                 </button>
               </div>
@@ -651,24 +636,24 @@ function RegisterTab({ step, form, errors, submitting, correlativo, steps,
         {/* Navigation buttons */}
         {step < 3 && (
           <div className={cn(
-            'flex gap-3 px-5 sm:px-6 py-4 border-t border-border/50 bg-muted/10',
+            'flex gap-3 px-5 sm:px-6 py-4 border-t border-border/40',
             step === 0 ? 'justify-end' : 'justify-between'
           )}>
             {step > 0 && (
               <button onClick={handleBack}
-                className="inline-flex items-center gap-2 px-5 py-2.5 border border-border rounded-xl font-medium text-sm text-foreground hover:bg-muted transition-colors">
+                className="inline-flex items-center gap-2 px-5 py-2.5 border border-border rounded-lg font-medium text-sm text-foreground hover:bg-muted/50 transition-colors">
                 <ChevronLeft className="w-4 h-4" /> Atrás
               </button>
             )}
             {step < 2 && (
               <button onClick={handleNext}
-                className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground rounded-xl font-semibold text-sm hover:bg-primary/90 active:scale-[.98] transition-all">
+                className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground rounded-lg font-medium text-sm hover:bg-primary/90 active:scale-[.98] transition-all">
                 Continuar <ChevronRight className="w-4 h-4" />
               </button>
             )}
             {step === 2 && (
               <button onClick={handleSubmit} disabled={submitting}
-                className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground rounded-xl font-semibold text-sm hover:bg-primary/90 active:scale-[.98] transition-all disabled:opacity-60">
+                className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground rounded-lg font-medium text-sm hover:bg-primary/90 active:scale-[.98] transition-all disabled:opacity-60">
                 {submitting ? 'Enviando...' : <><Send className="w-4 h-4" /> Enviar reclamo</>}
               </button>
             )}
@@ -678,13 +663,10 @@ function RegisterTab({ step, form, errors, submitting, correlativo, steps,
 
       {/* Legal footnote */}
       {step < 3 && (
-        <div className="flex gap-3 text-xs text-muted-foreground bg-muted/20 border border-border/40 rounded-xl p-3.5">
-          <Info className="w-4 h-4 shrink-0 mt-0.5 opacity-60" />
-          <p className="leading-relaxed">
-            Implementado conforme al D.S. 011-2011-PCM, Ley N° 29571 y Ley N° 29733.
-            La empresa atenderá tu reclamo en un plazo máximo de <strong>30 días calendario</strong>.
-          </p>
-        </div>
+        <p className="text-xs text-muted-foreground leading-relaxed px-1">
+          Implementado conforme al D.S. 011-2011-PCM, Ley N° 29571 y Ley N° 29733.
+          La empresa atenderá tu reclamo en un plazo máximo de <span className="text-foreground font-medium">30 días calendario</span>.
+        </p>
       )}
     </div>
   );
@@ -700,13 +682,11 @@ function ConsultarTab({ queryCode, setQueryCode, querying, queryResult, queryErr
 }) {
   return (
     <div className="space-y-4">
-      <div className="bg-card border border-border/60 rounded-2xl shadow-sm p-5 sm:p-6">
-        <div className="flex items-center gap-3 pb-4 border-b border-border/50 mb-5">
-          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-            <Search className="w-4 h-4 text-primary" />
-          </div>
+      <div className="bg-card border border-border/60 rounded-xl p-5 sm:p-6">
+        <div className="flex items-center gap-3 pb-4 border-b border-border/40 mb-5">
+          <Search className="w-4 h-4 text-muted-foreground shrink-0" />
           <div>
-            <h2 className="text-base font-bold text-foreground">Consultar estado de tu reclamo</h2>
+            <h2 className="text-base font-semibold text-foreground">Consultar estado de tu reclamo</h2>
             <p className="text-xs text-muted-foreground">Ingresa el código de seguimiento que recibiste.</p>
           </div>
         </div>
@@ -719,17 +699,17 @@ function ConsultarTab({ queryCode, setQueryCode, querying, queryResult, queryErr
               onChange={e => { setQueryCode(e.target.value.toUpperCase()); }}
               onKeyDown={e => e.key === 'Enter' && onQuery()}
               placeholder="Ej: REC-2026-123456"
-              className="w-full pl-10 pr-4 py-3 rounded-xl border border-input bg-background text-sm font-mono text-foreground placeholder:text-muted-foreground placeholder:font-sans focus:outline-none focus:ring-1 focus:ring-primary/40 focus:border-primary transition-colors"
+              className="w-full pl-10 pr-4 py-3 rounded-lg border border-input bg-background text-sm font-mono text-foreground placeholder:text-muted-foreground placeholder:font-sans focus:outline-none focus:ring-1 focus:ring-primary/40 focus:border-primary transition-colors"
             />
           </div>
           <button onClick={onQuery} disabled={querying}
-            className="inline-flex items-center gap-2 px-5 py-3 bg-primary text-primary-foreground rounded-xl font-semibold text-sm hover:bg-primary/90 active:scale-[.98] transition-all disabled:opacity-60">
+            className="inline-flex items-center gap-2 px-5 py-3 bg-primary text-primary-foreground rounded-lg font-medium text-sm hover:bg-primary/90 active:scale-[.98] transition-all disabled:opacity-60">
             {querying ? 'Buscando...' : <><ArrowRight className="w-4 h-4" />Consultar</>}
           </button>
         </div>
 
         {queryError && (
-          <div className="mt-4 flex items-start gap-2.5 p-3.5 rounded-xl bg-destructive/8 border border-destructive/25 text-sm text-destructive">
+          <div className="mt-4 flex items-start gap-2.5 p-3.5 rounded-lg bg-destructive/5 border border-destructive/20 text-sm text-destructive">
             <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
             <p>{queryError}</p>
           </div>
@@ -740,7 +720,7 @@ function ConsultarTab({ queryCode, setQueryCode, querying, queryResult, queryErr
 
       {!queryResult && !queryError && (
         <div className="text-center py-14 text-muted-foreground">
-          <BookOpen className="w-10 h-10 mx-auto mb-3 opacity-20" />
+          <BookOpen className="w-9 h-9 mx-auto mb-3 opacity-20" />
           <p className="text-sm">Ingresa tu código para ver el estado de tu reclamo.</p>
         </div>
       )}
@@ -762,14 +742,14 @@ function ComplaintResultCard({ result, onClear }: { result: ComplaintResult; onC
   return (
     <div className="space-y-3">
       {/* Main status card */}
-      <div className={cn('bg-card border rounded-2xl overflow-hidden', cfg.borderCls)}>
-        <div className={cn('px-5 py-4 flex items-start justify-between gap-3', cfg.bgCls)}>
+      <div className="bg-card border border-border/50 rounded-xl overflow-hidden">
+        <div className="px-5 py-4 flex items-start justify-between gap-3">
           <div>
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Correlativo</p>
-            <p className="text-2xl font-mono font-black text-foreground tracking-wider">{result.correlativo}</p>
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-1">Correlativo</p>
+            <p className="text-2xl font-mono font-bold text-foreground tracking-wider">{result.correlativo}</p>
             <p className="text-xs text-muted-foreground mt-1">Registrado el {fmtDate(result.created_at)}</p>
           </div>
-          <span className={cn('px-3 py-1.5 rounded-full border text-xs font-bold shrink-0', cfg.badgeCls)}>
+          <span className={cn('px-3 py-1 rounded-full text-xs font-medium shrink-0', cfg.badgeCls)}>
             {cfg.label}
           </span>
         </div>
@@ -784,17 +764,17 @@ function ComplaintResultCard({ result, onClear }: { result: ComplaintResult; onC
                 <div key={s} className="flex items-center flex-1 last:flex-none">
                   <div className="flex flex-col items-center gap-1.5 flex-1">
                     <div className={cn(
-                      'w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all',
-                      done ? `${sCfg.dotCls} border-transparent text-white shadow-sm` : 'border-border bg-background text-muted-foreground'
+                      'w-7 h-7 rounded-full flex items-center justify-center border transition-colors',
+                      done ? `${sCfg.dotCls} border-transparent text-white` : 'border-border bg-background text-muted-foreground'
                     )}>
-                      {done ? <CheckCircle className="w-4 h-4" /> : <span className="text-xs font-bold">{i + 1}</span>}
+                      {done ? <CheckCircle className="w-3.5 h-3.5" /> : <span className="text-xs font-semibold">{i + 1}</span>}
                     </div>
-                    <p className={cn('text-[10px] font-semibold text-center', done ? sCfg.textCls : 'text-muted-foreground/40')}>
+                    <p className={cn('text-[10px] font-medium text-center', done ? sCfg.textCls : 'text-muted-foreground/40')}>
                       {sCfg.label}
                     </p>
                   </div>
                   {i < STATUS_ORDER.length - 1 && (
-                    <div className={cn('h-0.5 flex-1 -mt-6 mx-1 rounded transition-all', i < stepIdx ? cfg.dotCls : 'bg-border')} />
+                    <div className={cn('h-px flex-1 -mt-5 mx-1 transition-colors', i < stepIdx ? cfg.dotCls : 'bg-border')} />
                   )}
                 </div>
               );
@@ -804,17 +784,17 @@ function ComplaintResultCard({ result, onClear }: { result: ComplaintResult; onC
         </div>
 
         {/* Meta info */}
-        <div className="px-5 pb-4 grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
-          <div className="bg-muted/30 rounded-lg px-3 py-2">
+        <div className="px-5 pb-4 grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2 text-sm border-t border-border/30 pt-3">
+          <div>
             <p className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wide mb-0.5">Tipo</p>
             <p className="font-medium text-foreground capitalize">{result.tipo}</p>
           </div>
-          <div className="bg-muted/30 rounded-lg px-3 py-2">
+          <div>
             <p className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wide mb-0.5">Solicitante</p>
             <p className="font-medium text-foreground truncate">{result.nombre} {result.apellido ?? ''}</p>
           </div>
           {result.descripcion_bien && (
-            <div className="bg-muted/30 rounded-lg px-3 py-2 col-span-2 sm:col-span-1">
+            <div className="col-span-2 sm:col-span-1">
               <p className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wide mb-0.5">Producto/Servicio</p>
               <p className="font-medium text-foreground truncate">{result.descripcion_bien}</p>
             </div>
@@ -824,10 +804,10 @@ function ComplaintResultCard({ result, onClear }: { result: ComplaintResult; onC
 
       {/* Respuesta */}
       {result.respuesta ? (
-        <div className="rounded-2xl border border-emerald-500/25 bg-emerald-500/5 p-5 space-y-2">
+        <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-5 space-y-2">
           <div className="flex items-center gap-2">
             <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
-            <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300">Respuesta de la empresa</p>
+            <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">Respuesta de la empresa</p>
           </div>
           <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">{result.respuesta}</p>
           {result.fecha_respuesta && (
@@ -837,17 +817,17 @@ function ComplaintResultCard({ result, onClear }: { result: ComplaintResult; onC
           )}
         </div>
       ) : (
-        <div className="rounded-2xl border border-border/50 bg-muted/20 p-4 flex items-start gap-3">
+        <div className="rounded-xl border border-border/50 p-4 flex items-start gap-3">
           <Clock className="w-5 h-5 text-muted-foreground shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm font-semibold text-foreground mb-0.5">En espera de respuesta</p>
-            <p className="text-xs text-muted-foreground">Tienes hasta <strong>30 días calendario</strong> para recibir una respuesta.</p>
+            <p className="text-sm font-medium text-foreground mb-0.5">En espera de respuesta</p>
+            <p className="text-xs text-muted-foreground">Tienes hasta <span className="text-foreground font-medium">30 días calendario</span> para recibir una respuesta.</p>
           </div>
         </div>
       )}
 
       <button onClick={onClear}
-        className="w-full py-2.5 text-sm text-muted-foreground hover:text-foreground border border-border/50 rounded-xl hover:bg-muted/30 transition-colors">
+        className="w-full py-2.5 text-sm text-muted-foreground hover:text-foreground border border-border/50 rounded-lg hover:bg-muted/30 transition-colors">
         Consultar otro reclamo
       </button>
     </div>
