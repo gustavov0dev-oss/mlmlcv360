@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Reveal } from '@/components/landing/Reveal';
 import { Mail, MapPin, Send, CircleCheck as CheckCircle, ChevronDown, Zap, Phone } from 'lucide-react';
 import { toast } from 'sonner';
 import { useConfig } from '@/store/configStore';
@@ -60,53 +59,53 @@ export default function ContactoPage() {
       <section className="relative pt-28 pb-10 sm:pb-14 overflow-hidden">
         <div className="absolute inset-0 bg-grid opacity-[0.25] mask-fade-top pointer-events-none dark:opacity-[0.1]" />
         <div className="relative max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
-          <Reveal>
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/8 border border-primary/15 text-xs font-medium text-primary mb-5">
-              <Zap className="w-3.5 h-3.5" />
-              Respondemos en menos de 24h
-            </div>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground tracking-tight mb-4 leading-[1.05]">
-              ¿En qué podemos<br className="hidden sm:block" /> <span className="text-gradient-animated">ayudarte?</span>
-            </h1>
-            <p className="text-base sm:text-lg text-muted-foreground/70 max-w-xl leading-relaxed">
-              {tagline || 'Nuestro equipo está disponible para resolver tus dudas, escuchar tus sugerencias y ayudarte a crecer.'}
-            </p>
-          </Reveal>
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/8 border border-primary/15 text-xs font-medium text-primary mb-5">
+            <Zap className="w-3.5 h-3.5" />
+            Respondemos en menos de 24h
+          </div>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground tracking-tight mb-4 leading-[1.1]">
+            ¿En qué podemos <span className="text-gradient-animated">ayudarte?</span>
+          </h1>
+          <p className="text-base sm:text-lg text-muted-foreground/70 max-w-xl leading-relaxed">
+            {tagline || 'Nuestro equipo está disponible para resolver tus dudas, escuchar tus sugerencias y ayudarte a crecer.'}
+          </p>
         </div>
       </section>
 
-      {/* ── Contact channels ── */}
+      {/* ── Canales de contacto ── */}
       {channels.length > 0 && (
-        <section className="pb-6">
+        <section className="pb-6 sm:pb-8">
           <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-              {channels.map((ch, i) => (
-                <Reveal key={ch.label} delay={i * 50}>
-                  <a
-                    href={ch.href}
-                    target={ch.href.startsWith('http') ? '_blank' : undefined}
-                    rel={ch.href.startsWith('http') ? 'noopener noreferrer' : undefined}
-                    className="group flex items-center gap-4 border border-border/20 rounded-xl p-4 sm:p-5 transition-all hover:border-primary/30"
-                  >
-                    <div className="w-10 h-10 rounded-xl icon-primary flex items-center justify-center shrink-0">
-                      <ch.icon className="w-5 h-5" />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="text-xs text-muted-foreground/60 mb-0.5">{ch.label}</div>
-                      <div className="text-sm font-medium text-foreground leading-snug break-words">{ch.value}</div>
-                    </div>
-                  </a>
-                </Reveal>
+            <div className={cn(
+              'grid grid-cols-1 gap-4',
+              channels.length === 3 ? 'sm:grid-cols-3' : channels.length === 2 ? 'sm:grid-cols-2' : 'sm:grid-cols-1',
+            )}>
+              {channels.map((ch) => (
+                <a
+                  key={ch.label}
+                  href={ch.href}
+                  target={ch.href.startsWith('http') ? '_blank' : undefined}
+                  rel={ch.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                  className="flex items-center gap-4 rounded-2xl border border-border/20 p-5"
+                >
+                  <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                    <ch.icon className="w-5 h-5 text-primary" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-medium text-muted-foreground/60 uppercase tracking-wide mb-0.5">{ch.label}</p>
+                    <p className="text-sm font-semibold text-foreground leading-snug break-words [overflow-wrap:anywhere]">{ch.value}</p>
+                  </div>
+                </a>
               ))}
             </div>
           </div>
         </section>
       )}
 
-      {/* ── Form + Map bento ── */}
-      <section className="py-10 sm:py-14">
+      {/* ── Form + Map ── */}
+      <section className="py-6 sm:py-8">
         <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 lg:gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 lg:gap-6 items-stretch">
             {/* Form */}
             <div className="lg:col-span-3 border border-border/20 rounded-2xl p-6 sm:p-8">
               <h2 className="text-lg font-bold text-foreground mb-1">Envíanos un mensaje</h2>
@@ -120,7 +119,7 @@ export default function ContactoPage() {
                   <h3 className="font-bold text-foreground mb-2">Mensaje enviado</h3>
                   <p className="text-sm text-muted-foreground mb-5">Te responderemos en menos de 24 horas.</p>
                   <button onClick={() => { setSent(false); setForm({ name: '', email: '', subject: '', message: '' }); }}
-                    className="text-sm text-primary font-medium hover:underline">Enviar otro mensaje</button>
+                    className="text-sm text-primary font-medium">Enviar otro mensaje</button>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -128,27 +127,27 @@ export default function ContactoPage() {
                     <div>
                       <label className="block text-xs font-medium text-muted-foreground mb-1.5">Nombre <span className="text-primary">*</span></label>
                       <input type="text" value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
-                        className="w-full px-3.5 py-2.5 bg-muted/30 border border-border/40 rounded-lg text-sm text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all" placeholder="Tu nombre" />
+                        className="w-full px-3.5 py-2.5 bg-muted/30 border border-border/40 rounded-lg text-sm text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/20" placeholder="Tu nombre" />
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-muted-foreground mb-1.5">Email <span className="text-primary">*</span></label>
                       <input type="email" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
-                        className="w-full px-3.5 py-2.5 bg-muted/30 border border-border/40 rounded-lg text-sm text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all" placeholder="tu@email.com" />
+                        className="w-full px-3.5 py-2.5 bg-muted/30 border border-border/40 rounded-lg text-sm text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/20" placeholder="tu@email.com" />
                     </div>
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-muted-foreground mb-1.5">Asunto</label>
                     <input type="text" value={form.subject} onChange={e => setForm(p => ({ ...p, subject: e.target.value }))}
-                      className="w-full px-3.5 py-2.5 bg-muted/30 border border-border/40 rounded-lg text-sm text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all" placeholder="¿Sobre qué nos escribes?" />
+                      className="w-full px-3.5 py-2.5 bg-muted/30 border border-border/40 rounded-lg text-sm text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/20" placeholder="¿Sobre qué nos escribes?" />
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-muted-foreground mb-1.5">Mensaje <span className="text-primary">*</span></label>
                     <textarea rows={5} value={form.message} onChange={e => setForm(p => ({ ...p, message: e.target.value }))}
-                      className="w-full px-3.5 py-2.5 bg-muted/30 border border-border/40 rounded-lg text-sm text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all resize-none" placeholder="Cuéntanos en qué podemos ayudarte..." />
+                      className="w-full px-3.5 py-2.5 bg-muted/30 border border-border/40 rounded-lg text-sm text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 resize-none" placeholder="Cuéntanos en qué podemos ayudarte..." />
                   </div>
                   <button type="submit" disabled={loading}
-                    className="w-full bg-primary text-white py-3 rounded-lg font-semibold text-sm hover:bg-primary/90 transition-all flex items-center justify-center gap-2 disabled:opacity-50">
-                    {loading ? <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Enviando...</> : <><Send className="w-4 h-4" /> Enviar mensaje</>}
+                    className="w-full bg-primary text-white py-3 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 disabled:opacity-50">
+                    {loading ? <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full" /> Enviando...</> : <><Send className="w-4 h-4" /> Enviar mensaje</>}
                   </button>
                 </form>
               )}
@@ -157,23 +156,29 @@ export default function ContactoPage() {
             {/* Map */}
             {companyAddress && (
               <div id="mapa" className="lg:col-span-2 flex flex-col rounded-2xl overflow-hidden border border-border/20">
-                <div className="p-5 sm:p-6">
-                  <div className="flex items-center gap-2.5 mb-2">
-                    <MapPin className="w-4 h-4 text-primary" />
-                    <span className="text-xs font-semibold text-primary uppercase tracking-widest">Ubicación</span>
-                  </div>
-                  <h3 className="text-base font-bold text-foreground mb-1">Visítanos</h3>
-                  <p className="text-sm text-muted-foreground/70 leading-relaxed">{companyAddress}</p>
-                </div>
-                <div className="flex-1 min-h-[200px] border-t border-border/20">
+                <div className="flex-1 min-h-[220px]">
                   <iframe
                     title={`Ubicación ${companyName}`}
                     src={mapsEmbed}
-                    className="w-full h-full min-h-[200px]"
+                    className="w-full h-full"
                     loading="lazy"
                     referrerPolicy="no-referrer-when-downgrade"
                     allowFullScreen
                   />
+                </div>
+                <div className="flex items-start justify-between gap-3 p-5 border-t border-border/20 shrink-0">
+                  <div className="min-w-0">
+                    <p className="text-xs font-medium text-muted-foreground/60 uppercase tracking-wide mb-1">Ubicación</p>
+                    <p className="text-sm font-medium text-foreground leading-snug">{companyAddress}</p>
+                  </div>
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${mapsQuery}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="shrink-0 text-xs font-semibold text-primary whitespace-nowrap pt-0.5"
+                  >
+                    Cómo llegar →
+                  </a>
                 </div>
               </div>
             )}
@@ -206,24 +211,26 @@ export default function ContactoPage() {
                   <div key={i} className={cn('border-b border-border/20', i === 0 && 'border-t border-border/20')}>
                     <button
                       onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                      className="w-full flex items-center justify-between py-5 text-left gap-4 group"
+                      className="w-full flex items-center justify-between py-5 text-left gap-4"
                     >
                       <span className={cn(
-                        'text-sm sm:text-[15px] leading-snug transition-colors',
-                        openFaq === i ? 'font-semibold text-foreground' : 'font-medium text-foreground/70 group-hover:text-foreground',
+                        'text-sm sm:text-[15px] leading-snug',
+                        openFaq === i ? 'font-semibold text-foreground' : 'font-medium text-foreground/70',
                       )}>
                         {faq.q}
                       </span>
                       <div className={cn(
-                        'w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-all duration-200',
-                        openFaq === i ? 'bg-primary/10 text-primary' : 'text-muted-foreground/40 group-hover:text-foreground/60',
+                        'w-6 h-6 rounded-full flex items-center justify-center shrink-0',
+                        openFaq === i ? 'bg-primary/10 text-primary' : 'text-muted-foreground/40',
                       )}>
-                        <ChevronDown className={cn('w-3.5 h-3.5 transition-transform duration-300', openFaq === i && 'rotate-180')} />
+                        <ChevronDown className={cn('w-3.5 h-3.5', openFaq === i && 'rotate-180')} />
                       </div>
                     </button>
-                    <div className={cn('overflow-hidden transition-all duration-300 ease-in-out', openFaq === i ? 'max-h-96 pb-5' : 'max-h-0')}>
-                      <p className="text-sm sm:text-[15px] text-muted-foreground leading-relaxed">{faq.a}</p>
-                    </div>
+                    {openFaq === i && (
+                      <div className="pb-5">
+                        <p className="text-sm sm:text-[15px] text-muted-foreground leading-relaxed">{faq.a}</p>
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -236,24 +243,26 @@ export default function ContactoPage() {
                   <div key={i} className={cn('border-b border-border/20', isFirst && 'border-t border-border/20')}>
                     <button
                       onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                      className="w-full flex items-center justify-between py-5 text-left gap-4 group"
+                      className="w-full flex items-center justify-between py-5 text-left gap-4"
                     >
                       <span className={cn(
-                        'text-sm sm:text-[15px] leading-snug transition-colors',
-                        openFaq === i ? 'font-semibold text-foreground' : 'font-medium text-foreground/70 group-hover:text-foreground',
+                        'text-sm sm:text-[15px] leading-snug',
+                        openFaq === i ? 'font-semibold text-foreground' : 'font-medium text-foreground/70',
                       )}>
                         {faq.q}
                       </span>
                       <div className={cn(
-                        'w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-all duration-200',
-                        openFaq === i ? 'bg-primary/10 text-primary' : 'text-muted-foreground/40 group-hover:text-foreground/60',
+                        'w-6 h-6 rounded-full flex items-center justify-center shrink-0',
+                        openFaq === i ? 'bg-primary/10 text-primary' : 'text-muted-foreground/40',
                       )}>
-                        <ChevronDown className={cn('w-3.5 h-3.5 transition-transform duration-300', openFaq === i && 'rotate-180')} />
+                        <ChevronDown className={cn('w-3.5 h-3.5', openFaq === i && 'rotate-180')} />
                       </div>
                     </button>
-                    <div className={cn('overflow-hidden transition-all duration-300 ease-in-out', openFaq === i ? 'max-h-96 pb-5' : 'max-h-0')}>
-                      <p className="text-sm sm:text-[15px] text-muted-foreground leading-relaxed">{faq.a}</p>
-                    </div>
+                    {openFaq === i && (
+                      <div className="pb-5">
+                        <p className="text-sm sm:text-[15px] text-muted-foreground leading-relaxed">{faq.a}</p>
+                      </div>
+                    )}
                   </div>
                 );
               })}
