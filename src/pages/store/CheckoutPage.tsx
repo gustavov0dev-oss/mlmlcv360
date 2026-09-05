@@ -7,7 +7,10 @@ import { useNavigate } from '@/lib/router';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import type { ShippingMethod, Coupon } from '@/lib/storeTypes';
-import { CircleCheck as CheckCircle, ChevronLeft, ChevronRight, MapPin, Truck, CreditCard, ClipboardList, Tag, Package, Plus, Trash2, Globe, Chrome as Home, X, Loader as Loader2 } from 'lucide-react';
+import { CircleCheck as CheckCircle, ChevronLeft, ChevronRight, MapPin, Truck, CreditCard, ClipboardList, Tag, Package, Plus, Trash2, Globe, X, Loader as Loader2, Pencil } from 'lucide-react';
+
+// Mismo ancho máximo que StorePage / CartPage.
+const PAGE_MAX_W = 'max-w-[1100px]';
 
 function fmt(n: number, currency = 'PEN', rate = 1) {
   if (currency === 'USD') return `$${(n / rate).toFixed(2)}`;
@@ -68,14 +71,28 @@ const EMPTY_ADDR: AddressForm = {
   ruc: '', razon_social: '', is_default: false,
 };
 
-// Skeleton for step
+// Input minimalista, sin fondo pesado — mismo estilo que Cart/Store.
+const inputClass = 'w-full px-3.5 py-3 bg-muted/30 border border-border/40 rounded-lg text-sm text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-colors';
+const labelClass = 'block text-xs font-semibold text-foreground/80 mb-1.5';
+
+// Eyebrow de sección — mismo mecanismo de "separator-based layout" que el resto del sitio,
+// usado aquí para trocear el formulario en bloques que se leen de un vistazo.
+function FieldSection({ title, children, first = false }: { title: string; children: React.ReactNode; first?: boolean }) {
+  return (
+    <div className={cn('space-y-4', !first && 'pt-6 border-t border-border/15')}>
+      <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70">{title}</p>
+      {children}
+    </div>
+  );
+}
+
 function StepSkeleton() {
   return (
-    <div className="bg-card border border-border rounded-xl p-5 space-y-4">
-      {Array.from({length: 5}).map((_, i) => (
+    <div className="space-y-4 pt-2">
+      {Array.from({ length: 5 }).map((_, i) => (
         <div key={i} className="space-y-1.5">
-          <div className="h-3 w-24 bg-muted rounded animate-pulse" />
-          <div className="h-11 bg-muted rounded-xl animate-pulse" />
+          <div className="h-3 w-24 bg-muted/40 rounded animate-pulse" />
+          <div className="h-11 bg-muted/30 rounded-lg animate-pulse" />
         </div>
       ))}
     </div>
@@ -93,15 +110,30 @@ export default function CheckoutPage() {
   const [addr, setAddr] = useState<AddressForm>({ ...EMPTY_ADDR, full_name: user?.full_name || '', phone: (user as any)?.phone || '' });
   const [savedAddresses, setSavedAddresses] = useState<AddressForm[]>([]);
   const [loadingAddresses, setLoadingAddresses] = useState(true);
+  // Mostrado por defecto solo si la persona no tiene direcciones guardadas.
+  // Con direcciones guardadas, el formulario completo queda oculto hasta que
+  // se pide explícitamente — así la pantalla no abre con 14 campos a la vista.
+  const [showForm, setShowForm] = useState(true);
 
   const [saveForFuture, setSaveForFuture] = useState(true);
   const [shippingMethods, setShippingMethods] = useState<ShippingMethod[]>([]);
   const [loadingShipping, setLoadingShipping] = useState(false);
-  const [selectedShipping, setSelectedShipping] = useState<ShippingMethod | null>(null);
+  // Fix: se selecciona por índice, no por `.id`. Si el backend entrega ids
+  // vacíos, repetidos o inconsistentes para algún método de envío, comparar
+  // por `.id` hace que el radio (controlado) nunca llegue a marcarse en el
+  // DOM real al hacer clic en otra opción — y por eso el resaltado se
+  // quedaba pegado en la primera. El índice del array siempre es único.
+  const [selectedShippingIdx, setSelectedShippingIdx] = useState<number>(-1);
+  const selectedShipping = selectedShippingIdx >= 0 ? (shippingMethods[selectedShippingIdx] ?? null) : null;
   const [gateways, setGateways] = useState<any[]>([]);
   const [loadingGateways, setLoadingGateways] = useState(true);
-  const [paymentMethod, setPaymentMethod] = useState('');
-  const [selectedGateway, setSelectedGateway] = useState<any>(null);
+  // Fix: mismo problema que en envío — seleccionar por paymentMethod/slug podía
+  // no coincidir si el slug o id de la pasarela no era limpio/único, dejando el
+  // radio (controlado) sin marcarse de verdad al elegir otra opción. Ahora se
+  // selecciona por índice, que siempre es único.
+  const [selectedGatewayIdx, setSelectedGatewayIdx] = useState<number>(-1);
+  const selectedGateway = selectedGatewayIdx >= 0 ? (gateways[selectedGatewayIdx] ?? null) : null;
+  const paymentMethod = selectedGateway?.slug || selectedGateway?.id || '';
   const [couponCode, setCouponCode] = useState('');
   const [coupon, setCoupon] = useState<Coupon | null>(null);
   const [couponError, setCouponError] = useState('');
@@ -112,7 +144,6 @@ export default function CheckoutPage() {
 
   const freeThreshold = parseFloat(company.free_shipping_threshold || '150');
 
-  // Load saved addresses and gateways on mount
   useEffect(() => {
     const loadAll = async () => {
       setLoadingAddresses(true);
@@ -126,28 +157,27 @@ export default function CheckoutPage() {
       if (addrs.length > 0) {
         const def = addrs.find((a: AddressForm) => a.is_default) || addrs[0];
         setAddr({ ...def });
+        setShowForm(false);
       }
       setLoadingAddresses(false);
 
       const gws = (gwRes.data || []) as any[];
       setGateways(gws);
       if (gws.length > 0) {
-        setSelectedGateway(gws[0]);
-        setPaymentMethod(gws[0].slug || gws[0].id);
+        setSelectedGatewayIdx(0);
       }
       setLoadingGateways(false);
     };
     loadAll();
   }, [user]);
 
-  // Load shipping methods when country changes
   useEffect(() => {
     if (step !== 2) return;
     setLoadingShipping(true);
     database.select<ShippingMethod>('shipping_methods', { filter: { status: 'active' } }).then(({ data }) => {
       const ms = (data || []) as ShippingMethod[];
       setShippingMethods(ms);
-      if (ms.length > 0 && !selectedShipping) setSelectedShipping(ms[0]);
+      if (ms.length > 0 && selectedShippingIdx === -1) setSelectedShippingIdx(0);
       setLoadingShipping(false);
     });
   }, [step]);
@@ -165,17 +195,14 @@ export default function CheckoutPage() {
       : coupon.value
     : 0;
 
-  // Dynamic IGV/Tax calculation
   const subtotalAfterDiscount = subtotal - discount;
   let taxAmount = 0;
   let basePrice = subtotalAfterDiscount + shippingCost;
 
   if (tax.enabled) {
     if (tax.includedInPrice) {
-      // IGV included in price - extract from total
       taxAmount = basePrice - (basePrice / (1 + tax.rate / 100));
     } else {
-      // IGV added to price
       taxAmount = basePrice * (tax.rate / 100);
     }
   }
@@ -227,12 +254,15 @@ export default function CheckoutPage() {
       const { data } = await database.insert<AddressForm>('saved_addresses', payload);
       if (data && !Array.isArray(data)) setAddr(prev => ({ ...prev, id: data.id }));
     }
-
   };
 
   const deleteAddress = async (id: string) => {
     await database.delete('saved_addresses', id);
-    setSavedAddresses(prev => prev.filter(a => a.id !== id));
+    setSavedAddresses(prev => {
+      const rest = prev.filter(a => a.id !== id);
+      if (rest.length === 0) setShowForm(true);
+      return rest;
+    });
     if (addr.id === id) setAddr({ ...EMPTY_ADDR, full_name: user?.full_name || '' });
   };
 
@@ -272,56 +302,64 @@ export default function CheckoutPage() {
     setPlacing(false);
   };
 
+  const continueFromAddress = () => {
+    if (!validateAddr()) return;
+    setShowForm(false);
+    setStep(2);
+  };
+
   // Success screen
   if (step === 5 && placedOrder) {
     return (
       <>
         <div className="flex-1 flex items-center justify-center px-4 pt-28 pb-10">
-        <div className="max-w-md w-full bg-card border border-border rounded-3xl p-8 text-center space-y-5 shadow-2xl">
-          <div className="w-20 h-20 bg-green-500/15 rounded-full flex items-center justify-center mx-auto animate-bounce">
-            <CheckCircle className="w-10 h-10 text-green-500" />
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold text-foreground">¡Pedido realizado!</h2>
-            <p className="text-muted-foreground text-sm mt-1">Gracias por tu compra. Te notificaremos al confirmar el pago.</p>
-          </div>
-          <div className="bg-muted rounded-xl p-4 space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Número de pedido</span>
-              <span className="font-bold text-foreground font-mono">{placedOrder.order_number}</span>
+          <div className="max-w-md w-full text-center space-y-6">
+            <div className="w-16 h-16 rounded-full border-2 border-primary/30 flex items-center justify-center mx-auto">
+              <CheckCircle className="w-8 h-8 text-primary" />
             </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Total</span>
-              <span className="font-bold text-foreground">{fmt(placedOrder.total)}</span>
+            <div>
+              <h2 className="text-2xl font-bold text-foreground">¡Pedido realizado!</h2>
+              <p className="text-muted-foreground text-sm mt-1">Gracias por tu compra. Te notificaremos al confirmar el pago.</p>
             </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Pago</span>
-              <span className="font-semibold text-foreground capitalize">{selectedGateway?.name || paymentMethod}</span>
+
+            <div className="divide-y divide-border/20 border-y border-border/20 text-sm text-left">
+              <div className="flex justify-between py-3">
+                <span className="text-muted-foreground">Número de pedido</span>
+                <span className="font-bold text-foreground font-mono">{placedOrder.order_number}</span>
+              </div>
+              <div className="flex justify-between py-3">
+                <span className="text-muted-foreground">Total</span>
+                <span className="font-bold text-foreground">{fmt(placedOrder.total)}</span>
+              </div>
+              <div className="flex justify-between py-3">
+                <span className="text-muted-foreground">Pago</span>
+                <span className="font-semibold text-foreground capitalize">{selectedGateway?.name || paymentMethod}</span>
+              </div>
+            </div>
+
+            {selectedGateway && (
+              <div className="border-l-2 border-primary/40 pl-3 text-left text-sm">
+                <p className="font-bold text-foreground mb-1">Instrucciones de pago</p>
+                {selectedGateway.slug === 'yape' && selectedGateway.credentials?.phone_number && (
+                  <p className="text-muted-foreground">Envía el pago a Yape/Plin: <span className="font-bold text-foreground">{selectedGateway.credentials.phone_number}</span> a nombre de {selectedGateway.credentials.merchant_name}</p>
+                )}
+                {(selectedGateway.slug === 'transfer' || !selectedGateway.credentials?.phone_number) && (
+                  <p className="text-muted-foreground">Recibirás los detalles de pago por correo electrónico. Tu pedido se confirmará tras verificar el pago.</p>
+                )}
+              </div>
+            )}
+
+            <div className="flex gap-3 pt-2">
+              <button onClick={() => navigate('/dashboard/pedidos')}
+                className="flex-1 bg-primary text-primary-foreground py-3 rounded-lg font-bold text-sm hover:bg-primary/90 transition-colors">
+                Ver mis pedidos
+              </button>
+              <button onClick={() => navigate('/tienda')}
+                className="flex-1 border border-border/50 py-3 rounded-lg font-bold text-sm hover:bg-muted/30 transition-colors">
+                Seguir comprando
+              </button>
             </div>
           </div>
-          {/* Payment instructions */}
-          {selectedGateway && (
-            <div className="bg-primary/8 border border-primary/20 rounded-xl p-4 text-sm text-left">
-              <p className="font-bold text-foreground mb-1">Instrucciones de pago</p>
-              {selectedGateway.slug === 'yape' && selectedGateway.credentials?.phone_number && (
-                <p className="text-muted-foreground">Envía el pago a Yape/Plin: <span className="font-bold text-foreground">{selectedGateway.credentials.phone_number}</span> a nombre de {selectedGateway.credentials.merchant_name}</p>
-              )}
-              {(selectedGateway.slug === 'transfer' || !selectedGateway.credentials?.phone_number) && (
-                <p className="text-muted-foreground">Recibirás los detalles de pago por correo electrónico. Tu pedido se confirmará tras verificar el pago.</p>
-              )}
-            </div>
-          )}
-          <div className="flex gap-3">
-            <button onClick={() => navigate('/dashboard/pedidos')}
-              className="flex-1 bg-primary text-primary-foreground py-3 rounded-xl font-bold text-sm hover:bg-primary/90 transition-colors">
-              Ver mis pedidos
-            </button>
-            <button onClick={() => navigate('/tienda')}
-              className="flex-1 border border-border py-3 rounded-xl font-bold text-sm hover:bg-muted transition-colors">
-              Seguir comprando
-            </button>
-          </div>
-        </div>
         </div>
       </>
     );
@@ -332,272 +370,293 @@ export default function CheckoutPage() {
     return null;
   }
 
-
-
   return (
     <>
-      {/* Checkout Header */}
-      <div className="border-b border-border bg-card mt-28">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4">
-          <div className="flex items-center gap-3 mb-4">
+      {/* Header — sin línea separadora debajo; el step bar respira con más espacio */}
+      <div className="mt-28">
+        <div className={cn(PAGE_MAX_W, 'mx-auto px-4 sm:px-6 lg:px-8 py-6')}>
+          <div className="flex items-center gap-3 mb-8">
             <button onClick={() => step > 1 ? setStep(s => s - 1) : navigate('/carrito')}
               className="text-muted-foreground hover:text-foreground transition-colors p-1 -ml-1">
               <ChevronLeft className="w-5 h-5" />
             </button>
             <h1 className="text-lg font-bold text-foreground">Finalizar compra</h1>
           </div>
-          {/* Step bar */}
-          <div className="flex items-center">
+
+          {/* Step bar — ocupa todo el ancho del contenedor, con más aire entre paso y paso */}
+          <div className="flex items-center w-full">
             {STEPS.map((s, i) => (
               <div key={s.id} className="flex items-center flex-1 last:flex-none">
                 <button onClick={() => step > s.id && setStep(s.id)}
-                  className={cn('flex items-center gap-1.5 text-xs font-bold transition-colors',
-                    step === s.id ? 'text-primary' : step > s.id ? 'text-green-500 cursor-pointer' : 'text-muted-foreground cursor-default')}>
-                  <div className={cn('w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border-2 flex-shrink-0 transition-all',
-                    step === s.id ? 'border-primary bg-primary text-white shadow-md shadow-primary/30' :
-                    step > s.id ? 'border-green-500 bg-green-500 text-white' : 'border-border text-muted-foreground')}>
+                  className={cn('flex items-center gap-2.5 text-sm font-bold transition-colors',
+                    step === s.id ? 'text-primary' : step > s.id ? 'text-primary/75 cursor-pointer' : 'text-muted-foreground cursor-default')}>
+                  {/* Fix: borde un poco más grueso que antes (2px → 2.5px), apenas perceptible. */}
+                  <div className={cn('w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold border-[3px] flex-shrink-0 transition-all',
+                    step === s.id ? 'border-primary text-primary' :
+                    step > s.id ? 'border-primary/60 text-primary/75' : 'border-border/50 text-muted-foreground')}>
                     {step > s.id ? '✓' : s.id}
                   </div>
-                  <span className="hidden sm:block">{s.label}</span>
+                  <span className="hidden sm:block whitespace-nowrap">{s.label}</span>
                 </button>
-                {i < STEPS.length - 1 && <div className={cn('flex-1 h-px mx-2', step > s.id ? 'bg-green-500' : 'bg-border')} />}
+                {i < STEPS.length - 1 && <div className={cn('flex-1 h-px mx-4', step > s.id ? 'bg-primary/40' : 'bg-border/30')} />}
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-5 grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <div className="lg:col-span-2 space-y-4">
+      <div className={cn(PAGE_MAX_W, 'mx-auto px-4 sm:px-6 lg:px-8 pt-10 sm:pt-12 pb-16 grid grid-cols-1 lg:grid-cols-5 gap-10 lg:gap-16')}>
+        <div className="lg:col-span-3 flex flex-col">
 
           {/* ── STEP 1: Address ── */}
           {step === 1 && (
-            <div className="space-y-4">
-              {/* Saved addresses */}
+            <div className="space-y-8">
               {loadingAddresses ? (
                 <StepSkeleton />
-              ) : savedAddresses.length > 0 && (
-                <div className="bg-card border border-border rounded-xl p-5 space-y-3">
-                  <h2 className="text-sm font-bold text-foreground flex items-center gap-2">
-                    <Home className="w-4 h-4 text-primary" /> Direcciones guardadas
-                  </h2>
-                  <div className="space-y-2">
-                    {savedAddresses.map(a => (
-                      <label key={a.id} className={cn('flex items-start gap-3 p-3 rounded-xl border-2 cursor-pointer transition-colors',
-                        addr.id === a.id ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40')}>
-                        <input type="radio" name="saved_addr" checked={addr.id === a.id}
-                          onChange={() => setAddr({ ...a })} className="mt-0.5 accent-primary" />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-bold text-foreground">{a.label} {a.is_default && <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full ml-1">Principal</span>}</p>
-                          <p className="text-xs text-muted-foreground">{a.full_name} · {a.phone}</p>
-                          <p className="text-xs text-muted-foreground">{a.address}{a.district ? `, ${a.district}` : ''}, {a.city}, {a.country_name}</p>
+              ) : (
+                <>
+                  {/* Vista compacta: solo aparece si hay direcciones guardadas y no se pidió el formulario.
+                      Evita abrir el checkout con 14 campos visibles cuando ya se conoce la dirección. */}
+                  {savedAddresses.length > 0 && !showForm && (
+                    <div className="space-y-5">
+                      <h2 className="text-sm font-bold text-foreground flex items-center gap-2">
+                        <MapPin className="w-4 h-4 text-primary" /> Dirección de entrega
+                      </h2>
+                      <div className="divide-y divide-border/20 border-t border-border/20">
+                        {savedAddresses.map(a => {
+                          const selected = addr.id === a.id;
+                          return (
+                            // Fix: el resaltado ya no depende del re-render de React (`selected`),
+                            // sino de :checked real del input vía has-[:checked] / group-has-[:checked].
+                            // Así el borde y el texto en negrita SIEMPRE quedan en la fila que
+                            // realmente está marcada, sin desfaces al cambiar de selección.
+                            <label key={a.id}
+                              className="group flex items-start gap-3 py-4 pl-3 -ml-3 cursor-pointer border-l-2 border-transparent transition-colors has-[:checked]:border-primary">
+                              <input type="radio" name="saved_addr" checked={selected}
+                                onChange={() => setAddr({ ...a })} className="accent-primary mt-0.5 focus:outline-none" />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-foreground/70 transition-colors group-has-[:checked]:font-semibold group-has-[:checked]:text-foreground">
+                                  {a.label} {a.is_default && <span className="text-[10px] text-primary font-bold ml-1">· Principal</span>}
+                                </p>
+                                <p className="text-xs text-muted-foreground mt-0.5">{a.full_name} · {a.phone}</p>
+                                <p className="text-xs text-muted-foreground">{a.address}{a.district ? `, ${a.district}` : ''}, {a.city}, {a.country_name}</p>
+                              </div>
+                              <div className="flex items-center gap-1 flex-shrink-0">
+                                <button onClick={e => { e.stopPropagation(); e.preventDefault(); setAddr({ ...a }); setShowForm(true); }}
+                                  className="text-muted-foreground/60 hover:text-primary transition-colors p-1">
+                                  <Pencil className="w-3.5 h-3.5" />
+                                </button>
+                                <button onClick={e => { e.stopPropagation(); e.preventDefault(); deleteAddress(a.id!); }}
+                                  className="text-muted-foreground/60 hover:text-red-500 transition-colors p-1">
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </label>
+                          );
+                        })}
+                      </div>
+                      <button onClick={() => { setAddr({ ...EMPTY_ADDR, full_name: user?.full_name || '' }); setShowForm(true); }}
+                        className="flex items-center gap-2 text-sm font-semibold text-primary">
+                        <Plus className="w-4 h-4" /> Usar otra dirección
+                      </button>
+
+                      <button onClick={continueFromAddress}
+                        className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground py-4 rounded-lg font-bold hover:bg-primary/90 transition-colors">
+                        Continuar al envío <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Formulario: primera compra, o "Usar otra dirección" / editar */}
+                  {showForm && (
+                    <div className="space-y-6">
+                      <div className="flex items-center justify-between">
+                        <h2 className="text-sm font-bold text-foreground flex items-center gap-2">
+                          <MapPin className="w-4 h-4 text-primary" />
+                          {addr.id ? 'Editar dirección' : 'Dirección de entrega'}
+                        </h2>
+                        {savedAddresses.length > 0 && (
+                          <button onClick={() => setShowForm(false)} className="text-xs font-semibold text-muted-foreground hover:text-foreground">
+                            Volver a mis direcciones
+                          </button>
+                        )}
+                      </div>
+
+                      <FieldSection title="País de entrega" first>
+                        {/* Fix: label ya no es sr-only (quedaba invisible y el select
+                            colgaba pegado al título). Ahora siempre se muestra con
+                            su propio margen, dando el respiro que faltaba. */}
+                        <div>
+                          <label className={cn(labelClass, 'flex items-center gap-1')}>
+                            <Globe className="w-3 h-3" /> País de destino *
+                          </label>
+                          <select
+                            value={addr.country}
+                            onChange={e => {
+                              const c = COUNTRIES.find(x => x.code === e.target.value) || COUNTRIES[0];
+                              setAddr(p => ({ ...p, country: c.code, country_name: c.name, region: c.zones[0] || '', district: '' }));
+                            }}
+                            className={cn(inputClass, 'mt-1')}>
+                            {COUNTRIES.map(c => (
+                              <option key={c.code} value={c.code}>{c.flag} {c.name}</option>
+                            ))}
+                          </select>
                         </div>
-                        <button onClick={e => { e.stopPropagation(); deleteAddress(a.id!); }}
-                          className="text-muted-foreground hover:text-red-500 transition-colors p-1 flex-shrink-0">
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </label>
-                    ))}
-                    <button onClick={() => setAddr({ ...EMPTY_ADDR, full_name: user?.full_name || '' })}
-                      className="w-full flex items-center justify-center gap-2 py-2.5 border-2 border-dashed border-border rounded-xl text-sm font-semibold text-muted-foreground hover:border-primary/40 hover:text-foreground transition-colors">
-                      <Plus className="w-4 h-4" /> Nueva dirección
-                    </button>
-                  </div>
-                </div>
-              )}
+                      </FieldSection>
 
-              {/* Address form */}
-              <div className="bg-card border border-border rounded-xl p-5 space-y-4">
-                <h2 className="text-sm font-bold text-foreground flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-primary" />
-                  {savedAddresses.length > 0 ? 'Editar / Nueva dirección' : 'Dirección de entrega'}
-                </h2>
+                      <FieldSection title="Contacto">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                          <div className="sm:col-span-2">
+                            <label className={labelClass}>Nombre completo *</label>
+                            <input value={addr.full_name} onChange={e => setAddr(p => ({ ...p, full_name: e.target.value }))}
+                              placeholder="Juan Pérez García" className={inputClass} />
+                          </div>
+                          <div>
+                            <label className={labelClass}>Celular / WhatsApp *</label>
+                            <input value={addr.phone} onChange={e => setAddr(p => ({ ...p, phone: e.target.value }))}
+                              placeholder="+51 999 888 777" className={inputClass} />
+                          </div>
+                        </div>
+                      </FieldSection>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {/* Country selector */}
-                  <div className="sm:col-span-2">
-                    <label className="block text-xs font-semibold text-foreground mb-1.5 flex items-center gap-1">
-                      <Globe className="w-3 h-3" /> País de destino *
-                    </label>
-                    <select
-                      value={addr.country}
-                      onChange={e => {
-                        const c = COUNTRIES.find(x => x.code === e.target.value) || COUNTRIES[0];
-                        setAddr(p => ({ ...p, country: c.code, country_name: c.name, region: c.zones[0] || '', district: '' }));
-                      }}
-                      className="w-full px-4 py-3 bg-muted border border-border rounded-xl text-sm text-foreground outline-none focus:border-primary">
-                      {COUNTRIES.map(c => (
-                        <option key={c.code} value={c.code}>{c.flag} {c.name}</option>
-                      ))}
-                    </select>
-                  </div>
+                      <FieldSection title="Ubicación">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {isPeru ? (
+                            <div>
+                              <label className={labelClass}>Región *</label>
+                              <select value={addr.region} onChange={e => setAddr(p => ({ ...p, region: e.target.value }))} className={inputClass}>
+                                {PERU_REGIONS.map(r => <option key={r}>{r}</option>)}
+                              </select>
+                            </div>
+                          ) : (
+                            <div>
+                              <label className={labelClass}>Estado / Provincia *</label>
+                              <input value={addr.region} onChange={e => setAddr(p => ({ ...p, region: e.target.value }))}
+                                placeholder="Estado o provincia" className={inputClass} />
+                            </div>
+                          )}
 
-                  <div className="sm:col-span-2">
-                    <label className="block text-xs font-semibold text-foreground mb-1.5">Nombre completo *</label>
-                    <input value={addr.full_name} onChange={e => setAddr(p => ({ ...p, full_name: e.target.value }))}
-                      placeholder="Juan Pérez García"
-                      className="w-full px-4 py-3 bg-muted border border-border rounded-xl text-sm outline-none focus:border-primary" />
-                  </div>
+                          <div>
+                            <label className={labelClass}>Ciudad *</label>
+                            <input value={addr.city} onChange={e => setAddr(p => ({ ...p, city: e.target.value }))}
+                              placeholder="Lima" className={inputClass} />
+                          </div>
 
-                  <div>
-                    <label className="block text-xs font-semibold text-foreground mb-1.5">Celular / WhatsApp *</label>
-                    <input value={addr.phone} onChange={e => setAddr(p => ({ ...p, phone: e.target.value }))}
-                      placeholder="+51 999 888 777"
-                      className="w-full px-4 py-3 bg-muted border border-border rounded-xl text-sm outline-none focus:border-primary" />
-                  </div>
+                          {isPeru ? (
+                            <div>
+                              <label className={labelClass}>Distrito *</label>
+                              <input value={addr.district} onChange={e => setAddr(p => ({ ...p, district: e.target.value }))}
+                                placeholder="Miraflores" className={inputClass} />
+                            </div>
+                          ) : (
+                            <div>
+                              <label className={labelClass}>Código postal</label>
+                              <input value={addr.zip_code} onChange={e => setAddr(p => ({ ...p, zip_code: e.target.value }))}
+                                placeholder="12345" className={inputClass} />
+                            </div>
+                          )}
+                        </div>
+                      </FieldSection>
 
-                  {isPeru ? (
-                    <div>
-                      <label className="block text-xs font-semibold text-foreground mb-1.5">Región *</label>
-                      <select value={addr.region} onChange={e => setAddr(p => ({ ...p, region: e.target.value }))}
-                        className="w-full px-4 py-3 bg-muted border border-border rounded-xl text-sm outline-none focus:border-primary">
-                        {PERU_REGIONS.map(r => <option key={r}>{r}</option>)}
-                      </select>
-                    </div>
-                  ) : (
-                    <div>
-                      <label className="block text-xs font-semibold text-foreground mb-1.5">Estado / Provincia *</label>
-                      <input value={addr.region} onChange={e => setAddr(p => ({ ...p, region: e.target.value }))}
-                        placeholder="Estado o provincia"
-                        className="w-full px-4 py-3 bg-muted border border-border rounded-xl text-sm outline-none focus:border-primary" />
-                    </div>
-                  )}
+                      <FieldSection title="Dirección exacta">
+                        <div className="space-y-4">
+                          <div>
+                            <label className={labelClass}>Dirección completa *</label>
+                            <input value={addr.address} onChange={e => setAddr(p => ({ ...p, address: e.target.value }))}
+                              placeholder="Av. Javier Prado 1234, Dpto 501" className={inputClass} />
+                          </div>
+                          <div>
+                            <label className={labelClass}>
+                              Referencia de entrega
+                              <span className="font-normal text-muted-foreground ml-1">(útil para zonas rurales o difíciles)</span>
+                            </label>
+                            <input value={addr.reference} onChange={e => setAddr(p => ({ ...p, reference: e.target.value }))}
+                              placeholder="Ej: Casa de 2 pisos, portón azul, frente al parque..." className={inputClass} />
+                            <div className="flex flex-wrap gap-1.5 mt-2">
+                              {REFERENCE_HINTS.map(h => (
+                                <button key={h} type="button" onClick={() => setAddr(p => ({ ...p, reference: h }))}
+                                  className="px-2.5 py-1 border border-border/40 rounded-full text-[11px] text-muted-foreground hover:border-primary/50 hover:text-foreground transition-colors">
+                                  {h}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </FieldSection>
 
-                  <div>
-                    <label className="block text-xs font-semibold text-foreground mb-1.5">Ciudad *</label>
-                    <input value={addr.city} onChange={e => setAddr(p => ({ ...p, city: e.target.value }))}
-                      placeholder="Lima"
-                      className="w-full px-4 py-3 bg-muted border border-border rounded-xl text-sm outline-none focus:border-primary" />
-                  </div>
+                      <FieldSection title="Comprobante de pago">
+                        <div className="space-y-4">
+                          <div className="flex flex-wrap gap-2">
+                            {(isPeru
+                              ? ([['boleta', '📄 Boleta'], ['factura', '🏢 Factura']] as const)
+                              : ([['receipt', '🧾 Recibo'], ['invoice', '📑 Invoice']] as const)
+                            ).map(([val, label]) => (
+                              <button key={val} onClick={() => setAddr(p => ({ ...p, invoice_type: val }))}
+                                className={cn('px-4 py-2 rounded-full text-xs font-bold border transition-colors',
+                                  addr.invoice_type === val ? 'border-primary text-primary bg-primary/10' : 'border-border/40 text-muted-foreground hover:border-primary/40')}>
+                                {label}
+                              </button>
+                            ))}
+                          </div>
 
-                  {isPeru && (
-                    <div>
-                      <label className="block text-xs font-semibold text-foreground mb-1.5">Distrito *</label>
-                      <input value={addr.district} onChange={e => setAddr(p => ({ ...p, district: e.target.value }))}
-                        placeholder="Miraflores"
-                        className="w-full px-4 py-3 bg-muted border border-border rounded-xl text-sm outline-none focus:border-primary" />
-                    </div>
-                  )}
+                          {addr.invoice_type === 'factura' && (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                              <div>
+                                <label className={labelClass}>RUC *</label>
+                                <input value={addr.ruc} onChange={e => setAddr(p => ({ ...p, ruc: e.target.value }))}
+                                  placeholder="20xxxxxxxxx" maxLength={11} className={cn(inputClass, 'font-mono')} />
+                              </div>
+                              <div>
+                                <label className={labelClass}>Razón Social *</label>
+                                <input value={addr.razon_social} onChange={e => setAddr(p => ({ ...p, razon_social: e.target.value }))}
+                                  placeholder="Empresa S.A.C." className={inputClass} />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </FieldSection>
 
-                  {!isPeru && (
-                    <div>
-                      <label className="block text-xs font-semibold text-foreground mb-1.5">Código postal</label>
-                      <input value={addr.zip_code} onChange={e => setAddr(p => ({ ...p, zip_code: e.target.value }))}
-                        placeholder="12345"
-                        className="w-full px-4 py-3 bg-muted border border-border rounded-xl text-sm outline-none focus:border-primary" />
-                    </div>
-                  )}
-
-                  <div className="sm:col-span-2">
-                    <label className="block text-xs font-semibold text-foreground mb-1.5">Dirección completa *</label>
-                    <input value={addr.address} onChange={e => setAddr(p => ({ ...p, address: e.target.value }))}
-                      placeholder="Av. Javier Prado 1234, Dpto 501"
-                      className="w-full px-4 py-3 bg-muted border border-border rounded-xl text-sm outline-none focus:border-primary" />
-                  </div>
-
-                  <div className="sm:col-span-2">
-                    <label className="block text-xs font-semibold text-foreground mb-1.5">
-                      Referencia de entrega
-                      <span className="font-normal text-muted-foreground ml-1">(útil para zonas rurales o difíciles)</span>
-                    </label>
-                    <input value={addr.reference} onChange={e => setAddr(p => ({ ...p, reference: e.target.value }))}
-                      placeholder="Ej: Casa de 2 pisos, portón azul, frente al parque..."
-                      className="w-full px-4 py-3 bg-muted border border-border rounded-xl text-sm outline-none focus:border-primary" />
-                    <div className="flex flex-wrap gap-1.5 mt-2">
-                      {REFERENCE_HINTS.map(h => (
-                        <button key={h} type="button" onClick={() => setAddr(p => ({ ...p, reference: h }))}
-                          className="px-2.5 py-1 bg-muted border border-border rounded-full text-[11px] text-muted-foreground hover:border-primary/50 hover:text-foreground transition-colors">
-                          {h}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Invoice type */}
-                  <div className="sm:col-span-2">
-                    <label className="block text-xs font-semibold text-foreground mb-2">Tipo de comprobante</label>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                      {isPeru ? (
-                        <>
-                          {([['boleta', '📄 Boleta'], ['factura', '🏢 Factura']] as const).map(([val, label]) => (
-                            <button key={val} onClick={() => setAddr(p => ({ ...p, invoice_type: val }))}
-                              className={cn('py-2.5 rounded-xl text-sm font-bold border-2 transition-colors',
-                                addr.invoice_type === val ? 'border-primary bg-primary/10 text-primary' : 'border-border text-muted-foreground hover:border-primary/40')}>
-                              {label}
-                            </button>
-                          ))}
-                        </>
-                      ) : (
-                        <>
-                          {([['receipt', '🧾 Recibo'], ['invoice', '📑 Invoice']] as const).map(([val, label]) => (
-                            <button key={val} onClick={() => setAddr(p => ({ ...p, invoice_type: val }))}
-                              className={cn('py-2.5 rounded-xl text-sm font-bold border-2 transition-colors',
-                                addr.invoice_type === val ? 'border-primary bg-primary/10 text-primary' : 'border-border text-muted-foreground hover:border-primary/40')}>
-                              {label}
-                            </button>
-                          ))}
-                        </>
+                      {user && (
+                        <FieldSection title="Guardar dirección">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
+                            <div>
+                              <label className={labelClass}>Etiqueta (para identificar)</label>
+                              <input value={addr.label} onChange={e => setAddr(p => ({ ...p, label: e.target.value }))}
+                                placeholder="Casa, Trabajo, etc." className={inputClass} />
+                            </div>
+                            <label className="flex items-center gap-2.5 cursor-pointer select-none py-3">
+                              <div onClick={() => setSaveForFuture(v => !v)}
+                                className={cn('w-10 h-6 rounded-full transition-colors relative flex-shrink-0',
+                                  saveForFuture ? 'bg-primary' : 'bg-muted/40 border border-border/40')}>
+                                <div className={cn('absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform',
+                                  saveForFuture ? 'translate-x-5' : 'translate-x-1')} />
+                              </div>
+                              <span className="text-sm text-foreground">Guardar para futuras compras</span>
+                            </label>
+                          </div>
+                        </FieldSection>
                       )}
-                    </div>
-                  </div>
 
-                  {addr.invoice_type === 'factura' && (
-                    <>
-                      <div>
-                        <label className="block text-xs font-semibold text-foreground mb-1.5">RUC *</label>
-                        <input value={addr.ruc} onChange={e => setAddr(p => ({ ...p, ruc: e.target.value }))}
-                          placeholder="20xxxxxxxxx" maxLength={11}
-                          className="w-full px-4 py-3 bg-muted border border-border rounded-xl text-sm font-mono outline-none focus:border-primary" />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-foreground mb-1.5">Razón Social *</label>
-                        <input value={addr.razon_social} onChange={e => setAddr(p => ({ ...p, razon_social: e.target.value }))}
-                          placeholder="Empresa S.A.C."
-                          className="w-full px-4 py-3 bg-muted border border-border rounded-xl text-sm outline-none focus:border-primary" />
-                      </div>
-                    </>
+                      <button onClick={continueFromAddress}
+                        className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground py-4 rounded-lg font-bold hover:bg-primary/90 transition-colors">
+                        Continuar al envío <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
                   )}
-
-                  <div className="sm:col-span-2">
-                    <label className="block text-xs font-semibold text-foreground mb-1.5">Etiqueta (para identificar)</label>
-                    <input value={addr.label} onChange={e => setAddr(p => ({ ...p, label: e.target.value }))}
-                      placeholder="Casa, Trabajo, etc."
-                      className="w-full px-4 py-3 bg-muted border border-border rounded-xl text-sm outline-none focus:border-primary" />
-                  </div>
-                </div>
-
-                {/* Save for future */}
-                {user && (
-                  <label className="flex items-center gap-2.5 cursor-pointer select-none">
-                    <div onClick={() => setSaveForFuture(v => !v)}
-                      className={cn('w-10 h-6 rounded-full transition-colors relative flex-shrink-0',
-                        saveForFuture ? 'bg-primary' : 'bg-muted border border-border')}>
-                      <div className={cn('absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform',
-                        saveForFuture ? 'translate-x-5' : 'translate-x-1')} />
-                    </div>
-                    <span className="text-sm text-foreground">Guardar esta dirección para futuras compras</span>
-                  </label>
-                )}
-
-                <button onClick={() => validateAddr() && setStep(2)}
-                  className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground py-4 rounded-xl font-bold hover:bg-primary/90 transition-colors">
-                  Continuar al envío <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
+                </>
+              )}
             </div>
           )}
 
           {/* ── STEP 2: Shipping ── */}
           {step === 2 && (
-            <div className="bg-card border border-border rounded-xl p-5 space-y-4">
+            <div className="space-y-4">
               <h2 className="text-sm font-bold text-foreground flex items-center gap-2">
                 <Truck className="w-4 h-4 text-primary" /> Método de envío
               </h2>
               {loadingShipping ? (
-                <div className="space-y-2">
-                  {Array.from({length: 3}).map((_, i) => (
-                    <div key={i} className="h-16 bg-muted rounded-xl animate-pulse" />
-                  ))}
+                <div className="space-y-2 pt-2">
+                  {Array.from({ length: 3 }).map((_, i) => <div key={i} className="h-14 bg-muted/30 rounded-lg animate-pulse" />)}
                 </div>
               ) : shippingMethods.length === 0 ? (
                 <div className="py-6 text-center text-muted-foreground text-sm">
@@ -605,33 +664,43 @@ export default function CheckoutPage() {
                   <p className="text-xs mt-1">Contacta con soporte para coordinar el envío a tu ubicación.</p>
                 </div>
               ) : (
-                shippingMethods.map(m => {
-                  const cost = subtotal >= freeThreshold ? 0 :
-                    (m.type === 'free_threshold' && m.free_threshold && subtotal >= m.free_threshold) ? 0 : m.price;
-                  return (
-                    <label key={m.id} className={cn('flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors',
-                      selectedShipping?.id === m.id ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40')}>
-                      <input type="radio" name="ship" checked={selectedShipping?.id === m.id}
-                        onChange={() => setSelectedShipping(m)} className="accent-primary" />
-                      <div className="flex-1">
-                        <p className="text-sm font-bold text-foreground">{m.name}</p>
-                        {m.description && <p className="text-xs text-muted-foreground">{m.description}</p>}
-                        {m.estimated_days_min != null && (
-                          <p className="text-xs text-muted-foreground">{m.estimated_days_min}–{m.estimated_days_max} días hábiles</p>
-                        )}
-                      </div>
-                      <span className={cn('text-sm font-bold', cost === 0 ? 'text-green-500' : 'text-foreground')}>
-                        {cost === 0 ? '¡Gratis!' : `S/ ${cost.toFixed(2)}`}
-                      </span>
-                    </label>
-                  );
-                })
+                <div className="divide-y divide-border/20 border-t border-border/20">
+                  {shippingMethods.map((m, idx) => {
+                    const cost = subtotal >= freeThreshold ? 0 :
+                      (m.type === 'free_threshold' && m.free_threshold && subtotal >= m.free_threshold) ? 0 : m.price;
+                    // Fix: comparar por índice (no por m.id) para que el clic SIEMPRE
+                    // marque el radio correcto, sin importar la calidad del id que
+                    // venga del backend.
+                    const selected = selectedShippingIdx === idx;
+                    return (
+                      // has-[:checked] sigue el :checked real del radio ya marcado
+                      // correctamente arriba — así el borde y el color del precio
+                      // se mueven a la fila que el usuario realmente eligió.
+                      <label key={m.id ?? idx}
+                        className="group flex items-center gap-3 py-4 pl-3 -ml-3 cursor-pointer border-l-2 border-transparent transition-colors has-[:checked]:border-primary">
+                        <input type="radio" name="ship" checked={selected}
+                          onChange={() => setSelectedShippingIdx(idx)} className="accent-primary focus:outline-none" />
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-foreground/70 transition-colors group-has-[:checked]:font-semibold group-has-[:checked]:text-foreground">{m.name}</p>
+                          {m.description && <p className="text-xs text-muted-foreground">{m.description}</p>}
+                          {m.estimated_days_min != null && (
+                            <p className="text-xs text-muted-foreground">{m.estimated_days_min}–{m.estimated_days_max} días hábiles</p>
+                          )}
+                        </div>
+                        <span className={cn('text-sm font-bold transition-colors',
+                          cost === 0 ? 'text-primary' : 'text-foreground/70 group-has-[:checked]:text-primary')}>
+                          {cost === 0 ? '¡Gratis!' : `S/ ${cost.toFixed(2)}`}
+                        </span>
+                      </label>
+                    );
+                  })}
+                </div>
               )}
-              <div className="flex gap-3">
-                <button onClick={() => setStep(1)} className="flex-1 border border-border rounded-xl py-3 font-bold text-sm hover:bg-muted transition-colors">
+              <div className="flex gap-3 pt-2">
+                <button onClick={() => setStep(1)} className="flex-1 border border-border/50 rounded-lg py-3 font-bold text-sm hover:bg-muted/30 transition-colors">
                   <ChevronLeft className="w-4 h-4 inline mr-1" /> Anterior
                 </button>
-                <button onClick={() => setStep(3)} className="flex-1 bg-primary text-primary-foreground rounded-xl py-3 font-bold text-sm hover:bg-primary/90 transition-colors">
+                <button onClick={() => setStep(3)} className="flex-1 bg-primary text-primary-foreground rounded-lg py-3 font-bold text-sm hover:bg-primary/90 transition-colors">
                   Continuar <ChevronRight className="w-4 h-4 inline ml-1" />
                 </button>
               </div>
@@ -640,16 +709,15 @@ export default function CheckoutPage() {
 
           {/* ── STEP 3: Payment ── */}
           {step === 3 && (
-            <div className="bg-card border border-border rounded-xl p-5 space-y-4">
+            <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-sm font-bold text-foreground flex items-center gap-2">
                   <CreditCard className="w-4 h-4 text-primary" /> Método de pago
                 </h2>
-                {/* Currency toggle */}
-                <div className="flex items-center bg-muted rounded-xl p-1 gap-1">
+                <div className="flex items-center gap-1 rounded-full border border-border/40 p-0.5">
                   {['PEN', 'USD'].map(c => (
                     <button key={c} onClick={() => setDisplayCurrency(c)}
-                      className={cn('px-3 py-1.5 rounded-lg text-xs font-bold transition-colors',
+                      className={cn('px-3 py-1.5 rounded-full text-xs font-bold transition-colors',
                         displayCurrency === c ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground')}>
                       {c === 'PEN' ? 'S/ Soles' : '$ USD'}
                     </button>
@@ -658,67 +726,68 @@ export default function CheckoutPage() {
               </div>
 
               {loadingGateways ? (
-                <div className="space-y-2">
-                  {Array.from({length: 3}).map((_, i) => (
-                    <div key={i} className="h-16 bg-muted rounded-xl animate-pulse" />
-                  ))}
+                <div className="space-y-2 pt-2">
+                  {Array.from({ length: 3 }).map((_, i) => <div key={i} className="h-14 bg-muted/30 rounded-lg animate-pulse" />)}
                 </div>
               ) : gateways.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-4">No hay métodos de pago configurados. Contacta al administrador.</p>
               ) : (
-                gateways.map(gw => {
-                  const gwIcons: Record<string, string> = { yape: '📱', culqi: '💳', niubiz: '💳', mercadopago: '💙', paypal: '🅿️', izipay: '💳', transfer: '🏦', efectivo: '💵' };
-                  const icon = gwIcons[gw.slug] || '💰';
-                  const gwDesc: Record<string, string> = {
-                    yape: gw.credentials?.phone_number ? `Yape al ${gw.credentials.phone_number}` : 'Pago móvil instantáneo',
-                    culqi: 'Visa, Mastercard, Amex • Perú',
-                    niubiz: 'Visa, Mastercard, Amex • Perú',
-                    mercadopago: 'Múltiples métodos • Latinoamérica',
-                    paypal: 'Tarjeta de crédito / PayPal Balance',
-                    izipay: 'Visa, Mastercard, Diners • Perú',
-                    transfer: 'BCP, Interbank, BBVA, Scotiabank',
-                    efectivo: 'Paga al recibir tu pedido',
-                  };
-                  const isSelected = paymentMethod === (gw.slug || gw.id);
-                  return (
-                    <label key={gw.id} className={cn('flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors',
-                      isSelected ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40')}>
-                      <input type="radio" name="payment" value={gw.slug || gw.id} checked={isSelected}
-                        onChange={() => { setPaymentMethod(gw.slug || gw.id); setSelectedGateway(gw); }}
-                        className="accent-primary" />
-                      <span className="text-xl flex-shrink-0">{icon}</span>
-                      <div className="flex-1">
-                        <p className="text-sm font-bold text-foreground">{gw.name}</p>
-                        <p className="text-xs text-muted-foreground">{gw.description || gwDesc[gw.slug] || ''}</p>
-                      </div>
-                      {gw.commission_rate > 0 && (
-                        <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full">+{gw.commission_rate}%</span>
-                      )}
-                    </label>
-                  );
-                })
+                <div className="divide-y divide-border/20 border-t border-border/20">
+                  {gateways.map((gw, idx) => {
+                    const gwIcons: Record<string, string> = { yape: '📱', culqi: '💳', niubiz: '💳', mercadopago: '💙', paypal: '🅿️', izipay: '💳', transfer: '🏦', efectivo: '💵' };
+                    const icon = gwIcons[gw.slug] || '💰';
+                    const gwDesc: Record<string, string> = {
+                      yape: gw.credentials?.phone_number ? `Yape al ${gw.credentials.phone_number}` : 'Pago móvil instantáneo',
+                      culqi: 'Visa, Mastercard, Amex • Perú',
+                      niubiz: 'Visa, Mastercard, Amex • Perú',
+                      mercadopago: 'Múltiples métodos • Latinoamérica',
+                      paypal: 'Tarjeta de crédito / PayPal Balance',
+                      izipay: 'Visa, Mastercard, Diners • Perú',
+                      transfer: 'BCP, Interbank, BBVA, Scotiabank',
+                      efectivo: 'Paga al recibir tu pedido',
+                    };
+                    // Fix: comparar por índice, no por slug/id — así el clic siempre
+                    // marca el radio correcto sin depender de la limpieza del dato.
+                    const isSelected = selectedGatewayIdx === idx;
+                    return (
+                      <label key={gw.id ?? idx}
+                        className="group flex items-center gap-3 py-4 pl-3 -ml-3 cursor-pointer border-l-2 border-transparent transition-colors has-[:checked]:border-primary">
+                        <input type="radio" name="payment" value={gw.slug || gw.id} checked={isSelected}
+                          onChange={() => setSelectedGatewayIdx(idx)}
+                          className="accent-primary focus:outline-none" />
+                        <span className="text-xl flex-shrink-0">{icon}</span>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-foreground/70 transition-colors group-has-[:checked]:font-semibold group-has-[:checked]:text-foreground">{gw.name}</p>
+                          <p className="text-xs text-muted-foreground">{gw.description || gwDesc[gw.slug] || ''}</p>
+                        </div>
+                        {gw.commission_rate > 0 && (
+                          <span className="text-[10px] text-muted-foreground border border-border/40 px-1.5 py-0.5 rounded-full">+{gw.commission_rate}%</span>
+                        )}
+                      </label>
+                    );
+                  })}
+                </div>
               )}
 
-              {/* Payment instruction hint */}
               {selectedGateway?.slug === 'yape' && selectedGateway.credentials?.phone_number && (
-                <div className="bg-green-500/8 border border-green-500/20 rounded-xl p-3">
-                  <p className="text-xs font-bold text-green-700 dark:text-green-400 mb-1">📱 Instrucciones Yape</p>
+                <div className="border-l-2 border-primary/40 pl-3">
+                  <p className="text-xs font-bold text-primary mb-1">📱 Instrucciones Yape</p>
                   <p className="text-xs text-muted-foreground">Realiza el pago a <strong className="text-foreground">{selectedGateway.credentials.phone_number}</strong> ({selectedGateway.credentials.merchant_name}). Envía el comprobante por WhatsApp para confirmar.</p>
                 </div>
               )}
 
               <div>
-                <label className="block text-xs font-semibold text-foreground mb-1.5">Notas del pedido (opcional)</label>
+                <label className={labelClass}>Notas del pedido (opcional)</label>
                 <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2}
                   placeholder="Instrucciones especiales, horario preferido de entrega..."
-                  className="w-full px-4 py-3 bg-muted border border-border rounded-xl text-sm outline-none focus:border-primary resize-none" />
+                  className={cn(inputClass, 'resize-none')} />
               </div>
 
-              <div className="flex gap-3">
-                <button onClick={() => setStep(2)} className="flex-1 border border-border rounded-xl py-3 font-bold text-sm hover:bg-muted transition-colors">
+              <div className="flex gap-3 pt-2">
+                <button onClick={() => setStep(2)} className="flex-1 border border-border/50 rounded-lg py-3 font-bold text-sm hover:bg-muted/30 transition-colors">
                   <ChevronLeft className="w-4 h-4 inline mr-1" /> Anterior
                 </button>
-                <button onClick={() => setStep(4)} className="flex-1 bg-primary text-primary-foreground rounded-xl py-3 font-bold text-sm hover:bg-primary/90 transition-colors">
+                <button onClick={() => setStep(4)} className="flex-1 bg-primary text-primary-foreground rounded-lg py-3 font-bold text-sm hover:bg-primary/90 transition-colors">
                   Revisar pedido <ChevronRight className="w-4 h-4 inline ml-1" />
                 </button>
               </div>
@@ -727,16 +796,16 @@ export default function CheckoutPage() {
 
           {/* ── STEP 4: Review ── */}
           {step === 4 && (
-            <div className="bg-card border border-border rounded-xl p-5 space-y-5">
+            <div className="space-y-5">
               <h2 className="text-sm font-bold text-foreground flex items-center gap-2">
                 <ClipboardList className="w-4 h-4 text-primary" /> Confirmar pedido
               </h2>
 
               {/* Address summary */}
-              <div className="bg-muted/40 rounded-xl p-4 space-y-1 text-sm border border-border">
+              <div className="border-t border-b border-border/20 py-4 space-y-1 text-sm">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Dirección</span>
-                  <button onClick={() => setStep(1)} className="text-xs text-primary hover:underline">Editar</button>
+                  <button onClick={() => { setStep(1); setShowForm(true); }} className="text-xs text-primary hover:underline">Editar</button>
                 </div>
                 <p className="font-bold text-foreground">{addr.full_name}</p>
                 <p className="text-muted-foreground">{addr.address}</p>
@@ -748,10 +817,16 @@ export default function CheckoutPage() {
               </div>
 
               {/* Items */}
-              <div className="space-y-2">
+              <div className="divide-y divide-border/20">
                 {items.map(i => (
-                  <div key={i.id} className="flex items-center gap-3 py-1">
-                    <div className="w-10 h-10 rounded-xl bg-muted overflow-hidden flex-shrink-0 border border-border">
+                  <div key={i.id} className="flex items-center gap-3 py-3">
+                    {/* Fix: antes rounded-lg (8px) hacía que la miniatura se viera
+                        demasiado redonda; ahora rounded-md, coherente con el resto
+                        de esquinas del checkout pero menos circular. */}
+                    {/* Fix: rounded-md aún se veía redondeado en el tamaño real de la
+                        miniatura; rounded-sm da un borde casi recto, coherente con el
+                        resto del checkout. */}
+                    <div className="w-10 h-10 rounded-sm bg-muted/30 overflow-hidden flex-shrink-0">
                       {(i.product.images?.[0]?.url || i.variant?.images?.[0]?.url) && (
                         <img src={i.variant?.images?.[0]?.url || i.product.images?.[0]?.url} alt="" className="w-full h-full object-cover" />
                       )}
@@ -767,11 +842,11 @@ export default function CheckoutPage() {
               </div>
 
               <div className="flex gap-3">
-                <button onClick={() => setStep(3)} className="flex-1 border border-border rounded-xl py-3 font-bold text-sm hover:bg-muted transition-colors">
+                <button onClick={() => setStep(3)} className="flex-1 border border-border/50 rounded-lg py-3 font-bold text-sm hover:bg-muted/30 transition-colors">
                   <ChevronLeft className="w-4 h-4 inline mr-1" /> Anterior
                 </button>
                 <button onClick={placeOrder} disabled={placing}
-                  className="flex-1 bg-primary text-primary-foreground rounded-xl py-3 font-bold text-sm hover:bg-primary/90 transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
+                  className="flex-1 bg-primary text-primary-foreground rounded-lg py-3 font-bold text-sm hover:bg-primary/90 transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
                   {placing ? <><Loader2 className="w-4 h-4 animate-spin" /> Procesando...</> : <><Package className="w-4 h-4" /> Confirmar pedido</>}
                 </button>
               </div>
@@ -779,10 +854,10 @@ export default function CheckoutPage() {
           )}
         </div>
 
-        {/* ── ORDER SUMMARY SIDEBAR ── */}
-        <div>
-          <div className="bg-card border border-border rounded-xl p-5 space-y-4 sticky top-20">
-            <h3 className="text-sm font-bold text-foreground">Resumen del pedido</h3>
+        {/* ── ORDER SUMMARY ── */}
+        <div className="lg:col-span-2 lg:pl-12 lg:border-l lg:border-border/20">
+          <div className="lg:sticky lg:top-24 space-y-5">
+            <h3 className="text-base font-bold text-foreground">Resumen del pedido</h3>
 
             {/* Items mini list */}
             <div className="space-y-2 max-h-48 overflow-y-auto">
@@ -794,50 +869,50 @@ export default function CheckoutPage() {
               ))}
             </div>
 
-            {/* Coupon - Always visible regardless of step */}
+            {/* Coupon */}
             {!coupon ? (
-              <div className="space-y-1.5 pt-2 border-t border-border">
-                <label className="text-xs font-bold text-foreground">Cupon de descuento</label>
+              <div className="space-y-1.5 pt-4 border-t border-border/20">
+                <label className="text-xs font-bold text-foreground">Cupón de descuento</label>
                 <div className="flex gap-2">
                   <div className="relative flex-1">
                     <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
                     <input value={couponCode} onChange={e => { setCouponCode(e.target.value.toUpperCase()); setCouponError(''); }}
-                      placeholder="Ingresa tu codigo"
-                      className="w-full pl-9 pr-3 py-2.5 bg-muted border border-border rounded-xl text-xs outline-none focus:border-primary"
+                      placeholder="Ingresa tu código"
+                      className="w-full pl-9 pr-3 py-2.5 bg-muted/30 border border-border/40 rounded-lg text-xs outline-none focus:border-primary focus:ring-1 focus:ring-primary/20"
                       onKeyDown={e => e.key === 'Enter' && applyCoupon()} />
                   </div>
-                  <button onClick={applyCoupon} className="px-4 py-2.5 bg-primary text-primary-foreground rounded-xl text-xs font-bold hover:bg-primary/90">
+                  <button onClick={applyCoupon} className="px-4 py-2.5 border border-border/40 rounded-lg text-xs font-bold hover:bg-muted/30 transition-colors">
                     Aplicar
                   </button>
                 </div>
                 {couponError && <p className="text-xs text-red-500">{couponError}</p>}
               </div>
             ) : (
-              <div className="flex items-center gap-2 pt-2 border-t border-border bg-green-500/10 px-3 py-2.5 rounded-xl">
-                <CheckCircle className="w-4 h-4 text-green-600" />
+              <div className="flex items-center gap-2 pt-4 border-t border-border/20 text-primary">
+                <CheckCircle className="w-4 h-4" />
                 <div className="flex-1">
-                  <p className="text-xs text-green-600 font-bold">{coupon.code} aplicado</p>
-                  <p className="text-xs text-green-600">Descuento: -{fmt(discount)}</p>
+                  <p className="text-xs font-bold">{coupon.code} aplicado</p>
+                  <p className="text-xs">Descuento: -{fmt(discount)}</p>
                 </div>
                 <button onClick={() => { setCoupon(null); setCouponCode(''); }} className="text-muted-foreground hover:text-red-500"><X className="w-4 h-4" /></button>
               </div>
             )}
 
             {/* Totals */}
-            <div className="border-t border-border pt-3 space-y-1.5 text-sm">
+            <div className="border-t border-border/20 pt-4 space-y-1.5 text-sm">
               <div className="flex justify-between text-muted-foreground">
                 <span>Subtotal</span>
                 <span>{fmt(subtotal, displayCurrency, exchangeRate)}</span>
               </div>
               {discount > 0 && (
-                <div className="flex justify-between text-green-600">
+                <div className="flex justify-between text-primary">
                   <span>Descuento</span>
                   <span>-{fmt(discount, displayCurrency, exchangeRate)}</span>
                 </div>
               )}
               <div className="flex justify-between text-muted-foreground">
-                <span>Envio</span>
-                <span className={shippingCost === 0 ? 'text-green-500 font-semibold' : ''}>
+                <span>Envío</span>
+                <span className={shippingCost === 0 ? 'text-primary font-semibold' : ''}>
                   {shippingCost === 0 ? 'Gratis' : fmt(shippingCost, displayCurrency, exchangeRate)}
                 </span>
               </div>
@@ -847,7 +922,7 @@ export default function CheckoutPage() {
                   <span>{fmt(taxAmount, displayCurrency, exchangeRate)}</span>
                 </div>
               )}
-              <div className="flex justify-between font-bold text-foreground text-base border-t border-border pt-2">
+              <div className="flex justify-between font-bold text-foreground text-base border-t border-border/20 pt-3">
                 <span>Total</span>
                 <span>{fmt(total, displayCurrency, exchangeRate)}</span>
               </div>

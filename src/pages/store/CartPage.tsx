@@ -4,13 +4,84 @@ import { useDatabase } from '@/lib/backend';
 import { useCart } from '@/store/cartStore';
 import { useConfig } from '@/store/configStore';
 import { useNavigate } from '@/lib/router';
-import FreeShippingBar from '@/components/store/FreeShippingBar';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import type { Coupon, ShippingMethod } from '@/lib/storeTypes';
-import { ShoppingCart, Trash2, Plus, Minus, Tag, X, ArrowRight, ChevronLeft, Truck, CircleCheck as CheckCircle, Package, ShoppingBag } from 'lucide-react';
+import { ShoppingCart, Trash2, Plus, Minus, Tag, X, ArrowRight, ChevronLeft, Truck, CircleCheck as CheckCircle, Package, ShoppingBag, Check } from 'lucide-react';
+
+// Mismo ancho máximo que usa StorePage, para que ambas vistas queden
+// perfectamente alineadas.
+const PAGE_MAX_W = 'max-w-[1100px]';
 
 function fmt(n: number) { return `S/ ${n.toFixed(2)}`; }
+
+// Mismo estilo del indicador de envío gratis de la tienda, integrado sin
+// tarjeta propia.
+function FreeShippingIndicator({ subtotal, threshold, currencySymbol, className }: {
+  subtotal: number;
+  threshold: number;
+  currencySymbol: string;
+  className?: string;
+}) {
+  if (subtotal <= 0) return null;
+
+  const reached = subtotal >= threshold;
+  const remaining = threshold - subtotal;
+  const progress = Math.min((subtotal / threshold) * 100, 100);
+
+  return (
+    <div className={cn('flex items-center gap-3', className)}>
+      <div
+        className={cn(
+          'flex items-center justify-center w-8 h-8 rounded-full shrink-0 transition-colors duration-300',
+          reached ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground/70'
+        )}
+      >
+        {reached ? <Check className="w-3.5 h-3.5" /> : <Truck className="w-3.5 h-3.5" />}
+      </div>
+
+      <div className="min-w-0 flex-1">
+        <div className="flex items-baseline justify-between gap-2 mb-1.5">
+          <span
+            className={cn(
+              'text-xs sm:text-[13px] leading-tight whitespace-nowrap font-medium',
+              reached ? 'text-primary' : 'text-foreground/80'
+            )}
+          >
+            {reached ? (
+              '¡Envío gratis desbloqueado!'
+            ) : (
+              <>
+                Te falta{' '}
+                <strong className="font-bold text-foreground">
+                  {currencySymbol} {remaining.toFixed(2)}
+                </strong>{' '}
+                para envío gratis
+              </>
+            )}
+          </span>
+          <span
+            className={cn(
+              'text-[11px] font-bold tabular-nums shrink-0',
+              reached ? 'text-primary' : 'text-muted-foreground/70'
+            )}
+          >
+            {Math.round(progress)}%
+          </span>
+        </div>
+        <div className="relative h-1 w-full rounded-full bg-border/30 overflow-hidden">
+          <div
+            className={cn(
+              'absolute inset-y-0 left-0 rounded-full transition-[width] duration-700 ease-out',
+              reached ? 'bg-primary' : 'bg-gradient-to-r from-primary/60 to-primary'
+            )}
+            style={{ width: `${Math.max(progress, 4)}%` }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function CartPage() {
   const database = useDatabase();
@@ -103,7 +174,7 @@ export default function CartPage() {
             <p className="text-muted-foreground text-sm mt-1">Explora nuestra tienda y agrega los productos que te gusten</p>
           </div>
           <button onClick={() => navigate('/tienda')}
-            className="flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-xl font-bold hover:bg-primary/90 transition-colors shadow-md shadow-primary/20">
+            className="flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-xl font-bold shadow-md shadow-primary/20">
             <ShoppingBag className="w-4 h-4" /> Explorar tienda
           </button>
         </div>
@@ -114,56 +185,57 @@ export default function CartPage() {
   return (
     <>
       {/* Header */}
-      <div className="border-b border-border bg-card sticky top-0 z-20">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-3">
-          <button onClick={() => navigate('/tienda')} className="text-muted-foreground hover:text-foreground transition-colors p-1 -ml-1">
+      <div className="border-b border-border/20 bg-card sticky top-0 z-20">
+        <div className={cn(PAGE_MAX_W, 'mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center gap-3')}>
+          <button onClick={() => navigate('/tienda')} className="text-muted-foreground p-1 -ml-1">
             <ChevronLeft className="w-5 h-5" />
           </button>
           <h1 className="text-lg font-bold text-foreground">Carrito de compras</h1>
           <span className="bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full">{itemCount}</span>
-          <button onClick={() => navigate('/tienda')} className="ml-auto text-sm text-primary hover:underline font-semibold hidden sm:block">
+          <button onClick={() => navigate('/tienda')} className="ml-auto text-sm text-primary font-semibold hidden sm:block">
             Seguir comprando
           </button>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-5 grid grid-cols-1 lg:grid-cols-3 gap-5">
+      <div className={cn(PAGE_MAX_W, 'mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-20 pb-16 grid grid-cols-1 lg:grid-cols-5 gap-10 lg:gap-16')}>
         {/* ── Items + Shipping ── */}
-        <div className="lg:col-span-2 space-y-4">
-          {/* Free shipping bar */}
-          <FreeShippingBar subtotal={subtotal} threshold={freeThreshold} />
+        <div className="lg:col-span-3 flex flex-col">
+          {/* Free shipping */}
+          {subtotal > 0 && (
+            <FreeShippingIndicator subtotal={subtotal} threshold={freeThreshold} currencySymbol="S/" className="mb-6" />
+          )}
 
           {/* Items */}
-          <div className="space-y-3">
+          <div className="divide-y divide-border/20 border-t border-border/20">
             {items.map(item => {
               const img = item.variant?.images?.[0]?.url || item.product.images?.[0]?.url;
               return (
-                <div key={item.id} className="bg-card border border-border rounded-xl p-4 flex items-center gap-3 sm:gap-4 hover:border-primary/20 transition-colors">
+                <div key={item.id} className="flex items-center gap-3 sm:gap-4 py-4">
                   <button onClick={() => navigate(`/tienda/${item.product.slug}`)}
-                    className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-muted flex-shrink-0 border border-border hover:opacity-80 transition-opacity">
+                    className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden bg-muted flex-shrink-0">
                     {img ? <img src={img} alt={item.product.name} className="w-full h-full object-cover" /> :
                       <div className="w-full h-full flex items-center justify-center"><Package className="w-6 h-6 text-muted-foreground/40" /></div>}
                   </button>
                   <div className="flex-1 min-w-0">
                     <button onClick={() => navigate(`/tienda/${item.product.slug}`)} className="text-left">
-                      <p className="text-sm font-bold text-foreground hover:text-primary transition-colors line-clamp-2">{item.product.name}</p>
+                      <p className="text-sm font-bold text-foreground line-clamp-2">{item.product.name}</p>
                     </button>
                     {item.variant && <p className="text-xs text-muted-foreground mt-0.5">{item.variant.name}</p>}
                     <p className="text-sm font-bold text-primary mt-1">{fmt(item.price)}</p>
                   </div>
                   <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                    <button onClick={() => removeItem(item.id)}
-                      className="text-muted-foreground hover:text-red-500 transition-colors p-1 -mr-1">
+                    <button onClick={() => removeItem(item.id)} className="text-muted-foreground/60 p-1 -mr-1">
                       <Trash2 className="w-4 h-4" />
                     </button>
-                    <div className="flex items-center border border-border rounded-xl overflow-hidden">
+                    <div className="flex items-center gap-1">
                       <button onClick={() => updateQty(item.id, item.quantity - 1)}
-                        className="w-8 h-8 flex items-center justify-center hover:bg-muted transition-colors">
+                        className="w-6 h-6 flex items-center justify-center text-muted-foreground">
                         <Minus className="w-3 h-3" />
                       </button>
-                      <span className="w-8 text-center text-xs font-bold text-foreground">{item.quantity}</span>
+                      <span className="w-6 text-center text-xs font-bold text-foreground">{item.quantity}</span>
                       <button onClick={() => updateQty(item.id, item.quantity + 1)}
-                        className="w-8 h-8 flex items-center justify-center hover:bg-muted transition-colors">
+                        className="w-6 h-6 flex items-center justify-center text-muted-foreground">
                         <Plus className="w-3 h-3" />
                       </button>
                     </div>
@@ -175,47 +247,47 @@ export default function CartPage() {
           </div>
 
           {/* Shipping selector */}
-          <div className="bg-card border border-border rounded-xl p-5">
-            <h3 className="text-sm font-bold text-foreground flex items-center gap-2 mb-3">
+          <div className="mt-8">
+            <h3 className="text-sm font-bold text-foreground flex items-center gap-2 mb-1">
               <Truck className="w-4 h-4 text-primary" /> Estimación de envío
             </h3>
             {loadingShipping ? (
-              <div className="space-y-2">
-                {Array.from({length: 2}).map((_, i) => <div key={i} className="h-14 bg-muted rounded-xl animate-pulse" />)}
+              <div className="space-y-2 pt-3">
+                {Array.from({length: 2}).map((_, i) => <div key={i} className="h-12 bg-muted/30 rounded-lg animate-pulse" />)}
               </div>
             ) : (
-              <div className="space-y-2">
+              <div className="divide-y divide-border/20 border-t border-border/20">
                 {shippingMethods.map(m => {
                   const cost = subtotal >= freeThreshold || (m.type === 'free_threshold' && m.free_threshold && subtotal >= m.free_threshold) ? 0 : m.price;
+                  const selected = selectedShipping?.id === m.id;
                   return (
-                    <label key={m.id} className={cn('flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-colors',
-                      selectedShipping?.id === m.id ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40')}>
-                      <input type="radio" name="shipping" value={m.id} checked={selectedShipping?.id === m.id}
+                    <label key={m.id} className="flex items-center gap-3 py-4 cursor-pointer">
+                      <input type="radio" name="shipping" value={m.id} checked={selected}
                         onChange={() => setSelectedShipping(m)} className="accent-primary" />
                       <div className="flex-1">
-                        <p className="text-sm font-semibold text-foreground">{m.name}</p>
+                        <p className={cn('text-sm', selected ? 'font-semibold text-foreground' : 'font-medium text-foreground/70')}>{m.name}</p>
                         {m.estimated_days_min != null && <p className="text-xs text-muted-foreground">{m.estimated_days_min}–{m.estimated_days_max} días hábiles</p>}
                       </div>
-                      <span className={cn('text-sm font-bold', cost === 0 ? 'text-green-500' : 'text-foreground')}>
+                      <span className={cn('text-sm font-bold', cost === 0 ? 'text-green-500' : selected ? 'text-primary' : 'text-foreground/70')}>
                         {cost === 0 ? 'Gratis' : fmt(cost)}
                       </span>
                     </label>
                   );
                 })}
-                {shippingMethods.length === 0 && <p className="text-sm text-muted-foreground text-center py-2">El costo de envío se calculará al hacer checkout</p>}
+                {shippingMethods.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">El costo de envío se calculará al hacer checkout</p>}
               </div>
             )}
           </div>
         </div>
 
         {/* ── Order Summary ── */}
-        <div>
-          <div className="bg-card border border-border rounded-xl p-5 space-y-4 sticky top-[73px]">
+        <div className="lg:col-span-2 lg:pl-12 lg:border-l lg:border-border/20">
+          <div className="lg:sticky lg:top-24 space-y-5">
             <h2 className="text-base font-bold text-foreground">Resumen del pedido</h2>
 
             {/* Smart coupons */}
             {availableCoupons.length > 0 && !coupon && (
-              <div className="space-y-2 bg-amber-500/8 border border-amber-500/20 rounded-xl p-3">
+              <div className="space-y-2">
                 <p className="text-xs font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
                   <Tag className="w-3.5 h-3.5" /> Cupones disponibles
                 </p>
@@ -223,7 +295,7 @@ export default function CartPage() {
                   {availableCoupons.map(c => (
                     <button key={c.code}
                       onClick={() => { setCouponCode(c.code); applyCoupon(c.code); }}
-                      className="flex items-center gap-1 px-2.5 py-1 bg-amber-500/15 border border-amber-500/25 rounded-lg text-xs font-bold text-amber-700 dark:text-amber-400 hover:bg-amber-500/25 transition-colors">
+                      className="flex items-center gap-1 px-2.5 py-1 border border-amber-500/20 rounded-lg text-xs font-bold text-amber-700 dark:text-amber-400">
                       {c.code} <span className="opacity-70">{c.type === 'percentage' ? `-${c.value}%` : `-S/${c.value}`}</span>
                     </button>
                   ))}
@@ -239,25 +311,25 @@ export default function CartPage() {
                   <input value={couponCode}
                     onChange={e => { setCouponCode(e.target.value.toUpperCase()); setCouponError(''); }}
                     placeholder="Código de cupón"
-                    className="w-full pl-9 pr-3 py-2.5 bg-muted border border-border rounded-xl text-sm outline-none focus:border-primary"
+                    className="w-full pl-9 pr-3 py-2.5 bg-muted/30 border border-border/40 rounded-lg text-sm text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/20"
                     onKeyDown={e => e.key === 'Enter' && applyCoupon()} />
                 </div>
                 <button onClick={() => applyCoupon()} disabled={checkingCoupon}
-                  className="px-4 py-2.5 bg-muted border border-border rounded-xl text-sm font-semibold hover:bg-muted/80 transition-colors disabled:opacity-50">
+                  className="px-4 py-2.5 border border-border/40 rounded-lg text-sm font-semibold disabled:opacity-50">
                   {checkingCoupon ? '...' : 'Aplicar'}
                 </button>
               </div>
               {couponError && <p className="text-xs text-red-500 mt-1">{couponError}</p>}
               {coupon && (
-                <div className="flex items-center gap-2 mt-2 bg-green-500/10 text-green-600 text-xs font-semibold px-3 py-2 rounded-lg">
+                <div className="flex items-center gap-2 mt-2 text-green-600 text-xs font-semibold px-1 py-1">
                   <CheckCircle className="w-3.5 h-3.5" /> {coupon.code}: -{fmt(discount)}
-                  <button onClick={() => { setCoupon(null); setCouponCode(''); }} className="ml-auto text-muted-foreground hover:text-foreground"><X className="w-3 h-3" /></button>
+                  <button onClick={() => { setCoupon(null); setCouponCode(''); }} className="ml-auto text-muted-foreground"><X className="w-3 h-3" /></button>
                 </div>
               )}
             </div>
 
             {/* Breakdown */}
-            <div className="space-y-2 text-sm border-t border-border pt-3">
+            <div className="space-y-2 text-sm border-t border-border/20 pt-4">
               <div className="flex justify-between text-muted-foreground">
                 <span>Subtotal ({itemCount} art.)</span>
                 <span>{fmt(subtotal)}</span>
@@ -278,18 +350,18 @@ export default function CartPage() {
                 <span>IGV incluido (18%)</span>
                 <span>{fmt(igv)}</span>
               </div>
-              <div className="flex justify-between font-bold text-foreground text-base border-t border-border pt-2">
+              <div className="flex justify-between font-bold text-foreground text-base border-t border-border/20 pt-3">
                 <span>Total estimado</span>
                 <span>{fmt(total)}</span>
               </div>
             </div>
 
             <button onClick={() => navigate('/checkout')}
-              className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground py-4 rounded-xl font-bold text-base hover:bg-primary/90 active:scale-[0.98] transition-all shadow-lg shadow-primary/20">
+              className="w-full flex items-center justify-center gap-2 bg-primary text-white py-4 rounded-lg font-bold text-base">
               Finalizar compra <ArrowRight className="w-5 h-5" />
             </button>
             <button onClick={() => navigate('/tienda')}
-              className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors">
+              className="w-full text-center text-sm text-muted-foreground">
               ← Seguir comprando
             </button>
           </div>
