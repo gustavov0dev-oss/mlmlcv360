@@ -245,17 +245,22 @@ export default function NosotrosAdminPage() {
   // ── Generic reorder ─────────────────────────────────────────────────────────────
   const handleDrop = async (kind: 'founder' | 'timeline' | 'infra' | 'value', targetId: string) => {
     if (!dragId || dragId === targetId) { setDragId(null); setDragOverId(null); return; }
-    const list = kind === 'founder' ? founders : kind === 'timeline' ? timeline : kind === 'infra' ? infra : values;
-    const setFn = kind === 'founder' ? setFounders : kind === 'timeline' ? setTimeline : kind === 'infra' ? setInfra : setValues;
+    const reorder = <T extends { id: string; sort_order: number }>(list: T[], setList: (items: T[]) => void) => {
+      const reordered = [...list];
+      const fromIdx = reordered.findIndex(x => x.id === dragId);
+      const toIdx = reordered.findIndex(x => x.id === targetId);
+      if (fromIdx < 0 || toIdx < 0) return [];
+      const [moved] = reordered.splice(fromIdx, 1);
+      reordered.splice(toIdx, 0, moved);
+      const updated = reordered.map((x, i) => ({ ...x, sort_order: i }));
+      setList(updated);
+      return updated;
+    };
+    const updated = kind === 'founder' ? reorder(founders, setFounders)
+      : kind === 'timeline' ? reorder(timeline, setTimeline)
+      : kind === 'infra' ? reorder(infra, setInfra)
+      : reorder(values, setValues);
     const table = kind === 'founder' ? 'about_founders' : kind === 'timeline' ? 'about_timeline' : kind === 'infra' ? 'about_infrastructure' : 'about_values';
-
-    const reordered = [...list];
-    const fromIdx = reordered.findIndex(x => x.id === dragId);
-    const toIdx = reordered.findIndex(x => x.id === targetId);
-    const [moved] = reordered.splice(fromIdx, 1);
-    reordered.splice(toIdx, 0, moved);
-    const updated = reordered.map((x, i) => ({ ...x, sort_order: i }));
-    setFn(updated);
     setDragId(null);
     setDragOverId(null);
     await Promise.all(updated.map(x => database.update(table, x.id, { sort_order: x.sort_order })));
