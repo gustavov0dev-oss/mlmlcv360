@@ -11,46 +11,11 @@ import {
   Users, Clock, Server, Target, FileText, Lock, Image as ImageIcon,
 } from 'lucide-react';
 
-// ── Types ──────────────────────────────────────────────────────────────────────
-interface Founder {
-  id: string;
-  name: string;
-  role: string;
-  bio: string;
-  image_url: string;
-  sort_order: number;
-  is_active: boolean;
-}
-
-interface TimelineItem {
-  id: string;
-  year: string;
-  title: string;
-  description: string;
-  icon: string;
-  sort_order: number;
-  is_active: boolean;
-}
-
-interface InfraItem {
-  id: string;
-  title: string;
-  description: string;
-  icon: string;
-  sort_order: number;
-  is_active: boolean;
-}
-
-interface ValueItem {
-  id: string;
-  label: string;
-  text: string;
-  icon: string;
-  sort_order: number;
-  is_active: boolean;
-}
-
-type Tab = 'hero' | 'values' | 'timeline' | 'infrastructure' | 'founders';
+import { useConfig } from '@/store/configStore';
+import { Link } from '@/lib/router';
+import { supabase } from '@/lib/backend/client';
+import { aboutFields, resolveAboutConfig, safeAboutUrl, reorderAboutItems, type AboutItem, type AboutTab as Tab, type Founder, type TimelineItem, type InfraItem, type ValueItem, type AboutField } from '@/lib/aboutContent';
+import { ABOUT_ICON_OPTIONS, AboutIcon } from '@/components/landing/AboutIcon';
 
 const TABS: { id: Tab; label: string; icon: typeof Users }[] = [
   { id: 'hero', label: 'Hero', icon: FileText },
@@ -58,14 +23,7 @@ const TABS: { id: Tab; label: string; icon: typeof Users }[] = [
   { id: 'timeline', label: 'Historia', icon: Clock },
   { id: 'infrastructure', label: 'Infraestructura', icon: Server },
   { id: 'founders', label: 'Fundadores', icon: Users },
-];
-
-// ── Icon picker options ─────────────────────────────────────────────────────────
-const ICON_OPTIONS = [
-  'Rocket', 'TrendingUp', 'Globe', 'Building2', 'Award', 'Target',
-  'HeartHandshake', 'Cloud', 'Shield', 'Database', 'Cpu', 'Lock',
-  'Zap', 'Star', 'Users', 'Sparkles', 'Briefcase', 'Home',
-  'GraduationCap', 'Headphones', 'Lightbulb', 'Compass', 'Flag', 'Gift',
+  { id: 'legal', label: 'Información legal', icon: FileText },
 ];
 
 // ── Image Input (URL or file upload, same pattern as testimonials) ──────────────
@@ -137,11 +95,11 @@ function ImageInput({ value, onChange, aspect = 'square' }: { value: string; onC
 function IconPicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   return (
     <div className="flex flex-wrap gap-1.5">
-      {ICON_OPTIONS.map(icon => (
+      {ABOUT_ICON_OPTIONS.map(icon => (
         <button key={icon} type="button" onClick={() => onChange(icon)}
           className={cn('px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors border',
             value === icon ? 'border-primary bg-primary/10 text-primary' : 'border-border text-muted-foreground hover:text-foreground hover:border-muted-foreground/40')}>
-          {icon}
+          <AboutIcon name={icon} className="w-3.5 h-3.5 inline-block mr-1.5" />{icon}
         </button>
       ))}
     </div>
@@ -151,7 +109,7 @@ function IconPicker({ value, onChange }: { value: string; onChange: (v: string) 
 // ── Toggle Switch ────────────────────────────────────────────────────────────────
 function ToggleSwitch({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
   return (
-    <button type="button" onClick={() => onChange(!checked)}
+    <button type="button" role="switch" aria-checked={checked} aria-label="Visible en la página" onClick={() => onChange(!checked)}
       className={cn('w-11 h-6 rounded-full relative transition-colors shrink-0', checked ? 'bg-primary' : 'bg-muted-foreground/30')}>
       <div className={cn('w-4 h-4 bg-white rounded-full absolute top-1 transition-transform', checked ? 'translate-x-6' : 'translate-x-1')} />
     </button>
@@ -171,10 +129,15 @@ function DragHandle() {
 export default function NosotrosAdminPage() {
   const { user } = useAuthStore();
   const database = useDatabase();
+  const { company, refresh } = useConfig();
+  const fields = aboutFields(company.company_name || 'MLM 360');
+  const [loadError, setLoadError] = useState(false);
+  const [busy, setBusy] = useState(false);
   const [tab, setTab] = useState<Tab>('hero');
   const [loading, setLoading] = useState(true);
 
   // Hero config
+  const dirtyFields = useRef(new Set<string>());
   const [heroConfig, setHeroConfig] = useState<Record<string, string>>({});
   const [savingHero, setSavingHero] = useState(false);
 
@@ -206,165 +169,140 @@ export default function NosotrosAdminPage() {
   const isAdmin = user?.role === 'super_admin' || user?.role === 'admin';
 
   const fetchAll = useCallback(async () => {
+    if (!isAdmin) return;
     setLoading(true);
-    const [heroRes, fRes, tRes, iRes, vRes] = await Promise.all([
-      database.select<{ key: string; value: string }>('system_config', {
-        filter: [{ column: 'key', operator: 'in', value: ['about_hero_badge', 'about_hero_title', 'about_hero_subtitle', 'about_hero_description'] }],
-      }),
-      database.select<Founder>('about_founders', { order: { column: 'sort_order' } }),
-      database.select<TimelineItem>('about_timeline', { order: { column: 'sort_order' } }),
-      database.select<InfraItem>('about_infrastructure', { order: { column: 'sort_order' } }),
-      database.select<ValueItem>('about_values', { order: { column: 'sort_order' } }),
-    ]);
-    const heroMap: Record<string, string> = {};
-    (heroRes.data as any[])?.forEach((r: any) => { heroMap[r.key] = r.value; });
-    setHeroConfig(heroMap);
-    setFounders((fRes.data as Founder[]) || []);
-    setTimeline((tRes.data as TimelineItem[]) || []);
-    setInfra((iRes.data as InfraItem[]) || []);
-    setValues((vRes.data as ValueItem[]) || []);
-    setLoading(false);
-  }, [database]);
-
-  useEffect(() => { fetchAll(); }, [fetchAll]);
-
-  // ── Hero save ──────────────────────────────────────────────────────────────────
-  const saveHero = async () => {
-    setSavingHero(true);
-    const keys = ['about_hero_badge', 'about_hero_title', 'about_hero_subtitle', 'about_hero_description'];
-    for (const key of keys) {
-      await database.upsert('system_config', {
-        key, value: heroConfig[key] ?? '', category: 'general',
-        updated_at: new Date().toISOString(),
-      }, 'key');
+    setLoadError(false);
+    try {
+      const configKeys = Object.values(aboutFields()).flat().map(field => field.key);
+      const [heroRes, fRes, tRes, iRes, vRes] = await Promise.all([
+        database.select<{ key: string; value: string }>('system_config', { filter: { key: [...configKeys, 'company_name'] } }),
+        database.select<Founder>('about_founders', { order: [{ column: 'sort_order' }, { column: 'id' }] }),
+        database.select<TimelineItem>('about_timeline', { order: [{ column: 'sort_order' }, { column: 'id' }] }),
+        database.select<InfraItem>('about_infrastructure', { order: [{ column: 'sort_order' }, { column: 'id' }] }),
+        database.select<ValueItem>('about_values', { order: [{ column: 'sort_order' }, { column: 'id' }] }),
+      ]);
+      if ([heroRes, fRes, tRes, iRes, vRes].some(result => result.error || !Array.isArray(result.data))) throw new Error('load');
+      const heroMap = Object.fromEntries((heroRes.data as { key: string; value: string }[]).map(row => [row.key, row.value]));
+      setHeroConfig(previous => ({ ...resolveAboutConfig(heroMap), ...Object.fromEntries([...dirtyFields.current].map(key => [key, previous[key]])) }));
+      setFounders(fRes.data as Founder[]);
+      setTimeline(tRes.data as TimelineItem[]);
+      setInfra(iRes.data as InfraItem[]);
+      setValues(vRes.data as ValueItem[]);
+    } catch {
+      setLoadError(true);
+      toast.error('No se pudo cargar el contenido. Vuelve a intentarlo.');
+    } finally {
+      setLoading(false);
     }
-    toast.success('Texto del hero guardado');
-    setSavingHero(false);
+  }, [database, isAdmin]);
+
+  useEffect(() => { void fetchAll(); }, [fetchAll]);
+
+  const saveText = async () => {
+    if (savingHero || busy || loading || loadError || !isAdmin) return;
+    const currentFields = fields[tab];
+    if (tab === 'hero') {
+      for (const button of ['primary', 'secondary']) {
+        if (heroConfig[`about_${button}_label`]?.trim() && !safeAboutUrl(heroConfig[`about_${button}_url`] || '')) {
+          toast.error('Revisa los enlaces de los botones: usa una ruta / o una dirección http(s).');
+          return;
+        }
+      }
+    }
+    setSavingHero(true);
+    try {
+      // A single request saves each section atomically; no partial success messages.
+      const { data, error } = await supabase.from('system_config').upsert(currentFields.map(({ key }) => ({
+        key, value: heroConfig[key] ?? '', updated_at: new Date().toISOString(),
+      })), { onConflict: 'key' }).select('key');
+      if (error || data?.length !== currentFields.length) throw new Error(error?.message || 'save');
+      currentFields.forEach(field => dirtyFields.current.delete(field.key));
+      await refresh();
+      toast.success('Textos guardados. Ya están disponibles en Nosotros.');
+    } catch {
+      toast.error('No se pudieron guardar los textos. Tus cambios siguen en el formulario.');
+    } finally {
+      setSavingHero(false);
+    }
   };
 
-  // ── Generic reorder ─────────────────────────────────────────────────────────────
-  const handleDrop = async (kind: 'founder' | 'timeline' | 'infra' | 'value', targetId: string) => {
-    if (!dragId || dragId === targetId) { setDragId(null); setDragOverId(null); return; }
-    const reorder = <T extends { id: string; sort_order: number }>(list: T[], setList: (items: T[]) => void) => {
-      const reordered = [...list];
-      const fromIdx = reordered.findIndex(x => x.id === dragId);
-      const toIdx = reordered.findIndex(x => x.id === targetId);
-      if (fromIdx < 0 || toIdx < 0) return [];
-      const [moved] = reordered.splice(fromIdx, 1);
-      reordered.splice(toIdx, 0, moved);
-      const updated = reordered.map((x, i) => ({ ...x, sort_order: i }));
-      setList(updated);
-      return updated;
-    };
-    const updated = kind === 'founder' ? reorder(founders, setFounders)
-      : kind === 'timeline' ? reorder(timeline, setTimeline)
-      : kind === 'infra' ? reorder(infra, setInfra)
-      : reorder(values, setValues);
-    const table = kind === 'founder' ? 'about_founders' : kind === 'timeline' ? 'about_timeline' : kind === 'infra' ? 'about_infrastructure' : 'about_values';
+  type Kind = 'founder' | 'timeline' | 'infra' | 'value';
+  const tableFor = (kind: Kind) => ({ founder: 'about_founders', timeline: 'about_timeline', infra: 'about_infrastructure', value: 'about_values' })[kind];
+
+  const handleDrop = async (kind: Kind, targetId: string) => {
+    if (busy || !dragId || dragId === targetId) { setDragId(null); setDragOverId(null); return; }
+    const list: AboutItem[] = kind === 'founder' ? founders : kind === 'timeline' ? timeline : kind === 'infra' ? infra : values;
+    const updated = reorderAboutItems(list, dragId, targetId);
     setDragId(null);
     setDragOverId(null);
-    await Promise.all(updated.map(x => database.update(table, x.id, { sort_order: x.sort_order })));
-    toast.success('Orden guardado');
+    if (updated === list) return;
+    setBusy(true);
+    try {
+      const results = await Promise.all(updated.map(item => database.update(tableFor(kind), item.id, { sort_order: item.sort_order })));
+      if (results.some(result => result.error || !result.data)) throw new Error('reorder');
+      toast.success('Orden guardado');
+    } catch {
+      toast.error('No se pudo guardar todo el orden. Se recargará el orden disponible.');
+    } finally {
+      await fetchAll();
+      setBusy(false);
+    }
   };
 
-  // ── Generic toggle active ───────────────────────────────────────────────────────
-  const toggleActive = async (kind: 'founder' | 'timeline' | 'infra' | 'value', item: any) => {
-    const table = kind === 'founder' ? 'about_founders' : kind === 'timeline' ? 'about_timeline' : kind === 'infra' ? 'about_infrastructure' : 'about_values';
-    const setFn = kind === 'founder' ? setFounders : kind === 'timeline' ? setTimeline : kind === 'infra' ? setInfra : setValues;
-    await database.update(table, item.id, { is_active: !item.is_active, updated_at: new Date().toISOString() });
-    setFn((prev: any[]) => prev.map(x => x.id === item.id ? { ...x, is_active: !item.is_active } : x));
-    toast.success(item.is_active ? 'Desactivado' : 'Activado');
+  const toggleActive = async (kind: Kind, item: AboutItem) => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      const result = await database.update(tableFor(kind), item.id, { is_active: !item.is_active, updated_at: new Date().toISOString() });
+      if (result.error || !result.data) throw new Error(result.error || 'update');
+      toast.success(item.is_active ? 'Oculto en la página' : 'Visible en la página');
+      await fetchAll();
+    } catch {
+      toast.error('No se pudo cambiar la visibilidad. Inténtalo de nuevo.');
+    } finally {
+      setBusy(false);
+    }
   };
 
-  // ── Generic delete ───────────────────────────────────────────────────────────────
   const handleDelete = async () => {
-    if (!deleteTarget) return;
-    const table = deleteTarget.kind === 'founder' ? 'about_founders' : deleteTarget.kind === 'timeline' ? 'about_timeline' : deleteTarget.kind === 'infra' ? 'about_infrastructure' : 'about_values';
-    const setFn = deleteTarget.kind === 'founder' ? setFounders : deleteTarget.kind === 'timeline' ? setTimeline : deleteTarget.kind === 'infra' ? setInfra : setValues;
+    if (!deleteTarget || deletingId) return;
     setDeletingId(deleteTarget.id);
     try {
-      await database.delete(table, deleteTarget.id);
-      setFn((prev: any[]) => prev.filter(x => x.id !== deleteTarget.id));
+      const { data, error } = await supabase.from(tableFor(deleteTarget.kind)).delete().eq('id', deleteTarget.id).select('id').single();
+      if (error || !data) throw new Error(error?.message || 'delete');
       toast.success('Eliminado correctamente');
+      setDeleteTarget(null);
+      await fetchAll();
     } catch {
-      toast.error('Error al eliminar');
+      toast.error('No se pudo eliminar. Inténtalo de nuevo.');
     } finally {
       setDeletingId(null);
-      setDeleteTarget(null);
     }
   };
 
-  // ── Founder save ────────────────────────────────────────────────────────────────
-  const saveFounder = async (data: Partial<Founder> & { id?: string }) => {
+  const saveItem = async <T extends AboutItem,>(kind: Kind, data: Partial<T>, list: T[], close: () => void) => {
+    if (saving) return;
     setSaving(true);
-    const { id, ...fields } = data;
-    const payload = { ...fields, updated_at: new Date().toISOString() };
-    if (id) {
-      await database.update('about_founders', id, payload);
-      toast.success('Fundador actualizado');
-    } else {
-      await database.insert('about_founders', { ...payload, sort_order: founders.length });
-      toast.success('Fundador creado');
+    try {
+      const { id, ...fields } = data;
+      const payload = { ...fields, updated_at: new Date().toISOString() };
+      const result = id
+        ? await database.update(tableFor(kind), id, payload)
+        : await database.insert(tableFor(kind), { ...payload, sort_order: Math.max(-1, ...list.map(item => item.sort_order)) + 1 });
+      if (result.error || !result.data) throw new Error(result.error || 'save');
+      toast.success(id ? 'Cambios guardados' : 'Contenido creado');
+      close();
+      await fetchAll();
+    } catch {
+      toast.error('No se pudo guardar. Tus cambios siguen en el formulario.');
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
-    setShowFounderForm(false);
-    setEditingFounder(null);
-    fetchAll();
   };
-
-  // ── Timeline save ───────────────────────────────────────────────────────────────
-  const saveTimeline = async (data: Partial<TimelineItem> & { id?: string }) => {
-    setSaving(true);
-    const { id, ...fields } = data;
-    const payload = { ...fields, updated_at: new Date().toISOString() };
-    if (id) {
-      await database.update('about_timeline', id, payload);
-      toast.success('Hit actualizado');
-    } else {
-      await database.insert('about_timeline', { ...payload, sort_order: timeline.length });
-      toast.success('Hit creado');
-    }
-    setSaving(false);
-    setShowTimelineForm(false);
-    setEditingTimeline(null);
-    fetchAll();
-  };
-
-  // ── Infra save ──────────────────────────────────────────────────────────────────
-  const saveInfra = async (data: Partial<InfraItem> & { id?: string }) => {
-    setSaving(true);
-    const { id, ...fields } = data;
-    const payload = { ...fields, updated_at: new Date().toISOString() };
-    if (id) {
-      await database.update('about_infrastructure', id, payload);
-      toast.success('Caracteristica actualizada');
-    } else {
-      await database.insert('about_infrastructure', { ...payload, sort_order: infra.length });
-      toast.success('Caracteristica creada');
-    }
-    setSaving(false);
-    setShowInfraForm(false);
-    setEditingInfra(null);
-    fetchAll();
-  };
-
-  // ── Value save ──────────────────────────────────────────────────────────────────
-  const saveValue = async (data: Partial<ValueItem> & { id?: string }) => {
-    setSaving(true);
-    const { id, ...fields } = data;
-    const payload = { ...fields, updated_at: new Date().toISOString() };
-    if (id) {
-      await database.update('about_values', id, payload);
-      toast.success('Valor actualizado');
-    } else {
-      await database.insert('about_values', { ...payload, sort_order: values.length });
-      toast.success('Valor creado');
-    }
-    setSaving(false);
-    setShowValueForm(false);
-    setEditingValue(null);
-    fetchAll();
-  };
+  const saveFounder = (data: Partial<Founder>) => saveItem('founder', data, founders, () => { setShowFounderForm(false); setEditingFounder(null); });
+  const saveTimeline = (data: Partial<TimelineItem>) => saveItem('timeline', data, timeline, () => { setShowTimelineForm(false); setEditingTimeline(null); });
+  const saveInfra = (data: Partial<InfraItem>) => saveItem('infra', data, infra, () => { setShowInfraForm(false); setEditingInfra(null); });
+  const saveValue = (data: Partial<ValueItem>) => saveItem('value', data, values, () => { setShowValueForm(false); setEditingValue(null); });
 
   if (!isAdmin) {
     return (
@@ -383,17 +321,19 @@ export default function NosotrosAdminPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Pagina Nosotros</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Administra todo el contenido de la pagina "Nosotros" — texto, valores, historia, infraestructura y fundadores.</p>
+          <p className="text-sm text-muted-foreground mt-0.5">Administra todo el contenido de la pagina "Nosotros" — textos, botones, valores, historia, infraestructura, fundadores y datos legales.</p>
         </div>
-        <button onClick={fetchAll} className="flex items-center gap-2 px-3 py-2 border border-border rounded-xl text-sm hover:bg-muted transition-colors shrink-0">
+        <button disabled={loading || saving || savingHero || busy} onClick={fetchAll} className="flex items-center gap-2 px-3 py-2 border border-border rounded-xl text-sm hover:bg-muted transition-colors shrink-0">
           <RefreshCw className={cn('w-4 h-4', loading && 'animate-spin')} /> Actualizar
         </button>
       </div>
 
+      <Link to="/nosotros" className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline">Ver página Nosotros</Link>
+
       {/* Tabs */}
       <div className="flex gap-1 p-1 bg-muted rounded-xl w-full overflow-x-auto scrollbar-hide">
         {TABS.map(t => (
-          <button key={t.id} onClick={() => setTab(t.id)}
+          <button key={t.id} disabled={savingHero || saving || busy} onClick={() => setTab(t.id)}
             className={cn('flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors flex-shrink-0',
               tab === t.id ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground')}>
             <t.icon className="w-4 h-4" />
@@ -402,62 +342,15 @@ export default function NosotrosAdminPage() {
         ))}
       </div>
 
-      {/* ── HERO TAB ─────────────────────────────────────────────────────────────── */}
-      {tab === 'hero' && (
-        <div className="bg-card border border-border rounded-xl p-5 sm:p-6 space-y-5">
-          <div>
-            <h3 className="text-sm font-bold text-foreground mb-1">Texto del Hero</h3>
-            <p className="text-xs text-muted-foreground">El texto principal que ven los visitantes al entrar a la pagina "Nosotros".</p>
-          </div>
-
-          {loading ? (
-            <div className="space-y-4">
-              {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-20 w-full rounded-lg" />)}
-            </div>
-          ) : (
-            <>
-              <div>
-                <label className="block text-xs font-semibold text-foreground mb-1.5">Badge (etiqueta superior)</label>
-                <input value={heroConfig.about_hero_badge || ''} onChange={e => setHeroConfig(p => ({ ...p, about_hero_badge: e.target.value }))}
-                  placeholder="Desde Lima para Latinoamerica"
-                  className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors" />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-foreground mb-1.5">Titulo principal</label>
-                <input value={heroConfig.about_hero_title || ''} onChange={e => setHeroConfig(p => ({ ...p, about_hero_title: e.target.value }))}
-                  placeholder="Empoderamos a emprendedores latinos"
-                  className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors" />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-foreground mb-1.5">Subtitulo</label>
-                <textarea value={heroConfig.about_hero_subtitle || ''} onChange={e => setHeroConfig(p => ({ ...p, about_hero_subtitle: e.target.value }))}
-                  rows={2} placeholder="Construimos tecnologia..."
-                  className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors resize-none" />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-foreground mb-1.5">Descripcion (parrafo extendido)</label>
-                <textarea value={heroConfig.about_hero_description || ''} onChange={e => setHeroConfig(p => ({ ...p, about_hero_description: e.target.value }))}
-                  rows={4} placeholder="Descripcion larga de la empresa..."
-                  className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors resize-none" />
-              </div>
-              <div className="flex justify-end pt-2 border-t border-border">
-                <button onClick={saveHero} disabled={savingHero}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-semibold hover:bg-primary/90 disabled:opacity-50 transition-colors">
-                  {savingHero ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                  Guardar texto
-                </button>
-              </div>
-            </>
-          )}
-        </div>
-      )}
+      {loadError && <div role="alert" className="border border-destructive/30 rounded-xl p-4 text-sm text-destructive">No se pudo cargar el contenido. Pulsa Actualizar para volver a intentarlo.</div>}
+      {!loadError && fields[tab].length > 0 && <AboutTextEditor fields={fields[tab]} values={heroConfig} onChange={(key, value) => { dirtyFields.current.add(key); setHeroConfig(previous => ({ ...previous, [key]: value })); }} onSave={saveText} loading={loading} saving={savingHero || busy} />}
 
       {/* ── VALUES TAB ───────────────────────────────────────────────────────────── */}
-      {tab === 'values' && (
+      {!loadError && tab === 'values' && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">{values.filter(v => v.is_active).length} activos · {values.length} total</p>
-            <button onClick={() => { setEditingValue(null); setShowValueForm(true); }}
+            <button aria-label="Editar contenido" disabled={busy || loading || saving || savingHero} onClick={() => { setEditingValue(null); setShowValueForm(true); }}
               className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:bg-primary/90 transition-colors">
               <Plus className="w-4 h-4" /> Nuevo valor
             </button>
@@ -472,7 +365,7 @@ export default function NosotrosAdminPage() {
               <ReorderHint />
               <div className="divide-y divide-border/50">
                 {values.map(v => (
-                  <div key={v.id} draggable onDragStart={() => setDragId(v.id)}
+                  <div key={v.id} draggable={!busy && !savingHero} onDragEnd={() => { setDragId(null); setDragOverId(null); }} onDragStart={() => setDragId(v.id)}
                     onDragOver={e => { e.preventDefault(); if (v.id !== dragId) setDragOverId(v.id); }}
                     onDrop={() => handleDrop('value', v.id)}
                     className={cn('flex items-center gap-3 px-4 py-3.5 transition-all select-none',
@@ -488,13 +381,13 @@ export default function NosotrosAdminPage() {
                       <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">{v.text}</p>
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
-                      <button onClick={() => toggleActive('value', v)} className={cn('p-2 rounded-lg transition-colors', v.is_active ? 'text-green-500 hover:bg-emerald-500/10' : 'text-muted-foreground hover:bg-muted')} title={v.is_active ? 'Desactivar' : 'Activar'}>
+                      <button aria-label="Cambiar visibilidad" disabled={busy || loading || saving || savingHero} onClick={() => toggleActive('value', v)} className={cn('p-2 rounded-lg transition-colors', v.is_active ? 'text-green-500 hover:bg-emerald-500/10' : 'text-muted-foreground hover:bg-muted')} title={v.is_active ? 'Desactivar' : 'Activar'}>
                         {v.is_active ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
                       </button>
-                      <button onClick={() => { setEditingValue(v); setShowValueForm(true); }} className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-primary transition-colors" title="Editar">
+                      <button aria-label="Editar contenido" disabled={busy || loading || saving || savingHero} onClick={() => { setEditingValue(v); setShowValueForm(true); }} className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-primary transition-colors" title="Editar">
                         <Pencil className="w-4 h-4" />
                       </button>
-                      <button onClick={() => setDeleteTarget({ id: v.id, name: v.label, kind: 'value' })} className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-destructive transition-colors" title="Eliminar">
+                      <button aria-label="Eliminar contenido" disabled={busy || loading || saving || savingHero} onClick={() => setDeleteTarget({ id: v.id, name: v.label, kind: 'value' })} className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-destructive transition-colors" title="Eliminar">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
@@ -507,13 +400,13 @@ export default function NosotrosAdminPage() {
       )}
 
       {/* ── TIMELINE TAB ──────────────────────────────────────────────────────────── */}
-      {tab === 'timeline' && (
+      {!loadError && tab === 'timeline' && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">{timeline.filter(t => t.is_active).length} activos · {timeline.length} total</p>
-            <button onClick={() => { setEditingTimeline(null); setShowTimelineForm(true); }}
+            <button aria-label="Editar contenido" disabled={busy || loading || saving || savingHero} onClick={() => { setEditingTimeline(null); setShowTimelineForm(true); }}
               className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:bg-primary/90 transition-colors">
-              <Plus className="w-4 h-4" /> Nuevo hit
+              <Plus className="w-4 h-4" /> Nuevo hito
             </button>
           </div>
 
@@ -526,7 +419,7 @@ export default function NosotrosAdminPage() {
               <ReorderHint />
               <div className="divide-y divide-border/50">
                 {timeline.map(t => (
-                  <div key={t.id} draggable onDragStart={() => setDragId(t.id)}
+                  <div key={t.id} draggable={!busy && !savingHero} onDragEnd={() => { setDragId(null); setDragOverId(null); }} onDragStart={() => setDragId(t.id)}
                     onDragOver={e => { e.preventDefault(); if (t.id !== dragId) setDragOverId(t.id); }}
                     onDrop={() => handleDrop('timeline', t.id)}
                     className={cn('flex items-center gap-3 px-4 py-3.5 transition-all select-none',
@@ -543,13 +436,13 @@ export default function NosotrosAdminPage() {
                       <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">{t.description}</p>
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
-                      <button onClick={() => toggleActive('timeline', t)} className={cn('p-2 rounded-lg transition-colors', t.is_active ? 'text-green-500 hover:bg-emerald-500/10' : 'text-muted-foreground hover:bg-muted')}>
+                      <button aria-label="Cambiar visibilidad" disabled={busy || loading || saving || savingHero} onClick={() => toggleActive('timeline', t)} className={cn('p-2 rounded-lg transition-colors', t.is_active ? 'text-green-500 hover:bg-emerald-500/10' : 'text-muted-foreground hover:bg-muted')}>
                         {t.is_active ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
                       </button>
-                      <button onClick={() => { setEditingTimeline(t); setShowTimelineForm(true); }} className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-primary transition-colors">
+                      <button aria-label="Editar contenido" disabled={busy || loading || saving || savingHero} onClick={() => { setEditingTimeline(t); setShowTimelineForm(true); }} className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-primary transition-colors">
                         <Pencil className="w-4 h-4" />
                       </button>
-                      <button onClick={() => setDeleteTarget({ id: t.id, name: t.title, kind: 'timeline' })} className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-destructive transition-colors">
+                      <button aria-label="Eliminar contenido" disabled={busy || loading || saving || savingHero} onClick={() => setDeleteTarget({ id: t.id, name: t.title, kind: 'timeline' })} className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-destructive transition-colors">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
@@ -562,11 +455,11 @@ export default function NosotrosAdminPage() {
       )}
 
       {/* ── INFRASTRUCTURE TAB ─────────────────────────────────────────────────────── */}
-      {tab === 'infrastructure' && (
+      {!loadError && tab === 'infrastructure' && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">{infra.filter(i => i.is_active).length} activos · {infra.length} total</p>
-            <button onClick={() => { setEditingInfra(null); setShowInfraForm(true); }}
+            <button aria-label="Editar contenido" disabled={busy || loading || saving || savingHero} onClick={() => { setEditingInfra(null); setShowInfraForm(true); }}
               className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:bg-primary/90 transition-colors">
               <Plus className="w-4 h-4" /> Nueva caracteristica
             </button>
@@ -581,7 +474,7 @@ export default function NosotrosAdminPage() {
               <ReorderHint />
               <div className="divide-y divide-border/50">
                 {infra.map(i => (
-                  <div key={i.id} draggable onDragStart={() => setDragId(i.id)}
+                  <div key={i.id} draggable={!busy && !savingHero} onDragEnd={() => { setDragId(null); setDragOverId(null); }} onDragStart={() => setDragId(i.id)}
                     onDragOver={e => { e.preventDefault(); if (i.id !== dragId) setDragOverId(i.id); }}
                     onDrop={() => handleDrop('infra', i.id)}
                     className={cn('flex items-center gap-3 px-4 py-3.5 transition-all select-none',
@@ -597,13 +490,13 @@ export default function NosotrosAdminPage() {
                       <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">{i.description}</p>
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
-                      <button onClick={() => toggleActive('infra', i)} className={cn('p-2 rounded-lg transition-colors', i.is_active ? 'text-green-500 hover:bg-emerald-500/10' : 'text-muted-foreground hover:bg-muted')}>
+                      <button aria-label="Cambiar visibilidad" disabled={busy || loading || saving || savingHero} onClick={() => toggleActive('infra', i)} className={cn('p-2 rounded-lg transition-colors', i.is_active ? 'text-green-500 hover:bg-emerald-500/10' : 'text-muted-foreground hover:bg-muted')}>
                         {i.is_active ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
                       </button>
-                      <button onClick={() => { setEditingInfra(i); setShowInfraForm(true); }} className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-primary transition-colors">
+                      <button aria-label="Editar contenido" disabled={busy || loading || saving || savingHero} onClick={() => { setEditingInfra(i); setShowInfraForm(true); }} className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-primary transition-colors">
                         <Pencil className="w-4 h-4" />
                       </button>
-                      <button onClick={() => setDeleteTarget({ id: i.id, name: i.title, kind: 'infra' })} className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-destructive transition-colors">
+                      <button aria-label="Eliminar contenido" disabled={busy || loading || saving || savingHero} onClick={() => setDeleteTarget({ id: i.id, name: i.title, kind: 'infra' })} className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-destructive transition-colors">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
@@ -616,11 +509,11 @@ export default function NosotrosAdminPage() {
       )}
 
       {/* ── FOUNDERS TAB ───────────────────────────────────────────────────────────── */}
-      {tab === 'founders' && (
+      {!loadError && tab === 'founders' && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">{founders.filter(f => f.is_active).length} activos · {founders.length} total</p>
-            <button onClick={() => { setEditingFounder(null); setShowFounderForm(true); }}
+            <button aria-label="Editar contenido" disabled={busy || loading || saving || savingHero} onClick={() => { setEditingFounder(null); setShowFounderForm(true); }}
               className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:bg-primary/90 transition-colors">
               <Plus className="w-4 h-4" /> Nuevo fundador
             </button>
@@ -635,7 +528,7 @@ export default function NosotrosAdminPage() {
               <ReorderHint />
               <div className="divide-y divide-border/50">
                 {founders.map(f => (
-                  <div key={f.id} draggable onDragStart={() => setDragId(f.id)}
+                  <div key={f.id} draggable={!busy && !savingHero} onDragEnd={() => { setDragId(null); setDragOverId(null); }} onDragStart={() => setDragId(f.id)}
                     onDragOver={e => { e.preventDefault(); if (f.id !== dragId) setDragOverId(f.id); }}
                     onDrop={() => handleDrop('founder', f.id)}
                     className={cn('flex items-center gap-3 px-4 py-3.5 transition-all select-none',
@@ -656,13 +549,13 @@ export default function NosotrosAdminPage() {
                       <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">{f.bio}</p>
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
-                      <button onClick={() => toggleActive('founder', f)} className={cn('p-2 rounded-lg transition-colors', f.is_active ? 'text-green-500 hover:bg-emerald-500/10' : 'text-muted-foreground hover:bg-muted')}>
+                      <button aria-label="Cambiar visibilidad" disabled={busy || loading || saving || savingHero} onClick={() => toggleActive('founder', f)} className={cn('p-2 rounded-lg transition-colors', f.is_active ? 'text-green-500 hover:bg-emerald-500/10' : 'text-muted-foreground hover:bg-muted')}>
                         {f.is_active ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
                       </button>
-                      <button onClick={() => { setEditingFounder(f); setShowFounderForm(true); }} className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-primary transition-colors">
+                      <button aria-label="Editar contenido" disabled={busy || loading || saving || savingHero} onClick={() => { setEditingFounder(f); setShowFounderForm(true); }} className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-primary transition-colors">
                         <Pencil className="w-4 h-4" />
                       </button>
-                      <button onClick={() => setDeleteTarget({ id: f.id, name: f.name, kind: 'founder' })} className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-destructive transition-colors">
+                      <button aria-label="Eliminar contenido" disabled={busy || loading || saving || savingHero} onClick={() => setDeleteTarget({ id: f.id, name: f.name, kind: 'founder' })} className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-destructive transition-colors">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
@@ -679,7 +572,7 @@ export default function NosotrosAdminPage() {
         <FounderFormModal
           founder={editingFounder}
           onSave={saveFounder}
-          onClose={() => { setShowFounderForm(false); setEditingFounder(null); }}
+          onClose={() => { if (saving) return; setShowFounderForm(false); setEditingFounder(null); }}
           saving={saving}
         />
       )}
@@ -689,7 +582,7 @@ export default function NosotrosAdminPage() {
         <TimelineFormModal
           item={editingTimeline}
           onSave={saveTimeline}
-          onClose={() => { setShowTimelineForm(false); setEditingTimeline(null); }}
+          onClose={() => { if (saving) return; setShowTimelineForm(false); setEditingTimeline(null); }}
           saving={saving}
         />
       )}
@@ -699,7 +592,7 @@ export default function NosotrosAdminPage() {
         <InfraFormModal
           item={editingInfra}
           onSave={saveInfra}
-          onClose={() => { setShowInfraForm(false); setEditingInfra(null); }}
+          onClose={() => { if (saving) return; setShowInfraForm(false); setEditingInfra(null); }}
           saving={saving}
         />
       )}
@@ -709,7 +602,7 @@ export default function NosotrosAdminPage() {
         <ValueFormModal
           item={editingValue}
           onSave={saveValue}
-          onClose={() => { setShowValueForm(false); setEditingValue(null); }}
+          onClose={() => { if (saving) return; setShowValueForm(false); setEditingValue(null); }}
           saving={saving}
         />
       )}
@@ -841,7 +734,7 @@ function TimelineFormModal({ item, onSave, onClose, saving }: {
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="bg-card border border-border rounded-xl w-full max-w-md shadow-2xl flex flex-col max-h-[90dvh]">
         <div className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
-          <h2 className="text-base font-bold text-foreground">{item ? 'Editar hit' : 'Nuevo hit'}</h2>
+          <h2 className="text-base font-bold text-foreground">{item ? 'Editar hito' : 'Nuevo hito'}</h2>
           <button onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-muted text-muted-foreground transition-colors">
             <X className="w-4 h-4" />
           </button>
@@ -861,7 +754,7 @@ function TimelineFormModal({ item, onSave, onClose, saving }: {
           </div>
           <div>
             <label className="block text-xs font-semibold text-foreground mb-1.5">Descripcion</label>
-            <textarea value={form.description} onChange={e => set('description', e.target.value)} rows={3} placeholder="Descripcion del hit..."
+            <textarea value={form.description} onChange={e => set('description', e.target.value)} rows={3} placeholder="Descripción del hito..."
               className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors resize-none" />
           </div>
           <div>
@@ -1002,4 +895,20 @@ function ValueFormModal({ item, onSave, onClose, saving }: {
       </div>
     </div>
   );
+}
+
+function AboutTextEditor({ fields, values, onChange, onSave, loading, saving }: {
+  fields: AboutField[]; values: Record<string, string>; onChange: (key: string, value: string) => void; onSave: () => void; loading: boolean; saving: boolean;
+}) {
+  return <div className="bg-card border border-border rounded-xl p-5 sm:p-6 space-y-5">
+    <div><h3 className="text-sm font-bold text-foreground mb-1">Textos de la sección</h3><p className="text-xs text-muted-foreground">Edita el contenido manteniendo el diseño actual de la página.</p></div>
+    {loading ? <div className="space-y-4">{[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-20 w-full rounded-lg" />)}</div> : <fieldset disabled={saving} className="space-y-5">
+      {fields.map(field => <div key={field.key}>
+        <label htmlFor={field.key} className="block text-xs font-semibold text-foreground mb-1.5">{field.label}</label>
+        {field.multiline ? <textarea id={field.key} value={values[field.key] ?? ''} onChange={event => onChange(field.key, event.target.value)} rows={field.key.endsWith('description') ? 4 : 2} className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors resize-y" /> : <input id={field.key} value={values[field.key] ?? ''} onChange={event => onChange(field.key, event.target.value)} className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors" />}
+        {field.hint && <p className="text-xs text-muted-foreground mt-1.5">{field.hint}</p>}
+      </div>)}
+      <div className="flex justify-end pt-2 border-t border-border"><button onClick={onSave} disabled={saving} className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-semibold hover:bg-primary/90 disabled:opacity-50 transition-colors">{saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}Guardar textos</button></div>
+    </fieldset>}
+  </div>;
 }

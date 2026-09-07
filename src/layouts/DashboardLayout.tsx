@@ -37,6 +37,7 @@ const SocialLinksAdminPage = lazy(() => import('@/pages/admin/SocialLinksAdminPa
 const FaqAdminPage = lazy(() => import('@/pages/admin/FaqAdminPage'));
 const ComplaintsAdminPage = lazy(() => import('@/pages/admin/ComplaintsAdminPage'));
 const LegalPagesAdminPage = lazy(() => import('@/pages/admin/LegalPagesAdminPage'));
+const NosotrosAdminPage = lazy(() => import('@/pages/admin/NosotrosAdminPage'));
 const MyComplaintsPage = lazy(() => import('@/pages/dashboard/MyComplaintsPage'));
 
 function PageSkeleton() {
@@ -101,6 +102,7 @@ function DashboardContent() {
   if (pathname === '/dashboard/admin/redes-sociales') return render(SocialLinksAdminPage);
   if (pathname === '/dashboard/admin/faq') return render(FaqAdminPage);
   if (pathname === '/dashboard/admin/libro-reclamaciones') return render(ComplaintsAdminPage);
+  if (pathname === '/dashboard/admin/nosotros') return render(NosotrosAdminPage);
   if (pathname === '/dashboard/admin/paginas') return render(LegalPagesAdminPage);
   if (pathname === '/dashboard/mis-reclamos') return render(MyComplaintsPage);
 
