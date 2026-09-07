@@ -1,58 +1,60 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Mail, MapPin, Send, CircleCheck as CheckCircle, ChevronDown, Zap, Phone } from 'lucide-react';
 import { toast } from 'sonner';
 import { useConfig } from '@/store/configStore';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/lib/backend/client';
+import { contactDefaults, contactTabs, contactKey, parseContactSection, validContactMessage } from '@/lib/contactContent';
+
+function Highlight({text,mark}:{text:string;mark:string}) { const i=mark?text.indexOf(mark):-1; return i<0?<>{text}</>:<>{text.slice(0,i)}<span className="text-gradient-animated">{mark}</span>{text.slice(i+mark.length)}</>; }
 
 export default function ContactoPage() {
-  const { company } = useConfig();
+  const { company, refresh } = useConfig();
+  const content = contactDefaults(company);
+  let invalid = false;
+  for(const {id} of contactTabs) { try { content[id]=parseContactSection(company[contactKey(id)],content[id]); } catch { invalid=true; } }
+  const {hero,channels:details,form:formText,map,faq:faqText}=content;
+  const submissionId=useRef(crypto.randomUUID());
+  const submitting=useRef(false);
+  useEffect(()=>{ void refresh(); const focus=()=>{void refresh();}; window.addEventListener('focus',focus); return ()=>window.removeEventListener('focus',focus); },[refresh]);
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
-  const companyName = company.company_name || 'MLM 360';
-  const companyEmail = company.company_email || 'contacto@mlm360.pe';
-  const companyPhone = company.company_phone || '';
-  const companyAddress = company.company_address || '';
-  const tagline = company.company_tagline || '';
-
+  const companyEmail=details.text.email;
+  const companyPhone=details.text.phone;
+  const companyAddress=details.text.address;
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name || !form.email || !form.message) {
-      toast.error('Completa los campos requeridos');
-      return;
-    }
-    setLoading(true);
-    await new Promise(r => setTimeout(r, 1200));
-    setLoading(false);
-    setSent(true);
-    toast.success('Mensaje enviado correctamente');
+    if(submitting.current)return;
+    if(!validContactMessage(form)) { toast.error('Revisa el nombre, email y mensaje.'); return; }
+    submitting.current=true; setLoading(true);
+    try {
+      const {error}=await supabase.from('contact_messages').insert({id:submissionId.current,name:form.name.trim(),email:form.email.trim(),subject:form.subject.trim(),message:form.message.trim()});
+      if(error && error.code!=='23505')throw error;
+      setSent(true); toast.success(formText.text.success_title);
+    } catch { toast.error('No se pudo enviar el mensaje. Tus datos siguen en el formulario; inténtalo de nuevo.'); }
+    finally { submitting.current=false; setLoading(false); }
   };
 
   const cleanPhone = (phone: string) => phone.replace(/[^0-9]/g, '');
 
   const channels = [
-    ...(companyEmail ? [{ icon: Mail, label: 'Email', value: companyEmail, href: `mailto:${companyEmail}` }] : []),
-    ...(companyPhone ? [{ icon: Phone, label: 'Teléfono', value: companyPhone, href: `tel:${cleanPhone(companyPhone)}` }] : []),
-    ...(companyAddress ? [{ icon: MapPin, label: 'Dirección', value: companyAddress, href: '#mapa' }] : []),
+    ...(companyEmail ? [{ icon: Mail, label: details.text.email_label, value: companyEmail, href: `mailto:${companyEmail}` }] : []),
+    ...(companyPhone ? [{ icon: Phone, label: details.text.phone_label, value: companyPhone, href: `tel:${cleanPhone(companyPhone)}` }] : []),
+    ...(companyAddress ? [{ icon: MapPin, label: details.text.address_label, value: companyAddress, href: '#mapa' }] : []),
   ];
 
-  const faqs = [
-    { q: `¿Cómo creo una cuenta en ${companyName}?`, a: 'Ve a la página de registro, completa tus datos y recibirás acceso inmediato al dashboard. No necesitas tarjeta de crédito.' },
-    { q: '¿Cuánto tardan en acreditarse las comisiones?', a: 'Las comisiones se acreditan en menos de 60 segundos después de cada venta. Puedes verlas en tiempo real en tu dashboard.' },
-    { q: '¿Qué métodos de pago aceptan?', a: 'Aceptamos Yape, Plin, tarjetas de crédito y transferencias bancarias. Para retiros, puedes usar Yape, Plin o transferencia bancaria.' },
-    { q: '¿Puedo usar la plataforma desde mi celular?', a: 'Sí, la plataforma es 100% responsive. Puedes gestionar tu red, ver comisiones y realizar todas las operaciones desde tu móvil.' },
-    { q: '¿Cómo contacto a soporte?', a: 'Puedes escribirnos por email o mediante el formulario de esta página. Respondemos en menos de 24 horas.' },
-    { q: '¿Hay algún costo de permanencia?', a: 'No. Puedes empezar con una cuenta gratuita y escalar cuando tu negocio lo necesite. Sin contratos de permanencia.' },
-  ];
+  const faqs = faqText.items.filter(item=>item.is_active).map(item=>({...item,q:item.title,a:item.desc}));
 
   const faqLeft = faqs.slice(0, Math.ceil(faqs.length / 2));
   const faqRight = faqs.slice(Math.ceil(faqs.length / 2));
 
-  const mapsQuery = encodeURIComponent(companyAddress || 'Lima, Peru');
+  const mapsQuery = encodeURIComponent(map.text.query || companyAddress);
   const mapsEmbed = `https://www.google.com/maps?q=${mapsQuery}&output=embed`;
 
+  if(invalid)return <section className="pt-28 px-6" role="alert">No se pudo cargar Contacto. <button onClick={()=>{void refresh();}} className="text-primary underline">Reintentar</button></section>;
   return (
     <>
       {/* ── Hero ── */}
@@ -61,13 +63,13 @@ export default function ContactoPage() {
         <div className="relative max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="inline-flex items-center gap-2 text-xs font-semibold text-primary uppercase tracking-widest mb-5">
             <Zap className="w-3.5 h-3.5" />
-            Respondemos en menos de 24h
+            {hero.text.badge}
           </div>
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground tracking-tight mb-4 leading-[1.1]">
-            ¿En qué podemos <span className="text-gradient-animated">ayudarte?</span>
+            <Highlight text={hero.text.title} mark={hero.text.highlight}/>
           </h1>
           <p className="text-base sm:text-lg text-muted-foreground/70 max-w-xl leading-relaxed">
-            {tagline || 'Nuestro equipo está disponible para resolver tus dudas, escuchar tus sugerencias y ayudarte a crecer.'}
+            {hero.text.subtitle}
           </p>
         </div>
       </section>
@@ -105,59 +107,59 @@ export default function ContactoPage() {
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 lg:gap-12">
             {/* Form */}
             <div className="lg:col-span-3 flex flex-col">
-              <h2 className="text-lg font-bold text-foreground mb-1">Envíanos un mensaje</h2>
-              <p className="text-sm text-muted-foreground/60 mb-6">Te responderemos lo antes posible.</p>
+              <h2 className="text-lg font-bold text-foreground mb-1">{formText.text.title}</h2>
+              <p className="text-sm text-muted-foreground/60 mb-6">{formText.text.subtitle}</p>
 
               {sent ? (
                 <div className="py-12 flex-1 flex flex-col justify-center">
                   <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                     <CheckCircle className="w-5 h-5 text-primary" />
                   </div>
-                  <h3 className="font-bold text-foreground mb-2">Mensaje enviado</h3>
-                  <p className="text-sm text-muted-foreground mb-5">Te responderemos en menos de 24 horas.</p>
-                  <button onClick={() => { setSent(false); setForm({ name: '', email: '', subject: '', message: '' }); }}
-                    className="text-sm text-primary font-medium self-start">Enviar otro mensaje</button>
+                  <h3 className="font-bold text-foreground mb-2">{formText.text.success_title}</h3>
+                  <p className="text-sm text-muted-foreground mb-5">{formText.text.success_description}</p>
+                  <button onClick={() => { submissionId.current=crypto.randomUUID(); setSent(false); setForm({ name: '', email: '', subject: '', message: '' }); }}
+                    className="text-sm text-primary font-medium self-start">{formText.text.another_label}</button>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} className="flex-1 flex flex-col gap-4">
+                <form onSubmit={handleSubmit} className="flex-1 flex flex-col gap-4"><fieldset disabled={loading} className="contents">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-medium text-muted-foreground mb-1.5">Nombre <span className="text-primary">*</span></label>
-                      <input type="text" value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
-                        className="w-full px-3.5 py-2.5 bg-muted/30 border border-border/40 rounded-lg text-sm text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/20" placeholder="Tu nombre" />
+                      <label htmlFor="contact-name" className="block text-xs font-medium text-muted-foreground mb-1.5">{formText.text.name_label} <span className="text-primary">*</span></label>
+                      <input type="text" id="contact-name" maxLength={120} required value={form.name} onChange={e => setForm(p => { submissionId.current=crypto.randomUUID(); return ({ ...p, name: e.target.value }); })}
+                        className="w-full px-3.5 py-2.5 bg-muted/30 border border-border/40 rounded-lg text-sm text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/20" placeholder={formText.text.name_placeholder} />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-muted-foreground mb-1.5">Email <span className="text-primary">*</span></label>
-                      <input type="email" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
-                        className="w-full px-3.5 py-2.5 bg-muted/30 border border-border/40 rounded-lg text-sm text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/20" placeholder="tu@email.com" />
+                      <label htmlFor="contact-email" className="block text-xs font-medium text-muted-foreground mb-1.5">{formText.text.email_label} <span className="text-primary">*</span></label>
+                      <input type="email" id="contact-email" maxLength={254} required value={form.email} onChange={e => setForm(p => { submissionId.current=crypto.randomUUID(); return ({ ...p, email: e.target.value }); })}
+                        className="w-full px-3.5 py-2.5 bg-muted/30 border border-border/40 rounded-lg text-sm text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/20" placeholder={formText.text.email_placeholder} />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-muted-foreground mb-1.5">Asunto</label>
-                    <input type="text" value={form.subject} onChange={e => setForm(p => ({ ...p, subject: e.target.value }))}
-                      className="w-full px-3.5 py-2.5 bg-muted/30 border border-border/40 rounded-lg text-sm text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/20" placeholder="¿Sobre qué nos escribes?" />
+                    <label htmlFor="contact-subject" className="block text-xs font-medium text-muted-foreground mb-1.5">{formText.text.subject_label}</label>
+                    <input type="text" id="contact-subject" maxLength={200} value={form.subject} onChange={e => setForm(p => { submissionId.current=crypto.randomUUID(); return ({ ...p, subject: e.target.value }); })}
+                      className="w-full px-3.5 py-2.5 bg-muted/30 border border-border/40 rounded-lg text-sm text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/20" placeholder={formText.text.subject_placeholder} />
                   </div>
                   <div className="flex-1 flex flex-col">
-                    <label className="block text-xs font-medium text-muted-foreground mb-1.5">Mensaje <span className="text-primary">*</span></label>
-                    <textarea value={form.message} onChange={e => setForm(p => ({ ...p, message: e.target.value }))}
-                      className="w-full flex-1 min-h-[120px] px-3.5 py-2.5 bg-muted/30 border border-border/40 rounded-lg text-sm text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 resize-none" placeholder="Cuéntanos en qué podemos ayudarte..." />
+                    <label htmlFor="contact-message" className="block text-xs font-medium text-muted-foreground mb-1.5">{formText.text.message_label} <span className="text-primary">*</span></label>
+                    <textarea id="contact-message" maxLength={5000} required value={form.message} onChange={e => setForm(p => { submissionId.current=crypto.randomUUID(); return ({ ...p, message: e.target.value }); })}
+                      className="w-full flex-1 min-h-[120px] px-3.5 py-2.5 bg-muted/30 border border-border/40 rounded-lg text-sm text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 resize-none" placeholder={formText.text.message_placeholder} />
                   </div>
                   <div className="flex pt-2">
                     <button type="submit" disabled={loading}
                       className="w-full sm:w-auto sm:ml-auto inline-flex items-center justify-center gap-2 bg-primary text-white px-6 py-3 sm:py-2.5 rounded-lg font-semibold text-sm disabled:opacity-50">
-                      {loading ? <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Enviando...</> : <><Send className="w-4 h-4" /> Enviar mensaje</>}
+                      {loading ? <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> {formText.text.sending_label}</> : <><Send className="w-4 h-4" /> {formText.text.submit_label}</>}
                     </button>
                   </div>
-                </form>
+                </fieldset></form>
               )}
             </div>
 
             {/* Map */}
-            {companyAddress && (
+            {(map.text.query || companyAddress) && (
               <div id="mapa" className="lg:col-span-2 lg:pl-12 lg:border-l lg:border-border/20 flex flex-col">
                 <div className="flex-1 min-h-[240px] rounded-lg overflow-hidden">
                   <iframe
-                    title={`Ubicación ${companyName}`}
+                    title={map.text.title}
                     src={mapsEmbed}
                     className="w-full h-full"
                     loading="lazy"
@@ -173,7 +175,7 @@ export default function ContactoPage() {
                     rel="noopener noreferrer"
                     className="shrink-0 text-xs font-semibold text-primary whitespace-nowrap pt-0.5"
                   >
-                    Cómo llegar →
+                    {map.text.directions_label}
                   </a>
                 </div>
               </div>
@@ -186,14 +188,14 @@ export default function ContactoPage() {
       <section className="py-16 sm:py-24">
         <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-10 sm:mb-14">
-            <span className="text-xs font-semibold text-primary uppercase tracking-widest mb-3 block">FAQ</span>
+            <span className="text-xs font-semibold text-primary uppercase tracking-widest mb-3 block">{faqText.text.badge}</span>
             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-5">
               <div>
                 <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight mb-3">
-                  Preguntas <span className="text-gradient-animated">frecuentes</span>
+                  <Highlight text={faqText.text.title} mark={faqText.text.highlight}/>
                 </h2>
                 <p className="text-muted-foreground/70 text-sm sm:text-base max-w-md">
-                  Las dudas más comunes de nuestros afiliados. Si tienes más preguntas, escríbenos.
+                  {faqText.text.subtitle}
                 </p>
               </div>
             </div>
@@ -204,9 +206,9 @@ export default function ContactoPage() {
               {faqLeft.map((faq) => {
                 const i = faqs.indexOf(faq);
                 return (
-                  <div key={i} className="border-b border-border/20">
+                  <div key={faq.id} className="border-b border-border/20">
                     <button
-                      onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                      aria-expanded={openFaq === i} onClick={() => setOpenFaq(openFaq === i ? null : i)}
                       className="w-full flex items-center justify-between py-5 text-left gap-4"
                     >
                       <span className={cn(
@@ -235,9 +237,9 @@ export default function ContactoPage() {
               {faqRight.map((faq) => {
                 const i = faqs.indexOf(faq);
                 return (
-                  <div key={i} className="border-b border-border/20">
+                  <div key={faq.id} className="border-b border-border/20">
                     <button
-                      onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                      aria-expanded={openFaq === i} onClick={() => setOpenFaq(openFaq === i ? null : i)}
                       className="w-full flex items-center justify-between py-5 text-left gap-4"
                     >
                       <span className={cn(

@@ -1,0 +1,6 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {contactDefaults,parseContactSection,validContactMessage} from '../src/lib/contactContent';
+test('contact defaults use existing company information',()=>{const data=contactDefaults({contact_email:'info@example.com',phone:'+51 123',address:'Lima'});assert.equal(data.channels.text.email,'info@example.com');assert.equal(data.channels.text.address,'Lima');assert.equal(data.faq.items.length,6);});
+test('blank channels and intentionally removed FAQs remain empty',()=>{const defaults=contactDefaults();const section={...defaults.channels,text:{...defaults.channels.text,email:'',address:''}};assert.deepEqual(parseContactSection(JSON.stringify(section),defaults.channels),section);assert.deepEqual(parseContactSection(JSON.stringify({...defaults.faq,items:[]}),defaults.faq).items,[]);});
+test('messages require valid email and bounded nonempty fields',()=>{const message={name:'Ana',email:'ana@example.com',subject:'Consulta',message:'Hola'};assert.equal(validContactMessage(message),true);for(const patch of [{name:' '},{email:'bad'},{message:' '},{message:'x'.repeat(5001)},{subject:'x'.repeat(201)}])assert.equal(validContactMessage({...message,...patch}),false);});
