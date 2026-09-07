@@ -7,7 +7,7 @@ type Route = {
 
 interface RouterContextType {
   route: Route;
-  navigate: (path: string) => void;
+  navigate: (path: string, options?: { replace?: boolean }) => void;
   params: Record<string, string>;
 }
 
@@ -68,8 +68,9 @@ export function Router({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const navigate = useCallback((to: string) => {
-    window.history.pushState({}, '', to);
+  const navigate = useCallback((to: string, options?: { replace?: boolean }) => {
+    if (options?.replace) window.history.replaceState({}, '', to);
+    else window.history.pushState({}, '', to);
     const p = stripQuery(to);
     setRoute({ path: p, params: {} });
     const isMobile = window.matchMedia('(max-width: 767px)').matches;
@@ -192,9 +193,9 @@ export function NavLink({ to, children, className, end, onClick }: LinkProps) {
   return <Link to={to} className={className} end={end} onClick={onClick}>{children}</Link>;
 }
 
-export function Navigate({ to }: { to: string }) {
+export function Navigate({ to, replace = false }: { to: string; replace?: boolean }) {
   const { navigate } = useContext(RouterContext);
-  useEffect(() => { navigate(to); }, [to]);
+  useEffect(() => { navigate(to, { replace }); }, [to, replace, navigate]);
   return null;
 }
 

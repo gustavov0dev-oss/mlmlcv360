@@ -17,7 +17,7 @@ import Logo from '@/components/Logo';
 const LandingPage = lazy(() => import('@/pages/landing/LandingPage'));
 const NosotrosPage = lazy(() => import('@/pages/landing/NosotrosPage'));
 const PreciosPage = lazy(() => import('@/pages/landing/PreciosPage'));
-const EmpresaPage = lazy(() => import('@/pages/landing/EmpresaPage'));
+const OportunidadPage = lazy(() => import('@/pages/landing/OportunidadPage'));
 const ContactoPage = lazy(() => import('@/pages/landing/ContactoPage'));
 const PlanesPage = lazy(() => import('@/pages/landing/PlanesPage'));
 const BlogPage = lazy(() => import('@/pages/landing/BlogPage'));
@@ -35,7 +35,7 @@ const CartPage = lazy(() => import('@/pages/store/CartPage'));
 const CheckoutPage = lazy(() => import('@/pages/store/CheckoutPage'));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 
-const LANDING_PATHS = ['/', '/nosotros', '/precios', '/empresa', '/contacto', '/planes', '/blog', '/pago', '/login', '/registro', '/reset-password', '/tienda', '/carrito', '/checkout', '/pedidos', '/favoritos', '/tienda/comparar', '/libro-reclamaciones', '/legal'];
+const LANDING_PATHS = ['/', '/nosotros', '/precios', '/empresa', '/oportunidad', '/contacto', '/planes', '/blog', '/pago', '/login', '/registro', '/reset-password', '/tienda', '/carrito', '/checkout', '/pedidos', '/favoritos', '/tienda/comparar', '/libro-reclamaciones', '/legal'];
 const ADMIN_BYPASS_ROLES = ['super_admin', 'admin'];
 
 function useCountdown(targetIso: string) {
@@ -286,7 +286,8 @@ function AppRoutes() {
           <Route path="/" element={<SiteLayout><LandingPage /></SiteLayout>} />
           <Route path="/nosotros" element={<SiteLayout><NosotrosPage /></SiteLayout>} />
           <Route path="/precios" element={<SiteLayout><PreciosPage /></SiteLayout>} />
-          <Route path="/empresa" element={<SiteLayout><EmpresaPage /></SiteLayout>} />
+          <Route path="/empresa" element={<Navigate to="/oportunidad" replace />} />
+          <Route path="/oportunidad" element={<SiteLayout><OportunidadPage /></SiteLayout>} />
           <Route path="/contacto" element={<SiteLayout><ContactoPage /></SiteLayout>} />
           <Route path="/planes" element={<SiteLayout><PlanesPage /></SiteLayout>} />
           <Route path="/blog" element={<SiteLayout><BlogPage /></SiteLayout>} />

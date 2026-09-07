@@ -5,7 +5,7 @@ import { useConfig } from '@/store/configStore';
 import { useDatabase } from '@/lib/backend';
 import { cn } from '@/lib/utils';
 import { Link, useLocation, useNavigate } from '@/lib/router';
-import { LayoutDashboard, Users, GitBranch, DollarSign, Award, ChartBar as BarChart3, Settings, ChevronDown, ChevronRight, UserCog, CreditCard, User, ShoppingBag, Package, Truck, Tag, ChartBar as BarChart2, ShoppingCart, FolderOpen, MessageSquare, Shield, Crown, Star, Medal, LogOut, Link2, CircleHelp as HelpCircle, FileText, ScrollText } from 'lucide-react';
+import { Briefcase, LayoutDashboard, Users, GitBranch, DollarSign, Award, ChartBar as BarChart3, Settings, ChevronDown, ChevronRight, UserCog, CreditCard, User, ShoppingBag, Package, Truck, Tag, ChartBar as BarChart2, ShoppingCart, FolderOpen, MessageSquare, Shield, Crown, Star, Medal, LogOut, Link2, CircleHelp as HelpCircle, FileText, ScrollText } from 'lucide-react';
 import { type Rank } from '@/store/configStore';
 
 const rankIconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -83,6 +83,7 @@ const superAdminNav: NavItem[] = [
   { label: 'Reportes', href: '/dashboard/reportes', icon: BarChart3 },
   {
     label: 'Contenido', icon: MessageSquare, children: [
+      { label: 'Oportunidad', href: '/dashboard/admin/oportunidad', icon: Briefcase },
       { label: 'Nosotros', href: '/dashboard/admin/nosotros', icon: Users },
       { label: 'Testimonios', href: '/dashboard/admin/testimonios', icon: Star },
       { label: 'Preguntas Frecuentes', href: '/dashboard/admin/faq', icon: HelpCircle },
@@ -123,6 +124,7 @@ const adminNav: NavItem[] = [
   { label: 'Reportes', href: '/dashboard/reportes', icon: BarChart3 },
   {
     label: 'Contenido', icon: MessageSquare, children: [
+      { label: 'Oportunidad', href: '/dashboard/admin/oportunidad', icon: Briefcase },
       { label: 'Nosotros', href: '/dashboard/admin/nosotros', icon: Users },
       { label: 'Testimonios', href: '/dashboard/admin/testimonios', icon: Star },
       { label: 'Preguntas Frecuentes', href: '/dashboard/admin/faq', icon: HelpCircle },

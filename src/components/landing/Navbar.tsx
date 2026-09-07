@@ -53,7 +53,7 @@ const navLinks = [
   { href: '/nosotros', label: 'Nosotros' },
   { href: '/planes', label: 'Planes' },
   { href: '/tienda', label: 'Tienda' },
-  { href: '/empresa', label: 'Oportunidad' },
+  { href: '/oportunidad', label: 'Oportunidad' },
   { href: '/blog', label: 'Novedades' },
   { href: '/contacto', label: 'Contacto' },
 ];
