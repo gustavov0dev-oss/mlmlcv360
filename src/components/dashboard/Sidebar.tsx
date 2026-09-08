@@ -468,7 +468,7 @@ export default function Sidebar() {
 
       {/* ─── Desktop Sidebar ─────────────────────────────────────── */}
       <aside className={cn(
-        'fixed left-0 top-0 bottom-0 z-50 bg-card border-r border-border flex flex-col transition-all duration-300',
+        'fixed left-0 lg:left-[max(0px,calc((100%-80rem)/2))] top-0 bottom-0 z-50 bg-card border-r border-border flex flex-col transition-all duration-300',
         'hidden lg:flex',
         sidebarCollapsed ? 'w-[72px]' : 'w-[260px]',
       )}>

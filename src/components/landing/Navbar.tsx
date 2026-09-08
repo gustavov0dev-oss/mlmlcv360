@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from '@/lib/router';
 import {
   X, Sun, Moon, ChevronDown, LogOut, LayoutDashboard, User,
-  ShoppingBag, Package, Heart, Menu, Settings,
+  ShoppingCart, ShoppingBag, Package, Heart, Menu, Settings,
   Crown, Zap, Scale, Star, Medal,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -279,8 +279,8 @@ export default function Navbar() {
                   className={cn(
                     'px-3.5 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap',
                     location.pathname === link.href || location.pathname.startsWith(link.href + '/')
-                      ? 'text-primary bg-primary/10'
-                      : 'text-foreground/70 hover:text-foreground hover:bg-muted/50',
+                      ? 'text-primary font-semibold'
+                      : 'text-foreground/70 hover:text-foreground',
                   )}>
                   {link.label}
                 </Link>
@@ -293,7 +293,7 @@ export default function Navbar() {
               <button onClick={() => navigate('/carrito')}
                 className="relative w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted/60 text-muted-foreground hover:text-foreground transition-colors"
                 aria-label="Carrito">
-                <ShoppingBag className="w-5 h-5" />
+                <ShoppingCart className="w-5 h-5" strokeWidth={1.7} />
                 {itemCount > 0 && (
                   <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-0.5 bg-primary text-primary-foreground rounded-full text-[10px] font-bold flex items-center justify-center">
                     {itemCount > 9 ? '9+' : itemCount}
@@ -423,8 +423,8 @@ export default function Navbar() {
                   className={cn(
                     'py-3 rounded-xl text-center text-sm font-medium transition-colors',
                     location.pathname === link.href
-                      ? 'bg-primary/10 text-primary'
-                      : 'bg-muted/40 text-foreground hover:bg-muted/60',
+                      ? 'text-primary font-semibold'
+                      : 'text-foreground/70 hover:text-foreground',
                   )}>
                   {link.label}
                 </Link>

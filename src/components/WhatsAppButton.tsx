@@ -1,8 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useDatabase } from '@/lib/backend';
 import { useUIStore } from '@/store/uiStore';
-import { MessageCircle, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+function WhatsAppIcon({className}:{className?:string}) {
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true"><path d="M20.5 11.7a8.5 8.5 0 0 1-12.6 7.5L3 20.5l1.3-4.7A8.5 8.5 0 1 1 20.5 11.7Z"/><path d="m8.5 7.5 1.4 2.7-1.1 1.1a9.2 9.2 0 0 0 3.9 3.9l1.1-1.1 2.7 1.4c-.3 1.2-1.1 1.8-2.3 1.5-4.1-1-7.2-4.1-8.2-8.2-.3-1.2.3-2 1.5-2.3Z" transform="translate(1 0) scale(.92)"/></svg>;
+}
 
 export default function WhatsAppButton() {
   const database = useDatabase();
@@ -55,7 +59,7 @@ export default function WhatsAppButton() {
           <div className="bg-green-500 p-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-                <MessageCircle className="w-4 h-4 text-white" />
+                <WhatsAppIcon className="w-4 h-4 text-white" />
               </div>
               <div>
                 <div className="text-sm font-bold text-white">MLM 360</div>
@@ -72,7 +76,7 @@ export default function WhatsAppButton() {
             </div>
             <button onClick={openWhatsApp}
               className="w-full bg-green-500 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-green-600 transition-colors flex items-center justify-center gap-2">
-              <MessageCircle className="w-4 h-4" /> Abrir WhatsApp
+              <WhatsAppIcon className="w-4 h-4" /> Abrir WhatsApp
             </button>
           </div>
         </div>
@@ -82,7 +86,7 @@ export default function WhatsAppButton() {
         className="w-14 h-14 rounded-full bg-green-500 hover:bg-green-600 text-white shadow-lg shadow-green-500/30 flex items-center justify-center transition-all hover:scale-110 active:scale-95"
         aria-label="WhatsApp"
       >
-        <MessageCircle className="w-6 h-6" />
+        <WhatsAppIcon className="w-6 h-6" />
       </button>
     </div>
   );

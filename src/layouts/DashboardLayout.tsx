@@ -110,7 +110,7 @@ export default function DashboardLayout() {
   if (!user) return <Navigate to="/login" />;
 
   return (
-    <div className="flex h-[100dvh] bg-background overflow-hidden">
+    <div className="relative flex h-[100dvh] w-full max-w-7xl mx-auto bg-background overflow-hidden lg:border-x lg:border-border/50">
       <Sidebar />
       <div className={cn('flex flex-col min-w-0 h-[100dvh] overflow-hidden w-full transition-[margin] duration-200',
         sidebarCollapsed ? 'lg:ml-[72px]' : 'lg:ml-[260px]')}>
