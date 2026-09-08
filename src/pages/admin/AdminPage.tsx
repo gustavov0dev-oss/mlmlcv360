@@ -545,20 +545,17 @@ export default function AdminPage() {
     category: string = "general",
   ) => {
     setSavingConfig(true);
-    for (const key of keys) {
-      await database.upsert(
-        "system_config",
-        {
-          key,
-          value: config[key] ?? "",
-          category,
-          updated_at: new Date().toISOString(),
-        },
-        "key",
-      );
-    }
-    toast.success("Configuración guardada");
-    setSavingConfig(false);
+    try {
+      for (const key of keys) {
+        const result=await database.upsert("system_config", {
+          key,value:config[key]??"",category,updated_at:new Date().toISOString(),
+          ...(['smtp_pass','smtp_password','smtp_user'].includes(key)?{is_sensitive:true}:{}),
+        },"key");
+        if(result.error)throw new Error();
+      }
+      toast.success("Configuración guardada");
+    }catch{toast.error("No se pudo guardar toda la configuración. Revisa los datos y vuelve a guardar.");}
+    finally{setSavingConfig(false);}
   };
 
   const c = (key: string) => config[key] ?? "";
@@ -2158,15 +2155,16 @@ export default function AdminPage() {
               <h2 className="text-lg font-semibold text-foreground mb-5">
                 Configuración de Correos
               </h2>
+              <p className="text-sm text-muted-foreground mb-5">Las respuestas de contacto usan estos datos SMTP. El puerto 465 usa SSL/TLS; otros puertos requieren STARTTLS. El alojamiento actual bloquea 25 y 587. Guarda los cambios y comprueba la conexión desde la bandeja de contacto.</p>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   {[
                     {
                       k: "smtp_host",
                       label: "Servidor SMTP",
-                      placeholder: "smtp.gmail.com",
+                      placeholder: "smtp.tuproveedor.com",
                     },
-                    { k: "smtp_port", label: "Puerto", placeholder: "587" },
+                    { k: "smtp_port", label: "Puerto", placeholder: "465" },
                   ].map((f) => (
                     <div key={f.k}>
                       <label className="block text-xs font-medium text-foreground mb-1.5">
