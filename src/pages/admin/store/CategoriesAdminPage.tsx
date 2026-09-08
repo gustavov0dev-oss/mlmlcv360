@@ -1,10 +1,10 @@
+import { LoadingRegion, StableRegion } from '@/components/ui/loading-region';
 import { useState, useEffect, useCallback } from 'react';
 import { useDatabase, useStorage } from '@/lib/backend';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import type { ProductCategory } from '@/lib/storeTypes';
 import { Plus, Save, Loader as Loader2, Trash2, Pencil, X, Image, FolderOpen } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
 import { DeleteConfirmDialog } from '@/components/admin/DeleteConfirmDialog';
 
 const EMPTY: Partial<ProductCategory> = { name: '', slug: '', description: '', status: 'active', sort_order: 0 };
@@ -101,7 +101,7 @@ export default function CategoriesAdminPage() {
   const childCategories = (parentId: string) => categories.filter(c => c.parent_id === parentId);
 
   return (
-    <div className="space-y-5 pb-10">
+    <StableRegion className="space-y-5 pb-10">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Categorías de Productos</h1>
@@ -137,14 +137,7 @@ export default function CategoriesAdminPage() {
       </div>
 
       {/* Category list */}
-      {loading ? (
-        <div className="bg-card border border-border rounded-xl overflow-hidden">
-          <table className="w-full text-sm">
-            <thead><tr className="border-b border-border bg-muted/30">{['Imagen','Nombre','Slug','Orden','Estado','Acciones'].map(h=><th key={h} className="text-left px-4 py-3 text-xs font-bold text-muted-foreground uppercase">{h}</th>)}</tr></thead>
-            <tbody>{Array.from({length:5}).map((_,i)=>(<tr key={i} className="border-b border-border/40"><td className="px-4 py-3"><Skeleton className="w-10 h-10 rounded-xl" /></td><td className="px-4 py-3"><Skeleton className="h-4 w-28" /></td><td className="px-4 py-3"><Skeleton className="h-4 w-24" /></td><td className="px-4 py-3"><Skeleton className="h-7 w-16 rounded-lg" /></td><td className="px-4 py-3"><Skeleton className="h-6 w-16 rounded-full" /></td><td className="px-4 py-3"><div className="flex gap-1"><Skeleton className="w-7 h-7 rounded-lg" /><Skeleton className="w-7 h-7 rounded-lg" /></div></td></tr>))}</tbody>
-          </table>
-        </div>
-      ) : (
+      {loading ? <LoadingRegion className="min-h-[24rem]" /> : (
         <div className="bg-card border border-border rounded-xl overflow-hidden">
           <table className="w-full text-sm">
             <thead>
@@ -326,6 +319,6 @@ export default function CategoriesAdminPage() {
         description={<>Se eliminará permanentemente <strong>{deleteTarget?.name}</strong>. Esta acción no se puede deshacer.</>}
         loading={!!deletingId}
       />
-    </div>
+    </StableRegion>
   );
 }

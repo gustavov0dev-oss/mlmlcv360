@@ -1,3 +1,4 @@
+import { LoadingRegion, StableRegion } from '@/components/ui/loading-region';
 import { useState, useEffect, useMemo } from 'react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -596,7 +597,7 @@ export default function AdminCommissionsPage() {
 
       {/* Table */}
       <div className="bg-card border border-border rounded-xl overflow-hidden">
-        <div className="overflow-x-auto">
+        <StableRegion className="overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="border-b border-border bg-muted/40">
@@ -614,13 +615,7 @@ export default function AdminCommissionsPage() {
               </tr>
             </thead>
             <tbody>
-              {loading ? (
-                Array.from({ length: 6 }).map((_, i) => (
-                  <tr key={i} className="border-b border-border">
-                    <td colSpan={8} className="py-3 px-4"><div className="h-8 bg-muted animate-pulse rounded-lg" /></td>
-                  </tr>
-                ))
-              ) : paginatedData.length === 0 ? (
+              {loading ? <tr><td colSpan={20}><LoadingRegion className="min-h-[24rem]" /></td></tr> : paginatedData.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="py-16 text-center">
                     <div className="flex flex-col items-center gap-3 text-muted-foreground">
@@ -703,7 +698,7 @@ export default function AdminCommissionsPage() {
               ))}
             </tbody>
           </table>
-        </div>
+        </StableRegion>
 
         {/* Pagination */}
         {totalPages > 1 && (

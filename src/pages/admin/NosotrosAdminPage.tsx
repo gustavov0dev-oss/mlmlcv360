@@ -1,9 +1,9 @@
+import { LoadingRegion, StableRegion } from '@/components/ui/loading-region';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useDatabase, useStorage } from '@/lib/backend';
 import { useAuthStore } from '@/store/authStore';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import { Skeleton } from '@/components/ui/skeleton';
 import { DeleteConfirmDialog } from '@/components/admin/DeleteConfirmDialog';
 import {
   Plus, Trash2, Pencil, X, Save, RefreshCw, GripVertical,
@@ -347,7 +347,7 @@ export default function NosotrosAdminPage() {
 
       {/* ── VALUES TAB ───────────────────────────────────────────────────────────── */}
       {!loadError && tab === 'values' && (
-        <div className="space-y-4">
+        <StableRegion className="space-y-4">
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">{values.filter(v => v.is_active).length} activos · {values.length} total</p>
             <button aria-label="Editar contenido" disabled={busy || loading || saving || savingHero} onClick={() => { setEditingValue(null); setShowValueForm(true); }}
@@ -356,9 +356,7 @@ export default function NosotrosAdminPage() {
             </button>
           </div>
 
-          {loading ? (
-            <div className="space-y-2">{[1, 2, 3].map(i => <Skeleton key={i} className="h-20 rounded-xl" />)}</div>
-          ) : values.length === 0 ? (
+          {loading ? <LoadingRegion className="min-h-[24rem]" /> : values.length === 0 ? (
             <EmptyState icon={Target} label="Sin valores" hint="Agrega mision, vision o valores." onAdd={() => { setEditingValue(null); setShowValueForm(true); }} />
           ) : (
             <div className="border border-border/60 rounded-xl overflow-hidden bg-card">
@@ -396,12 +394,12 @@ export default function NosotrosAdminPage() {
               </div>
             </div>
           )}
-        </div>
+        </StableRegion>
       )}
 
       {/* ── TIMELINE TAB ──────────────────────────────────────────────────────────── */}
       {!loadError && tab === 'timeline' && (
-        <div className="space-y-4">
+        <StableRegion className="space-y-4">
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">{timeline.filter(t => t.is_active).length} activos · {timeline.length} total</p>
             <button aria-label="Editar contenido" disabled={busy || loading || saving || savingHero} onClick={() => { setEditingTimeline(null); setShowTimelineForm(true); }}
@@ -410,9 +408,7 @@ export default function NosotrosAdminPage() {
             </button>
           </div>
 
-          {loading ? (
-            <div className="space-y-2">{[1, 2, 3].map(i => <Skeleton key={i} className="h-20 rounded-xl" />)}</div>
-          ) : timeline.length === 0 ? (
+          {loading ? <LoadingRegion className="min-h-[24rem]" /> : timeline.length === 0 ? (
             <EmptyState icon={Clock} label="Sin hitos" hint="Agrega hitos de la historia de tu empresa." onAdd={() => { setEditingTimeline(null); setShowTimelineForm(true); }} />
           ) : (
             <div className="border border-border/60 rounded-xl overflow-hidden bg-card">
@@ -451,12 +447,12 @@ export default function NosotrosAdminPage() {
               </div>
             </div>
           )}
-        </div>
+        </StableRegion>
       )}
 
       {/* ── INFRASTRUCTURE TAB ─────────────────────────────────────────────────────── */}
       {!loadError && tab === 'infrastructure' && (
-        <div className="space-y-4">
+        <StableRegion className="space-y-4">
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">{infra.filter(i => i.is_active).length} activos · {infra.length} total</p>
             <button aria-label="Editar contenido" disabled={busy || loading || saving || savingHero} onClick={() => { setEditingInfra(null); setShowInfraForm(true); }}
@@ -465,9 +461,7 @@ export default function NosotrosAdminPage() {
             </button>
           </div>
 
-          {loading ? (
-            <div className="space-y-2">{[1, 2, 3].map(i => <Skeleton key={i} className="h-20 rounded-xl" />)}</div>
-          ) : infra.length === 0 ? (
+          {loading ? <LoadingRegion className="min-h-[24rem]" /> : infra.length === 0 ? (
             <EmptyState icon={Server} label="Sin caracteristicas" hint="Agrega caracteristicas de infraestructura." onAdd={() => { setEditingInfra(null); setShowInfraForm(true); }} />
           ) : (
             <div className="border border-border/60 rounded-xl overflow-hidden bg-card">
@@ -505,12 +499,12 @@ export default function NosotrosAdminPage() {
               </div>
             </div>
           )}
-        </div>
+        </StableRegion>
       )}
 
       {/* ── FOUNDERS TAB ───────────────────────────────────────────────────────────── */}
       {!loadError && tab === 'founders' && (
-        <div className="space-y-4">
+        <StableRegion className="space-y-4">
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">{founders.filter(f => f.is_active).length} activos · {founders.length} total</p>
             <button aria-label="Editar contenido" disabled={busy || loading || saving || savingHero} onClick={() => { setEditingFounder(null); setShowFounderForm(true); }}
@@ -519,9 +513,7 @@ export default function NosotrosAdminPage() {
             </button>
           </div>
 
-          {loading ? (
-            <div className="space-y-2">{[1, 2, 3].map(i => <Skeleton key={i} className="h-24 rounded-xl" />)}</div>
-          ) : founders.length === 0 ? (
+          {loading ? <LoadingRegion className="min-h-[24rem]" /> : founders.length === 0 ? (
             <EmptyState icon={Users} label="Sin fundadores" hint="Agrega los fundadores o lideres de la empresa." onAdd={() => { setEditingFounder(null); setShowFounderForm(true); }} />
           ) : (
             <div className="border border-border/60 rounded-xl overflow-hidden bg-card">
@@ -564,7 +556,7 @@ export default function NosotrosAdminPage() {
               </div>
             </div>
           )}
-        </div>
+        </StableRegion>
       )}
 
       {/* ── FOUNDER MODAL ──────────────────────────────────────────────────────────── */}
@@ -900,9 +892,9 @@ function ValueFormModal({ item, onSave, onClose, saving }: {
 function AboutTextEditor({ fields, values, onChange, onSave, loading, saving }: {
   fields: AboutField[]; values: Record<string, string>; onChange: (key: string, value: string) => void; onSave: () => void; loading: boolean; saving: boolean;
 }) {
-  return <div className="bg-card border border-border rounded-xl p-5 sm:p-6 space-y-5">
+  return <StableRegion className="bg-card border border-border rounded-xl p-5 sm:p-6 space-y-5">
     <div><h3 className="text-sm font-bold text-foreground mb-1">Textos de la sección</h3><p className="text-xs text-muted-foreground">Edita el contenido manteniendo el diseño actual de la página.</p></div>
-    {loading ? <div className="space-y-4">{[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-20 w-full rounded-lg" />)}</div> : <fieldset disabled={saving} className="space-y-5">
+    {loading ? <LoadingRegion className="min-h-[24rem]" /> : <fieldset disabled={saving} className="space-y-5">
       {fields.map(field => <div key={field.key}>
         <label htmlFor={field.key} className="block text-xs font-semibold text-foreground mb-1.5">{field.label}</label>
         {field.multiline ? <textarea id={field.key} value={values[field.key] ?? ''} onChange={event => onChange(field.key, event.target.value)} rows={field.key.endsWith('description') ? 4 : 2} className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors resize-y" /> : <input id={field.key} value={values[field.key] ?? ''} onChange={event => onChange(field.key, event.target.value)} className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors" />}
@@ -910,5 +902,5 @@ function AboutTextEditor({ fields, values, onChange, onSave, loading, saving }: 
       </div>)}
       <div className="flex justify-end pt-2 border-t border-border"><button onClick={onSave} disabled={saving} className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-semibold hover:bg-primary/90 disabled:opacity-50 transition-colors">{saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}Guardar textos</button></div>
     </fieldset>}
-  </div>;
+  </StableRegion>;
 }

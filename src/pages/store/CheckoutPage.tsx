@@ -1,3 +1,4 @@
+import { LoadingRegion, StableRegion } from '@/components/ui/loading-region';
 import { useState, useEffect } from 'react';
 import { useDatabase } from '@/lib/backend';
 import { useCart } from '@/store/cartStore';
@@ -86,18 +87,7 @@ function FieldSection({ title, children, first = false }: { title: string; child
   );
 }
 
-function StepSkeleton() {
-  return (
-    <div className="space-y-4 pt-2">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <div key={i} className="space-y-1.5">
-          <div className="h-3 w-24 bg-muted/40 rounded animate-pulse" />
-          <div className="h-11 bg-muted/30 rounded-lg animate-pulse" />
-        </div>
-      ))}
-    </div>
-  );
-}
+
 
 export default function CheckoutPage() {
   const database = useDatabase();
@@ -410,10 +400,8 @@ export default function CheckoutPage() {
 
           {/* ── STEP 1: Address ── */}
           {step === 1 && (
-            <div className="space-y-8">
-              {loadingAddresses ? (
-                <StepSkeleton />
-              ) : (
+            <StableRegion className="space-y-8">
+              {loadingAddresses ? <LoadingRegion className="min-h-[12rem]" /> : (
                 <>
                   {/* Vista compacta: solo aparece si hay direcciones guardadas y no se pidió el formulario.
                       Evita abrir el checkout con 14 campos visibles cuando ya se conoce la dirección. */}
@@ -645,20 +633,16 @@ export default function CheckoutPage() {
                   )}
                 </>
               )}
-            </div>
+            </StableRegion>
           )}
 
           {/* ── STEP 2: Shipping ── */}
           {step === 2 && (
-            <div className="space-y-4">
+            <StableRegion className="space-y-4">
               <h2 className="text-sm font-bold text-foreground flex items-center gap-2">
                 <Truck className="w-4 h-4 text-primary" /> Método de envío
               </h2>
-              {loadingShipping ? (
-                <div className="space-y-2 pt-2">
-                  {Array.from({ length: 3 }).map((_, i) => <div key={i} className="h-14 bg-muted/30 rounded-lg animate-pulse" />)}
-                </div>
-              ) : shippingMethods.length === 0 ? (
+              {loadingShipping ? <LoadingRegion className="min-h-[12rem]" /> : shippingMethods.length === 0 ? (
                 <div className="py-6 text-center text-muted-foreground text-sm">
                   <p>No hay métodos de envío disponibles.</p>
                   <p className="text-xs mt-1">Contacta con soporte para coordinar el envío a tu ubicación.</p>
@@ -704,12 +688,12 @@ export default function CheckoutPage() {
                   Continuar <ChevronRight className="w-4 h-4 inline ml-1" />
                 </button>
               </div>
-            </div>
+            </StableRegion>
           )}
 
           {/* ── STEP 3: Payment ── */}
           {step === 3 && (
-            <div className="space-y-4">
+            <StableRegion className="space-y-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-sm font-bold text-foreground flex items-center gap-2">
                   <CreditCard className="w-4 h-4 text-primary" /> Método de pago
@@ -725,11 +709,7 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              {loadingGateways ? (
-                <div className="space-y-2 pt-2">
-                  {Array.from({ length: 3 }).map((_, i) => <div key={i} className="h-14 bg-muted/30 rounded-lg animate-pulse" />)}
-                </div>
-              ) : gateways.length === 0 ? (
+              {loadingGateways ? <LoadingRegion className="min-h-[12rem]" /> : gateways.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-4">No hay métodos de pago configurados. Contacta al administrador.</p>
               ) : (
                 <div className="divide-y divide-border/20 border-t border-border/20">
@@ -791,7 +771,7 @@ export default function CheckoutPage() {
                   Revisar pedido <ChevronRight className="w-4 h-4 inline ml-1" />
                 </button>
               </div>
-            </div>
+            </StableRegion>
           )}
 
           {/* ── STEP 4: Review ── */}

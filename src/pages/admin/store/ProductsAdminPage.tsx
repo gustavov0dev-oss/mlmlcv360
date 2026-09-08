@@ -1,3 +1,4 @@
+import { LoadingRegion, StableRegion } from '@/components/ui/loading-region';
 import { useState, useEffect, useCallback } from 'react';
 import { useDatabase } from '@/lib/backend';
 import { useNavigate } from '@/lib/router';
@@ -5,7 +6,6 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import type { Product, ProductCategory } from '@/lib/storeTypes';
 import { Plus, Search, Pencil, Trash2, Copy, Eye, EyeOff, Package, RefreshCw } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
 import { DeleteConfirmDialog } from '@/components/admin/DeleteConfirmDialog';
 
 function fmt(n: number) { return `S/ ${n.toFixed(2)}`; }
@@ -114,7 +114,7 @@ export default function ProductsAdminPage() {
   };
 
   return (
-    <div className="space-y-5">
+    <StableRegion className="space-y-5">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Productos</h1>
@@ -155,27 +155,7 @@ export default function ProductsAdminPage() {
       </div>
 
       {/* Table */}
-      {loading ? (
-        <div className="bg-card border border-border rounded-xl overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead><tr className="border-b border-border bg-muted/30">{['Producto','Categoría','Precio','Stock','Estado','Acciones'].map(h => <th key={h} className="text-left px-4 py-3 text-xs font-bold text-muted-foreground uppercase">{h}</th>)}</tr></thead>
-              <tbody>
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <tr key={i} className="border-b border-border/40">
-                    <td className="px-4 py-3"><div className="flex items-center gap-3"><Skeleton className="w-10 h-10 rounded-lg flex-shrink-0" /><div className="space-y-1"><Skeleton className="h-4 w-32" /><Skeleton className="h-3 w-20" /></div></div></td>
-                    <td className="px-4 py-3 hidden sm:table-cell"><Skeleton className="h-4 w-24" /></td>
-                    <td className="px-4 py-3"><Skeleton className="h-4 w-16" /></td>
-                    <td className="px-4 py-3 hidden md:table-cell"><Skeleton className="h-4 w-8" /></td>
-                    <td className="px-4 py-3"><Skeleton className="h-6 w-20 rounded-full" /></td>
-                    <td className="px-4 py-3"><div className="flex gap-1"><Skeleton className="w-7 h-7 rounded-lg" /><Skeleton className="w-7 h-7 rounded-lg" /><Skeleton className="w-7 h-7 rounded-lg" /></div></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      ) : (
+      {loading ? <LoadingRegion className="min-h-[24rem]" /> : (
         <div className="bg-card border border-border rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -258,6 +238,6 @@ export default function ProductsAdminPage() {
         description={<>Se eliminará permanentemente <strong>{deleteTarget?.name}</strong>. Esta acción no se puede deshacer.</>}
         loading={!!deletingId}
       />
-    </div>
+    </StableRegion>
   );
 }

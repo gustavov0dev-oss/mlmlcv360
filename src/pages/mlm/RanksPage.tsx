@@ -1,8 +1,8 @@
+import { LoadingRegion } from '@/components/ui/loading-region';
 import { useConfig, formatPrice } from '@/store/configStore';
 import { useRanks } from '@/modules/mlm';
 import { cn } from '@/lib/utils';
 import { TrendingUp, Star, Crown, Target, CircleCheck as CheckCircle, Medal, Gem, Disc, Award as AwardIcon } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   medal: Medal, gem: Gem, disc: Disc, crown: Crown, star: Star, award: AwardIcon,
@@ -27,68 +27,13 @@ function RankIcon({ icon, className }: { icon?: string; className?: string }) {
   return <Medal className={className} />;
 }
 
-function RanksSkeleton() {
-  return (
-    <div className="space-y-5">
-      {/* Header */}
-      <div className="space-y-1.5">
-        <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-4 w-40" />
-      </div>
 
-      {/* Current rank progress card */}
-      <div className="bg-card border border-border rounded-xl p-5 sm:p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-5">
-          <Skeleton className="w-16 h-16 rounded-xl flex-shrink-0" />
-          <div className="flex-1 space-y-2">
-            <Skeleton className="h-3 w-24" />
-            <Skeleton className="h-6 w-32" />
-            <Skeleton className="h-4 w-40" />
-          </div>
-          <div className="text-right space-y-1">
-            <Skeleton className="h-3 w-16 ml-auto" />
-            <Skeleton className="h-5 w-20 ml-auto" />
-          </div>
-        </div>
-        <div className="space-y-4 pt-4 border-t border-border">
-          {[0, 1].map(i => (
-            <div key={i}>
-              <div className="flex items-center justify-between mb-1.5">
-                <Skeleton className="h-3 w-36" />
-                <Skeleton className="h-3 w-20" />
-              </div>
-              <Skeleton className="h-2 w-full rounded-full" />
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* 6 rank cards grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="bg-card border-2 border-border rounded-xl p-5">
-            <div className="flex items-center justify-between mb-3">
-              <Skeleton className="w-12 h-12 rounded-xl" />
-              <Skeleton className="h-6 w-16 rounded-full" />
-            </div>
-            <Skeleton className="h-5 w-24 mb-1" />
-            <Skeleton className="h-4 w-32 mb-3" />
-            <div className="pt-3 border-t border-border space-y-1.5">
-              <Skeleton className="h-3 w-28" />
-              <Skeleton className="h-3 w-36" />
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 export default function RanksPage() {
   const { ranks, currency, currencySymbol, exchangeRate } = useConfig();
   const { loading, stats, currentRank, nextRank, progress } = useRanks();
 
-  if (loading || ranks.length === 0) return <RanksSkeleton />;
+  if (loading || ranks.length === 0) return <LoadingRegion className="min-h-[calc(100dvh-8rem)]" />;
 
   return (
     <div className="space-y-5">

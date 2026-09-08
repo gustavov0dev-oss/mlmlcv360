@@ -1,3 +1,4 @@
+import { LoadingRegion } from '@/components/ui/loading-region';
 import { useState, useEffect, useRef, Fragment } from "react";
 import { useDatabase, useStorage } from "@/lib/backend";
 import { useAuthStore } from "@/store/authStore";
@@ -576,40 +577,7 @@ export default function AdminPage() {
   }
 
   if (loadingConfig) {
-    return (
-      <div className="space-y-6 animate-fade-in">
-        <div className="space-y-1.5">
-          <div className="h-7 w-64 bg-muted rounded-lg animate-pulse" />
-          <div className="h-4 w-80 bg-muted rounded animate-pulse" />
-        </div>
-        <div className="flex flex-col lg:flex-row gap-6">
-          <div className="lg:w-56 flex-shrink-0">
-            <div className="bg-card border border-border rounded-xl overflow-hidden">
-              {Array.from({ length: 8 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="flex items-center gap-3 px-4 py-3.5 border-b border-border/50 last:border-0"
-                >
-                  <div className="w-4 h-4 bg-muted rounded animate-pulse" />
-                  <div className="h-3 flex-1 bg-muted rounded animate-pulse" />
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="flex-1 bg-card border border-border rounded-xl p-6 space-y-4">
-            <div className="h-5 w-48 bg-muted rounded animate-pulse" />
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="space-y-1.5">
-                  <div className="h-3 w-24 bg-muted rounded animate-pulse" />
-                  <div className="h-10 w-full bg-muted rounded-lg animate-pulse" />
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+    return <LoadingRegion className="min-h-[calc(100dvh-8rem)]" />;
   }
 
   return (

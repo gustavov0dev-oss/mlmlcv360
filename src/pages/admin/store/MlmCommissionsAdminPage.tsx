@@ -1,10 +1,10 @@
+import { LoadingRegion } from '@/components/ui/loading-region';
 import { useState, useEffect, useCallback } from 'react';
 import { useDatabase } from '@/lib/backend';
 
 import { toast } from 'sonner';
 import type { MlmCommissionConfig } from '@/lib/storeTypes';
 import { Save, Loader as Loader2, Info } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
 
 const RANKS = ['bronze','silver','gold','platinum','diamond','crown'] as const;
 const RANK_LABELS: Record<string, string> = { bronze:'Bronce', silver:'Plata', gold:'Oro', platinum:'Platino', diamond:'Diamante', crown:'Corona' };
@@ -81,17 +81,7 @@ export default function MlmCommissionsAdminPage() {
     }));
   };
 
-  if (loading) return (
-    <div className="space-y-5">
-      <div className="space-y-1.5"><Skeleton className="h-8 w-44" /><Skeleton className="h-4 w-56" /></div>
-      {['bronze','silver','gold','platinum','diamond','crown'].map(r => (
-        <div key={r} className="bg-card border border-border rounded-xl overflow-hidden">
-          <div className="px-5 py-3 border-b border-border"><Skeleton className="h-4 w-32" /></div>
-          <div className="p-4"><div className="flex flex-wrap gap-3">{Array.from({length:5}).map((_,i)=>(<div key={i} className="space-y-1.5"><Skeleton className="h-3 w-12" /><div className="flex gap-1"><Skeleton className="w-14 h-9 rounded-lg" /><Skeleton className="w-16 h-9 rounded-lg" /></div></div>))}</div></div>
-        </div>
-      ))}
-    </div>
-  );
+  if (loading) return <LoadingRegion className="min-h-[calc(100dvh-8rem)]" />;
 
   return (
     <div className="space-y-5 pb-10">

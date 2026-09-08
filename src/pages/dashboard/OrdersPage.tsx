@@ -1,3 +1,4 @@
+import { LoadingRegion } from '@/components/ui/loading-region';
 import { useState, useEffect, useCallback } from 'react';
 import { useDatabase } from '@/lib/backend';
 import { useAuthStore } from '@/store/authStore';
@@ -5,7 +6,6 @@ import { useNavigate } from '@/lib/router';
 import { cn } from '@/lib/utils';
 import type { Order, Product } from '@/lib/storeTypes';
 import { Package, ChevronRight, ShoppingBag } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
   pending:    { label: 'Pendiente',     color: 'text-yellow-600', bg: 'bg-yellow-500/10' },
@@ -59,23 +59,7 @@ export default function OrdersPage() {
 
   useEffect(() => { load(); }, [load]);
 
-  if (loading) return (
-    <div className="space-y-5">
-      <div className="space-y-1.5"><Skeleton className="h-8 w-36" /><Skeleton className="h-4 w-28" /></div>
-      <div className="space-y-3">
-        {Array.from({length:5}).map((_,i)=>(
-          <div key={i} className="bg-card border border-border rounded-xl p-4 flex items-center gap-4">
-            <Skeleton className="w-14 h-14 rounded-xl flex-shrink-0" />
-            <div className="flex-1 space-y-1.5">
-              <div className="flex items-center gap-2"><Skeleton className="h-4 w-28" /><Skeleton className="h-5 w-16 rounded-full" /></div>
-              <Skeleton className="h-3 w-40" /><Skeleton className="h-5 w-20" />
-            </div>
-            <Skeleton className="w-4 h-4 flex-shrink-0" />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+  if (loading) return <LoadingRegion className="min-h-[calc(100dvh-8rem)]" />;
 
   return (
     <div className="space-y-5">

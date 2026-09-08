@@ -1,3 +1,4 @@
+import { LoadingRegion } from '@/components/ui/loading-region';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useDatabase } from '@/lib/backend';
 import { Link, useNavigate, useLocation } from '@/lib/router';
@@ -12,7 +13,6 @@ import { useUIStore } from '@/store/uiStore';
 import { useConfig, type Rank } from '@/store/configStore';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import Logo from '@/components/Logo';
 import {useContactNotifications} from '@/hooks/useContactNotifications';
@@ -361,16 +361,7 @@ export default function DashboardHeader() {
 
   function SearchResultsList() {
     if (loadingSearch) {
-      return (
-        <div className="py-3">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="flex items-center gap-3 px-4 py-2.5">
-              <Skeleton className="w-9 h-9 rounded-xl flex-shrink-0" />
-              <div className="flex-1 space-y-1.5"><Skeleton className="h-3.5 w-3/4 rounded" /><Skeleton className="h-2.5 w-1/2 rounded" /></div>
-            </div>
-          ))}
-        </div>
-      );
+      return <LoadingRegion className="min-h-[12rem]" />;
     }
     if (results.length > 0) {
       return <div className="py-1.5">{results.map(r => <SearchResultItem key={`${r.type}-${r.id}`} r={r} />)}</div>;

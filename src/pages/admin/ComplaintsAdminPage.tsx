@@ -1,3 +1,4 @@
+import { LoadingRegion } from '@/components/ui/loading-region';
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/backend/client';
 import { Button } from '@/components/ui/button';
@@ -5,7 +6,6 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { toast } from 'sonner';
@@ -404,16 +404,7 @@ export default function ComplaintsAdminPage() {
   };
 
   if (loading) {
-    return (
-      <div className="space-y-6 max-w-5xl">
-        <div className="flex justify-between items-center">
-          <div className="space-y-1.5"><Skeleton className="h-7 w-52" /><Skeleton className="h-4 w-72" /></div>
-          <Skeleton className="h-9 w-28 rounded-lg" />
-        </div>
-        <Skeleton className="h-10 rounded-lg" />
-        <Skeleton className="h-64 rounded-xl" />
-      </div>
-    );
+    return <LoadingRegion className="min-h-[calc(100dvh-8rem)]" />;
   }
 
   return (

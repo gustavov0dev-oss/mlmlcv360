@@ -1,3 +1,4 @@
+import { LoadingRegion, StableRegion } from '@/components/ui/loading-region';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useDatabase, useStorage } from '@/lib/backend';
 import { useAuthStore } from '@/store/authStore';
@@ -265,7 +266,7 @@ export default function RegionStatsAdminPage() {
   }
 
   return (
-    <div className="space-y-5 max-w-5xl">
+    <StableRegion className="space-y-5 max-w-5xl">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h2 className="text-xl font-bold text-foreground">Ciudades destacadas</h2>
@@ -280,13 +281,7 @@ export default function RegionStatsAdminPage() {
         </button>
       </div>
 
-      {loading ? (
-        <div className="border border-border/60 rounded-xl overflow-hidden bg-card divide-y divide-border/50">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="px-4 py-3.5 animate-pulse h-16" />
-          ))}
-        </div>
-      ) : items.length === 0 ? (
+      {loading ? <LoadingRegion className="min-h-[24rem]" /> : items.length === 0 ? (
         <div className="border border-border/60 rounded-xl overflow-hidden bg-card">
           <div className="flex flex-col items-center justify-center py-16 text-center px-4">
             <div className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center mb-3">
@@ -379,6 +374,6 @@ export default function RegionStatsAdminPage() {
         description={<>Se eliminará permanentemente <strong>{deleteTarget?.city}</strong>. Esta acción no se puede deshacer.</>}
         loading={!!deletingId}
       />
-    </div>
+    </StableRegion>
   );
 }

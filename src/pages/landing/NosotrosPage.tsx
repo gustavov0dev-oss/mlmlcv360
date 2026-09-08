@@ -1,9 +1,9 @@
+import { LoadingRegion } from '@/components/ui/loading-region';
 import { Link } from '@/lib/router';
 import { ArrowRight, Sparkles } from 'lucide-react';
 import { useEffect, useState, type ReactNode } from 'react';
 import { useDatabase } from '@/lib/backend';
 import { AboutIcon } from '@/components/landing/AboutIcon';
-import { Skeleton } from '@/components/ui/skeleton';
 import { resolveAboutConfig, safeAboutUrl, type Founder, type TimelineItem, type InfraItem, type ValueItem } from '@/lib/aboutContent';
 import { useConfig } from '@/store/configStore';
 import { cn } from '@/lib/utils';
@@ -106,7 +106,7 @@ export default function NosotrosPage() {
         </div>
       </section>
 
-      {loading && <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 py-14" role="status" aria-label="Cargando información"><Skeleton className="h-40 w-full" /></div>}
+      {loading && <LoadingRegion className="min-h-[17rem]" />}
       {error && <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 py-8 text-sm text-muted-foreground" role="alert">No se pudo actualizar la información. <button className="text-primary underline" onClick={() => setRetry(value => value + 1)}>Reintentar</button></div>}
       {/* MISION / VISION / VALORES */}
       {values.length > 0 && (<section className="py-14 sm:py-20">

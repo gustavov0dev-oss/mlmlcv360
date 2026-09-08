@@ -1,10 +1,10 @@
+import { LoadingRegion } from '@/components/ui/loading-region';
 import { useState, useEffect, useCallback } from 'react';
 import { useDatabase } from '@/lib/backend';
 import { useNavigate } from '@/lib/router';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Plus, Trash2, Save, Shield, Users, X, Lock, ArrowRight, RefreshCw } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
 import { DeleteConfirmDialog } from '@/components/admin/DeleteConfirmDialog';
 
 interface CustomRole {
@@ -166,20 +166,7 @@ export default function RolesAdminPage() {
   };
 
   if (loading) {
-    return (
-      <div className="space-y-5 animate-fade-in">
-        <div className="flex items-center justify-between"><div className="space-y-1.5"><Skeleton className="h-8 w-44" /><Skeleton className="h-4 w-48" /></div><Skeleton className="h-10 w-28 rounded-xl" /></div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-          <div className="space-y-2">{Array.from({length:5}).map((_,i)=>(<div key={i} className="bg-card border border-border rounded-xl p-3.5 flex items-center gap-3"><Skeleton className="w-9 h-9 rounded-xl flex-shrink-0" /><div className="flex-1 space-y-1"><Skeleton className="h-4 w-24" /><Skeleton className="h-3 w-32" /></div></div>))}</div>
-          <div className="lg:col-span-2 bg-card border border-border rounded-xl p-5 sm:p-6 space-y-5">
-            <div className="flex items-center gap-3"><Skeleton className="w-12 h-12 rounded-xl" /><div className="space-y-1.5"><Skeleton className="h-5 w-32" /><Skeleton className="h-3 w-20" /></div></div>
-            {Array.from({length:3}).map((_,i)=>(<div key={i} className="space-y-1.5"><Skeleton className="h-3 w-32" /><Skeleton className="h-11 w-full rounded-xl" /></div>))}
-            <div className="space-y-2"><Skeleton className="h-3 w-20" /><div className="flex flex-wrap gap-2">{Array.from({length:12}).map((_,j)=>(<Skeleton key={j} className="w-7 h-7 rounded-lg" />))}</div></div>
-            <Skeleton className="h-10 w-40 rounded-xl" />
-          </div>
-        </div>
-      </div>
-    );
+    return <LoadingRegion className="min-h-[calc(100dvh-8rem)]" />;
   }
 
   return (

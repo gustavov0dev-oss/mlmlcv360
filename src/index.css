@@ -380,28 +380,6 @@
      ANIMATED SHIMMER — Premium button effect
      ═══════════════════════════════════════════════════════════════════════════ */
 
-  .shimmer {
-    background: linear-gradient(
-      90deg,
-      hsl(var(--muted)) 25%,
-      hsl(var(--border)) 50%,
-      hsl(var(--muted)) 75%
-    );
-    background-size: 200% 100%;
-    animation: shimmer 2s ease-in-out infinite;
-  }
-
-  .shimmer-gold {
-    background: linear-gradient(
-      90deg,
-      hsl(var(--primary)) 0%,
-      hsl(var(--brand-400)) 50%,
-      hsl(var(--primary)) 100%
-    );
-    background-size: 200% auto;
-    animation: shimmer 3s linear infinite;
-  }
-
   /* ═══════════════════════════════════════════════════════════════════════════
      SCROLLBAR — Custom scrollbar
      ═══════════════════════════════════════════════════════════════════════════ */
@@ -425,10 +403,7 @@
    KEYFRAME ANIMATIONS — Smooth, premium motion
    ═══════════════════════════════════════════════════════════════════════════════ */
 
-@keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
+
 
 @keyframes fadeInUp {
   from {
@@ -1296,3 +1271,6 @@ button:focus-visible {
     -webkit-overflow-scrolling: touch;
   }
 }
+
+/* Keep content width stable as asynchronous pages gain a scrollbar. */
+html, .dashboard-scroll { scrollbar-gutter: stable; }

@@ -1,3 +1,4 @@
+import { LoadingRegion } from '@/components/ui/loading-region';
 import { useState, useEffect } from 'react';
 import { useDatabase } from '@/lib/backend';
 import { useThemeStore } from '@/store/themeStore';
@@ -5,7 +6,6 @@ import { useAuthStore } from '@/store/authStore';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Sun, Moon, Monitor, Save, RefreshCw, GitBranch, Bell } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
 
 type Tab = 'mlm' | 'appearance' | 'notifications';
 
@@ -61,24 +61,7 @@ export default function SettingsPage() {
   const setC = (key: string, val: string) => setConfig(prev => ({ ...prev, [key]: val }));
 
   if (loading) {
-    return (
-      <div className="space-y-6 max-w-5xl">
-        <div className="space-y-1.5"><Skeleton className="h-8 w-64" /><Skeleton className="h-4 w-56" /></div>
-        <div className="flex flex-col lg:flex-row lg:items-start gap-6">
-          <Skeleton className="hidden lg:block w-56 h-40 rounded-xl" />
-          <div className="flex-1 space-y-4">
-            <Skeleton className="lg:hidden h-12 w-full rounded-xl" />
-            <div className="bg-card border border-border rounded-xl p-6 space-y-4">
-              <Skeleton className="h-5 w-40" />
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {Array.from({length:4}).map((_,i)=>(<div key={i} className="space-y-1.5"><Skeleton className="h-3 w-32" /><Skeleton className="h-11 w-full rounded-lg" /></div>))}
-              </div>
-              <div className="pt-4 border-t border-border flex justify-end"><Skeleton className="h-10 w-28 rounded-lg" /></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+    return <LoadingRegion className="min-h-[calc(100dvh-8rem)]" />;
   }
 
   return (
@@ -266,20 +249,7 @@ function NotificationPreferences() {
     setSaving(false);
   };
 
-  if (loading) return (
-    <div className="bg-card border border-border rounded-xl p-5 sm:p-6 space-y-3">
-      <Skeleton className="h-5 w-48" />
-      {Array.from({length:6}).map((_,i)=>(
-        <div key={i} className="flex items-center justify-between py-3 border-b border-border last:border-0">
-          <div className="space-y-1">
-            <Skeleton className="h-4 w-36" />
-            <Skeleton className="h-3 w-56" />
-          </div>
-          <Skeleton className="w-11 h-6 rounded-full" />
-        </div>
-      ))}
-    </div>
-  );
+  if (loading) return <LoadingRegion className="min-h-[calc(100dvh-8rem)]" />;
   if (!prefs) return null;
 
   const items = [

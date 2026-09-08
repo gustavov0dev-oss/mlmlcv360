@@ -1,3 +1,4 @@
+import { LoadingRegion } from '@/components/ui/loading-region';
 import { useState, useEffect } from 'react';
 import { useBackend, useDatabase, useStorage } from '@/lib/backend';
 import { useAuthStore } from '@/store/authStore';
@@ -89,31 +90,7 @@ export default function ProfilePage() {
   }, [user]);
 
   if (!user) {
-    return (
-      <div className="space-y-4 sm:space-y-6 max-w-6xl">
-        <div className="space-y-1.5">
-          <div className="h-7 w-48 bg-muted rounded-lg animate-pulse" />
-          <div className="h-4 w-64 bg-muted rounded animate-pulse" />
-        </div>
-        <div className="bg-card border border-border rounded-xl p-4 sm:p-6 space-y-4">
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-muted animate-pulse" />
-            <div className="space-y-2">
-              <div className="h-5 w-36 bg-muted rounded animate-pulse" />
-              <div className="h-3 w-28 bg-muted rounded animate-pulse" />
-            </div>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="space-y-1.5">
-                <div className="h-3 w-24 bg-muted rounded animate-pulse" />
-                <div className="h-10 w-full bg-muted rounded-lg animate-pulse" />
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
+    return <LoadingRegion className="min-h-[calc(100dvh-8rem)]" />;
   }
 
   const handleAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -1,3 +1,4 @@
+import { LoadingRegion } from '@/components/ui/loading-region';
 import {
   useState, useRef, useEffect, useMemo, WheelEvent,
   PointerEvent as RPointerEvent, TouchEvent as RTouchEvent,
@@ -7,7 +8,6 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { Users, UserPlus, RefreshCw, ZoomIn, ZoomOut, Maximize2, List, Network, Search, X, Loader as Loader2, Copy, CircleCheck as CheckCircle, Link2, Medal, Award, Gem, Disc, Crown, ChevronRight, Move, CreditCard as Edit2, Trash2, Eye, Send, Mail, UserCheck, TrendingDown, TriangleAlert as AlertTriangle, Star, Plus } from 'lucide-react';
 import { useNetwork, type Profile } from '@/modules/mlm';
-import { Skeleton } from '@/components/ui/skeleton';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface NetProfile extends Profile {
@@ -1311,73 +1311,7 @@ export default function NetworkPage() {
   };
 
   if (loading) {
-    return (
-      <div className="space-y-5">
-        {/* Header skeleton */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="space-y-1.5">
-            <Skeleton className="h-8 w-48" />
-            <Skeleton className="h-4 w-32" />
-          </div>
-          <div className="flex gap-2">
-            <Skeleton className="h-9 w-24 rounded-xl" />
-            <Skeleton className="h-9 w-24 rounded-xl" />
-            <Skeleton className="h-9 w-9 rounded-xl" />
-          </div>
-        </div>
-
-        {/* 4 stat cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="bg-card border border-border rounded-xl p-4 flex items-center gap-3">
-              <Skeleton className="w-10 h-10 rounded-xl flex-shrink-0" />
-              <div className="space-y-1.5 flex-1">
-                <Skeleton className="h-6 w-12" />
-                <Skeleton className="h-3 w-20" />
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Tree canvas skeleton – simplified node/edge representation */}
-        <div className="bg-card border border-border rounded-xl overflow-hidden" style={{ height: 480 }}>
-          <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-            <Skeleton className="h-4 w-32" />
-            <div className="flex gap-1">
-              {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-8 w-8 rounded-lg" />)}
-            </div>
-          </div>
-          <div className="relative w-full" style={{ height: 432 }}>
-            {/* Root node */}
-            <div className="absolute" style={{ left: '50%', top: 40, transform: 'translateX(-50%)' }}>
-              <Skeleton className="w-16 h-16 rounded-full" />
-              <Skeleton className="h-3 w-24 mt-2 mx-auto" />
-            </div>
-            {/* Connector line down */}
-            <div className="absolute" style={{ left: '50%', top: 112, width: 2, height: 40, transform: 'translateX(-50%)', background: 'hsl(var(--border))' }} />
-            {/* Level-2 horizontal line */}
-            <div className="absolute" style={{ left: '20%', top: 152, width: '60%', height: 2, background: 'hsl(var(--border))' }} />
-            {/* Level-2 nodes – 3 nodes */}
-            {[20, 45, 70].map((left, i) => (
-              <div key={i} className="absolute" style={{ left: `${left}%`, top: 154, transform: 'translateX(-50%)' }}>
-                <div className="absolute" style={{ left: '50%', top: -2, width: 2, height: 30, transform: 'translateX(-50%)', background: 'hsl(var(--border))' }} />
-                <div className="mt-7">
-                  <Skeleton className="w-12 h-12 rounded-full" />
-                  <Skeleton className="h-3 w-16 mt-1.5 mx-auto" />
-                </div>
-              </div>
-            ))}
-            {/* Level-3 hint nodes */}
-            {[12, 28, 55, 65].map((left, i) => (
-              <div key={i} className="absolute" style={{ left: `${left}%`, top: 260, transform: 'translateX(-50%)' }}>
-                <Skeleton className="w-10 h-10 rounded-full opacity-50" />
-                <Skeleton className="h-2 w-12 mt-1 mx-auto opacity-50" />
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
+    return <LoadingRegion className="min-h-[calc(100dvh-8rem)]" />;
   }
 
   const myName = user?.full_name || user?.username || 'Mi Red';

@@ -1,3 +1,4 @@
+import { LoadingRegion } from '@/components/ui/loading-region';
 import { useState, useEffect } from 'react';
 import { useDatabase } from '@/lib/backend';
 import { useAuthStore } from '@/store/authStore';
@@ -10,7 +11,6 @@ import {
   Crown, Zap, Lock, ExternalLink, Smartphone, ShieldCheck,
   DollarSign,
 } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
 import { useNavigate, useSearchParams } from '@/lib/router';
 
 type Tab = 'current' | 'change';
@@ -262,33 +262,7 @@ export default function MyPlanPage() {
   };
 
   if (loading) {
-    return (
-      <div className="space-y-6 max-w-4xl">
-        <div className="space-y-1.5"><Skeleton className="h-8 w-28" /><Skeleton className="h-4 w-48" /></div>
-        <Skeleton className="h-10 w-48 rounded-xl" />
-        {/* Current plan card */}
-        <div className="bg-card border border-border rounded-xl p-6 space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-            <div className="flex items-start gap-4">
-              <Skeleton className="w-12 h-12 rounded-xl flex-shrink-0" />
-              <div className="space-y-2"><Skeleton className="h-6 w-36" /><Skeleton className="h-5 w-20 rounded-full" /></div>
-            </div>
-            <div className="flex flex-col gap-2"><Skeleton className="h-10 w-32 rounded-xl" /><Skeleton className="h-10 w-32 rounded-xl" /></div>
-          </div>
-          <Skeleton className="h-9 w-32" />
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {Array.from({length:4}).map((_,i)=>(<div key={i} className="bg-muted/50 rounded-xl p-3 space-y-1"><Skeleton className="h-3 w-16" /><Skeleton className="h-4 w-20" /></div>))}
-          </div>
-        </div>
-        {/* Features card */}
-        <div className="bg-card border border-border rounded-xl p-5 space-y-3">
-          <Skeleton className="h-4 w-40" />
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {Array.from({length:6}).map((_,i)=>(<div key={i} className="flex items-center gap-2"><Skeleton className="w-3.5 h-3.5 rounded-full flex-shrink-0" /><Skeleton className="h-4 w-40" /></div>))}
-          </div>
-        </div>
-      </div>
-    );
+    return <LoadingRegion className="min-h-[calc(100dvh-8rem)]" />;
   }
 
   return (

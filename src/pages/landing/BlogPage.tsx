@@ -1,3 +1,4 @@
+import { LoadingRegion, StableRegion } from '@/components/ui/loading-region';
 import { useState, useMemo, useEffect } from 'react';
 import { Link } from '@/lib/router';
 import { Clock, Eye, Video, Search, FileText, Newspaper, ChevronLeft, ChevronRight, Play, TrendingUp } from 'lucide-react';
@@ -50,22 +51,7 @@ const typeMeta: Record<ContentType, { label: string; icon: typeof Video; badgeCl
   news: { label: 'Noticia', icon: Newspaper, badgeClass: 'bg-amber-600/55 text-white backdrop-blur-sm shadow-amber-950/30' },
 };
 
-function SkeletonCard() {
-  return (
-    <div className="border border-border/40 rounded-lg overflow-hidden">
-      <div className="aspect-video shimmer" />
-      <div className="p-4 space-y-3">
-        <div className="h-3 w-20 shimmer rounded-full" />
-        <div className="h-4 w-full shimmer rounded" />
-        <div className="h-4 w-2/3 shimmer rounded" />
-        <div className="flex items-center gap-2 pt-2">
-          <div className="w-7 h-7 rounded-full shimmer" />
-          <div className="h-3 w-24 shimmer rounded" />
-        </div>
-      </div>
-    </div>
-  );
-}
+
 
 function MetaBadge({ type }: { type: ContentType }) {
   const meta = typeMeta[type];
@@ -300,12 +286,8 @@ export default function BlogPage() {
       </section>
 
       <section className="py-8 sm:py-10">
-        <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
-          {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
-            </div>
-          ) : paginated.length === 0 ? (
+        <StableRegion className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
+          {loading ? <LoadingRegion className="min-h-[24rem]" /> : paginated.length === 0 ? (
             <div className="text-center py-20">
               <div className="w-14 h-14 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4">
                 <Search className="w-6 h-6 text-muted-foreground/50" />
@@ -345,7 +327,7 @@ export default function BlogPage() {
               )}
             </>
           )}
-        </div>
+        </StableRegion>
       </section>
     </>
   );

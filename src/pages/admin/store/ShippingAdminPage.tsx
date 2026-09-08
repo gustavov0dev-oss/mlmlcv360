@@ -1,10 +1,10 @@
+import { LoadingRegion } from '@/components/ui/loading-region';
 import { useState, useEffect, useCallback } from 'react';
 import { useDatabase } from '@/lib/backend';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import type { ShippingZone, ShippingMethod } from '@/lib/storeTypes';
 import { Plus, Save, Loader as Loader2, Truck, Globe, X, Pencil, Trash2 } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
 import { DeleteConfirmDialog } from '@/components/admin/DeleteConfirmDialog';
 
 export default function ShippingAdminPage() {
@@ -80,19 +80,7 @@ export default function ShippingAdminPage() {
     }
   };
 
-  if (loading) return (
-    <div className="space-y-5">
-      <div className="flex items-center justify-between"><div className="space-y-1.5"><Skeleton className="h-8 w-56" /><Skeleton className="h-4 w-48" /></div><Skeleton className="h-10 w-32 rounded-xl" /></div>
-      <div className="columns-1 lg:columns-2 gap-5 space-y-5">
-        {Array.from({length:2}).map((_,i) => (
-          <div key={i} className="break-inside-avoid bg-card border border-border rounded-xl overflow-hidden">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-border"><Skeleton className="h-4 w-40" /><div className="flex gap-2"><Skeleton className="h-4 w-12" /><Skeleton className="h-4 w-16" /></div></div>
-            <div className="p-5 space-y-2">{Array.from({length:2}).map((_,j)=>(<Skeleton key={j} className="h-14 w-full rounded-xl" />))}</div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+  if (loading) return <LoadingRegion className="min-h-[calc(100dvh-8rem)]" />;
 
   return (
     <div className="space-y-5 pb-10">

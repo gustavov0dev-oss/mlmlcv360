@@ -1,3 +1,4 @@
+import { LoadingRegion, StableRegion } from '@/components/ui/loading-region';
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/backend/client';
 import { useAuthStore } from '@/store/authStore';
@@ -5,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { FileText, Search, RefreshCw, Clock, CircleCheck as CheckCheck, CircleAlert as AlertCircle, Circle as XCircle, X, ChevronRight, ArrowLeft } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Link, useNavigate } from '@/lib/router';
 import { cn } from '@/lib/utils';
 
@@ -209,7 +209,7 @@ export default function MyComplaintsPage() {
   });
 
   return (
-    <div className="space-y-6">
+    <StableRegion className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -247,22 +247,7 @@ export default function MyComplaintsPage() {
       </div>
 
       {/* List */}
-      {loading ? (
-        <div className="space-y-2.5">
-          {[0, 1, 2].map(i => (
-            <div key={i} className="bg-card border border-border/60 rounded-xl p-4">
-              <div className="flex items-center gap-3">
-                <div className="flex-1 space-y-2">
-                  <div className="flex gap-2"><Skeleton className="h-4 w-28" /><Skeleton className="h-5 w-16 rounded-full" /></div>
-                  <Skeleton className="h-3 w-full" />
-                  <Skeleton className="h-3 w-2/3" />
-                </div>
-                <Skeleton className="w-5 h-5 rounded" />
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : filtered.length === 0 ? (
+      {loading ? <LoadingRegion className="min-h-[24rem]" /> : filtered.length === 0 ? (
         <div className="py-20 text-center">
           <div className="w-12 h-12 rounded-xl bg-muted/60 flex items-center justify-center mx-auto mb-4">
             <FileText className="w-6 h-6 text-muted-foreground/40" />
@@ -326,6 +311,6 @@ export default function MyComplaintsPage() {
 
       {/* Detail panel */}
       {selected && <DetailPanel complaint={selected} onClose={() => setSelected(null)} />}
-    </div>
+    </StableRegion>
   );
 }

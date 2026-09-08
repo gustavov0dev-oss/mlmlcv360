@@ -1,3 +1,4 @@
+import { LoadingRegion, StableRegion } from '@/components/ui/loading-region';
 import { useState, useEffect, useCallback } from 'react';
 import { useDatabase } from '@/lib/backend';
 import { cn } from '@/lib/utils';
@@ -7,7 +8,6 @@ import {
   Star, Check, X, Trash2, MessageSquare,
   Search, Eye, ThumbsUp, RefreshCw, Package
 } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
 import { DeleteConfirmDialog } from '@/components/admin/DeleteConfirmDialog';
 
 function StarsDisplay({ value, size = 14 }: { value: number; size?: number }) {
@@ -104,7 +104,7 @@ export default function ReviewsAdminPage() {
   ];
 
   return (
-    <div className="space-y-5 pb-10">
+    <StableRegion className="space-y-5 pb-10">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
@@ -152,14 +152,7 @@ export default function ReviewsAdminPage() {
       </div>
 
       {/* Reviews table / list */}
-      {loading ? (
-        <div className="bg-card border border-border rounded-xl overflow-hidden">
-          <table className="w-full text-sm min-w-[700px]">
-            <thead><tr className="border-b border-border bg-muted/30">{['Producto','Cliente','Calificación','Reseña','Estado','Fecha','Acciones'].map(h=><th key={h} className="text-left px-4 py-3 text-xs font-bold text-muted-foreground uppercase">{h}</th>)}</tr></thead>
-            <tbody>{Array.from({length:7}).map((_,i)=>(<tr key={i} className="border-b border-border/50"><td className="px-4 py-3"><div className="flex items-center gap-2.5"><Skeleton className="w-9 h-9 rounded-lg flex-shrink-0" /><Skeleton className="h-4 w-28" /></div></td><td className="px-4 py-3"><div className="flex items-center gap-2"><Skeleton className="w-7 h-7 rounded-full flex-shrink-0" /><Skeleton className="h-4 w-20" /></div></td><td className="px-4 py-3"><Skeleton className="h-4 w-20" /></td><td className="px-4 py-3"><Skeleton className="h-4 w-32" /></td><td className="px-4 py-3"><Skeleton className="h-6 w-20 rounded-full" /></td><td className="px-4 py-3"><Skeleton className="h-4 w-20" /></td><td className="px-4 py-3"><div className="flex gap-1"><Skeleton className="w-7 h-7 rounded-lg" /><Skeleton className="w-7 h-7 rounded-lg" /><Skeleton className="w-7 h-7 rounded-lg" /></div></td></tr>))}</tbody>
-          </table>
-        </div>
-      ) : filteredReviews.length === 0 ? (
+      {loading ? <LoadingRegion className="min-h-[24rem]" /> : filteredReviews.length === 0 ? (
         <div className="text-center py-16 border border-dashed border-border rounded-xl">
           <MessageSquare className="w-12 h-12 mx-auto mb-3 text-muted-foreground/20" />
           <p className="font-semibold text-foreground">No hay reseñas en esta categoría</p>
@@ -353,6 +346,6 @@ export default function ReviewsAdminPage() {
         description={<>Se eliminará permanentemente la reseña de <strong>{deleteTarget?.profile?.full_name || 'Anónimo'}</strong>. Esta acción no se puede deshacer.</>}
         loading={!!deletingId}
       />
-    </div>
+    </StableRegion>
   );
 }

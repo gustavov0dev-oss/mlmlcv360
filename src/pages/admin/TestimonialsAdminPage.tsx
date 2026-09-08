@@ -1,9 +1,9 @@
+import { LoadingRegion, StableRegion } from '@/components/ui/loading-region';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useDatabase, useStorage } from '@/lib/backend';
 import { useAuthStore } from '@/store/authStore';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import { Skeleton } from '@/components/ui/skeleton';
 import { DeleteConfirmDialog } from '@/components/admin/DeleteConfirmDialog';
 import {
   Plus, Trash2, Pencil, X, Save, RefreshCw, Star, Eye,
@@ -434,22 +434,8 @@ export default function TestimonialsAdminPage() {
       </div>
 
       {/* List */}
-      <div className="border border-border/60 rounded-xl overflow-hidden bg-card">
-        {loading ? (
-          <div className="divide-y divide-border/50">
-            {[0,1,2].map(i => (
-              <div key={i} className="p-4 flex gap-4 items-start">
-                <Skeleton className="w-14 h-14 rounded-xl shrink-0" />
-                <div className="flex-1 space-y-2">
-                  <Skeleton className="h-4 w-1/3" />
-                  <Skeleton className="h-3 w-3/4" />
-                  <Skeleton className="h-3 w-1/2" />
-                </div>
-                <Skeleton className="h-8 w-16 rounded-lg" />
-              </div>
-            ))}
-          </div>
-        ) : filtered.length === 0 ? (
+      <StableRegion className="border border-border/60 rounded-xl overflow-hidden bg-card">
+        {loading ? <LoadingRegion className="min-h-[24rem]" /> : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center px-4">
             <div className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center mb-3">
               <Quote className="h-5 w-5 text-muted-foreground/40" />
@@ -484,7 +470,7 @@ export default function TestimonialsAdminPage() {
             </div>
           </>
         )}
-      </div>
+      </StableRegion>
 
       {/* Hint */}
       <div className="bg-primary/10 border border-primary/20 rounded-xl p-4">

@@ -1,3 +1,4 @@
+import { LoadingRegion, StableRegion } from '@/components/ui/loading-region';
 import React from 'react';
 import { useState, useEffect } from 'react';
 import { useDatabase } from '@/lib/backend';
@@ -247,15 +248,11 @@ export default function CartPage() {
           </div>
 
           {/* Shipping selector */}
-          <div className="mt-8">
+          <StableRegion className="mt-8">
             <h3 className="text-sm font-bold text-foreground flex items-center gap-2 mb-1">
               <Truck className="w-4 h-4 text-primary" /> Estimación de envío
             </h3>
-            {loadingShipping ? (
-              <div className="space-y-2 pt-3">
-                {Array.from({length: 2}).map((_, i) => <div key={i} className="h-12 bg-muted/30 rounded-lg animate-pulse" />)}
-              </div>
-            ) : (
+            {loadingShipping ? <LoadingRegion className="min-h-[7rem]" /> : (
               <div className="divide-y divide-border/20 border-t border-border/20">
                 {shippingMethods.map(m => {
                   const cost = subtotal >= freeThreshold || (m.type === 'free_threshold' && m.free_threshold && subtotal >= m.free_threshold) ? 0 : m.price;
@@ -277,7 +274,7 @@ export default function CartPage() {
                 {shippingMethods.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">El costo de envío se calculará al hacer checkout</p>}
               </div>
             )}
-          </div>
+          </StableRegion>
         </div>
 
         {/* ── Order Summary ── */}

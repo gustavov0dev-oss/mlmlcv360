@@ -1,3 +1,4 @@
+import { LoadingRegion } from '@/components/ui/loading-region';
 import { ReactNode, useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { Toaster } from 'sonner';
 import { AuthProvider, useAuthStore } from '@/store/authStore';
@@ -162,24 +163,12 @@ function MaintenancePage() {
   );
 }
 
-function AppSkeleton() {
-  return (
-    <div className="min-h-screen bg-background flex items-center justify-center">
-      <div className="flex flex-col items-center gap-5">
-        <div className="w-12 h-12 rounded-2xl bg-muted animate-pulse" />
-        <div className="space-y-2 text-center">
-          <div className="h-2.5 w-32 bg-muted rounded-full animate-pulse mx-auto" />
-          <div className="h-2 w-20 bg-muted rounded-full animate-pulse mx-auto" />
-        </div>
-      </div>
-    </div>
-  );
-}
+
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
   const { session, loading } = useAuthStore();
 
-  if (loading) return <AppSkeleton />;
+  if (loading) return <LoadingRegion className="min-h-[100dvh]" />;
   if (!session) return <Navigate to="/login" />;
   return <>{children}</>;
 }
@@ -203,7 +192,7 @@ function MaintenanceGate({ children }: { children: ReactNode }) {
   const isDashboard = pathname.startsWith('/dashboard');
 
   if (isMaintenanceOn && !isDashboard) {
-    if (authLoading) return <AppSkeleton />;
+    if (authLoading) return <LoadingRegion className="min-h-[100dvh]" />;
     if (pathname === '/login' || pathname === '/registro' || pathname === '/reset-password') return <>{children}</>;
     // Admins bypass maintenance entirely — they see the regular content
     if (isAdmin) return <>{children}</>;
@@ -276,12 +265,12 @@ function AppRoutes() {
   // Wait for BOTH config and auth to resolve before rendering routes.
   // This prevents guest-state flashes (e.g. "Empezar gratis" button) for
   // logged-in users during the initial session restore on manual reload.
-  if ((configLoading || authLoading) && !forcedReady) return <AppSkeleton />;
+  if ((configLoading || authLoading) && !forcedReady) return <LoadingRegion className="min-h-[100dvh]" />;
   return (
     <MaintenanceGate>
       <ThemeSync globalTheme={globalTheme} />
       <MaintenanceAutoDisable />
-      <Suspense fallback={<AppSkeleton />}>
+      <Suspense fallback={<LoadingRegion className="min-h-[100dvh]" />}>
         <Routes>
           <Route path="/" element={<SiteLayout><LandingPage /></SiteLayout>} />
           <Route path="/nosotros" element={<SiteLayout><NosotrosPage /></SiteLayout>} />

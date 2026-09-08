@@ -1,9 +1,9 @@
+import { LoadingRegion } from '@/components/ui/loading-region';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/lib/backend/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
@@ -257,16 +257,7 @@ export default function LegalPagesAdminPage() {
   };
 
   if (loading) {
-    return (
-      <div className="space-y-6 max-w-4xl">
-        <div className="flex justify-between items-center">
-          <div className="space-y-1.5"><Skeleton className="h-7 w-52" /><Skeleton className="h-4 w-72" /></div>
-          <Skeleton className="h-9 w-28 rounded-lg" />
-        </div>
-        <Skeleton className="h-10 rounded-lg" />
-        <Skeleton className="h-64 rounded-xl" />
-      </div>
-    );
+    return <LoadingRegion className="min-h-[calc(100dvh-8rem)]" />;
   }
 
   return (

@@ -1,7 +1,7 @@
+import { LoadingRegion, StableRegion } from '@/components/ui/loading-region';
 import { useState, useEffect } from 'react';
 import { Link, useParams } from '@/lib/router';
 import { supabase } from '@/lib/backend/client';
-import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft, CircleAlert as AlertCircle } from 'lucide-react';
 
 interface LegalPageData {
@@ -39,7 +39,7 @@ export default function LegalPage() {
 
   return (
     <main className="flex-1 py-12 sm:py-20">
-      <div className="max-w-2xl mx-auto px-4 sm:px-6">
+      <StableRegion className="max-w-2xl mx-auto px-4 sm:px-6">
 
         {/* Back link */}
         <nav className="mb-10">
@@ -51,15 +51,7 @@ export default function LegalPage() {
           </Link>
         </nav>
 
-        {loading ? (
-          <div className="space-y-3">
-            <Skeleton className="h-3 w-24" />
-            <Skeleton className="h-9 w-3/4" />
-            <div className="pt-6 space-y-2.5">
-              {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-3.5 w-full" />)}
-            </div>
-          </div>
-        ) : notFound ? (
+        {loading ? <LoadingRegion className="min-h-[24rem]" /> : notFound ? (
           <div className="py-20 text-center">
             <AlertCircle className="w-8 h-8 text-muted-foreground/40 mx-auto mb-4" />
             <h1 className="text-lg font-semibold text-foreground mb-1">Página no encontrada</h1>
@@ -99,7 +91,7 @@ export default function LegalPage() {
             />
           </article>
         ) : null}
-      </div>
+      </StableRegion>
     </main>
   );
 }

@@ -1,3 +1,4 @@
+import { LoadingRegion, StableRegion } from '@/components/ui/loading-region';
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from '@/lib/router';
 import { useAuthStore } from '@/store/authStore';
@@ -56,11 +57,11 @@ export default function OportunidadAdminPage() {
   finally { setSaving(false); }
  };
  if(!isAdmin)return <div className="py-16 text-center text-muted-foreground"><Lock className="w-10 h-10 mx-auto mb-3"/>Sin permisos de administrador.</div>;
- return <div className="space-y-6 max-w-4xl">
+ return <StableRegion className="space-y-6 max-w-4xl">
   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"><div><h1 className="text-2xl font-bold text-foreground">Página Oportunidad</h1><p className="text-sm text-muted-foreground mt-0.5">Administra textos, video, botones, tarjetas y comparación.</p></div><button disabled={loading || saving || dirty.size>0} title={dirty.size ? 'Guarda los cambios pendientes antes de actualizar' : 'Actualizar'} onClick={load} className="flex items-center gap-2 px-3 py-2 border border-border rounded-xl text-sm hover:bg-muted disabled:opacity-50"><RefreshCw className={cn('w-4 h-4',loading&&'animate-spin')}/>Actualizar</button></div>
   <Link to="/oportunidad" className="inline-flex text-sm font-medium text-primary hover:underline">Ver página Oportunidad</Link>
   <div className="flex gap-1 p-1 bg-muted rounded-xl overflow-x-auto">{opportunityTabs.map(({id,label})=><button key={id} disabled={saving} onClick={()=>setTab(id)} className={cn('px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap',tab===id?'bg-card text-foreground shadow-sm':'text-muted-foreground hover:text-foreground')}>{label}{dirty.has(id)&&' •'}</button>)}</div>
-  {loading ? <div role="status" className="h-48 animate-pulse bg-muted rounded-xl" aria-label="Cargando contenido"/> : failed ? <div role="alert" className="border border-destructive/30 rounded-xl p-4 text-destructive text-sm">No se pudo cargar el contenido. Pulsa Actualizar para reintentar.</div> : <fieldset disabled={saving} className="space-y-5">
+  {loading ? <LoadingRegion className="min-h-[24rem]" /> : failed ? <div role="alert" className="border border-destructive/30 rounded-xl p-4 text-destructive text-sm">No se pudo cargar el contenido. Pulsa Actualizar para reintentar.</div> : <fieldset disabled={saving} className="space-y-5">
    <div className="bg-card border border-border rounded-xl p-5 sm:p-6 space-y-5"><h2 className="font-bold text-sm">Textos de la sección</h2>
     {Object.entries(section.text).map(([key,value])=><div key={key}><label htmlFor={`opportunity-${key}`} className="block text-xs font-semibold mb-1.5">{opportunityFieldLabels[key] || key}</label>{['subtitle','description'].includes(key)?<textarea id={`opportunity-${key}`} rows={3} value={value} onChange={e=>edit({...section,text:{...section.text,[key]:e.target.value}})} className={inputClass}/>:<input id={`opportunity-${key}`} value={value} onChange={e=>edit({...section,text:{...section.text,[key]:e.target.value}})} className={inputClass}/>} {key==='highlight'&&<p className="text-xs text-muted-foreground mt-1">Escribe una parte exacta del título para conservar el efecto de color.</p>}{key.endsWith('_label')&&tab==='hero'&&<p className="text-xs text-muted-foreground mt-1">Déjalo vacío para ocultar el botón.</p>}{key==='video_url'&&<p className="text-xs text-muted-foreground mt-1">Déjalo vacío para ocultar el video.</p>}</div>)}
    </div>
@@ -76,5 +77,5 @@ export default function OportunidadAdminPage() {
    <div className="flex items-center justify-between gap-4 border-t border-border pt-4"><p className="text-xs text-muted-foreground">{dirty.has(tab)?'Cambios pendientes. Guarda para publicarlos.':'Sección sin cambios pendientes.'}</p><button onClick={save} disabled={saving || !dirty.has(tab)} className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-semibold disabled:opacity-50">{saving?<RefreshCw className="w-4 h-4 animate-spin"/>:<Save className="w-4 h-4"/>}Guardar sección</button></div>
   </fieldset>}
   <DeleteConfirmDialog open={!!deleteId} onOpenChange={open=>{if(!open)setDeleteId(null);}} title="Eliminar elemento" description="El elemento se quitará cuando guardes esta sección." onConfirm={()=>{edit({...section,items:section.items.filter(item=>item.id!==deleteId)});setDeleteId(null);}}/>
- </div>;
+ </StableRegion>;
 }

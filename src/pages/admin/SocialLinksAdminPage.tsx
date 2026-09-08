@@ -1,6 +1,6 @@
+import { LoadingRegion, StableRegion } from '@/components/ui/loading-region';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/lib/backend/client';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -360,19 +360,8 @@ export default function SocialLinksAdminPage() {
       )}
 
       {/* Links list */}
-      <div className="border border-border/60 rounded-xl overflow-hidden bg-card">
-        {loading ? (
-          <div className="divide-y divide-border/50">
-            {[0,1,2].map(i => (
-              <div key={i} className="flex items-center gap-3 px-4 py-3.5">
-                <Skeleton className="w-10 h-10 rounded-xl shrink-0" />
-                <div className="flex-1 space-y-2"><Skeleton className="h-4 w-1/3" /><Skeleton className="h-3 w-1/2" /></div>
-                <Skeleton className="w-10 h-5 rounded-full" />
-                <Skeleton className="w-8 h-8 rounded-lg" />
-              </div>
-            ))}
-          </div>
-        ) : links.length === 0 ? (
+      <StableRegion className="border border-border/60 rounded-xl overflow-hidden bg-card">
+        {loading ? <LoadingRegion className="min-h-[24rem]" /> : links.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center px-4">
             <div className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center mb-3">
               <Globe className="h-5 w-5 text-muted-foreground/40" />
@@ -456,7 +445,7 @@ export default function SocialLinksAdminPage() {
             </div>
           </>
         )}
-      </div>
+      </StableRegion>
 
       <DeleteConfirmDialog
         open={!!deleteTarget}

@@ -1,3 +1,4 @@
+import { LoadingRegion, StableRegion } from '@/components/ui/loading-region';
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useDatabase } from '@/lib/backend';
 import { useAuthStore } from '@/store/authStore';
@@ -24,35 +25,11 @@ const SORT_OPTIONS = [
   { value: 'rating', label: 'Mejor valorados' },
 ];
 
-function Skeleton({ className }: { className?: string }) {
-  return <div className={cn('animate-pulse rounded-lg', className)} />;
-}
 
-function ProductRowSkeleton() {
-  return (
-    <div className="flex flex-col">
-      <Skeleton className="aspect-square bg-muted w-full" />
-      <div className="pt-3 space-y-2">
-        <Skeleton className="h-2 w-1/3 bg-muted rounded-full" />
-        <Skeleton className="h-3 w-full bg-muted rounded" />
-        <Skeleton className="h-3 w-4/5 bg-muted rounded" />
-        <Skeleton className="h-4 w-2/5 bg-muted rounded mt-1" />
-      </div>
-    </div>
-  );
-}
 
-function CarouselSkeleton() {
-  return (
-    <div className="flex gap-4 sm:gap-5 overflow-hidden -mx-4 px-4 sm:mx-0 sm:px-0">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <div key={i} className="shrink-0 w-[150px] sm:w-[190px]">
-          <ProductRowSkeleton />
-        </div>
-      ))}
-    </div>
-  );
-}
+
+
+
 
 function CompareBar({ products, onRemove, onClear }: {
   products: Product[];
@@ -484,7 +461,7 @@ export default function StorePage() {
       </section>
 
       <div className="flex-1">
-        <div className={cn(PAGE_MAX_W, 'mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8')}>
+        <StableRegion className={cn(PAGE_MAX_W, 'mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8')}>
 
           {loadError && !loading ? (
             <div className="flex flex-col items-center text-center py-14 border border-red-500/20 bg-red-500/5 rounded-2xl">
@@ -498,7 +475,7 @@ export default function StorePage() {
             </div>
           ) : (
             <>
-              {showPromoRails && loading && <div className="mb-10"><CarouselSkeleton /></div>}
+              {showPromoRails && loading && <LoadingRegion className="min-h-[24rem]" />}
               {showPromoRails && !loading && featured.length > 0 && (
                 <section className="mb-10">
                   <div className="flex items-center gap-2 mb-4">
@@ -554,7 +531,7 @@ export default function StorePage() {
                   </div>
                 </aside>
 
-                <div className="flex-1 min-w-0">
+                <StableRegion className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-base font-semibold text-foreground">
                       {activeCat ? activeCat.name : 'Todos los productos'}
@@ -625,11 +602,7 @@ export default function StorePage() {
                     </div>
                   )}
 
-                  {loading ? (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 lg:gap-6">
-                      {Array.from({ length: 12 }).map((_, i) => <ProductRowSkeleton key={i} />)}
-                    </div>
-                  ) : filtered.length === 0 ? (
+                  {loading ? <LoadingRegion className="min-h-[24rem]" /> : filtered.length === 0 ? (
                     <div className="text-center py-20">
                       <div className="w-14 h-14 rounded-2xl bg-muted/30 flex items-center justify-center mx-auto mb-4">
                         <Package className="w-7 h-7 text-muted-foreground/30" />
@@ -660,11 +633,11 @@ export default function StorePage() {
                       )}
                     </>
                   )}
-                </div>
+                </StableRegion>
               </div>
             </>
           )}
-        </div>
+        </StableRegion>
       </div>
 
       <CompareBar products={compareList} onRemove={id => setCompareList(prev => prev.filter(p => p.id !== id))} onClear={() => setCompareList([])} />

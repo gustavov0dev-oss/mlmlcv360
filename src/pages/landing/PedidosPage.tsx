@@ -1,3 +1,4 @@
+import { LoadingRegion, StableRegion } from '@/components/ui/loading-region';
 import { useState, useEffect, useCallback } from 'react';
 import { useDatabase } from '@/lib/backend';
 import { useAuthStore } from '@/store/authStore';
@@ -9,7 +10,6 @@ import {
   Package, ChevronRight, ShoppingBag, Search, Heart, Scale, ShoppingCart,
   Trash2, Star, X,
 } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
 
 const STATUS_CONFIG: Record<string, { label: string; dot: string; text: string; bg: string }> = {
   pending:    { label: 'Pendiente',   dot: 'bg-yellow-500',  text: 'text-yellow-700 dark:text-yellow-400',  bg: 'bg-yellow-500/10' },
@@ -174,7 +174,7 @@ export default function PedidosPage({ initialTab = 'pedidos' }: { initialTab?: T
 
           {/* ── PEDIDOS ─────────────────────────────────── */}
           {tab === 'pedidos' && (
-            <div className="space-y-6">
+            <StableRegion className="space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                   <h1 className="text-xl font-semibold text-foreground tracking-tight">Mis Pedidos</h1>
@@ -195,20 +195,7 @@ export default function PedidosPage({ initialTab = 'pedidos' }: { initialTab?: T
                 )}
               </div>
 
-              {loadingOrders ? (
-                <div className="divide-y divide-border">
-                  {Array.from({ length: 4 }).map((_, i) => (
-                    <div key={i} className="py-5 flex items-center gap-4">
-                      <Skeleton className="w-12 h-12 rounded-md flex-shrink-0" />
-                      <div className="flex-1 space-y-2">
-                        <div className="flex items-center gap-2"><Skeleton className="h-4 w-28" /><Skeleton className="h-3 w-16" /></div>
-                        <Skeleton className="h-3 w-40" />
-                      </div>
-                      <Skeleton className="w-4 h-4 flex-shrink-0" />
-                    </div>
-                  ))}
-                </div>
-              ) : filteredOrders.length === 0 ? (
+              {loadingOrders ? <LoadingRegion className="min-h-[24rem]" /> : filteredOrders.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-24 gap-3">
                   <div className="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center">
                     <ShoppingBag className="w-5 h-5 text-muted-foreground" />
@@ -260,12 +247,12 @@ export default function PedidosPage({ initialTab = 'pedidos' }: { initialTab?: T
                   })}
                 </div>
               )}
-            </div>
+            </StableRegion>
           )}
 
           {/* ── FAVORITOS ───────────────────────────────── */}
           {tab === 'favoritos' && (
-            <div className="space-y-6">
+            <StableRegion className="space-y-6">
               <div>
                 <h1 className="text-xl font-semibold text-foreground tracking-tight">Favoritos</h1>
                 <p className="text-muted-foreground text-sm mt-0.5">
@@ -273,18 +260,7 @@ export default function PedidosPage({ initialTab = 'pedidos' }: { initialTab?: T
                 </p>
               </div>
 
-              {loadingWishlist ? (
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
-                  {Array.from({ length: 6 }).map((_, i) => (
-                    <div key={i} className="space-y-2">
-                      <Skeleton className="aspect-square w-full rounded-md" />
-                      <Skeleton className="h-3 w-1/3" />
-                      <Skeleton className="h-4 w-full" />
-                      <Skeleton className="h-4 w-1/2" />
-                    </div>
-                  ))}
-                </div>
-              ) : wishlist.length === 0 ? (
+              {loadingWishlist ? <LoadingRegion className="min-h-[24rem]" /> : wishlist.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-24 gap-3">
                   <div className="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center">
                     <Heart className="w-5 h-5 text-muted-foreground" />
@@ -337,22 +313,18 @@ export default function PedidosPage({ initialTab = 'pedidos' }: { initialTab?: T
                   })}
                 </div>
               )}
-            </div>
+            </StableRegion>
           )}
 
           {/* ── COMPARAR ────────────────────────────────── */}
           {tab === 'comparar' && (
-            <div className="space-y-6">
+            <StableRegion className="space-y-6">
               <div>
                 <h1 className="text-xl font-semibold text-foreground tracking-tight">Comparar Productos</h1>
                 <p className="text-muted-foreground text-sm mt-0.5">{compareItems.length} productos en comparación</p>
               </div>
 
-              {loadingCompare ? (
-                <div className="space-y-4">
-                  {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-16 w-full rounded-md" />)}
-                </div>
-              ) : compareItems.length < 2 ? (
+              {loadingCompare ? <LoadingRegion className="min-h-[24rem]" /> : compareItems.length < 2 ? (
                 <div className="flex flex-col items-center justify-center py-24 gap-3">
                   <div className="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center">
                     <Scale className="w-5 h-5 text-muted-foreground" />
@@ -454,7 +426,7 @@ export default function PedidosPage({ initialTab = 'pedidos' }: { initialTab?: T
                   </table>
                 </div>
               )}
-            </div>
+            </StableRegion>
           )}
 
         </div>

@@ -1,3 +1,4 @@
+import { LoadingRegion, StableRegion } from '@/components/ui/loading-region';
 import { Link } from "@/lib/router";
 import {
   ArrowRight,
@@ -30,7 +31,6 @@ import { supabase } from "@/lib/backend/client";
 import { useCart } from "@/store/cartStore";
 import type { Product, ProductCategory } from "@/lib/storeTypes";
 import ProductCard from "@/components/store/ProductCard";
-import { Skeleton } from "@/components/ui/skeleton";
 
 const rankIconMap: Record<
   string,
@@ -212,7 +212,7 @@ function StoreSection() {
 
   return (
     <section className="py-16 sm:py-24">
-      <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
+      <StableRegion className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
           <div>
             <span className="text-xs font-semibold text-primary uppercase tracking-widest mb-3 block">
@@ -277,18 +277,7 @@ function StoreSection() {
           </div>
         )}
 
-        {loading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div
-                key={i}
-                className="bg-white/70 dark:bg-white/[0.05] rounded-xl overflow-hidden border border-border/40"
-              >
-                <Skeleton className="aspect-square" />
-              </div>
-            ))}
-          </div>
-        ) : filtered.length === 0 ? (
+        {loading ? <LoadingRegion className="min-h-[24rem]" /> : filtered.length === 0 ? (
           <div className="py-20 flex flex-col items-center justify-center gap-2 text-center">
             <p className="text-sm text-muted-foreground/70">
               No hay productos en esta categoría
@@ -307,7 +296,7 @@ function StoreSection() {
             ))}
           </div>
         )}
-      </div>
+      </StableRegion>
     </section>
   );
 }

@@ -1,3 +1,4 @@
+import { LoadingRegion } from '@/components/ui/loading-region';
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useDatabase, useStorage } from '@/lib/backend';
 import { useCart } from '@/store/cartStore';
@@ -1112,19 +1113,7 @@ export default function ProductDetailPage() {
   ];
 
   if (loading) {
-    return (
-      <>
-        <div className="pt-16 max-w-6xl mx-auto px-4 sm:px-6 py-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="space-y-2.5">
-            <div className="aspect-square bg-muted/40 rounded-lg animate-pulse" />
-            <div className="flex gap-2">{[...Array(4)].map((_, i) => <div key={i} className="w-14 h-14 bg-muted/40 rounded-md animate-pulse" />)}</div>
-          </div>
-          <div className="space-y-4">
-            {[...Array(6)].map((_, i) => <div key={i} className="h-5 bg-muted/40 rounded animate-pulse" style={{ width: `${60 + i * 5}%` }} />)}
-          </div>
-        </div>
-      </>
-    );
+    return <LoadingRegion className="min-h-[calc(100dvh-8rem)]" />;
   }
 
   if (!product) {

@@ -1,3 +1,4 @@
+import { LoadingRegion, StableRegion } from '@/components/ui/loading-region';
 import { useState, useEffect, useCallback } from 'react';
 import { useDatabase, useStorage } from '@/lib/backend';
 import { supabase } from '@/lib/backend/client';
@@ -666,7 +667,7 @@ export default function UsersPage() {
 
       {/* Table */}
       <div className="bg-card border border-border rounded-xl overflow-hidden">
-        <div className="overflow-x-auto">
+        <StableRegion className="overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="border-b border-border bg-muted/40">
@@ -679,15 +680,7 @@ export default function UsersPage() {
               </tr>
             </thead>
             <tbody>
-              {loading ? (
-                Array.from({ length: 5 }).map((_, i) => (
-                  <tr key={i} className="border-b border-border">
-                    <td colSpan={6} className="py-3 px-4">
-                      <div className="h-9 bg-muted animate-pulse rounded-lg" />
-                    </td>
-                  </tr>
-                ))
-              ) : users.length === 0 ? (
+              {loading ? <tr><td colSpan={20}><LoadingRegion className="min-h-[24rem]" /></td></tr> : users.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-16 text-center text-muted-foreground text-sm">
                     No se encontraron usuarios
@@ -783,7 +776,7 @@ export default function UsersPage() {
               ))}
             </tbody>
           </table>
-        </div>
+        </StableRegion>
 
         {/* Pagination */}
         {totalPages > 1 && (
