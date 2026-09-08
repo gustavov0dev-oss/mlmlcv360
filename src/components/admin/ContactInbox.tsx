@@ -46,6 +46,7 @@ function ContactThread({id,onBack}:{id:string;onBack:()=>void}){
  const [loading,setLoading]=useState(true);const [failed,setFailed]=useState(false);const [busy,setBusy]=useState(false);
  const [subject,setSubject]=useState('');const [html,setHtml]=useState('');const [dirty,setDirty]=useState(false);
  const [draftId,setDraftId]=useState(()=>crypto.randomUUID());const [configured,setConfigured]=useState<boolean|null>(null);
+ const [checking,setChecking]=useState(false);const [checkResult,setCheckResult]=useState('');const checkLock=useRef(false);
  const [notice,setNotice]=useState('');const lock=useRef(false);const initialized=useRef(false);
  const load=useCallback(async()=>{
   try{const [{data:row,error},{data:replies,error:replyError}]=await Promise.all([supabase.from('contact_messages').select('id,name,email,subject,message,status,created_at,replied_at').eq('id',id).single(),supabase.from('contact_replies').select(replyColumns).eq('contact_message_id',id).order('created_at')]);
@@ -55,7 +56,19 @@ function ContactThread({id,onBack}:{id:string;onBack:()=>void}){
    setFailed(false);
   }catch{setFailed(true);}finally{setLoading(false);}
  },[id,user?.id,cacheKey]);
- useEffect(()=>{void load();void supabase.functions.invoke('contact-reply',{method:'GET'}).then(({data,error})=>{setConfigured(error?null:!!data?.configured);});},[load]);
+ const checkConfiguration=useCallback(async(manual=false)=>{
+  if(checkLock.current)return;checkLock.current=true;setChecking(true);setCheckResult('');
+  const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),15000);
+  try{
+   const {data,error}=await supabase.functions.invoke('contact-reply',{method:'GET',signal:controller.signal});
+   if(error||typeof data?.configured!=='boolean')throw new Error();
+   setConfigured(data.configured);
+   const result=data.configured?'Configuración detectada. Ya puedes intentar enviar respuestas.':'Comprobación completada: todavía falta configurar el correo de salida. Este botón revisa la configuración; no la activa.';
+   setCheckResult(result);if(manual){if(data.configured)toast.success(result);else toast.info(result);}
+  }catch{setConfigured(null);const result='No se pudo comprobar el correo. Revisa tu conexión y vuelve a intentarlo.';setCheckResult(result);if(manual)toast.error(result);}
+  finally{clearTimeout(timer);checkLock.current=false;setChecking(false);}
+ },[]);
+ useEffect(()=>{void load();void checkConfiguration();},[load,checkConfiguration]);
  useEffect(()=>{if(!dirty)return;const warn=(event:BeforeUnloadEvent)=>{event.preventDefault();event.returnValue='';};window.addEventListener('beforeunload',warn);return()=>window.removeEventListener('beforeunload',warn);},[dirty]);
  useEffect(()=>{if(dirty)pendingDrafts.set(cacheKey,{subject,html,draftId});},[dirty,subject,html,draftId,cacheKey]);
  const saveDraft=async()=>{
@@ -84,8 +97,12 @@ function ContactThread({id,onBack}:{id:string;onBack:()=>void}){
   <button onClick={back} disabled={busy} className="inline-flex gap-2 items-center text-sm text-primary"><ArrowLeft className="w-4 h-4"/>Volver a mensajes</button>
   <article className="bg-card border border-border rounded-xl p-5 sm:p-6 space-y-4"><div className="flex justify-between gap-4"><div className="min-w-0"><h2 className="font-bold text-lg break-words">{message.subject||'Sin asunto'}</h2><p className="text-sm text-muted-foreground break-words mt-1">{message.name} · {message.email}</p></div><span className="text-xs text-primary font-semibold shrink-0">{labels[message.status]}</span></div><p className="text-sm whitespace-pre-wrap break-words leading-relaxed">{message.message}</p><p className="text-xs text-muted-foreground">{new Date(message.created_at).toLocaleString('es-PE')}</p></article>
   {history.filter(reply=>reply.state!=='draft').map(reply=><article key={reply.id} className="border border-border rounded-xl p-5 space-y-3"><div className="flex flex-wrap justify-between gap-2"><h3 className="font-semibold text-sm inline-flex items-center gap-2"><Reply className="w-4 h-4"/>{reply.subject}</h3><span className={cn('text-xs font-medium',reply.state==='sent'?'text-emerald-600':'text-amber-600')}>{replyLabels[reply.state]}</span></div><p className="text-sm whitespace-pre-wrap break-words">{reply.body_text}</p><p className="text-xs text-muted-foreground">{new Date(reply.sent_at||reply.created_at).toLocaleString('es-PE')}</p>{reply.state!=='sent'&&reply.author_id===user?.id&&<button disabled={busy||configured!==true} onClick={()=>send(reply.id)} className="text-sm text-primary disabled:opacity-50">{reply.state==='failed'?'Reintentar envío':'Verificar / reintentar este envío'}</button>}</article>)}
-  {configured===false&&<div role="status" className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 text-sm">El correo de salida está pendiente de configuración. Puedes redactar y guardar borradores; el envío se habilitará cuando esté configurado. <button className="text-primary underline" onClick={()=>{void supabase.functions.invoke('contact-reply',{method:'GET'}).then(({data,error})=>setConfigured(error?null:!!data?.configured));}}>Comprobar configuración</button></div>}
-  {configured===null&&<div className="text-sm text-muted-foreground">No se pudo comprobar el servicio de correo. <button className="text-primary" onClick={()=>{void supabase.functions.invoke('contact-reply',{method:'GET'}).then(({data,error})=>setConfigured(error?null:!!data?.configured));}}>Reintentar</button></div>}
+  <div className={cn('border rounded-xl p-4 text-sm space-y-3',configured===true?'bg-emerald-500/10 border-emerald-500/20':'bg-amber-500/10 border-amber-500/20')} aria-busy={checking}>
+   <p>{configured===true?'El correo de salida tiene una configuración disponible.':configured===false?'El correo de salida está pendiente de configuración. Puedes redactar y guardar borradores.':'Comprueba la disponibilidad del correo de salida.'}</p>
+   <button type="button" disabled={checking} onClick={()=>void checkConfiguration(true)} className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-primary/30 text-primary font-medium hover:bg-primary/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary disabled:opacity-60 disabled:cursor-wait"><RefreshCw className={cn('w-4 h-4',checking&&'animate-spin')}/>{checking?'Comprobando…':'Comprobar configuración'}</button>
+   <p role="status" aria-live="polite" className="text-xs text-muted-foreground">{checking?'Consultando el servicio de correo…':checkResult}</p>
+   {configured===false&&!checking&&<p className="text-xs text-muted-foreground">Para habilitar el envío, configura RESEND_API_KEY y EMAIL_FROM en los secretos de Supabase y vuelve a comprobar.</p>}
+  </div>
   {notice&&<div role="alert" className="border border-amber-500/30 rounded-xl p-4 text-sm">{notice}</div>}
   {canCompose?<section className="bg-card border border-border rounded-xl p-5 sm:p-6 space-y-4"><div><h3 className="font-semibold inline-flex items-center gap-2"><Reply className="w-4 h-4 text-primary"/>Responder</h3><p className="text-sm text-muted-foreground mt-1">La respuesta se enviará a <strong>{message.email}</strong>.</p></div><fieldset disabled={busy} className="space-y-4"><label className="block text-sm font-medium">Asunto<input value={subject} maxLength={250} onChange={event=>{setSubject(event.target.value);setDirty(true);}} className={`${inputClass} mt-1.5`}/></label><div className={busy?'pointer-events-none opacity-60':''}><RichTextEditor editable={!busy} value={html} onChange={value=>{setHtml(value);setDirty(true);}} minHeight={220}/></div><div className="flex flex-wrap items-center justify-between gap-3"><span className="text-xs text-muted-foreground">{dirty?'Cambios sin guardar':history.some(reply=>reply.id===draftId)?'Borrador guardado':'Nueva respuesta'}</span><div className="flex gap-2"><button onClick={persist} disabled={busy||!subject.trim()} className="inline-flex items-center gap-2 border border-border rounded-lg px-4 py-2 text-sm disabled:opacity-50"><Save className="w-4 h-4"/>Guardar borrador</button><button onClick={()=>send()} disabled={busy||configured!==true||!plainText(html)} className="inline-flex items-center gap-2 bg-primary text-primary-foreground rounded-lg px-4 py-2 text-sm disabled:opacity-50">{busy?<RefreshCw className="w-4 h-4 animate-spin"/>:<Send className="w-4 h-4"/>}Enviar respuesta</button></div></div></fieldset></section>:<p className="text-sm text-muted-foreground inline-flex gap-2"><CheckCheck className="w-4 h-4"/>Verifica el envío pendiente antes de redactar otra respuesta.</p>}
  </div>;

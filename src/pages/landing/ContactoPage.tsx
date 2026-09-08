@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Mail, MapPin, Send, CircleCheck as CheckCircle, ChevronDown, Zap, Phone } from 'lucide-react';
 import { toast } from 'sonner';
+import { useAuthStore } from '@/store/authStore';
 import { useConfig } from '@/store/configStore';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/lib/backend/client';
@@ -9,6 +10,8 @@ import { contactDefaults, contactTabs, contactKey, parseContactSection, validCon
 function Highlight({text,mark}:{text:string;mark:string}) { const i=mark?text.indexOf(mark):-1; return i<0?<>{text}</>:<>{text.slice(0,i)}<span className="text-gradient-animated">{mark}</span>{text.slice(i+mark.length)}</>; }
 
 export default function ContactoPage() {
+  const { user, loading: authLoading } = useAuthStore();
+  const editedIdentity = useRef({name:false,email:false});
   const { company, refresh } = useConfig();
   const content = contactDefaults(company);
   let invalid = false;
@@ -18,6 +21,14 @@ export default function ContactoPage() {
   const submitting=useRef(false);
   useEffect(()=>{ void refresh(); const focus=()=>{void refresh();}; window.addEventListener('focus',focus); return ()=>window.removeEventListener('focus',focus); },[refresh]);
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
+  useEffect(() => {
+    if(authLoading)return;
+    submissionId.current=crypto.randomUUID();
+    setForm(previous=>({...previous,
+      name:editedIdentity.current.name?previous.name:(user?.full_name||'').slice(0,120),
+      email:editedIdentity.current.email?previous.email:(user?.email||'').slice(0,254),
+    }));
+  },[authLoading,user?.id,user?.full_name,user?.email]);
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
@@ -117,20 +128,21 @@ export default function ContactoPage() {
                   </div>
                   <h3 className="font-bold text-foreground mb-2">{formText.text.success_title}</h3>
                   <p className="text-sm text-muted-foreground mb-5">{formText.text.success_description}</p>
-                  <button onClick={() => { submissionId.current=crypto.randomUUID(); setSent(false); setForm({ name: '', email: '', subject: '', message: '' }); }}
+                  <button onClick={() => { submissionId.current=crypto.randomUUID(); setSent(false); editedIdentity.current={name:false,email:false}; setForm({ name: user?.full_name?.slice(0,120)||'', email: user?.email?.slice(0,254)||'', subject: '', message: '' }); }}
                     className="text-sm text-primary font-medium self-start">{formText.text.another_label}</button>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="flex-1 flex flex-col gap-4"><fieldset disabled={loading} className="contents">
+                  {user&&!authLoading&&<p className="text-xs text-muted-foreground">Usamos los datos de tu cuenta para facilitarte el contacto. Puedes editarlos aquí sin cambiar tu perfil; responderemos al correo que indiques.</p>}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label htmlFor="contact-name" className="block text-xs font-medium text-muted-foreground mb-1.5">{formText.text.name_label} <span className="text-primary">*</span></label>
-                      <input type="text" id="contact-name" maxLength={120} required value={form.name} onChange={e => setForm(p => { submissionId.current=crypto.randomUUID(); return ({ ...p, name: e.target.value }); })}
+                      <input type="text" id="contact-name" autoComplete="name" maxLength={120} required value={form.name} onChange={e => setForm(p => { submissionId.current=crypto.randomUUID(); editedIdentity.current.name=true; return ({ ...p, name: e.target.value }); })}
                         className="w-full px-3.5 py-2.5 bg-muted/30 border border-border/40 rounded-lg text-sm text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/20" placeholder={formText.text.name_placeholder} />
                     </div>
                     <div>
                       <label htmlFor="contact-email" className="block text-xs font-medium text-muted-foreground mb-1.5">{formText.text.email_label} <span className="text-primary">*</span></label>
-                      <input type="email" id="contact-email" maxLength={254} required value={form.email} onChange={e => setForm(p => { submissionId.current=crypto.randomUUID(); return ({ ...p, email: e.target.value }); })}
+                      <input type="email" id="contact-email" autoComplete="email" maxLength={254} required value={form.email} onChange={e => setForm(p => { submissionId.current=crypto.randomUUID(); editedIdentity.current.email=true; return ({ ...p, email: e.target.value }); })}
                         className="w-full px-3.5 py-2.5 bg-muted/30 border border-border/40 rounded-lg text-sm text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/20" placeholder={formText.text.email_placeholder} />
                     </div>
                   </div>
