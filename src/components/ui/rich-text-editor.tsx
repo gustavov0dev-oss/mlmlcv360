@@ -16,6 +16,7 @@ interface RichTextEditorProps {
   onChange: (html: string) => void;
   placeholder?: string;
   minHeight?: number;
+  editable?: boolean;
 }
 
 function ToolbarButton({
@@ -128,8 +129,9 @@ function Toolbar({ editor }: { editor: Editor }) {
   );
 }
 
-export function RichTextEditor({ value, onChange, minHeight = 300 }: RichTextEditorProps) {
+export function RichTextEditor({ value, onChange, minHeight = 300, editable = true }: RichTextEditorProps) {
   const editor = useEditor({
+    editable,
     extensions: [
       StarterKit.configure({
         heading: { levels: [2, 3] },
@@ -157,6 +159,8 @@ export function RichTextEditor({ value, onChange, minHeight = 300 }: RichTextEdi
       editor.commands.setContent(value || '', { emitUpdate: false });
     }
   }, [value, editor]);
+
+  useEffect(() => { editor?.setEditable(editable); }, [editor, editable]);
 
   if (!editor) {
     return <div className="border border-border/50 rounded-lg min-h-[40px] bg-muted/20" />;

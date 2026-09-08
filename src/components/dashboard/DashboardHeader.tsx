@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useDatabase } from '@/lib/backend';
 import { Link, useNavigate, useLocation } from '@/lib/router';
 import {
-  Bell, Search, Moon, Sun, Menu, LogOut, User, Settings,
+  Mail, Bell, Search, Moon, Sun, Menu, LogOut, User, Settings,
   ChevronDown, ExternalLink, CheckCheck, Trash2, X, Users, Package, ShoppingBag,
   LayoutDashboard, Crown, Star, Medal, DollarSign, ArrowRight,
 } from 'lucide-react';
@@ -15,6 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import Logo from '@/components/Logo';
+import {useContactNotifications} from '@/hooks/useContactNotifications';
 
 const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.platform);
 
@@ -80,6 +81,8 @@ export default function DashboardHeader() {
   const { pathname } = useLocation();
   const role = (user as any)?.role || 'user';
   const canAccessSettings = role === 'super_admin' || role === 'admin';
+  const contactNotifications=useContactNotifications(canAccessSettings);
+  const openContactMessage=(id?:string)=>{setNotifOpen(false);navigate(`/dashboard/admin/contacto?tab=messages${id?'&message='+id:''}`);};
 
   // Search state
   const [searchOpen, setSearchOpen] = useState(false);
@@ -533,13 +536,14 @@ export default function DashboardHeader() {
           <div className="relative">
             <button
               id="bell-btn"
+              aria-label={`Notificaciones: ${unread + contactNotifications.count} nuevas, ${contactNotifications.count} de contacto`}
               onClick={() => { setNotifOpen(v => !v); if (!notifOpen) fetchNotifications(); }}
               className="relative w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted/50 active:bg-muted text-muted-foreground hover:text-foreground transition-colors"
             >
               <Bell className="w-5 h-5" />
-              {unread > 0 && (
+              {unread + contactNotifications.count > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-0.5 bg-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-sm ring-2 ring-background">
-                  {unread > 9 ? '9+' : unread}
+                  {unread + contactNotifications.count > 99 ? '99+' : unread + contactNotifications.count}
                 </span>
               )}
             </button>
@@ -548,7 +552,7 @@ export default function DashboardHeader() {
                 <div className="flex items-center justify-between px-4 py-3 border-b border-border">
                   <span className="font-semibold text-sm">Notificaciones</span>
                   <div className="flex items-center gap-2">
-                    <Badge variant="secondary" className="text-xs">{unread} nuevas</Badge>
+                    <Badge variant="secondary" className="text-xs">{unread + contactNotifications.count} nuevas</Badge>
                     {unread > 0 && (
                       <button onClick={markAllAsRead} title="Marcar todas como leídas"
                         className="text-muted-foreground hover:text-primary transition-colors">
@@ -558,6 +562,11 @@ export default function DashboardHeader() {
                   </div>
                 </div>
                 <div className="max-h-80 overflow-y-auto">
+                  {canAccessSettings && <div className="border-b border-border/50">
+                    <button onClick={()=>openContactMessage()} className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left hover:bg-muted"><span className="inline-flex items-center gap-2 text-sm font-semibold"><Mail className="w-4 h-4 text-primary"/>Mensajes de contacto</span><Badge variant="secondary">{contactNotifications.count} nuevos</Badge></button>
+                    {contactNotifications.messages.map(message=><button key={message.id} onClick={()=>openContactMessage(message.id)} className="w-full px-4 py-3 text-left hover:bg-muted bg-primary/5 border-t border-border/30"><p className="text-sm font-medium truncate">{message.name}</p><p className="text-xs text-muted-foreground truncate">{message.subject||'Sin asunto'}</p></button>)}
+                  </div>}
+
                   {loadingNotifs ? (
                     <div className="px-4 py-8 text-center">
                       <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
@@ -591,7 +600,7 @@ export default function DashboardHeader() {
                   )) : (
                     <div className="px-4 py-12 text-center">
                       <Bell className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
-                      <p className="text-sm text-muted-foreground">Sin notificaciones</p>
+                      <p className="text-sm text-muted-foreground">{contactNotifications.count ? 'Sin otras notificaciones' : 'Sin notificaciones'}</p>
                     </div>
                   )}
                 </div>
