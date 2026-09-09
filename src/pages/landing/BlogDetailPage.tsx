@@ -1,7 +1,9 @@
 import { Link, useParams } from '@/lib/router';
-import { Clock, Eye, Share2, Bookmark, ThumbsUp, Play, ArrowLeft, FileText, Video, Newspaper, Calendar } from 'lucide-react';
+import { Clock, Eye, Share2, Play, ArrowLeft, FileText, Video, Newspaper, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useDatabase } from '@/lib/backend';
+import { toast } from 'sonner';
 
 import { useNews } from '@/hooks/useNews';
 import { safeNewsHtml, videoEmbed, directVideoUrl } from '@/lib/newsContent';
@@ -23,8 +25,25 @@ export default function BlogDetailPage() {
   const {rows,loading,error,reload}=useNews();
   const articles = Object.fromEntries(rows.map(row=>[row.slug,{...row.data,author:{name:row.data.author,role:row.data.authorRole,avatar:row.data.authorAvatar},related:rows.filter(r=>r.id!==row.id && r.data.category===row.data.category).slice(0,2).map(r=>({...r.data,slug:r.slug}))}]));
   const article = articles[slug || ''] || defaultArticle;
-  const [liked, setLiked] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const database=useDatabase();
+  const [counts,setCounts]=useState<Record<string,number>>({});
+  const [showLink,setShowLink]=useState(false);
+  const postId=rows.find(row=>row.slug===slug)?.id;
+  useEffect(()=>{
+    setShowLink(false);
+    if(!postId)return;
+    let active=true;
+    let visitor:string;
+    try {visitor=sessionStorage.getItem('news-visitor')||crypto.randomUUID();sessionStorage.setItem('news-visitor',visitor);} catch {return;}
+    void database.rpc<number>('record_novedad_view',{p_post_id:postId,p_visitor_id:visitor}).then(result=>{if(active&&!result.error&&typeof result.data==='number')setCounts(prev=>({...prev,[postId]:result.data as number}));});
+    return ()=>{active=false;};
+  },[postId,database]);
+  const views=postId?(counts[postId]??article.views??0):0;
+  const share=async()=>{
+    const url=window.location.origin+'/blog/'+encodeURIComponent(slug||'');
+    if(navigator.share){try{await navigator.share({title:article.title,url});return;}catch(error){if(error instanceof Error&&error.name==='AbortError')return;}}
+    try{await navigator.clipboard.writeText(url);toast.success('Enlace copiado');}catch{setShowLink(true);}
+  };
   const TypeIcon = typeMeta[article.type as keyof typeof typeMeta].icon;
   if(loading)return <LoadingRegion className="min-h-[70vh] pt-28"/>;
   if(error)return <div role="alert" className="pt-28 pb-20 text-center">No se pudo cargar esta publicación. <button className="text-primary" onClick={()=>void reload()}>Reintentar</button></div>;
@@ -52,7 +71,7 @@ export default function BlogDetailPage() {
 
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-5 leading-tight tracking-tight">{article.title}</h1>
 
-            <div className="flex items-center gap-3 sm:gap-4 text-sm text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-sm text-muted-foreground">
               <div className="flex items-center gap-2.5">
                 {article.author.avatar && <img src={article.author.avatar} alt="" className="w-8 h-8 rounded-full object-cover" />}
                 <div className="leading-tight">
@@ -63,8 +82,10 @@ export default function BlogDetailPage() {
               <span className="text-muted-foreground/40 hidden sm:inline">·</span>
               <span className="flex items-center gap-1 text-xs sm:text-sm"><Calendar className="w-3.5 h-3.5" />{article.date}</span>
               {article.duration && <><span className="text-muted-foreground/40">·</span><span className="flex items-center gap-1 text-xs sm:text-sm"><Clock className="w-3.5 h-3.5" />{article.duration}</span></>}
-              {article.views != null && article.views > 0 && <><span className="text-muted-foreground/40 hidden sm:inline">·</span><span className="flex items-center gap-1 text-xs sm:text-sm"><Eye className="w-3.5 h-3.5" />{article.views.toLocaleString()}</span></>}
+              {views >= 0 && <><span className="text-muted-foreground/40 hidden sm:inline">·</span><span className="flex items-center gap-1 text-xs sm:text-sm"><Eye className="w-3.5 h-3.5" />{views.toLocaleString()} vistas</span></>}
+              <button onClick={()=>void share()} className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary ml-auto py-2"><Share2 className="w-4 h-4"/>Compartir</button>
             </div>
+            {showLink&&<label className="block text-sm mt-3">Copia el enlace<input aria-label="Enlace para compartir" readOnly value={window.location.origin+'/blog/'+encodeURIComponent(slug||'')} onFocus={e=>e.target.select()} className="block w-full bg-background border border-border rounded-lg p-2 mt-1"/></label>}
           </header>
 
           {article.type === 'video' && directVideoUrl(article.videoUrl || '') ? <video src={article.videoUrl} controls preload="metadata" poster={article.image} className="w-full aspect-video rounded-lg bg-black mb-8"/> : article.type === 'video' && videoEmbed(article.videoUrl || '') ? (
@@ -76,18 +97,6 @@ export default function BlogDetailPage() {
               <img src={article.image} alt={article.title} className="w-full h-full object-cover" />
             </div>
           ) : null}
-
-          <div className="flex items-center gap-2 mb-8 pb-6 border-b border-border/30">
-            <button onClick={() => setLiked(!liked)} className={cn('flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium', liked ? 'bg-primary/10 text-primary' : 'bg-muted/50 text-muted-foreground')}>
-              <ThumbsUp className={cn('w-4 h-4', liked && 'fill-primary')} /> Me gusta
-            </button>
-            <button onClick={() => setSaved(!saved)} className={cn('flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium', saved ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' : 'bg-muted/50 text-muted-foreground')}>
-              <Bookmark className={cn('w-4 h-4', saved && 'fill-amber-500')} /> Guardar
-            </button>
-            <button className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium bg-muted/50 text-muted-foreground ml-auto">
-              <Share2 className="w-4 h-4" /> Compartir
-            </button>
-          </div>
 
           <div className="prose prose-sm dark:prose-invert max-w-none
             prose-headings:text-foreground prose-headings:font-bold prose-headings:tracking-tight

@@ -6,7 +6,7 @@ export interface ContentItem {
   readTime?: string; duration?: string; views: number; image: string; featured?: boolean;
   content: string; videoUrl: string;
 }
-export interface NewsRow { id: string; slug: string; status: 'draft' | 'published'; sort_order: number; data: ContentItem; }
+export interface NewsRow { view_count?: number; id: string; slug: string; status: 'draft' | 'published'; sort_order: number; data: ContentItem; }
 export const newsPageDefaults = { badge: 'Recursos Cluv360', title: 'Novedades, guías y', highlight: 'tutoriales', subtitle: 'Aprende a escalar tu red, domina el sistema de comisiones y mantente al día con las novedades de la plataforma.' };
 export function newsSlug(value: string) { return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
 export function safeMediaUrl(value: string) { try { const url = new URL(value); return url.protocol === 'https:' ? url.href : ''; } catch { return ''; } }

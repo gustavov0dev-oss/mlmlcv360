@@ -14,7 +14,7 @@ export function useNews(admin = false) {
         database.select<{data: typeof newsPageDefaults}>('novedades_page',{filter:{id:'main'}}),
       ]);
       if(posts.error || page.error) throw new Error('load');
-      setRows((posts.data as NewsRow[]) || []);
+      setRows(((posts.data as NewsRow[]) || []).map(row=>({...row,data:{...row.data,views:row.view_count||0}})));
       setSettings({...newsPageDefaults,...(page.data as {data: typeof newsPageDefaults}[])?.[0]?.data});
       setError(false);
     } catch { setError(true); } finally {setLoading(false);}
