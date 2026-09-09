@@ -386,7 +386,7 @@ export default function DashboardHeader() {
         </Link>
 
         {/* Search — large inline on desktop, icon-collapsible on mobile */}
-  <div ref={searchRef} className="relative flex-1 max-w-md mx-3 hidden lg:block">
+  <div ref={searchRef} className="relative flex-1 max-w-sm mr-6 hidden lg:block">
   <div className="relative">
     <Search
       className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/70 pointer-events-none"
@@ -398,21 +398,22 @@ export default function DashboardHeader() {
       value={query}
       onChange={e => setQuery(e.target.value)}
       onFocus={() => setSearchOpen(true)}
-      placeholder="Buscar usuarios, productos..."
+      aria-label="Buscar en el dashboard"
+      placeholder="Buscar en el dashboard…"
       className="
         w-full
         h-9
         pl-10
         pr-[5rem]
-        rounded-lg
-        bg-muted/40
-        border border-border/60
+        rounded-full
+        bg-transparent
+        border border-border/50
         text-sm
         text-foreground
         placeholder:text-muted-foreground/60
         outline-none
         transition-all duration-200
-        hover:bg-muted/60
+        hover:border-border
         focus:bg-background
         focus:border-primary/40
         focus:ring-2
@@ -424,6 +425,7 @@ export default function DashboardHeader() {
     <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center">
       {query ? (
         <button
+          aria-label="Limpiar búsqueda"
           onClick={() => {
             setQuery('');
             setResults([]);
@@ -610,7 +612,7 @@ export default function DashboardHeader() {
           <div className="relative hidden lg:block" ref={userMenuRef}>
             <button
               onClick={() => setUserMenuOpen(v => !v)}
-              className="flex items-center gap-2 px-2.5 py-2 rounded-full border border-border/60 hover:bg-muted/50 active:bg-muted transition-all duration-200 ml-1"
+              className="flex items-center gap-2 px-2 py-1.5 rounded-full border border-border/60 hover:bg-muted/50 active:bg-muted transition-all duration-200 ml-1"
             >
               <div className="w-7 h-7 rounded-full overflow-hidden bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center flex-shrink-0">
                 {user?.avatar_url ? (

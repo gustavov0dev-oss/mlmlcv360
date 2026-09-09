@@ -1,7 +1,7 @@
 import { LoadingRegion } from '@/components/ui/loading-region';
 import { Link } from '@/lib/router';
-import { ArrowRight, Sparkles } from 'lucide-react';
-import { useEffect, useState, type ReactNode } from 'react';
+import { ArrowRight, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useDatabase } from '@/lib/backend';
 import { AboutIcon } from '@/components/landing/AboutIcon';
 import { resolveAboutConfig, safeAboutUrl, type Founder, type TimelineItem, type InfraItem, type ValueItem } from '@/lib/aboutContent';
@@ -26,6 +26,27 @@ export default function NosotrosPage() {
   const database = useDatabase();
   const [founders, setFounders] = useState<Founder[]>([]);
   const [timeline, setTimeline] = useState<TimelineItem[]>([]);
+  const historyRef = useRef<HTMLDivElement>(null);
+  const [historyEdges, setHistoryEdges] = useState({ overflow: false, start: true, end: true });
+  useEffect(() => {
+    const track = historyRef.current;
+    if (!track) return;
+    const update = () => {
+      const max = track.scrollWidth - track.clientWidth;
+      setHistoryEdges({ overflow: max > 2, start: track.scrollLeft <= 2, end: track.scrollLeft >= max - 2 });
+    };
+    const observer = new ResizeObserver(update);
+    observer.observe(track);
+    Array.from(track.children).forEach(child => observer.observe(child));
+    track.addEventListener('scroll', update, { passive: true });
+    update();
+    return () => { observer.disconnect(); track.removeEventListener('scroll', update); };
+  }, [timeline]);
+  const scrollHistory = (direction: number) => {
+    const track = historyRef.current;
+    if (!track) return;
+    track.scrollBy({ left: direction * track.clientWidth * 0.8, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  };
   const [infra, setInfra] = useState<InfraItem[]>([]);
   const [values, setValues] = useState<ValueItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -141,11 +162,17 @@ export default function NosotrosPage() {
           <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground tracking-tight mb-2 max-w-xl">
             <HighlightedTitle text={config.about_timeline_title} highlight={config.about_timeline_highlight} />
           </h2>
-          <p className="text-sm sm:text-base text-muted-foreground/80 max-w-xl mb-10">{config.about_timeline_subtitle}</p>
+          <div className="flex items-end justify-between gap-4 mb-8">
+            <p className="text-sm sm:text-base text-muted-foreground/80 max-w-xl">{config.about_timeline_subtitle}</p>
+            <div className={cn('flex gap-1 shrink-0', !historyEdges.overflow && 'invisible')} aria-hidden={!historyEdges.overflow}>
+              <button type="button" aria-label="Ver hitos anteriores" aria-controls="about-history-track" disabled={!historyEdges.overflow || historyEdges.start} onClick={() => scrollHistory(-1)} className="w-10 h-10 flex items-center justify-center rounded-full text-muted-foreground hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary disabled:opacity-25 disabled:pointer-events-none transition-colors"><ChevronLeft className="w-5 h-5" /></button>
+              <button type="button" aria-label="Ver siguientes hitos" aria-controls="about-history-track" disabled={!historyEdges.overflow || historyEdges.end} onClick={() => scrollHistory(1)} className="w-10 h-10 flex items-center justify-center rounded-full text-muted-foreground hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary disabled:opacity-25 disabled:pointer-events-none transition-colors"><ChevronRight className="w-5 h-5" /></button>
+            </div>
+          </div>
         </div>
 
         <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 min-w-0">
-          <div role="region" aria-label="Hitos de nuestra historia" tabIndex={0} className="flex gap-8 overflow-x-auto pb-4 snap-x snap-proximity max-w-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary/50">
+          <div ref={historyRef} id="about-history-track" role="region" aria-label="Hitos de nuestra historia" tabIndex={0} className="flex gap-8 overflow-x-auto pb-4 snap-x snap-proximity max-w-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary/50">
             {timeline.map((item, i) => (
               <div
                 key={item.id}
