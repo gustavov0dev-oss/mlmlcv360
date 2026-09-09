@@ -245,7 +245,7 @@ export default function OrderDetailPage() {
             <p className="text-sm font-bold text-foreground">{order.tracking_number}</p>
           </div>
           {order.tracking_url && (
-            <a href={order.tracking_url} target="_blank" rel="noreferrer" className="p-2 hover:bg-muted rounded-lg transition-colors">
+            <a href={order.tracking_url} target="_blank" rel="noreferrer" className={["p-2 hover:bg-muted rounded-lg transition-colors", 'dashboard-action'].filter(Boolean).join(' ')}>
               <ExternalLink className="w-4 h-4 text-primary" />
             </a>
           )}

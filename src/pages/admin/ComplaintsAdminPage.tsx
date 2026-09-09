@@ -503,7 +503,7 @@ export default function ComplaintsAdminPage() {
                     <span className="text-xs text-muted-foreground/40 hidden sm:block">
                       {fmtDate(c.created_at)}
                     </span>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10"
+                    <Button variant="ghost" size="sm" className={["h-8 w-8 p-0 text-destructive hover:bg-destructive/10", 'dashboard-action'].filter(Boolean).join(' ')}
                       onClick={(e) => { e.stopPropagation(); setDeleteTarget(c); }} disabled={deletingId === c.id}>
                       {deletingId === c.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                     </Button>

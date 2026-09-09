@@ -1292,7 +1292,9 @@ html, .dashboard-scroll { scrollbar-gutter: stable; }
   transition: color 150ms, background-color 150ms;
 }
 .dashboard-action > svg { width: 1rem !important; height: 1rem !important; stroke-width: 1.75; }
-.dashboard-action:hover:not(:disabled) { color: hsl(var(--primary)) !important; background: hsl(var(--muted) / .5) !important; }
-.dashboard-action-danger:hover:not(:disabled) { color: hsl(var(--destructive)) !important; }
+.dashboard-action:hover:not(:disabled) { color: hsl(var(--foreground)) !important; background: hsl(var(--muted) / .5) !important; }
+
 .dashboard-action:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 2px; }
 .dashboard-action:disabled { opacity: .4; cursor: not-allowed; }
+
+.dashboard-action svg { color: inherit !important; }

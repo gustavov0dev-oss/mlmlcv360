@@ -89,7 +89,7 @@ export default function OrdersAdminPage() {
           <h1 className="text-2xl font-bold text-foreground">Gestión de Pedidos</h1>
           <p className="text-sm text-muted-foreground mt-0.5">{orders.length} pedidos</p>
         </div>
-        <button onClick={load} className="p-2 border border-border rounded-xl hover:bg-muted transition-colors self-start">
+        <button onClick={load} className={["p-2 border border-border rounded-xl hover:bg-muted transition-colors self-start", 'dashboard-action'].filter(Boolean).join(' ')}>
           <RefreshCw className="w-4 h-4 text-muted-foreground" />
         </button>
       </div>

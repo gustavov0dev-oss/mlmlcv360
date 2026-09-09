@@ -121,7 +121,7 @@ export default function ProductsAdminPage() {
           <p className="text-sm text-muted-foreground mt-0.5">{products.length} productos en total</p>
         </div>
         <div className="flex gap-2">
-          <button onClick={load} className="p-2 border border-border rounded-xl hover:bg-muted transition-colors">
+          <button onClick={load} className={["p-2 border border-border rounded-xl hover:bg-muted transition-colors", 'dashboard-action'].filter(Boolean).join(' ')}>
             <RefreshCw className="w-4 h-4 text-muted-foreground" />
           </button>
           <button

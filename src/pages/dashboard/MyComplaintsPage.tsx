@@ -241,7 +241,7 @@ export default function MyComplaintsPage() {
             className="pl-9"
           />
         </div>
-        <Button variant="outline" size="icon" onClick={load} disabled={loading} aria-label="Actualizar" className="shrink-0">
+        <Button variant="outline" size="icon" onClick={load} disabled={loading} aria-label="Actualizar" className={["shrink-0", 'dashboard-action'].filter(Boolean).join(' ')}>
           <RefreshCw className={cn('w-4 h-4', loading && 'animate-spin')} />
         </Button>
       </div>

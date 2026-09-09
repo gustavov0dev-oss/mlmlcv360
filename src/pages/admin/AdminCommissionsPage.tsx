@@ -590,7 +590,7 @@ export default function AdminCommissionsPage() {
           <option value="">Todos los estados</option>
           {STATUSES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
         </select>
-        <button onClick={refresh} className="p-2.5 border border-border rounded-xl hover:bg-muted text-muted-foreground transition-colors" title="Actualizar">
+        <button onClick={refresh} className={["p-2.5 border border-border rounded-xl hover:bg-muted text-muted-foreground transition-colors", 'dashboard-action'].filter(Boolean).join(' ')} title="Actualizar">
           <RefreshCw className="w-4 h-4" />
         </button>
       </div>

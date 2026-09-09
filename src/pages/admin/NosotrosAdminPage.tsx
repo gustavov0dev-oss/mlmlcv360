@@ -379,7 +379,7 @@ export default function NosotrosAdminPage() {
                       <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">{v.text}</p>
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
-                      <button aria-label="Cambiar visibilidad" disabled={busy || loading || saving || savingHero} onClick={() => toggleActive('value', v)} className={cn('p-2 rounded-lg transition-colors', v.is_active ? 'text-green-500 hover:bg-emerald-500/10' : 'text-muted-foreground hover:bg-muted')} title={v.is_active ? 'Desactivar' : 'Activar'}>
+                      <button aria-label="Cambiar visibilidad" disabled={busy || loading || saving || savingHero} onClick={() => toggleActive('value', v)} className={[cn('p-2 rounded-lg transition-colors', v.is_active ? 'text-green-500 hover:bg-emerald-500/10' : 'text-muted-foreground hover:bg-muted'), 'dashboard-action'].filter(Boolean).join(' ')} title={v.is_active ? 'Desactivar' : 'Activar'}>
                         {v.is_active ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
                       </button>
                       <button aria-label="Editar contenido" disabled={busy || loading || saving || savingHero} onClick={() => { setEditingValue(v); setShowValueForm(true); }} className={["p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-primary transition-colors", "dashboard-action"].filter(Boolean).join(' ')} title="Editar">
@@ -432,7 +432,7 @@ export default function NosotrosAdminPage() {
                       <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">{t.description}</p>
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
-                      <button aria-label="Cambiar visibilidad" disabled={busy || loading || saving || savingHero} onClick={() => toggleActive('timeline', t)} className={cn('p-2 rounded-lg transition-colors', t.is_active ? 'text-green-500 hover:bg-emerald-500/10' : 'text-muted-foreground hover:bg-muted')}>
+                      <button aria-label="Cambiar visibilidad" disabled={busy || loading || saving || savingHero} onClick={() => toggleActive('timeline', t)} className={[cn('p-2 rounded-lg transition-colors', t.is_active ? 'text-green-500 hover:bg-emerald-500/10' : 'text-muted-foreground hover:bg-muted'), 'dashboard-action'].filter(Boolean).join(' ')}>
                         {t.is_active ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
                       </button>
                       <button aria-label="Editar contenido" disabled={busy || loading || saving || savingHero} onClick={() => { setEditingTimeline(t); setShowTimelineForm(true); }} className={["p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-primary transition-colors", "dashboard-action"].filter(Boolean).join(' ')}>
@@ -484,7 +484,7 @@ export default function NosotrosAdminPage() {
                       <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">{i.description}</p>
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
-                      <button aria-label="Cambiar visibilidad" disabled={busy || loading || saving || savingHero} onClick={() => toggleActive('infra', i)} className={cn('p-2 rounded-lg transition-colors', i.is_active ? 'text-green-500 hover:bg-emerald-500/10' : 'text-muted-foreground hover:bg-muted')}>
+                      <button aria-label="Cambiar visibilidad" disabled={busy || loading || saving || savingHero} onClick={() => toggleActive('infra', i)} className={[cn('p-2 rounded-lg transition-colors', i.is_active ? 'text-green-500 hover:bg-emerald-500/10' : 'text-muted-foreground hover:bg-muted'), 'dashboard-action'].filter(Boolean).join(' ')}>
                         {i.is_active ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
                       </button>
                       <button aria-label="Editar contenido" disabled={busy || loading || saving || savingHero} onClick={() => { setEditingInfra(i); setShowInfraForm(true); }} className={["p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-primary transition-colors", "dashboard-action"].filter(Boolean).join(' ')}>
@@ -541,7 +541,7 @@ export default function NosotrosAdminPage() {
                       <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">{f.bio}</p>
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
-                      <button aria-label="Cambiar visibilidad" disabled={busy || loading || saving || savingHero} onClick={() => toggleActive('founder', f)} className={cn('p-2 rounded-lg transition-colors', f.is_active ? 'text-green-500 hover:bg-emerald-500/10' : 'text-muted-foreground hover:bg-muted')}>
+                      <button aria-label="Cambiar visibilidad" disabled={busy || loading || saving || savingHero} onClick={() => toggleActive('founder', f)} className={[cn('p-2 rounded-lg transition-colors', f.is_active ? 'text-green-500 hover:bg-emerald-500/10' : 'text-muted-foreground hover:bg-muted'), 'dashboard-action'].filter(Boolean).join(' ')}>
                         {f.is_active ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
                       </button>
                       <button aria-label="Editar contenido" disabled={busy || loading || saving || savingHero} onClick={() => { setEditingFounder(f); setShowFounderForm(true); }} className={["p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-primary transition-colors", "dashboard-action"].filter(Boolean).join(' ')}>

@@ -374,8 +374,8 @@ export default function LegalPagesAdminPage() {
                     {/* Action buttons — tamaño fijo para evitar layout shift al toglear published */}
                     <div className="flex items-center gap-1 shrink-0">
                       {p.is_published ? (
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0" asChild>
-                          <Link to={`/legal/${p.slug}`} target="_blank" rel="noopener noreferrer">
+                        <Button variant="ghost" size="sm" className={["h-8 w-8 p-0", 'dashboard-action'].filter(Boolean).join(' ')} asChild>
+                          <Link to={`/legal/${p.slug}`} target="_blank" rel="noopener noreferrer" className="dashboard-action">
                             <ExternalLink className="h-4 w-4" />
                           </Link>
                         </Button>
@@ -387,7 +387,7 @@ export default function LegalPagesAdminPage() {
                       <Button variant="ghost" size="sm" className={["h-8 w-8 p-0", "dashboard-action"].filter(Boolean).join(' ')} onClick={() => openEdit(p)}>
                         <Pencil className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10"
+                      <Button variant="ghost" size="sm" className={["h-8 w-8 p-0 text-destructive hover:bg-destructive/10", 'dashboard-action'].filter(Boolean).join(' ')}
                         onClick={() => setDeleteTarget(p)} disabled={deletingId === p.id}>
                         {deletingId === p.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                       </Button>

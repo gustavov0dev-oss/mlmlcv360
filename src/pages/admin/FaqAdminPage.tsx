@@ -492,7 +492,7 @@ export default function FaqAdminPage() {
                       <Button variant="ghost" size="sm" className={["h-8 w-8 p-0", "dashboard-action"].filter(Boolean).join(' ')} onClick={() => startEdit(item)} disabled={saving || reordering} title="Editar">
                         <Pencil className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10" onClick={() => setDeleteTarget(item)} disabled={saving || reordering || deletingId === item.id} title="Eliminar">
+                      <Button variant="ghost" size="sm" className={["h-8 w-8 p-0 text-destructive hover:bg-destructive/10", 'dashboard-action'].filter(Boolean).join(' ')} onClick={() => setDeleteTarget(item)} disabled={saving || reordering || deletingId === item.id} title="Eliminar">
                         {deletingId === item.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                       </Button>
                     </div>

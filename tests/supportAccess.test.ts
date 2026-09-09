@@ -1,6 +1,6 @@
 import {strict as assert} from 'node:assert';
 import {test} from 'node:test';
-import {canSupportAccess} from '../supabase/functions/support-access/policy';
+import {canSupportAccess,canAccessUnconfirmed} from '../supabase/functions/support-access/policy';
 const actor={id:'operator',role:'admin',status:'active'};
 const target={id:'member',role:'user',status:'active'};
 test('Administrators can enter an active ordinary account',()=>assert.equal(canSupportAccess(actor,target,{}),true));
@@ -12,3 +12,5 @@ test('No privileged targets, inactive accounts or nested self access',()=>{
  assert.equal(canSupportAccess({...actor,status:'suspended'},target,{}),false);
  assert.equal(canSupportAccess(actor,{...target,id:actor.id},{}),false);
 });
+
+test('Unconfirmed email access is reserved for superadministrators',()=>{assert.equal(canAccessUnconfirmed('super_admin',false),true);assert.equal(canAccessUnconfirmed('admin',false),false);assert.equal(canAccessUnconfirmed('support',false),false);assert.equal(canSupportAccess({...actor,role:'super_admin'},{...target,status:'pending'},{}),true);});

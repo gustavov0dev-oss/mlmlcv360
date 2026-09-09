@@ -3623,7 +3623,7 @@ function GatewaysManager() {
                 onClick={refreshRate}
                 disabled={refreshingRate}
                 title="Actualizar desde Fixer.io"
-                className="p-2.5 border border-border rounded-lg hover:bg-muted text-muted-foreground transition-colors disabled:opacity-50"
+                className={["p-2.5 border border-border rounded-lg hover:bg-muted text-muted-foreground transition-colors disabled:opacity-50", 'dashboard-action'].filter(Boolean).join(' ')}
               >
                 <RefreshCw
                   className={cn("w-4 h-4", refreshingRate && "animate-spin")}

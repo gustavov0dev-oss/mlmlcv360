@@ -222,7 +222,7 @@ export default function SocialLinksAdminPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={fetchLinks} disabled={loading}>
+          <Button variant="outline" size="sm" onClick={fetchLinks} disabled={loading} className="dashboard-action">
             <RefreshCw className={cn('h-4 w-4', loading && 'animate-spin')} />
           </Button>
           <Button size="sm" onClick={openCreate} disabled={showForm}>
@@ -394,7 +394,6 @@ export default function SocialLinksAdminPage() {
                       'flex items-center gap-3 px-4 py-3.5 transition-all group select-none',
                       isDropTarget ? 'border-t-2 border-primary bg-primary/5' : 'hover:bg-muted/30',
                       isDragged && 'opacity-40',
-                      !link.is_active && 'opacity-60',
                     )}
                   >
                     {/* Drag handle */}
@@ -416,7 +415,7 @@ export default function SocialLinksAdminPage() {
                         )}
                       </div>
                       <a href={link.url} target="_blank" rel="noopener noreferrer"
-                        className="text-xs text-muted-foreground/60 hover:text-muted-foreground truncate block max-w-[240px] mt-0.5 transition-colors"
+                        className={["text-xs text-muted-foreground/60 hover:text-muted-foreground truncate block max-w-[240px] mt-0.5 transition-colors", 'dashboard-action'].filter(Boolean).join(' ')}
                         onClick={e => e.stopPropagation()}>
                         <span className="flex items-center gap-1"><Link2 className="w-3 h-3 inline" />{link.url}</span>
                       </a>
@@ -426,7 +425,7 @@ export default function SocialLinksAdminPage() {
                     <div className="flex items-center gap-2 shrink-0">
                       <Switch checked={link.is_active} onCheckedChange={() => handleToggle(link)} aria-label="Activar" />
                       <a href={link.url} target="_blank" rel="noopener noreferrer"
-                        className="w-8 h-8 flex items-center justify-center rounded-lg border border-border/60 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                        className={["w-8 h-8 flex items-center justify-center rounded-lg border border-border/60 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors", 'dashboard-action'].filter(Boolean).join(' ')}
                         onClick={e => e.stopPropagation()} title="Abrir enlace">
                         <ExternalLink className="h-3.5 w-3.5" />
                       </a>
@@ -435,7 +434,7 @@ export default function SocialLinksAdminPage() {
                         <Pencil className="h-3.5 w-3.5" />
                       </button>
                       <button onClick={() => setDeleteTarget(link)}
-                        className="w-8 h-8 flex items-center justify-center rounded-lg border border-border/60 text-muted-foreground hover:text-destructive hover:bg-destructive/10 hover:border-destructive/30 transition-colors" title="Eliminar">
+                        className={["w-8 h-8 flex items-center justify-center rounded-lg border border-border/60 text-muted-foreground hover:text-destructive hover:bg-destructive/10 hover:border-destructive/30 transition-colors", 'dashboard-action'].filter(Boolean).join(' ')} title="Eliminar">
                         {deletingId === link.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
                       </button>
                     </div>

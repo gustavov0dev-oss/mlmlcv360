@@ -337,7 +337,7 @@ export default function RegionStatsAdminPage() {
 
                 <div className="flex items-center gap-1 flex-shrink-0">
                   <button onClick={() => toggleActive(item)}
-                    className={cn('p-2 rounded-lg transition-colors', item.is_active ? 'text-green-500 hover:bg-emerald-500/10' : 'text-muted-foreground hover:bg-muted')}
+                    className={[cn('p-2 rounded-lg transition-colors', item.is_active ? 'text-green-500 hover:bg-emerald-500/10' : 'text-muted-foreground hover:bg-muted'), 'dashboard-action'].filter(Boolean).join(' ')}
                     title={item.is_active ? 'Desactivar' : 'Activar'}>
                     {item.is_active ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
                   </button>

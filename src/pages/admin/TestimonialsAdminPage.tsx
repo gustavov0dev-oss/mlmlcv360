@@ -246,7 +246,6 @@ function DraggableRow({
       className={cn(
         'flex items-start gap-3 px-4 py-3.5 transition-all cursor-default select-none',
         isDragOver ? 'border-t-2 border-primary bg-primary/5' : 'hover:bg-muted/30',
-        !t.is_active && 'opacity-60',
       )}
     >
       {/* Drag handle */}
@@ -287,7 +286,7 @@ function DraggableRow({
       {/* Actions */}
       <div className="flex flex-col sm:flex-row items-center gap-1 flex-shrink-0">
         <button onClick={() => onToggle(t)}
-          className={cn('p-2 rounded-lg transition-colors', t.is_active ? 'text-green-500 hover:bg-emerald-500/10' : 'text-muted-foreground hover:bg-muted')}
+          className={[cn('p-2 rounded-lg transition-colors', t.is_active ? 'text-green-500 hover:bg-emerald-500/10' : 'text-muted-foreground hover:bg-muted'), 'dashboard-action'].filter(Boolean).join(' ')}
           title={t.is_active ? 'Desactivar' : 'Activar'}>
           {t.is_active ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
         </button>

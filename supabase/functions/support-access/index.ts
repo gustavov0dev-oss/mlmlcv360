@@ -1,5 +1,5 @@
 import {createClient} from 'npm:@supabase/supabase-js@2.58.0';
-import {canSupportAccess} from './policy.ts';
+import {canSupportAccess,canAccessUnconfirmed} from './policy.ts';
 const headers={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization,apikey,content-type,x-client-info','Access-Control-Allow-Methods':'POST,OPTIONS','Content-Type':'application/json','Cache-Control':'no-store'};
 const json=(data:unknown,status=200)=>new Response(JSON.stringify(data),{status,headers});
 Deno.serve(async(req:Request)=>{
@@ -16,12 +16,18 @@ Deno.serve(async(req:Request)=>{
  let permissions={};try{permissions=typeof c.data?.value==='string'?JSON.parse(c.data.value):c.data?.value||{};}catch{return json({error:'No se pudieron comprobar los permisos'},403);}
  if(a.error||t.error||c.error||!canSupportAccess(a.data,t.data,permissions))return json({error:'No tienes permiso para acceder a esta cuenta. Solo se permiten cuentas de usuario activas.'},403);
  const {data:target,error:targetError}=await db.auth.admin.getUserById(targetId);
- if(targetError||!target.user?.email||!target.user.email_confirmed_at)return json({error:'La cuenta debe tener un correo confirmado'},409);
+ if(targetError||!target.user?.email)return json({error:'No se encontró la cuenta de autenticación de este usuario'},409);
+ const unconfirmed=!target.user.email_confirmed_at;
+ if(!canAccessUnconfirmed(a.data.role,!unconfirmed))return json({error:'Solo el superadministrador puede acceder mientras el correo está pendiente'},403);
  const {error:auditError}=await db.from('support_access_audit').insert({actor_id:auth.user.id,target_id:targetId});if(auditError)return json({error:'No se pudo registrar el acceso'},500);
  const {data:link,error:linkError}=await db.auth.admin.generateLink({type:'magiclink',email:target.user.email});if(linkError||!link.properties?.hashed_token)return json({error:'No se pudo iniciar el acceso'},500);
  const client=createClient(url,Deno.env.get('SUPABASE_ANON_KEY')!,{auth:{persistSession:false,autoRefreshToken:false}});
- const {data:verified,error:verifyError}=await client.auth.verifyOtp({token_hash:link.properties.hashed_token,type:'magiclink'});
+ const {data:verified,error:verifyError}=await client.auth.verifyOtp({token_hash:link.properties.hashed_token,type:link.properties.verification_type==='signup'?'signup':'magiclink'});
  if(verifyError||!verified.session||verified.user?.id!==targetId)return json({error:'No se pudo iniciar la sesión de usuario'},500);
+ if(unconfirmed&&verified.user.email_confirmed_at){
+ const restored=await db.rpc('restore_support_email_state',{p_user_id:targetId,p_expected:verified.user.email_confirmed_at});
+ if(restored.error||restored.data!==true){await client.auth.signOut({scope:'local'});return json({error:'No se pudo conservar el estado del correo. El acceso se canceló.'},500);}
+ }
  return json({session:{access_token:verified.session.access_token,refresh_token:verified.session.refresh_token},name:t.data.full_name});
  }catch{return json({error:'No se pudo iniciar el acceso. Inténtalo nuevamente.'},500);}
 });
