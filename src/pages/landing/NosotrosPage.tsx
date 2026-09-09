@@ -144,15 +144,13 @@ export default function NosotrosPage() {
           <p className="text-sm sm:text-base text-muted-foreground/80 max-w-xl mb-10">{config.about_timeline_subtitle}</p>
         </div>
 
-        <div className="relative">
-          <div className="absolute left-0 top-0 bottom-4 w-8 sm:w-16 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
-          <div className="absolute right-0 top-0 bottom-4 w-8 sm:w-16 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
-          <div className="flex gap-8 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 min-w-0">
+          <div role="region" aria-label="Hitos de nuestra historia" tabIndex={0} className="flex gap-8 overflow-x-auto pb-4 snap-x snap-proximity max-w-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary/50">
             {timeline.map((item, i) => (
               <div
                 key={item.id}
                 className={
-                  'shrink-0 w-[220px] sm:w-[240px] snap-start ' +
+                  'shrink-0 w-[220px] sm:w-[240px] max-w-full break-words snap-start ' +
                   (i > 0 ? 'border-l border-border/20 pl-8' : '')
                 }
               >
@@ -257,7 +255,7 @@ export default function NosotrosPage() {
             <div className="space-y-7 pt-7 md:pt-0 md:pl-10">
               <div>
                 <div className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wide mb-2">{config.about_legal_label_address}</div>
-                <div className="font-semibold text-foreground leading-relaxed">{company.address || 'Manuel Asencio Segura 211, Los Olivos, Lima, {config.address_country}'}</div>
+                <div className="font-semibold text-foreground leading-relaxed">{config.address}</div>
               </div>
               <div>
                 <div className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wide mb-2">{config.about_legal_label_contact_email}</div>
