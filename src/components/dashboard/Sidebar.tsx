@@ -83,6 +83,7 @@ const superAdminNav: NavItem[] = [
   { label: 'Reportes', href: '/dashboard/reportes', icon: BarChart3 },
   {
     label: 'Contenido', icon: MessageSquare, children: [
+      { label: 'Novedades', href: '/dashboard/admin/novedades', icon: FileText },
       { label: 'Contacto', href: '/dashboard/admin/contacto', icon: MessageSquare },
       { label: 'Oportunidad', href: '/dashboard/admin/oportunidad', icon: Briefcase },
       { label: 'Nosotros', href: '/dashboard/admin/nosotros', icon: Users },
@@ -125,6 +126,7 @@ const adminNav: NavItem[] = [
   { label: 'Reportes', href: '/dashboard/reportes', icon: BarChart3 },
   {
     label: 'Contenido', icon: MessageSquare, children: [
+      { label: 'Novedades', href: '/dashboard/admin/novedades', icon: FileText },
       { label: 'Contacto', href: '/dashboard/admin/contacto', icon: MessageSquare },
       { label: 'Oportunidad', href: '/dashboard/admin/oportunidad', icon: Briefcase },
       { label: 'Nosotros', href: '/dashboard/admin/nosotros', icon: Users },

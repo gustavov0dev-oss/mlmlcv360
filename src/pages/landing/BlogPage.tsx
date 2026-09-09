@@ -1,47 +1,12 @@
 import { LoadingRegion, StableRegion } from '@/components/ui/loading-region';
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { Link } from '@/lib/router';
 import { Clock, Eye, Video, Search, FileText, Newspaper, ChevronLeft, ChevronRight, Play, TrendingUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-type ContentType = 'article' | 'video' | 'news';
-type Category = 'Estrategia' | 'Rangos' | 'Comisiones' | 'Marketing' | 'Tutoriales' | 'Noticias';
-
-interface ContentItem {
-  slug: string;
-  type: ContentType;
-  category: Category;
-  title: string;
-  excerpt: string;
-  author: string;
-  authorRole: string;
-  authorAvatar: string;
-  date: string;
-  readTime?: string;
-  duration?: string;
-  views: number;
-  image: string;
-  featured?: boolean;
-}
-
-const allItems: ContentItem[] = [
-  { slug: 'alcanzar-rango-diamante-6-meses', type: 'article', category: 'Estrategia', title: 'Cómo alcanzar el rango Diamante en 6 meses', excerpt: 'Sistema comprobado para escalar rangos rápidamente sin saturar tu red.', author: 'Carlos Mendoza', authorRole: 'Líder Diamante', authorAvatar: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=100', date: '15 Jun 2025', readTime: '8 min', views: 4280, image: 'https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=800', featured: true },
-  { slug: 'tour-completo-dashboard', type: 'video', category: 'Tutoriales', title: 'Tour completo del dashboard', excerpt: 'Recorrido por cada función del panel de control de Cluv360.', author: 'Ana Rodríguez', authorRole: 'Soporte', authorAvatar: 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=100', date: '12 Jun 2025', duration: '22:15', views: 6150, image: 'https://images.pexels.com/photos/3184339/pexels-photo-3184339.jpeg?auto=compress&cs=tinysrgb&w=800', featured: true },
-  { slug: 'comisiones-binarias-guia-2025', type: 'article', category: 'Comisiones', title: 'Comisiones binarias: Guía definitiva 2025', excerpt: 'Algoritmo del sistema binario explicado paso a paso.', author: 'Luis García', authorRole: 'Analista', authorAvatar: 'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=100', date: '10 Jun 2025', readTime: '6 min', views: 3890, image: 'https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=800' },
-  { slug: '5-scripts-ventas-convierten', type: 'video', category: 'Marketing', title: '5 scripts de ventas que convierten', excerpt: 'Guiones probados para invitar sin presionar.', author: 'María Torres', authorRole: 'Coach', authorAvatar: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=100', date: '8 Jun 2025', duration: '18:30', views: 5420, image: 'https://images.pexels.com/photos/3182812/pexels-photo-3182812.jpeg?auto=compress&cs=tinysrgb&w=800' },
-  { slug: 'sistema-rangos-bronce-corona', type: 'article', category: 'Rangos', title: 'Sistema de rangos: del Bronce a la Corona', excerpt: 'Requisitos, bonos y beneficios de cada nivel.', author: 'Ana Rodríguez', authorRole: 'Soporte', authorAvatar: 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=100', date: '2 Jun 2025', readTime: '5 min', views: 4100, image: 'https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=800' },
-  { slug: 'nueva-funcion-comisiones-instantaneas', type: 'news', category: 'Noticias', title: 'Nueva función: Comisiones instantáneas', excerpt: 'Ahora tus comisiones se acreditan en menos de 60 segundos.', author: 'Equipo Cluv360', authorRole: 'Producto', authorAvatar: 'https://images.pexels.com/photos/3184339/pexels-photo-3184339.jpeg?auto=compress&cs=tinysrgb&w=100', date: '28 May 2025', readTime: '3 min', views: 8200, image: 'https://images.pexels.com/photos/7688460/pexels-photo-7688460.jpeg?auto=compress&cs=tinysrgb&w=800', featured: true },
-  { slug: 'marketing-digital-mlm', type: 'article', category: 'Marketing', title: 'Marketing digital para MLM en 2025', excerpt: 'Construye tu marca personal y atrae afiliados de calidad.', author: 'Ana Ríos', authorRole: 'Dir. Operaciones', authorAvatar: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=100', date: '1 Jun 2025', readTime: '7 min', views: 2950, image: 'https://images.pexels.com/photos/3194523/pexels-photo-3194523.jpeg?auto=compress&cs=tinysrgb&w=800' },
-  { slug: 'tutorial-arbol-genealogico', type: 'video', category: 'Tutoriales', title: 'Tutorial: Árbol genealógico interactivo', excerpt: 'Domina filtros, zoom, búsqueda y exportación de tu red.', author: 'Carlos Torres', authorRole: 'CTO', authorAvatar: 'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=100', date: '25 May 2025', duration: '15:20', views: 5420, image: 'https://images.pexels.com/photos/3182812/pexels-photo-3182812.jpeg?auto=compress&cs=tinysrgb&w=800' },
-  { slug: 'retener-afiliados-activos', type: 'article', category: 'Estrategia', title: 'El arte de retener afiliados activos', excerpt: 'Técnicas de seguimiento y mentoring que multiplican la retención.', author: 'Gustavo Ortiz', authorRole: 'CEO', authorAvatar: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=100', date: '22 May 2025', readTime: '6 min', views: 3650, image: 'https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=800' },
-  { slug: 'nuevas-pasarelas-pago-peru', type: 'news', category: 'Noticias', title: 'Integramos Yape y Plin como pasarelas de pago', excerpt: 'Ahora puedes cobrar comisiones directamente a Yape y Plin.', author: 'Equipo Cluv360', authorRole: 'Producto', authorAvatar: 'https://images.pexels.com/photos/3184339/pexels-photo-3184339.jpeg?auto=compress&cs=tinysrgb&w=100', date: '18 May 2025', readTime: '2 min', views: 7100, image: 'https://images.pexels.com/photos/4968391/pexels-photo-4968391.jpeg?auto=compress&cs=tinysrgb&w=800' },
-  { slug: 'maximizar-comisiones-binarias', type: 'video', category: 'Comisiones', title: 'Maximiza tus comisiones binarias', excerpt: 'Aprende a optimizar el balance de tu red binaria.', author: 'Carlos Torres', authorRole: 'CTO', authorAvatar: 'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=100', date: '15 May 2025', duration: '8:30', views: 2180, image: 'https://images.pexels.com/photos/7688460/pexels-photo-7688460.jpeg?auto=compress&cs=tinysrgb&w=800' },
-  { slug: 'estrategias-duplicar-red-90-dias', type: 'video', category: 'Estrategia', title: 'Estrategias para duplicar tu red en 90 días', excerpt: '5 estrategias que los líderes Diamante usan para crecer rápido.', author: 'Gustavo Ortiz', authorRole: 'CEO', authorAvatar: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=100', date: '10 May 2025', duration: '12:45', views: 3420, image: 'https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=800' },
-];
-
-const categories: Category[] = ['Estrategia', 'Rangos', 'Comisiones', 'Marketing', 'Tutoriales', 'Noticias'];
+import { useNews } from '@/hooks/useNews';
+import { type ContentType, type Category, type ContentItem } from '@/lib/newsContent';
 const ITEMS_PER_PAGE = 6;
-const heroItems = allItems.slice(0, 5);
 
 function formatViews(n: number) { return n >= 1000 ? `${(n / 1000).toFixed(1)}K` : n.toString(); }
 
@@ -76,7 +41,7 @@ function AuthorMeta({ item, size = 'sm' }: { item: ContentItem; size?: 'sm' | 'm
   const avatarSize = size === 'md' ? 'w-7 h-7' : 'w-6 h-6';
   return (
     <div className="flex items-center gap-2 min-w-0">
-      <img src={item.authorAvatar} alt="" className={cn(avatarSize, 'rounded-full object-cover shrink-0')} />
+      <img src={item.authorAvatar || undefined} alt="" className={cn(avatarSize, 'rounded-full object-cover shrink-0')} />
       <div className="leading-tight min-w-0">
         <div className="text-[11px] font-medium text-foreground/85 truncate">{item.author}</div>
         <div className="text-[10px] text-muted-foreground/65 truncate">{item.date}</div>
@@ -133,7 +98,7 @@ function HeroCard({ item }: { item: ContentItem }) {
           <p className="text-sm text-white/75 line-clamp-2 mb-4 max-w-md">{item.excerpt}</p>
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5 min-w-0">
-              <img src={item.authorAvatar} alt="" className="w-8 h-8 rounded-full object-cover shrink-0" />
+              <img src={item.authorAvatar || undefined} alt="" className="w-8 h-8 rounded-full object-cover shrink-0" />
               <div className="leading-tight min-w-0">
                 <div className="text-xs font-medium text-white truncate">{item.author}</div>
                 <div className="text-[10px] text-white/65 truncate">{item.date} · {formatViews(item.views)} vistas</div>
@@ -155,13 +120,10 @@ export default function BlogPage() {
   const [activeCategory, setActiveCategory] = useState<'Todas' | Category>('Todas');
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    setLoading(true);
-    const t = setTimeout(() => setLoading(false), 350);
-    return () => clearTimeout(t);
-  }, [activeTab, activeCategory, search]);
+  const {rows,settings,loading,error,reload}=useNews();
+  const allItems = useMemo(()=>rows.map(row=>({...row.data,slug:row.slug})),[rows]);
+  const heroItems = allItems.filter(item=>item.featured).slice(0,3);
+  const categories = [...new Set(allItems.map(item=>item.category))];
 
   const filtered = useMemo(() => {
     return allItems.filter(item => {
@@ -170,7 +132,7 @@ export default function BlogPage() {
       if (search && !item.title.toLowerCase().includes(search.toLowerCase()) && !item.excerpt.toLowerCase().includes(search.toLowerCase())) return false;
       return true;
     });
-  }, [activeTab, activeCategory, search]);
+  }, [activeTab, activeCategory, search, allItems]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
   const currentPage = Math.min(page, totalPages);
@@ -194,18 +156,18 @@ export default function BlogPage() {
         <div className="relative max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="inline-flex items-center gap-2 text-xs font-semibold text-primary uppercase tracking-widest mb-5">
             <TrendingUp className="w-3.5 h-3.5" />
-            Recursos Cluv360
+            {settings.badge}
           </div>
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground tracking-tight mb-4 leading-[1.1]">
-            Novedades, guías y <span className="text-gradient-animated">tutoriales</span>
+            {settings.title} <span className="text-gradient-animated">{settings.highlight}</span>
           </h1>
           <p className="text-base sm:text-lg text-muted-foreground/80 max-w-xl leading-relaxed">
-            Aprende a escalar tu red, domina el sistema de comisiones y mantente al día con las novedades de la plataforma.
+            {settings.subtitle}
           </p>
         </div>
       </section>
 
-      <section className="pb-10 sm:pb-12">
+      {heroItems.length > 0 && <section className="pb-10 sm:pb-12">
         <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <div className="lg:col-span-2">
@@ -243,7 +205,7 @@ export default function BlogPage() {
             </div>
           </div>
         </div>
-      </section>
+      </section>}
 
       <section className="pb-6">
         <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
@@ -287,7 +249,7 @@ export default function BlogPage() {
 
       <section className="py-8 sm:py-10">
         <StableRegion className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
-          {loading ? <LoadingRegion className="min-h-[24rem]" /> : paginated.length === 0 ? (
+          {error ? <div role="alert" className="py-12 text-center text-sm">No se pudieron cargar las novedades. <button className="text-primary" onClick={()=>void reload()}>Reintentar</button></div> : loading ? <LoadingRegion className="min-h-[24rem]" /> : paginated.length === 0 ? (
             <div className="text-center py-20">
               <div className="w-14 h-14 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4">
                 <Search className="w-6 h-6 text-muted-foreground/50" />

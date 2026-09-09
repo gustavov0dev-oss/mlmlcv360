@@ -37,6 +37,7 @@ const SocialLinksAdminPage = lazy(() => import('@/pages/admin/SocialLinksAdminPa
 const FaqAdminPage = lazy(() => import('@/pages/admin/FaqAdminPage'));
 const ComplaintsAdminPage = lazy(() => import('@/pages/admin/ComplaintsAdminPage'));
 const LegalPagesAdminPage = lazy(() => import('@/pages/admin/LegalPagesAdminPage'));
+const NovedadesAdminPage = lazy(() => import('@/pages/admin/NovedadesAdminPage'));
 const ContactoAdminPage = lazy(() => import('@/pages/admin/ContactoAdminPage'));
 const OportunidadAdminPage = lazy(() => import('@/pages/admin/OportunidadAdminPage'));
 const NosotrosAdminPage = lazy(() => import('@/pages/admin/NosotrosAdminPage'));
@@ -82,6 +83,7 @@ function DashboardContent() {
   if (pathname === '/dashboard/admin/redes-sociales') return render(SocialLinksAdminPage);
   if (pathname === '/dashboard/admin/faq') return render(FaqAdminPage);
   if (pathname === '/dashboard/admin/libro-reclamaciones') return render(ComplaintsAdminPage);
+  if (pathname === '/dashboard/admin/novedades') return render(NovedadesAdminPage);
   if (pathname === '/dashboard/admin/contacto') return render(ContactoAdminPage);
   if (pathname === '/dashboard/admin/oportunidad') return render(OportunidadAdminPage);
   if (pathname === '/dashboard/admin/nosotros') return render(NosotrosAdminPage);
