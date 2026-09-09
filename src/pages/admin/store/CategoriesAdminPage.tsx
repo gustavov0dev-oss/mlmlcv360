@@ -292,7 +292,7 @@ export default function CategoriesAdminPage() {
                 <div className="grid grid-cols-2 gap-2">
                   {(['active', 'inactive'] as const).map(s => (
                     <button key={s} onClick={() => setForm(p => ({ ...p, status: s }))}
-                      className={cn('py-2.5 rounded-xl text-sm font-bold border-2 transition-colors',
+                      className={cn('py-2.5 rounded-xl text-sm font-bold border transition-colors',
                         form.status === s ? 'border-primary bg-primary/10 text-primary' : 'border-border text-muted-foreground')}>
                       {s === 'active' ? 'Activa' : 'Inactiva'}
                     </button>

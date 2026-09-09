@@ -269,7 +269,7 @@ export default function LoginPage() {
               >
                 <div
                   className={cn(
-                    "w-5 h-5 rounded-md flex items-center justify-center transition-all border-2 shrink-0",
+                    "w-5 h-5 rounded-md flex items-center justify-center transition-all border shrink-0",
                     rememberMe
                       ? "bg-primary border-primary text-primary-foreground"
                       : "bg-background border-border hover:border-primary/60"

@@ -14,7 +14,7 @@ Deno.serve(async(req:Request)=>{
  const {targetId}=JSON.parse(raw);if(typeof targetId!=='string'||!/^[a-f0-9-]{36}$/i.test(targetId))return json({error:'Usuario no válido'},400);
  const [a,t,c]=await Promise.all([db.from('profiles').select('id,role,status').eq('id',auth.user.id).single(),db.from('profiles').select('id,role,status,full_name').eq('id',targetId).single(),db.from('system_config').select('value').eq('key','role_permissions').maybeSingle()]);
  let permissions={};try{permissions=typeof c.data?.value==='string'?JSON.parse(c.data.value):c.data?.value||{};}catch{return json({error:'No se pudieron comprobar los permisos'},403);}
- if(a.error||t.error||c.error||!canSupportAccess(a.data,t.data,permissions))return json({error:'No tienes permiso para acceder a esta cuenta. Solo se permiten cuentas de usuario activas.'},403);
+ if(a.error||t.error||c.error||!canSupportAccess(a.data,t.data,permissions))return json({error:'No tienes permiso para acceder a esta cuenta. Revisa tu rol y el permiso de acceso como usuario.'},403);
  const {data:target,error:targetError}=await db.auth.admin.getUserById(targetId);
  if(targetError||!target.user?.email)return json({error:'No se encontró la cuenta de autenticación de este usuario'},409);
  const unconfirmed=!target.user.email_confirmed_at;

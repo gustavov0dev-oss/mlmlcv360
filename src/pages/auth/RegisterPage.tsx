@@ -285,7 +285,7 @@ export default function RegisterPage() {
                   <div className="flex justify-center mb-1">
                     <button type="button" onClick={() => fileRef.current?.click()} className="relative group">
                       {avatarPreview ? (
-                        <img src={avatarPreview} className="w-16 h-16 rounded-full object-cover ring-2 ring-primary/30" alt="Avatar" />
+                        <img src={avatarPreview} className="w-16 h-16 rounded-full object-cover ring-1 ring-primary/30" alt="Avatar" />
                       ) : (
                         <div className="w-16 h-16 rounded-full bg-muted/50 border border-dashed border-border flex items-center justify-center group-hover:border-primary/50 transition-colors">
                           <User className="w-5 h-5 text-muted-foreground" />
@@ -521,7 +521,7 @@ export default function RegisterPage() {
                         type="button"
                         onClick={() => setSelectedPlan(isSelected && !requirePlan ? '' : plan.slug)}
                         className={cn(
-                          "w-full text-left p-4 rounded-xl border-2 transition-all group",
+                          "w-full text-left p-4 rounded-xl border transition-all group",
                           isSelected
                             ? "border-primary bg-primary/5"
                             : "border-border/50 hover:border-border bg-background"
@@ -577,7 +577,7 @@ export default function RegisterPage() {
                 <div className="text-center mb-6">
                   <div className="relative inline-block mb-4">
                     {avatarPreview ? (
-                      <img src={avatarPreview} className="w-16 h-16 rounded-full object-cover ring-2 ring-primary/30" alt="Avatar" />
+                      <img src={avatarPreview} className="w-16 h-16 rounded-full object-cover ring-1 ring-primary/30" alt="Avatar" />
                     ) : (
                       <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center">
                         <User className="w-6 h-6 text-muted-foreground" />

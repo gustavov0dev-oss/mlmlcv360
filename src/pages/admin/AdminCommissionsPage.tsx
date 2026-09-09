@@ -243,13 +243,13 @@ function CommissionModal({
                   key={t.value}
                   onClick={() => setForm(p => ({ ...p, type: t.value }))}
                   className={cn(
-                    'w-full flex items-start gap-3 p-3 rounded-xl border-2 text-left transition-all',
+                    'w-full flex items-start gap-3 p-3 rounded-xl border text-left transition-all',
                     form.type === t.value
                       ? 'border-primary bg-primary/5'
                       : 'border-border hover:border-muted-foreground/40'
                   )}
                 >
-                  <div className={cn('w-3 h-3 rounded-full border-2 mt-0.5 flex-shrink-0 transition-colors',
+                  <div className={cn('w-3 h-3 rounded-full border mt-0.5 flex-shrink-0 transition-colors',
                     form.type === t.value ? 'border-primary bg-primary' : 'border-muted-foreground/40'
                   )} />
                   <div>
@@ -301,7 +301,7 @@ function CommissionModal({
                     key={s.value}
                     onClick={() => set('status')(s.value)}
                     className={cn(
-                      'py-2 px-3 rounded-lg border-2 text-xs font-semibold transition-all',
+                      'py-2 px-3 rounded-lg border text-xs font-semibold transition-all',
                       form.status === s.value ? 'border-primary bg-primary/5 text-primary' : 'border-border text-muted-foreground hover:border-muted-foreground/50'
                     )}
                   >

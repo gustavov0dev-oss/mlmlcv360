@@ -422,7 +422,7 @@ export default function MyPlanPage() {
                       onClick={() => setTargetPlanSlug(p.slug)}
                       disabled={isCurrent}
                       className={cn(
-                        'w-full flex items-center justify-between p-4 rounded-xl border-2 transition-all text-left',
+                        'w-full flex items-center justify-between p-4 rounded-xl border transition-all text-left',
                         isCurrent && 'opacity-50 cursor-not-allowed border-green-500/30 bg-green-500/5',
                         !isCurrent && targetPlanSlug === p.slug && 'border-primary bg-primary/5',
                         !isCurrent && targetPlanSlug !== p.slug && 'border-border hover:border-primary/40'
@@ -458,7 +458,7 @@ export default function MyPlanPage() {
                       key={c}
                       onClick={() => setCurrency(c)}
                       className={cn(
-                        'flex items-center gap-3 p-3 rounded-xl border-2 transition-all',
+                        'flex items-center gap-3 p-3 rounded-xl border transition-all',
                         currency === c ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/30'
                       )}
                     >
@@ -497,7 +497,7 @@ export default function MyPlanPage() {
                           onClick={() => ready && setSelectedGatewayId(g.id)}
                           disabled={!ready}
                           className={cn(
-                            'w-full flex items-center gap-3 p-4 rounded-xl border-2 transition-all text-left',
+                            'w-full flex items-center gap-3 p-4 rounded-xl border transition-all text-left',
                             !ready && 'opacity-40 cursor-not-allowed border-border',
                             isSelected && ready ? 'border-primary bg-primary/5' : ready ? 'border-border hover:border-primary/30 cursor-pointer' : ''
                           )}
@@ -512,7 +512,7 @@ export default function MyPlanPage() {
                             <p className="text-xs text-muted-foreground truncate mt-0.5">{g.description}</p>
                           </div>
                           <div className={cn(
-                            'w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center',
+                            'w-5 h-5 rounded-full border flex-shrink-0 flex items-center justify-center',
                             isSelected && ready ? 'border-primary bg-primary' : 'border-muted-foreground/30'
                           )}>
                             {isSelected && ready && <div className="w-2 h-2 rounded-full bg-white" />}

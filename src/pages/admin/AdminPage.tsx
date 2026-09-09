@@ -506,7 +506,7 @@ export default function AdminPage() {
         if (savedPerms) {
           try {
             const parsed = JSON.parse(savedPerms);
-            setPermissions((prev) => ({ ...prev, ...parsed }));
+            setPermissions((prev) => ({ ...prev, ...Object.fromEntries(Object.entries(parsed).map(([role, values]) => [role, { ...prev[role], ...(values as Record<string, boolean>) }])), super_admin: defaultPermissions.super_admin }));
           } catch {
             /* ignore malformed JSON */
           }
@@ -775,7 +775,7 @@ export default function AdminPage() {
                     </h3>
                     <label
                       className={cn(
-                        "flex flex-col items-center justify-center gap-2 w-full h-24 border-2 border-dashed rounded-xl cursor-pointer transition-colors",
+                        "flex flex-col items-center justify-center gap-2 w-full h-24 border border-dashed rounded-xl cursor-pointer transition-colors",
                         "hover:border-primary/50 hover:bg-primary/5",
                         uploading ? "opacity-50 pointer-events-none" : "",
                         "border-border",
@@ -831,7 +831,7 @@ export default function AdminPage() {
                     </p>
                     <label
                       className={cn(
-                        "flex flex-col items-center justify-center gap-1.5 w-full h-16 border-2 border-dashed rounded-xl cursor-pointer transition-colors",
+                        "flex flex-col items-center justify-center gap-1.5 w-full h-16 border border-dashed rounded-xl cursor-pointer transition-colors",
                         "hover:border-primary/50 hover:bg-primary/5",
                         uploadingCollapsed
                           ? "opacity-50 pointer-events-none"
@@ -1140,7 +1140,7 @@ export default function AdminPage() {
                                             togglePermission(r.name, perm.key)
                                           }
                                           className={cn(
-                                            "w-5 h-5 rounded border-2 flex items-center justify-center mx-auto transition-colors",
+                                            "w-5 h-5 rounded border flex items-center justify-center mx-auto transition-colors",
                                             permissions[r.name]?.[perm.key]
                                               ? "bg-primary border-primary text-white"
                                               : "border-border hover:border-muted-foreground",
@@ -1474,7 +1474,7 @@ export default function AdminPage() {
                     />
                     <label
                       className={cn(
-                        "flex flex-col items-center justify-center gap-1.5 w-full h-20 mt-2 border-2 border-dashed rounded-lg cursor-pointer transition-colors hover:border-primary/50 hover:bg-primary/5",
+                        "flex flex-col items-center justify-center gap-1.5 w-full h-20 mt-2 border border-dashed rounded-lg cursor-pointer transition-colors hover:border-primary/50 hover:bg-primary/5",
                         uploadingPwaIcon ? "opacity-50 pointer-events-none" : "",
                         "border-border",
                       )}
@@ -1546,7 +1546,7 @@ export default function AdminPage() {
                     />
                     <label
                       className={cn(
-                        "flex flex-col items-center justify-center gap-1.5 w-full h-20 mt-2 border-2 border-dashed rounded-lg cursor-pointer transition-colors hover:border-primary/50 hover:bg-primary/5",
+                        "flex flex-col items-center justify-center gap-1.5 w-full h-20 mt-2 border border-dashed rounded-lg cursor-pointer transition-colors hover:border-primary/50 hover:bg-primary/5",
                         uploadingPwaMobile ? "opacity-50 pointer-events-none" : "",
                         "border-border",
                       )}
@@ -1607,7 +1607,7 @@ export default function AdminPage() {
                     />
                     <label
                       className={cn(
-                        "flex flex-col items-center justify-center gap-1.5 w-full h-20 mt-2 border-2 border-dashed rounded-lg cursor-pointer transition-colors hover:border-primary/50 hover:bg-primary/5",
+                        "flex flex-col items-center justify-center gap-1.5 w-full h-20 mt-2 border border-dashed rounded-lg cursor-pointer transition-colors hover:border-primary/50 hover:bg-primary/5",
                         uploadingPwaDesktop ? "opacity-50 pointer-events-none" : "",
                         "border-border",
                       )}
@@ -1797,7 +1797,7 @@ export default function AdminPage() {
                       />
                       <label
                         className={cn(
-                          "flex flex-col items-center justify-center gap-1.5 w-full h-20 mt-2 border-2 border-dashed rounded-lg cursor-pointer transition-colors hover:border-primary/50 hover:bg-primary/5",
+                          "flex flex-col items-center justify-center gap-1.5 w-full h-20 mt-2 border border-dashed rounded-lg cursor-pointer transition-colors hover:border-primary/50 hover:bg-primary/5",
                           uploadingFavicon
                             ? "opacity-50 pointer-events-none"
                             : "",
@@ -1884,7 +1884,7 @@ export default function AdminPage() {
                     />
                     <label
                       className={cn(
-                        "flex flex-col items-center justify-center gap-1.5 w-full h-20 mt-2 border-2 border-dashed rounded-lg cursor-pointer transition-colors hover:border-primary/50 hover:bg-primary/5",
+                        "flex flex-col items-center justify-center gap-1.5 w-full h-20 mt-2 border border-dashed rounded-lg cursor-pointer transition-colors hover:border-primary/50 hover:bg-primary/5",
                         uploadingSeo ? "opacity-50 pointer-events-none" : "",
                         "border-border",
                       )}
@@ -2252,7 +2252,7 @@ export default function AdminPage() {
               {/* Estado — ancho completo, siempre visible arriba de las dos columnas */}
               <div
                 className={cn(
-                  "flex items-center justify-between p-4 rounded-xl border-2 transition-colors gap-3 mb-3",
+                  "flex items-center justify-between p-4 rounded-xl border transition-colors gap-3 mb-3",
                   c("maintenance_mode") === "true"
                     ? "bg-amber-500/10 border-amber-500/30"
                     : "bg-emerald-500/10 border-green-500/20",

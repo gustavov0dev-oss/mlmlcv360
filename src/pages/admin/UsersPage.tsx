@@ -746,11 +746,12 @@ export default function UsersPage() {
                       >
                         <Link2 className="w-3.5 h-3.5" />
                       </button>
-                      {canAccess && user.role==='user' && (user.status==='active'||(currentUser?.role==='super_admin'&&user.status==='pending')) && user.id!==currentUser?.id && (
+                      {canAccess && (currentUser?.role==='super_admin' || (user.role==='user' && user.status==='active' && user.id!==currentUser?.id)) && (
                         <button
                           onClick={() => setAccessTarget(user)}
                           className={["p-1.5 rounded-lg hover:bg-amber-500/10 text-muted-foreground hover:text-amber-600 transition-colors", "dashboard-action"].filter(Boolean).join(' ')}
-                          title="Acceder como usuario"
+                          disabled={user.id===currentUser?.id}
+                          title={user.id===currentUser?.id ? "Esta es tu cuenta" : "Acceder como usuario"}
                         >
                           <LogIn className="w-3.5 h-3.5" />
                         </button>

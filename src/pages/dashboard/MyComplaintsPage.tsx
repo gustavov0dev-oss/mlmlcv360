@@ -109,7 +109,7 @@ function DetailPanel({ complaint, onClose }: { complaint: Complaint; onClose: ()
                 const col = stepColors[i];
                 return (
                   <div key={s} className="flex flex-col items-center gap-1 flex-1">
-                    <div className={cn('w-2.5 h-2.5 rounded-full border-2 transition-colors', done ? col.dot : 'border-border bg-background')} />
+                    <div className={cn('w-2.5 h-2.5 rounded-full border transition-colors', done ? col.dot : 'border-border bg-background')} />
                     <span className={cn('text-[9px] font-medium hidden sm:block', done ? col.text : 'text-muted-foreground/40')}>
                       {cfg?.label}
                     </span>

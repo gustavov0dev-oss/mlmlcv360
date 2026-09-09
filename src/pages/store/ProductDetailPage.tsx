@@ -1318,7 +1318,7 @@ export default function ProductDetailPage() {
                             return (
                               <button key={val} onClick={() => !isOos && handleAttrSelect(key, val)}
                                 disabled={!!isOos} title={colorName}
-                                className={cn('relative w-9 h-9 rounded-full border-2 transition-colors',
+                                className={cn('relative w-9 h-9 rounded-full border transition-colors',
                                   isSelected ? 'border-primary' : 'border-border hover:border-muted-foreground/50',
                                   isOos && 'opacity-40 cursor-not-allowed')}
                                 style={{ backgroundColor: val }}>
@@ -1332,7 +1332,7 @@ export default function ProductDetailPage() {
                             return (
                               <button key={val} onClick={() => !isOos && handleAttrSelect(key, val)}
                                 disabled={!!isOos} title={val}
-                                className={cn('w-11 h-11 rounded-md overflow-hidden border-2 transition-colors',
+                                className={cn('w-11 h-11 rounded-md overflow-hidden border transition-colors',
                                   isSelected ? 'border-primary' : 'border-border hover:border-muted-foreground/50',
                                   isOos && 'opacity-40 cursor-not-allowed')}>
                                 <img src={swatchImg} alt={val} className="w-full h-full object-cover" />

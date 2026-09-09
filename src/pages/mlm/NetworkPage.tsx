@@ -552,7 +552,7 @@ function AddMemberModal({
                         key={pos.v}
                         onClick={() => setForm(p => ({ ...p, position: pos.v as 'left' | 'right' }))}
                         className={cn(
-                          'flex-1 py-3 rounded-xl text-xs font-bold border-2 transition-all',
+                          'flex-1 py-3 rounded-xl text-xs font-bold border transition-all',
                           form.position === pos.v
                             ? pos.color === 'blue'
                               ? 'border-primary bg-primary/15 text-primary'
@@ -663,7 +663,7 @@ function AddMemberModal({
                       key={pos.v}
                       onClick={() => setForm(p => ({ ...p, position: pos.v as 'left' | 'right' }))}
                       className={cn(
-                        'py-3 rounded-xl text-sm font-bold border-2 transition-all',
+                        'py-3 rounded-xl text-sm font-bold border transition-all',
                         form.position === pos.v
                           ? pos.color === 'blue'
                             ? 'border-primary bg-primary/15 text-primary'
@@ -737,7 +737,7 @@ function AddMemberModal({
               <button
                 onClick={handleSendInvite}
                 disabled={loading || !inviteEmail.trim()}
-                className="w-full flex items-center justify-center gap-2 border-2 border-border hover:bg-muted text-foreground py-3 rounded-xl text-sm font-semibold transition-all disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-2 border border-border hover:bg-muted text-foreground py-3 rounded-xl text-sm font-semibold transition-all disabled:opacity-50"
               >
                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                 Registrar invitación
@@ -1051,7 +1051,7 @@ function NodeDrawer({
                 <div className="grid grid-cols-2 gap-2">
                   {[{ v: 'left', label: 'Izquierda', color: 'blue' }, { v: 'right', label: 'Derecha', color: 'orange' }].map(pos => (
                     <button key={pos.v} onClick={() => setMovePos(pos.v as 'left' | 'right')}
-                      className={cn('py-3 rounded-xl text-sm font-bold border-2 transition-all',
+                      className={cn('py-3 rounded-xl text-sm font-bold border transition-all',
                         movePos === pos.v
                           ? pos.color === 'blue' ? 'border-primary bg-primary/15 text-primary' : 'border-orange-500 bg-orange-500/15 text-orange-600 dark:text-orange-400'
                           : 'border-border text-muted-foreground',

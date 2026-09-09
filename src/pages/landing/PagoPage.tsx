@@ -467,7 +467,7 @@ export default function PagoPage() {
                       key={p.id}
                       onClick={() => setSelectedPlanSlug(p.slug)}
                       className={cn(
-                        'p-3 rounded-xl border-2 text-left transition-all',
+                        'p-3 rounded-xl border text-left transition-all',
                         selectedPlanSlug === p.slug
                           ? 'border-primary bg-primary/5'
                           : 'border-border hover:border-primary/40'
@@ -493,7 +493,7 @@ export default function PagoPage() {
                       key={c}
                       onClick={() => handleCurrencyChange(c)}
                       className={cn(
-                        'flex items-center gap-3 p-3.5 rounded-xl border-2 transition-all',
+                        'flex items-center gap-3 p-3.5 rounded-xl border transition-all',
                         currency === c ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/30'
                       )}
                     >
@@ -534,7 +534,7 @@ export default function PagoPage() {
                           onClick={() => ready && setSelectedGatewayId(g.id)}
                           disabled={!ready}
                           className={cn(
-                            'w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left',
+                            'w-full flex items-center gap-4 p-4 rounded-xl border transition-all text-left',
                             !ready && 'opacity-40 cursor-not-allowed',
                             isSelected && ready ? 'border-primary bg-primary/5' : 'border-border',
                             ready && !isSelected && 'hover:border-primary/40 cursor-pointer'
@@ -560,7 +560,7 @@ export default function PagoPage() {
                             <p className="text-xs text-muted-foreground mt-0.5 truncate">{g.description}</p>
                           </div>
                           <div className={cn(
-                            'w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all',
+                            'w-5 h-5 rounded-full border flex-shrink-0 flex items-center justify-center transition-all',
                             isSelected && ready ? 'border-primary bg-primary' : 'border-muted-foreground/30'
                           )}>
                             {isSelected && ready && <div className="w-2 h-2 rounded-full bg-white" />}

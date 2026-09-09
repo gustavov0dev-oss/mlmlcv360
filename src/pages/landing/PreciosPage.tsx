@@ -15,7 +15,7 @@ export default function PreciosPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
               {plans.map(plan => (
                 <div key={plan.id} className={cn(
-                  'bg-card border-2 rounded-2xl p-7 relative transition-all hover:shadow-xl',
+                  'bg-card border rounded-2xl p-7 relative transition-all hover:shadow-xl',
                   plan.id === 'pro' ? 'border-primary shadow-xl shadow-primary/10 scale-105' : 'border-border hover:border-primary/30'
                 )}>
                   {plan.badge && (

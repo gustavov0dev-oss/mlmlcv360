@@ -147,7 +147,7 @@ function DetailPanel({
                   <div key={s} className="flex items-center flex-1 last:flex-none">
                     <div className="flex flex-col items-center gap-1">
                       <div className={cn(
-                        'w-7 h-7 rounded-full border-2 flex items-center justify-center text-[10px] font-bold transition-colors',
+                        'w-7 h-7 rounded-full border flex items-center justify-center text-[10px] font-bold transition-colors',
                         done ? `${sCfg.stepClass} border-transparent text-white` : 'border-border bg-background text-muted-foreground'
                       )}>
                         {i + 1}

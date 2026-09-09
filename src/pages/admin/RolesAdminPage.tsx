@@ -31,7 +31,7 @@ function ColorPicker({ value, onChange }: { value: string; onChange: (c: string)
           <button key={c} type="button" onClick={() => onChange(c)}
             title={c}
             className={cn(
-              'w-7 h-7 rounded-lg border-2 transition-all hover:scale-110 active:scale-95',
+              'w-7 h-7 rounded-lg border transition-all hover:scale-110 active:scale-95',
               value.toUpperCase() === c.toUpperCase() ? 'border-foreground shadow-md scale-110' : 'border-transparent',
             )}
             style={{ backgroundColor: c }} />

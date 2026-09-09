@@ -99,7 +99,7 @@ export default function RanksPage() {
           const isAchieved = currentRank && i <= ranks.findIndex(r => r.id === currentRank.id);
           return (
             <div key={rank.id} className={cn(
-              'bg-card border-2 rounded-xl p-5 transition-all',
+              'bg-card border rounded-xl p-5 transition-all',
               isCurrent ? 'border-primary shadow-lg shadow-primary/10' : isAchieved ? rank.border_color : 'border-border opacity-60'
             )}>
               <div className="flex items-center justify-between mb-3">

@@ -85,7 +85,7 @@ function ColorPicker({
           type="button"
           onClick={() => onChange(c)}
           className={cn(
-            "w-6 h-6 rounded-lg border-2 transition-all",
+            "w-6 h-6 rounded-lg border transition-all",
             value === c
               ? "border-primary scale-110 shadow-md"
               : "border-border hover:scale-105",
@@ -954,7 +954,7 @@ export default function ProductFormPage() {
                     }}
                     className={cn(
                       "relative group rounded-xl overflow-hidden border border-border aspect-square bg-muted cursor-grab active:cursor-grabbing",
-                      i === 0 && "ring-2 ring-primary ring-offset-2",
+                      i === 0 && "ring-1 ring-primary ring-offset-2",
                     )}
                   >
                     {m.type === "video" ? (

@@ -294,8 +294,8 @@ export default function StorePage() {
       <div className="flex items-center gap-4 overflow-x-auto touch-pan-x snap-x snap-proximity scroll-smooth scrollbar-hide pb-1">
         <button onClick={() => setCatFilter('')} className="flex flex-col items-center gap-1.5 shrink-0 w-16 snap-start">
           <div className={cn(
-            'w-14 h-14 rounded-full flex items-center justify-center border-2 transition-all',
-            !catFilter ? 'border-primary bg-primary/10 ring-2 ring-primary/20' : 'border-border/40 bg-muted/30'
+            'w-14 h-14 rounded-full flex items-center justify-center border transition-all',
+            !catFilter ? 'border-primary bg-primary/10 ring-1 ring-primary/20' : 'border-border/40 bg-muted/30'
           )}>
             <Package className={cn('w-6 h-6', !catFilter ? 'text-primary' : 'text-muted-foreground/50')} />
           </div>
@@ -304,8 +304,8 @@ export default function StorePage() {
         {categories.map(cat => (
           <button key={cat.id} onClick={() => setCatFilter(catFilter === cat.id ? '' : cat.id)} className="flex flex-col items-center gap-1.5 shrink-0 w-16 snap-start">
             <div className={cn(
-              'w-14 h-14 rounded-full overflow-hidden flex items-center justify-center border-2 transition-all',
-              catFilter === cat.id ? 'border-primary ring-2 ring-primary/20' : 'border-border/40 bg-muted/30'
+              'w-14 h-14 rounded-full overflow-hidden flex items-center justify-center border transition-all',
+              catFilter === cat.id ? 'border-primary ring-1 ring-primary/20' : 'border-border/40 bg-muted/30'
             )}>
               {cat.image_url
                 ? <img src={cat.image_url} alt={cat.name} loading="lazy" className="w-full h-full object-cover" />

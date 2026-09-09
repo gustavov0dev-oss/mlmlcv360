@@ -1,3 +1,4 @@
+import { Switch } from '@/components/ui/switch';
 import { LoadingRegion, StableRegion } from '@/components/ui/loading-region';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useDatabase, useStorage } from '@/lib/backend';
@@ -7,7 +8,7 @@ import { toast } from 'sonner';
 import { DeleteConfirmDialog } from '@/components/admin/DeleteConfirmDialog';
 import {
   Plus, Trash2, Pencil, X, Save, RefreshCw, Star, Eye,
-  Upload, Link as LinkIcon, GripVertical, ToggleLeft, ToggleRight,
+  Upload, Link as LinkIcon, GripVertical, 
   Quote, Lock,
 } from 'lucide-react';
 
@@ -84,7 +85,7 @@ function AvatarInput({ value, onChange }: { value: string; onChange: (url: strin
           placeholder="https://images.pexels.com/..."
           className="w-full px-3 py-2 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors" />
       ) : (
-        <label className={cn('flex items-center justify-center gap-2 w-full h-10 border-2 border-dashed rounded-lg cursor-pointer text-sm transition-colors',
+        <label className={cn('flex items-center justify-center gap-2 w-full h-10 border border-dashed rounded-lg cursor-pointer text-sm transition-colors',
           uploading ? 'opacity-50 pointer-events-none border-border' : 'border-border hover:border-primary/50 hover:bg-primary/5 text-muted-foreground hover:text-primary')}>
           <input ref={fileRef} type="file" accept="image/*" className="sr-only" onChange={handleFile} disabled={uploading} />
           {uploading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
@@ -285,11 +286,8 @@ function DraggableRow({
 
       {/* Actions */}
       <div className="flex flex-col sm:flex-row items-center gap-1 flex-shrink-0">
-        <button onClick={() => onToggle(t)}
-          className={[cn('p-2 rounded-lg transition-colors', t.is_active ? 'text-green-500 hover:bg-emerald-500/10' : 'text-muted-foreground hover:bg-muted'), 'dashboard-action'].filter(Boolean).join(' ')}
-          title={t.is_active ? 'Desactivar' : 'Activar'}>
-          {t.is_active ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
-        </button>
+        <Switch checked={t.is_active} onCheckedChange={() => onToggle(t)}
+          aria-label={t.is_active ? 'Desactivar testimonio' : 'Activar testimonio'} />
         <button onClick={() => onEdit(t)}
           className={["p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-primary transition-colors", "dashboard-action"].filter(Boolean).join(' ')} title="Editar">
           <Pencil className="w-4 h-4" />

@@ -276,7 +276,7 @@ export default function CouponsAdminPage() {
                     {[{ v: 'active', label: 'Activo', cl: 'bg-emerald-500/10 text-emerald-600 border-green-500/30' },
                       { v: 'inactive', label: 'Inactivo', cl: 'bg-muted text-muted-foreground border-border' }].map(s => (
                       <button key={s.v} onClick={() => setForm(p => ({ ...p, status: s.v as any }))}
-                        className={cn('flex-1 py-3 rounded-xl text-xs font-bold border-2 transition-colors',
+                        className={cn('flex-1 py-3 rounded-xl text-xs font-bold border transition-colors',
                           form.status === s.v ? s.cl : 'border-border text-muted-foreground hover:border-muted-foreground/50')}>
                         {s.label}
                       </button>
@@ -290,7 +290,7 @@ export default function CouponsAdminPage() {
                 <label className="block text-xs font-bold text-foreground">Tipo de descuento *</label>
                 <div className="grid grid-cols-2 gap-3">
                   <button onClick={() => setForm(p => ({ ...p, type: 'percentage' }))}
-                    className={cn('flex items-center gap-3 p-3.5 rounded-xl border-2 transition-all text-left',
+                    className={cn('flex items-center gap-3 p-3.5 rounded-xl border transition-all text-left',
                       form.type === 'percentage' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40')}>
                     <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center text-lg font-bold flex-shrink-0', form.type === 'percentage' ? 'bg-primary text-white' : 'bg-muted text-muted-foreground')}>%</div>
                     <div>
@@ -299,7 +299,7 @@ export default function CouponsAdminPage() {
                     </div>
                   </button>
                   <button onClick={() => setForm(p => ({ ...p, type: 'fixed' }))}
-                    className={cn('flex items-center gap-3 p-3.5 rounded-xl border-2 transition-all text-left',
+                    className={cn('flex items-center gap-3 p-3.5 rounded-xl border transition-all text-left',
                       form.type === 'fixed' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40')}>
                     <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold flex-shrink-0', form.type === 'fixed' ? 'bg-primary text-white' : 'bg-muted text-muted-foreground')}>S/</div>
                     <div>
@@ -362,7 +362,7 @@ export default function CouponsAdminPage() {
                       { value: 'categories', label: 'Categorías', icon: '🗂️' },
                     ].map(opt => (
                       <button key={opt.value} onClick={() => setForm(p => ({ ...p, applies_to: opt.value as any }))}
-                        className={cn('flex flex-col items-center gap-1.5 px-2 py-3 rounded-xl text-xs font-semibold border-2 transition-colors text-center',
+                        className={cn('flex flex-col items-center gap-1.5 px-2 py-3 rounded-xl text-xs font-semibold border transition-colors text-center',
                           form.applies_to === opt.value ? 'border-primary bg-primary/10 text-primary' : 'border-border text-muted-foreground hover:border-primary/40 hover:text-foreground')}>
                         <span className="text-xl">{opt.icon}</span>
                         {opt.label}

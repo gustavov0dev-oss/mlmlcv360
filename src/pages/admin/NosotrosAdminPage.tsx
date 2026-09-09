@@ -69,7 +69,7 @@ function ImageInput({ value, onChange, aspect = 'square' }: { value: string; onC
           placeholder="https://..."
           className="w-full px-3 py-2 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors" />
       ) : (
-        <label className={cn('flex items-center justify-center gap-2 w-full h-10 border-2 border-dashed rounded-lg cursor-pointer text-sm transition-colors',
+        <label className={cn('flex items-center justify-center gap-2 w-full h-10 border border-dashed rounded-lg cursor-pointer text-sm transition-colors',
           uploading ? 'opacity-50 pointer-events-none border-border' : 'border-border hover:border-primary/50 hover:bg-primary/5 text-muted-foreground hover:text-primary')}>
           <input ref={fileRef} type="file" accept="image/*" className="sr-only" onChange={handleFile} disabled={uploading} />
           {uploading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}

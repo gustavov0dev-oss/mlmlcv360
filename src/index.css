@@ -1169,7 +1169,7 @@ input.themed:focus {
 
 /* Remove default browser focus ring on buttons */
 button:focus-visible {
-  outline: 2px solid hsl(var(--primary));
+  outline: 1px solid hsl(var(--primary));
   outline-offset: 2px;
 }
 
@@ -1294,7 +1294,7 @@ html, .dashboard-scroll { scrollbar-gutter: stable; }
 .dashboard-action > svg { width: 1rem !important; height: 1rem !important; stroke-width: 1.75; }
 .dashboard-action:hover:not(:disabled) { color: hsl(var(--foreground)) !important; background: hsl(var(--muted) / .5) !important; }
 
-.dashboard-action:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 2px; }
+.dashboard-action:focus-visible { outline: 1px solid hsl(var(--primary)); outline-offset: 2px; }
 .dashboard-action:disabled { opacity: .4; cursor: not-allowed; }
 
 .dashboard-action svg { color: inherit !important; }
