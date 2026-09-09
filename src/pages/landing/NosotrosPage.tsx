@@ -172,7 +172,7 @@ export default function NosotrosPage() {
         </div>
 
         <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 min-w-0">
-          <div ref={historyRef} id="about-history-track" role="region" aria-label="Hitos de nuestra historia" tabIndex={0} className="flex gap-8 overflow-x-auto pb-4 snap-x snap-proximity max-w-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary/50">
+          <div ref={historyRef} id="about-history-track" role="region" aria-label="Hitos de nuestra historia" tabIndex={0} className="flex gap-8 overflow-x-auto scrollbar-hide pb-4 snap-x snap-proximity max-w-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary/50">
             {timeline.map((item, i) => (
               <div
                 key={item.id}

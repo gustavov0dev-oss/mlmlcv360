@@ -23,6 +23,7 @@ export interface Product {
   base_price: number;
   compare_price?: number;
   cost_price?: number;
+  points?: number;
   currency: 'PEN' | 'USD';
   status: 'draft' | 'active' | 'archived';
   weight?: number;

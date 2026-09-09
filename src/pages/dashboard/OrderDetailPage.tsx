@@ -11,9 +11,9 @@ function fmt(n: number) { return `S/ ${n.toFixed(2)}`; }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; icon: React.FC<any> }> = {
   pending:    { label: 'Pendiente',   color: 'text-yellow-600', bg: 'bg-yellow-500/10', icon: Clock    },
-  confirmed:  { label: 'Confirmado',  color: 'text-primary',    bg: 'bg-primary/10',    icon: CheckCircle },
-  processing: { label: 'En proceso',  color: 'text-purple-600', bg: 'bg-purple-500/10', icon: Package  },
-  shipped:    { label: 'Enviado',     color: 'text-cyan-600',   bg: 'bg-cyan-500/10',   icon: Truck    },
+  confirmed:  { label: 'Revisión',  color: 'text-primary',    bg: 'bg-primary/10',    icon: CheckCircle },
+  processing: { label: 'Procesando',  color: 'text-purple-600', bg: 'bg-purple-500/10', icon: Package  },
+  shipped:    { label: 'Envío',     color: 'text-cyan-600',   bg: 'bg-cyan-500/10',   icon: Truck    },
   delivered:  { label: 'Entregado',   color: 'text-green-600',  bg: 'bg-green-500/10',  icon: CheckCircle },
   cancelled:  { label: 'Cancelado',   color: 'text-red-600',    bg: 'bg-red-500/10',    icon: XCircle  },
   refunded:   { label: 'Reembolsado', color: 'text-orange-600', bg: 'bg-orange-500/10', icon: RefreshCw },

@@ -134,6 +134,7 @@ export default function ProductFormPage() {
     base_price: "",
     compare_price: "",
     cost_price: "",
+    points: "0",
     currency: "PEN",
     status: "draft",
     sku: "",
@@ -197,6 +198,7 @@ export default function ProductFormPage() {
           base_price: String(p.base_price),
           compare_price: p.compare_price ? String(p.compare_price) : "",
           cost_price: p.cost_price ? String(p.cost_price) : "",
+          points: String(p.points ?? 0),
           currency: p.currency,
           status: p.status,
           sku: p.sku || generateSKU(),
@@ -284,6 +286,10 @@ export default function ProductFormPage() {
       toast.error("Completa nombre, slug y precio base");
       return;
     }
+    if (!Number.isFinite(Number(form.points)) || Number(form.points) < 0) {
+      toast.error("Los puntos deben ser un número mayor o igual a cero");
+      return;
+    }
     setSaving(true);
     const images = media
       .filter((m) => m.type !== "video")
@@ -311,6 +317,7 @@ export default function ProductFormPage() {
       base_price: parseFloat(form.base_price),
       compare_price: form.compare_price ? parseFloat(form.compare_price) : null,
       cost_price: form.cost_price ? parseFloat(form.cost_price) : null,
+      points: Number(form.points || 0),
       currency: form.currency,
       status: form.status,
       sku: form.sku || null,
@@ -651,9 +658,9 @@ export default function ProductFormPage() {
                 </label>
                 <input
                   type="number"
-                  value={form.cost_price}
+                  value={form.points}
                   onChange={(e) =>
-                    setForm((p) => ({ ...p, cost_price: e.target.value }))
+                    setForm((p) => ({ ...p, points: e.target.value }))
                   }
                   placeholder="0.00"
                   step="0.01"

@@ -11,15 +11,15 @@ function fmt(n: number) { return `S/ ${n.toFixed(2)}`; }
 
 const STATUS_CONFIG: Record<string, { label: string; cl: string }> = {
   pending:    { label: 'Pendiente',   cl: 'text-amber-600 bg-amber-500/10' },
-  confirmed:  { label: 'Confirmado',  cl: 'text-primary bg-primary/10'     },
-  processing: { label: 'En proceso',  cl: 'text-primary bg-primary/10' },
-  shipped:    { label: 'Enviado',     cl: 'text-cyan-600 bg-cyan-500/10'     },
+  confirmed:  { label: 'Revisión',  cl: 'text-primary bg-primary/10'     },
+  processing: { label: 'Procesando',  cl: 'text-primary bg-primary/10' },
+  shipped:    { label: 'Envío',     cl: 'text-cyan-600 bg-cyan-500/10'     },
   delivered:  { label: 'Entregado',   cl: 'text-emerald-600 bg-emerald-500/10'   },
   cancelled:  { label: 'Cancelado',   cl: 'text-red-600 bg-destructive/10'       },
   refunded:   { label: 'Reembolsado', cl: 'text-amber-600 bg-amber-500/10' },
 };
 
-const ALL_STATUSES = Object.keys(STATUS_CONFIG);
+const ALL_STATUSES = ['pending', 'confirmed', 'processing', 'shipped', 'delivered'];
 
 export default function OrdersAdminPage() {
   const navigate = useNavigate();
@@ -60,7 +60,7 @@ export default function OrdersAdminPage() {
     if (error) { toast.error(error); setUpdating(null); return; }
 
     const trackDesc: Record<string, string> = {
-      confirmed:  'Pedido confirmado — en preparación',
+      confirmed:  'Pedido en revisión',
       processing: 'Pedido en proceso de empaque',
       shipped:    'Pedido enviado — en camino',
       delivered:  'Pedido entregado exitosamente',
