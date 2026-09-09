@@ -1,3 +1,4 @@
+import { WhatsAppSettings } from '@/components/admin/WhatsAppSettings';
 import { LoadingRegion } from '@/components/ui/loading-region';
 import { useState, useEffect, useRef, Fragment } from "react";
 import { useDatabase, useStorage } from "@/lib/backend";
@@ -1392,106 +1393,7 @@ export default function AdminPage() {
           )}
 
           {/* WhatsApp */}
-          {activeModule === "whatsapp" && (
-            <div className="bg-card border border-border rounded-xl p-5 sm:p-6">
-              <div className="mb-5">
-                <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
-                  <MessageCircle className="w-4 h-4 text-green-500" />{" "}
-                  Configuración de WhatsApp
-                </h2>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Configura el botón flotante de WhatsApp que aparece en el
-                  sitio.
-                </p>
-              </div>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
-                    <div>
-                      <div className="text-sm font-medium text-foreground">
-                        Botón de WhatsApp visible
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        Muestra u oculta el botón flotante en el sitio público
-                      </div>
-                    </div>
-                    <ToggleSwitch
-                      checked={c("whatsapp_enabled") === "true"}
-                      onChange={(v) => setC("whatsapp_enabled", String(v))}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-foreground mb-1.5">
-                      Número de WhatsApp
-                    </label>
-                    <input
-                      value={c("whatsapp_number")}
-                      onChange={(e) => setC("whatsapp_number", e.target.value)}
-                      placeholder="51987654321"
-                      className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors font-mono"
-                    />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Incluye el código de país sin "+". Ej: 51 para Perú, 34
-                      para España.
-                    </p>
-                  </div>
-                </div>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-medium text-foreground mb-1.5">
-                      Mensaje predeterminado
-                    </label>
-                    <textarea
-                      value={c("whatsapp_message")}
-                      onChange={(e) => setC("whatsapp_message", e.target.value)}
-                      placeholder="Hola, me gustaría más información sobre MLM 360"
-                      rows={3}
-                      className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors resize-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-foreground mb-1.5">
-                      Posición del botón
-                    </label>
-                    <select
-                      value={c("whatsapp_position")}
-                      onChange={(e) =>
-                        setC("whatsapp_position", e.target.value)
-                      }
-                      className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary"
-                    >
-                      <option value="bottom-right">Abajo a la derecha</option>
-                      <option value="bottom-left">Abajo a la izquierda</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-              <div className="mt-6 pt-4 border-t border-border flex justify-end">
-                <button
-                  onClick={() =>
-                    saveConfigKeys(
-                      [
-                        "whatsapp_enabled",
-                        "whatsapp_number",
-                        "whatsapp_message",
-                        "whatsapp_position",
-                      ],
-                      "whatsapp",
-                    )
-                  }
-                  disabled={savingConfig}
-                  className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-medium transition-colors disabled:opacity-50"
-                >
-                  {savingConfig ? (
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Save className="w-4 h-4" />
-                  )}{" "}
-                  Guardar
-                </button>
-              </div>
-            </div>
-          )}
+          {activeModule === "whatsapp" && <WhatsAppSettings />}
 
           {/* PWA */}
           {activeModule === "pwa" && (
