@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { useState } from 'react';
 
 import { useNews } from '@/hooks/useNews';
-import { safeNewsHtml, videoEmbed } from '@/lib/newsContent';
+import { safeNewsHtml, videoEmbed, directVideoUrl } from '@/lib/newsContent';
 import { LoadingRegion } from '@/components/ui/loading-region';
 
 const defaultArticle = { videoUrl: '', duration: '', views: 0,
@@ -67,7 +67,7 @@ export default function BlogDetailPage() {
             </div>
           </header>
 
-          {article.type === 'video' && videoEmbed(article.videoUrl || '') ? (
+          {article.type === 'video' && directVideoUrl(article.videoUrl || '') ? <video src={article.videoUrl} controls preload="metadata" poster={article.image} className="w-full aspect-video rounded-lg bg-black mb-8"/> : article.type === 'video' && videoEmbed(article.videoUrl || '') ? (
             <div className="aspect-video rounded-lg overflow-hidden bg-black border border-border/40 mb-8">
               <iframe src={videoEmbed(article.videoUrl || '')} className="w-full h-full" allowFullScreen title={article.title} />
             </div>

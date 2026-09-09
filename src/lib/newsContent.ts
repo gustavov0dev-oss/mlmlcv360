@@ -37,3 +37,7 @@ export function safeNewsHtml(html: string) {
   };
   const output=document.createElement('div'); doc.body.childNodes.forEach(node=>output.appendChild(clean(node))); return output.innerHTML;
 }
+
+export function directVideoUrl(value: string) { try { const url=new URL(value); return url.protocol==='https:' && /\.(mp4|webm)$/i.test(url.pathname) ? url.href : ''; } catch { return ''; } }
+export function formatVideoDuration(seconds:number) { if(!Number.isFinite(seconds)||seconds<=0)return ''; const total=Math.round(seconds); return `${Math.floor(total/60)}:${String(total%60).padStart(2,'0')}`; }
+export function readingTime(html:string) { const words=html.replace(/<[^>]*>/g,' ').replace(/&[^;]+;/g,' ').trim().split(/\s+/).filter(Boolean).length; return words ? `${Math.max(1,Math.ceil(words/200))} min` : ''; }
