@@ -482,9 +482,7 @@ export default function FaqAdminPage() {
                           className="focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none"
                         />
                       </div>
-                      <span className={cn('text-[10px] font-medium', item.is_active ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground/50')}>
-                        {item.is_active ? 'Activa' : 'Inactiva'}
-                      </span>
+
                     </div>
 
                     {/* Actions */}

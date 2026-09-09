@@ -1,5 +1,5 @@
 import { supportMode } from '@/lib/backend/client';
-import { endSupportAccess } from '@/lib/backend/supportAccess';
+import { endSupportAccess, returningFromSupport } from '@/lib/backend/supportAccess';
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { useBackend, useDatabase } from '@/lib/backend';
 import type { Profile, Session } from '@/lib/backend';
@@ -149,6 +149,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             if (mounted) { clearTimeout(safetyTimer); setLoading(false); }
           }
         } else if (event === 'SIGNED_OUT') {
+          if (returningFromSupport) return;
           setUser(null);
           clearTimeout(safetyTimer);
           setLoading(false);

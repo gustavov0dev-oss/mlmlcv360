@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { supabase, supportMode } from './client';
+export let returningFromSupport = false;
 // Provider-specific session handling stays behind this adapter for a future backend migration.
 export async function startSupportAccess(targetId:string) {
  if(supportMode)throw new Error('Regresa primero a tu cuenta de administrador');
@@ -18,7 +19,8 @@ export async function startSupportAccess(targetId:string) {
  window.location.assign('/dashboard');
 }
 export async function endSupportAccess() {
- if(!supportMode)return;
+ if(!supportMode || returningFromSupport)return;
+ returningFromSupport = true;
  try {await supabase.auth.signOut({scope:'local'});} finally {
  sessionStorage.removeItem('mlm360-support-mode');sessionStorage.removeItem('mlm360-support-auth');sessionStorage.removeItem('mlm360-support-name');
  window.location.assign('/dashboard/usuarios');

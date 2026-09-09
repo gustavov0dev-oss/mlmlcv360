@@ -261,7 +261,7 @@ function NavItemComponent({
                 to={child.href!}
                 onClick={onNavigate}
                 className={cn(
-                  'flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors',
+                  'flex items-center gap-2 px-2 py-2 rounded-lg text-sm whitespace-nowrap transition-colors',
                   childActive
                     ? "text-primary font-semibold"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted/70",
