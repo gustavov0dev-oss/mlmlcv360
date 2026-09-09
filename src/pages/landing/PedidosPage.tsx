@@ -162,7 +162,7 @@ export default function PedidosPage({ initialTab = 'pedidos' }: { initialTab?: T
                 {t.count !== undefined && t.count > 0 && (
                   <span className={cn(
                     'text-[10px] font-semibold min-w-[20px] h-5 px-1 rounded-full flex items-center justify-center transition-colors',
-                    tab === t.id ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground',
+                    tab === t.id ? "text-primary font-semibold" : "text-muted-foreground",
                   )}>{t.count}</span>
                 )}
                 {tab === t.id && (

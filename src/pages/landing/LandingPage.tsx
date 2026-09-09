@@ -247,8 +247,8 @@ function StoreSection() {
               className={cn(
                 "shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all",
                 activeCat === ""
-                  ? "bg-foreground/90 text-background backdrop-blur-md"
-                  : "border border-border/40 bg-white/70 dark:bg-white/[0.05] backdrop-blur-md text-muted-foreground hover:text-foreground hover:border-foreground/30",
+                  ? "text-primary font-semibold"
+                  : "border border-border/40 dark:bg-white/[0.05] backdrop-blur-md text-muted-foreground hover:text-foreground hover:border-foreground/30",
               )}
             >
               <ShoppingBag className="w-3.5 h-3.5" /> Todos
@@ -260,8 +260,8 @@ function StoreSection() {
                 className={cn(
                   "shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all",
                   activeCat === cat.id
-                    ? "bg-foreground/90 text-background backdrop-blur-md"
-                    : "border border-border/40 bg-white/70 dark:bg-white/[0.05] backdrop-blur-md text-muted-foreground hover:text-foreground hover:border-foreground/30",
+                    ? "text-primary font-semibold"
+                    : "border border-border/40 dark:bg-white/[0.05] backdrop-blur-md text-muted-foreground hover:text-foreground hover:border-foreground/30",
                 )}
               >
                 {cat.image_url && (

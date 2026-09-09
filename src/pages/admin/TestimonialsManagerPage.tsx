@@ -25,8 +25,8 @@ export default function TestimonialsManagerPage() {
             className={cn(
               'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all',
               tab === t.id
-                ? 'bg-background text-foreground shadow-sm'
-                : 'text-muted-foreground hover:text-foreground',
+                ? "text-primary font-semibold"
+                : "text-muted-foreground hover:text-foreground",
             )}
           >
             <t.icon className="w-3.5 h-3.5" />

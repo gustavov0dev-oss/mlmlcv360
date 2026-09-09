@@ -519,7 +519,7 @@ export default function ProductFormPage() {
             className={cn(
               "flex items-center gap-1.5 px-4 py-3 text-xs font-bold whitespace-nowrap border-b-2 -mb-px transition-colors flex-shrink-0",
               tab === t.id
-                ? "border-primary text-primary bg-primary/5"
+                ? "border-primary text-primary font-semibold"
                 : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/30",
             )}
           >

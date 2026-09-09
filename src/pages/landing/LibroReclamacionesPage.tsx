@@ -336,8 +336,8 @@ export default function LibroReclamacionesPage() {
                 className={cn(
                   'flex items-center justify-center gap-2 py-2.5 px-3 rounded-md text-sm font-medium transition-colors duration-150',
                   tab === t
-                    ? 'bg-background text-foreground'
-                    : 'text-muted-foreground hover:text-foreground'
+                    ? "text-primary font-semibold"
+                    : "text-muted-foreground hover:text-foreground"
                 )}>
                 <Icon className="w-4 h-4 shrink-0" />
                 <span className="truncate">{label}</span>

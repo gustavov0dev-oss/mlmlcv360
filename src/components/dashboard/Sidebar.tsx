@@ -219,8 +219,8 @@ function NavItemComponent({
           className={cn(
             'w-full flex items-center justify-center p-3 rounded-xl transition-colors text-sm cursor-pointer',
             isActive
-              ? 'text-primary bg-primary/15'
-              : 'text-muted-foreground hover:text-foreground hover:bg-muted/70',
+              ? "text-primary font-semibold"
+              : "text-muted-foreground hover:text-foreground hover:bg-muted/70",
           )}
         >
           <item.icon className="w-4 h-4 flex-shrink-0" />
@@ -236,8 +236,8 @@ function NavItemComponent({
           className={cn(
             'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors text-sm cursor-pointer',
             isActive
-              ? 'text-primary bg-primary/15 font-medium'
-              : 'text-muted-foreground hover:text-foreground hover:bg-muted/70',
+              ? "text-primary font-semibold"
+              : "text-muted-foreground hover:text-foreground hover:bg-muted/70",
           )}
         >
           <item.icon className="w-4 h-4 flex-shrink-0" />
@@ -261,8 +261,8 @@ function NavItemComponent({
                 className={cn(
                   'flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors',
                   childActive
-                    ? 'text-primary font-semibold bg-primary/[0.12]'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/70',
+                    ? "text-primary font-semibold"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/70",
                 )}
               >
                 <child.icon className="w-3.5 h-3.5 flex-shrink-0" />
@@ -283,8 +283,8 @@ function NavItemComponent({
         className={cn(
           'flex items-center justify-center p-3 rounded-xl transition-colors text-sm',
           isActive
-            ? 'text-primary bg-primary/15 font-semibold'
-            : 'text-muted-foreground hover:text-foreground hover:bg-muted/70',
+            ? "text-primary font-semibold"
+            : "text-muted-foreground hover:text-foreground hover:bg-muted/70",
         )}
       >
         <item.icon className="w-4 h-4 flex-shrink-0" />
@@ -299,8 +299,8 @@ function NavItemComponent({
       className={cn(
         'flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors text-sm',
         isActive
-          ? 'text-primary bg-primary/15 font-semibold'
-          : 'text-muted-foreground hover:text-foreground hover:bg-muted/70',
+          ? "text-primary font-semibold"
+          : "text-muted-foreground hover:text-foreground hover:bg-muted/70",
       )}
     >
       <item.icon className="w-4 h-4 flex-shrink-0" />
@@ -330,7 +330,7 @@ function MobileExpandableSection({
         onClick={() => setExpanded(v => !v)}
         className={cn(
           'w-full flex items-center gap-2 py-3 px-3 rounded-xl text-sm font-medium transition-colors',
-          isActiveParent ? 'bg-primary/15 text-primary' : 'bg-muted/40 text-foreground hover:bg-muted/60',
+          isActiveParent ? "text-primary font-semibold" : "text-foreground hover:bg-muted/60",
         )}
       >
         <item.icon className="w-4 h-4 flex-shrink-0" />
@@ -351,8 +351,8 @@ function MobileExpandableSection({
                 className={cn(
                   'flex items-center gap-2 py-2.5 px-3 rounded-xl text-sm transition-colors',
                   childActive
-                    ? 'bg-primary/15 text-primary font-semibold'
-                    : 'bg-muted/40 text-foreground hover:bg-muted/60 active:scale-95',
+                    ? "text-primary font-semibold"
+                    : "text-foreground hover:bg-muted/60 active:scale-95",
                 )}
               >
                 <child.icon className="w-3.5 h-3.5 flex-shrink-0 text-muted-foreground" />
@@ -689,8 +689,8 @@ export default function Sidebar() {
                         className={cn(
                           'flex flex-col items-center gap-2 py-3.5 rounded-xl transition-all text-center active:scale-95',
                           active
-                            ? 'bg-primary/12 text-primary shadow-sm'
-                            : 'bg-muted/40 text-foreground hover:bg-muted/60 active:bg-muted',
+                            ? "text-primary font-semibold"
+                            : "text-foreground hover:bg-muted/60 active:bg-muted",
                         )}
                       >
                         <item.icon className="w-5 h-5" />

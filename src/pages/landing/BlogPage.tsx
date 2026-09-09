@@ -271,13 +271,13 @@ export default function BlogPage() {
           <div className="flex flex-wrap items-center gap-2 mt-4">
             <button onClick={() => handleCategoryChange('Todas')}
               className={cn('px-3 py-1.5 rounded-full text-xs font-medium',
-                activeCategory === 'Todas' ? 'bg-primary text-primary-foreground' : 'bg-muted/50 text-muted-foreground')}>
+                activeCategory === 'Todas' ? "text-primary font-semibold" : "text-muted-foreground")}>
               Todas
             </button>
             {categories.map(cat => (
               <button key={cat} onClick={() => handleCategoryChange(cat)}
                 className={cn('px-3 py-1.5 rounded-full text-xs font-medium',
-                  activeCategory === cat ? 'bg-primary text-primary-foreground' : 'bg-muted/50 text-muted-foreground')}>
+                  activeCategory === cat ? "text-primary font-semibold" : "text-muted-foreground")}>
                 {cat}
               </button>
             ))}
@@ -314,7 +314,7 @@ export default function BlogPage() {
                     {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
                       <button key={p} onClick={() => setPage(p)}
                         className={cn('w-9 h-9 rounded-lg text-sm font-medium',
-                          p === currentPage ? 'bg-primary text-primary-foreground' : 'text-muted-foreground')}>
+                          p === currentPage ? "text-primary font-semibold" : "text-muted-foreground")}>
                         {p}
                       </button>
                     ))}

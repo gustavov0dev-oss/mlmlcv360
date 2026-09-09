@@ -38,7 +38,7 @@ function ToolbarButton({
       className={cn(
         'w-7 h-7 rounded-md flex items-center justify-center transition-colors text-muted-foreground',
         'hover:bg-foreground/10 hover:text-foreground',
-        isActive && 'bg-foreground/10 text-foreground',
+        isActive && 'text-primary ring-1 ring-primary/40',
         disabled && 'opacity-30 cursor-not-allowed hover:bg-transparent',
       )}
     >

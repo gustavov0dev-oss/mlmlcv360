@@ -335,7 +335,7 @@ export default function NosotrosAdminPage() {
         {TABS.map(t => (
           <button key={t.id} disabled={savingHero || saving || busy} onClick={() => setTab(t.id)}
             className={cn('flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors flex-shrink-0',
-              tab === t.id ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground')}>
+              tab === t.id ? "text-primary font-semibold" : "text-muted-foreground hover:text-foreground")}>
             <t.icon className="w-4 h-4" />
             {t.label}
           </button>

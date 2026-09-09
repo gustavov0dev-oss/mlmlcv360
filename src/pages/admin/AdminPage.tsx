@@ -604,7 +604,7 @@ export default function AdminPage() {
                 className={cn(
                   "flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors flex-shrink-0",
                   activeModule === mod.id
-                    ? "bg-card text-foreground shadow-sm"
+                    ? "text-primary font-semibold"
                     : "text-muted-foreground hover:text-foreground",
                 )}
               >
@@ -622,7 +622,7 @@ export default function AdminPage() {
                 className={cn(
                   "w-full flex items-center gap-3 px-4 py-3 text-left border-b border-border/50 last:border-0 transition-colors",
                   activeModule === mod.id
-                    ? "bg-primary/10 text-primary"
+                    ? "text-primary font-semibold"
                     : "hover:bg-muted text-muted-foreground hover:text-foreground",
                 )}
               >

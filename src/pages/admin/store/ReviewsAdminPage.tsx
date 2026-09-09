@@ -123,7 +123,7 @@ export default function ReviewsAdminPage() {
         {TABS.map(t => (
           <button key={t.id} onClick={() => setTab(t.id)}
             className={cn('p-4 rounded-xl border text-left transition-all',
-              tab === t.id ? 'border-primary bg-primary/5 shadow-sm' : 'border-border bg-card hover:border-primary/40')}>
+              tab === t.id ? "border-primary text-primary font-semibold" : "border-border hover:border-primary/40")}>
             <p className={cn('text-3xl font-bold', t.color)}>{counts[t.id]}</p>
             <p className="text-xs text-muted-foreground mt-1 font-medium">{t.label}</p>
           </button>
@@ -143,7 +143,7 @@ export default function ReviewsAdminPage() {
           {TABS.map(t => (
             <button key={t.id} onClick={() => setTab(t.id)}
               className={cn('px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors',
-                tab === t.id ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground')}>
+                tab === t.id ? "text-primary font-semibold" : "text-muted-foreground hover:text-foreground")}>
               {t.label}
               <span className={cn('ml-1.5 text-[10px] font-bold', t.color)}>{counts[t.id]}</span>
             </button>
