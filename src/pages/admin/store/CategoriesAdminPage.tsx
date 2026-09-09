@@ -178,11 +178,11 @@ export default function CategoriesAdminPage() {
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1">
                         <button onClick={() => { setForm(cat); setShowForm(true); }}
-                          className="p-1.5 hover:bg-muted rounded-lg text-muted-foreground hover:text-primary">
+                          className={["p-1.5 hover:bg-muted rounded-lg text-muted-foreground hover:text-primary", "dashboard-action"].filter(Boolean).join(' ')}>
                           <Pencil className="w-3.5 h-3.5" />
                         </button>
                         <button onClick={() => setDeleteTarget(cat)}
-                          className="p-1.5 hover:bg-muted rounded-lg text-muted-foreground hover:text-destructive">
+                          className={["p-1.5 hover:bg-muted rounded-lg text-muted-foreground hover:text-destructive", "dashboard-action dashboard-action-danger"].filter(Boolean).join(' ')}>
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
@@ -206,7 +206,7 @@ export default function CategoriesAdminPage() {
                       </td>
                       <td className="px-4 py-2">
                         <button onClick={() => { setForm(child); setShowForm(true); }}
-                          className="p-1.5 hover:bg-muted rounded-lg text-muted-foreground hover:text-primary">
+                          className={["p-1.5 hover:bg-muted rounded-lg text-muted-foreground hover:text-primary", "dashboard-action"].filter(Boolean).join(' ')}>
                           <Pencil className="w-3.5 h-3.5" />
                         </button>
                       </td>

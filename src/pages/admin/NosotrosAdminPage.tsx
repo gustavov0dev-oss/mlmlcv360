@@ -382,10 +382,10 @@ export default function NosotrosAdminPage() {
                       <button aria-label="Cambiar visibilidad" disabled={busy || loading || saving || savingHero} onClick={() => toggleActive('value', v)} className={cn('p-2 rounded-lg transition-colors', v.is_active ? 'text-green-500 hover:bg-emerald-500/10' : 'text-muted-foreground hover:bg-muted')} title={v.is_active ? 'Desactivar' : 'Activar'}>
                         {v.is_active ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
                       </button>
-                      <button aria-label="Editar contenido" disabled={busy || loading || saving || savingHero} onClick={() => { setEditingValue(v); setShowValueForm(true); }} className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-primary transition-colors" title="Editar">
+                      <button aria-label="Editar contenido" disabled={busy || loading || saving || savingHero} onClick={() => { setEditingValue(v); setShowValueForm(true); }} className={["p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-primary transition-colors", "dashboard-action"].filter(Boolean).join(' ')} title="Editar">
                         <Pencil className="w-4 h-4" />
                       </button>
-                      <button aria-label="Eliminar contenido" disabled={busy || loading || saving || savingHero} onClick={() => setDeleteTarget({ id: v.id, name: v.label, kind: 'value' })} className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-destructive transition-colors" title="Eliminar">
+                      <button aria-label="Eliminar contenido" disabled={busy || loading || saving || savingHero} onClick={() => setDeleteTarget({ id: v.id, name: v.label, kind: 'value' })} className={["p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-destructive transition-colors", "dashboard-action dashboard-action-danger"].filter(Boolean).join(' ')} title="Eliminar">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
@@ -435,10 +435,10 @@ export default function NosotrosAdminPage() {
                       <button aria-label="Cambiar visibilidad" disabled={busy || loading || saving || savingHero} onClick={() => toggleActive('timeline', t)} className={cn('p-2 rounded-lg transition-colors', t.is_active ? 'text-green-500 hover:bg-emerald-500/10' : 'text-muted-foreground hover:bg-muted')}>
                         {t.is_active ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
                       </button>
-                      <button aria-label="Editar contenido" disabled={busy || loading || saving || savingHero} onClick={() => { setEditingTimeline(t); setShowTimelineForm(true); }} className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-primary transition-colors">
+                      <button aria-label="Editar contenido" disabled={busy || loading || saving || savingHero} onClick={() => { setEditingTimeline(t); setShowTimelineForm(true); }} className={["p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-primary transition-colors", "dashboard-action"].filter(Boolean).join(' ')}>
                         <Pencil className="w-4 h-4" />
                       </button>
-                      <button aria-label="Eliminar contenido" disabled={busy || loading || saving || savingHero} onClick={() => setDeleteTarget({ id: t.id, name: t.title, kind: 'timeline' })} className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-destructive transition-colors">
+                      <button aria-label="Eliminar contenido" disabled={busy || loading || saving || savingHero} onClick={() => setDeleteTarget({ id: t.id, name: t.title, kind: 'timeline' })} className={["p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-destructive transition-colors", "dashboard-action dashboard-action-danger"].filter(Boolean).join(' ')}>
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
@@ -487,10 +487,10 @@ export default function NosotrosAdminPage() {
                       <button aria-label="Cambiar visibilidad" disabled={busy || loading || saving || savingHero} onClick={() => toggleActive('infra', i)} className={cn('p-2 rounded-lg transition-colors', i.is_active ? 'text-green-500 hover:bg-emerald-500/10' : 'text-muted-foreground hover:bg-muted')}>
                         {i.is_active ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
                       </button>
-                      <button aria-label="Editar contenido" disabled={busy || loading || saving || savingHero} onClick={() => { setEditingInfra(i); setShowInfraForm(true); }} className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-primary transition-colors">
+                      <button aria-label="Editar contenido" disabled={busy || loading || saving || savingHero} onClick={() => { setEditingInfra(i); setShowInfraForm(true); }} className={["p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-primary transition-colors", "dashboard-action"].filter(Boolean).join(' ')}>
                         <Pencil className="w-4 h-4" />
                       </button>
-                      <button aria-label="Eliminar contenido" disabled={busy || loading || saving || savingHero} onClick={() => setDeleteTarget({ id: i.id, name: i.title, kind: 'infra' })} className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-destructive transition-colors">
+                      <button aria-label="Eliminar contenido" disabled={busy || loading || saving || savingHero} onClick={() => setDeleteTarget({ id: i.id, name: i.title, kind: 'infra' })} className={["p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-destructive transition-colors", "dashboard-action dashboard-action-danger"].filter(Boolean).join(' ')}>
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
@@ -544,10 +544,10 @@ export default function NosotrosAdminPage() {
                       <button aria-label="Cambiar visibilidad" disabled={busy || loading || saving || savingHero} onClick={() => toggleActive('founder', f)} className={cn('p-2 rounded-lg transition-colors', f.is_active ? 'text-green-500 hover:bg-emerald-500/10' : 'text-muted-foreground hover:bg-muted')}>
                         {f.is_active ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
                       </button>
-                      <button aria-label="Editar contenido" disabled={busy || loading || saving || savingHero} onClick={() => { setEditingFounder(f); setShowFounderForm(true); }} className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-primary transition-colors">
+                      <button aria-label="Editar contenido" disabled={busy || loading || saving || savingHero} onClick={() => { setEditingFounder(f); setShowFounderForm(true); }} className={["p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-primary transition-colors", "dashboard-action"].filter(Boolean).join(' ')}>
                         <Pencil className="w-4 h-4" />
                       </button>
-                      <button aria-label="Eliminar contenido" disabled={busy || loading || saving || savingHero} onClick={() => setDeleteTarget({ id: f.id, name: f.name, kind: 'founder' })} className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-destructive transition-colors">
+                      <button aria-label="Eliminar contenido" disabled={busy || loading || saving || savingHero} onClick={() => setDeleteTarget({ id: f.id, name: f.name, kind: 'founder' })} className={["p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-destructive transition-colors", "dashboard-action dashboard-action-danger"].filter(Boolean).join(' ')}>
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>

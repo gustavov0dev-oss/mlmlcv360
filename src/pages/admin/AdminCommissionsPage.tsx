@@ -653,10 +653,10 @@ export default function AdminCommissionsPage() {
                   </td>
                   <td className="py-3 px-4">
                     <div className="flex items-center gap-0.5">
-                      <button onClick={() => setViewRow(c)} className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors" title="Ver">
+                      <button onClick={() => setViewRow(c)} className={["p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors", "dashboard-action"].filter(Boolean).join(' ')} title="Ver">
                         <Eye className="w-3.5 h-3.5" />
                       </button>
-                      <button onClick={() => openEdit(c)} className="p-1.5 rounded-lg hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors" title="Editar">
+                      <button onClick={() => openEdit(c)} className={["p-1.5 rounded-lg hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors", "dashboard-action"].filter(Boolean).join(' ')} title="Editar">
                         <Pencil className="w-3.5 h-3.5" />
                       </button>
                       {c.status === 'pending' && (
@@ -689,7 +689,7 @@ export default function AdminCommissionsPage() {
                           <X className="w-3.5 h-3.5" />
                         </button>
                       )}
-                      <button onClick={() => setDeleteTarget(c)} className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors" title="Eliminar">
+                      <button onClick={() => setDeleteTarget(c)} className={["p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors", "dashboard-action dashboard-action-danger"].filter(Boolean).join(' ')} title="Eliminar">
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>

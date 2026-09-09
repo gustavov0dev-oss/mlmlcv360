@@ -489,7 +489,7 @@ export default function FaqAdminPage() {
 
                     {/* Actions */}
                     <div className="flex items-center gap-1 shrink-0">
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => startEdit(item)} disabled={saving || reordering} title="Editar">
+                      <Button variant="ghost" size="sm" className={["h-8 w-8 p-0", "dashboard-action"].filter(Boolean).join(' ')} onClick={() => startEdit(item)} disabled={saving || reordering} title="Editar">
                         <Pencil className="h-4 w-4" />
                       </Button>
                       <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10" onClick={() => setDeleteTarget(item)} disabled={saving || reordering || deletingId === item.id} title="Eliminar">

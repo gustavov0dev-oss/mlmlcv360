@@ -1128,7 +1128,7 @@ export default function ProductFormPage() {
                       onClick={() =>
                         setVariants((p) => p.filter((_, j) => j !== i))
                       }
-                      className="w-8 h-8 flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+                      className={["w-8 h-8 flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors", "dashboard-action dashboard-action-danger"].filter(Boolean).join(' ')}
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -1405,7 +1405,7 @@ export default function ProductFormPage() {
                   />
                   <button
                     onClick={() => setSpecs((p) => p.filter((_, j) => j !== i))}
-                    className="w-9 h-9 flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+                    className={["w-9 h-9 flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors", "dashboard-action dashboard-action-danger"].filter(Boolean).join(' ')}
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -1484,7 +1484,7 @@ export default function ProductFormPage() {
                     onClick={() =>
                       setCommissions((p) => p.filter((_, j) => j !== i))
                     }
-                    className="w-9 h-9 flex items-center justify-center text-muted-foreground hover:text-destructive rounded-lg"
+                    className={["w-9 h-9 flex items-center justify-center text-muted-foreground hover:text-destructive rounded-lg", "dashboard-action dashboard-action-danger"].filter(Boolean).join(' ')}
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>

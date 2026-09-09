@@ -2,6 +2,7 @@ import { LoadingRegion, StableRegion } from '@/components/ui/loading-region';
 import { useState, useEffect, useCallback } from 'react';
 import { useDatabase, useStorage } from '@/lib/backend';
 import { supabase } from '@/lib/backend/client';
+import { startSupportAccess } from '@/lib/backend/supportAccess';
 import { toast } from 'sonner';
 import { DeleteConfirmDialog } from '@/components/admin/DeleteConfirmDialog';
 import { cn } from '@/lib/utils';
@@ -436,7 +437,10 @@ function UserModal({
 // ── Main page ──
 export default function UsersPage() {
   const { user: currentUser } = useAuthStore();
-  const isSuperAdmin = currentUser?.role === 'super_admin';
+  const [canAccess,setCanAccess]=useState(false);
+  const [accessTarget,setAccessTarget]=useState<UserRow|null>(null);
+  const [accessBusy,setAccessBusy]=useState(false);
+  useEffect(()=>{let active=true; if(!currentUser)return; if(['admin','super_admin'].includes(currentUser.role)){setCanAccess(true);return;} void supabase.from('system_config').select('value').eq('key','role_permissions').maybeSingle().then(({data})=>{try{const permissions=typeof data?.value==='string'?JSON.parse(data.value):data?.value;if(active)setCanAccess(permissions?.[currentUser.role]?.impersonate_users===true);}catch{if(active)setCanAccess(false);}});return()=>{active=false;};},[currentUser]);
   const database = useDatabase();
   const storage = useStorage();
 
@@ -723,30 +727,30 @@ export default function UsersPage() {
                     <div className="flex items-center justify-end gap-0.5">
                       <button
                         onClick={() => setModal({ mode: 'view', user })}
-                        className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                        className={["p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors", "dashboard-action"].filter(Boolean).join(' ')}
                         title="Ver detalle"
                       >
                         <Eye className="w-3.5 h-3.5" />
                       </button>
                       <button
                         onClick={() => setModal({ mode: 'edit', user })}
-                        className="p-1.5 rounded-lg hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors"
+                        className={["p-1.5 rounded-lg hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors", "dashboard-action"].filter(Boolean).join(' ')}
                         title="Editar"
                       >
                         <Pencil className="w-3.5 h-3.5" />
                       </button>
                       <button
                         onClick={() => copyInviteLink(user)}
-                        className="p-1.5 rounded-lg hover:bg-emerald-500/10 text-muted-foreground hover:text-emerald-500 transition-colors"
+                        className={["p-1.5 rounded-lg hover:bg-emerald-500/10 text-muted-foreground hover:text-emerald-500 transition-colors", "dashboard-action"].filter(Boolean).join(' ')}
                         title="Copiar enlace de referido"
                       >
                         <Link2 className="w-3.5 h-3.5" />
                       </button>
-                      {isSuperAdmin && (
+                      {canAccess && user.role==='user' && user.status==='active' && user.id!==currentUser?.id && (
                         <button
-                          onClick={() => toast.info(`Para impersonar a ${user.full_name}, usa Supabase Studio → Authentication → Users.`)}
-                          className="p-1.5 rounded-lg hover:bg-amber-500/10 text-muted-foreground hover:text-amber-600 transition-colors"
-                          title="Acceder como usuario (solo superadmin)"
+                          onClick={() => setAccessTarget(user)}
+                          className={["p-1.5 rounded-lg hover:bg-amber-500/10 text-muted-foreground hover:text-amber-600 transition-colors", "dashboard-action"].filter(Boolean).join(' ')}
+                          title="Acceder como usuario"
                         >
                           <LogIn className="w-3.5 h-3.5" />
                         </button>
@@ -754,7 +758,7 @@ export default function UsersPage() {
                       <button
                         onClick={() => toggleStatus(user)}
                         className={cn(
-                          'p-1.5 rounded-lg transition-colors',
+                          'dashboard-action p-1.5 rounded-lg transition-colors',
                           user.status === 'active'
                             ? 'hover:bg-destructive/10 text-muted-foreground hover:text-destructive'
                             : 'hover:bg-emerald-500/10 text-green-500 hover:text-emerald-600',
@@ -765,7 +769,7 @@ export default function UsersPage() {
                       </button>
                       <button
                         onClick={() => setDeleteConfirm(user)}
-                        className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                        className={["p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors", "dashboard-action dashboard-action-danger"].filter(Boolean).join(' ')}
                         title="Eliminar"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -830,6 +834,7 @@ export default function UsersPage() {
       )}
 
       {/* Delete confirm */}
+      <DeleteConfirmDialog open={!!accessTarget} onOpenChange={v=>{if(!v&&!accessBusy)setAccessTarget(null);}} title="Acceder como usuario" destructive={false} description={`Entrarás en la cuenta de ${accessTarget?.full_name}. Las acciones se realizarán en su cuenta y este acceso quedará registrado. Podrás regresar a tu cuenta desde la banda superior.`} confirmText="Acceder" cancelText="Cancelar" loading={accessBusy} onConfirm={async()=>{if(!accessTarget)return;setAccessBusy(true);try{await startSupportAccess(accessTarget.id);}catch(e){toast.error(e instanceof Error?e.message:'No se pudo acceder');}finally{setAccessBusy(false);}}}/>
       <DeleteConfirmDialog
         open={!!deleteConfirm}
         onOpenChange={(open) => { if (!open) setDeleteConfirm(null); }}

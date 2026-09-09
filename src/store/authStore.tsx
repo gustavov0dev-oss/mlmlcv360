@@ -1,3 +1,5 @@
+import { supportMode } from '@/lib/backend/client';
+import { endSupportAccess } from '@/lib/backend/supportAccess';
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { useBackend, useDatabase } from '@/lib/backend';
 import type { Profile, Session } from '@/lib/backend';
@@ -43,6 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const setUser = useCallback((u: Profile | null) => {
     setUserState(u);
+    if(supportMode)return;
     if (u) localStorage.setItem('mlm360-user', JSON.stringify(u));
     else localStorage.removeItem('mlm360-user');
   }, []);
@@ -69,6 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [user]);
 
   const signOut = useCallback(async () => {
+    if(supportMode){await endSupportAccess();return;}
     await backend.auth.signOut();
     setUser(null);
     setSessionState(null);

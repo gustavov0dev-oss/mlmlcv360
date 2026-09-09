@@ -156,6 +156,7 @@ const permissionList = [
   { key: "create_reports", label: "Crear reportes", group: "General" },
   { key: "export_data", label: "Exportar datos", group: "General" },
   // Usuarios
+  { key: "impersonate_users", label: "Acceder como usuario", group: "Usuarios" },
   { key: "view_users", label: "Ver usuarios", group: "Usuarios" },
   { key: "create_users", label: "Crear usuarios", group: "Usuarios" },
   { key: "edit_users", label: "Editar usuarios", group: "Usuarios" },
@@ -813,7 +814,7 @@ export default function AdminPage() {
                         <button
                           onClick={() => setC("logo_value", "")}
                           title="Eliminar logo"
-                          className="flex items-center justify-center w-9 px-2 bg-destructive/10 hover:bg-destructive/20 text-destructive border border-destructive/20 rounded-lg transition-colors"
+                          className={["flex items-center justify-center w-9 px-2 bg-destructive/10 hover:bg-destructive/20 text-destructive border border-destructive/20 rounded-lg transition-colors", "dashboard-action dashboard-action-danger"].filter(Boolean).join(' ')}
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -868,7 +869,7 @@ export default function AdminPage() {
                         <button
                           onClick={() => setC("logo_collapsed_value", "")}
                           title="Eliminar logo colapsado"
-                          className="flex items-center justify-center w-9 px-2 bg-destructive/10 hover:bg-destructive/20 text-destructive border border-destructive/20 rounded-lg transition-colors"
+                          className={["flex items-center justify-center w-9 px-2 bg-destructive/10 hover:bg-destructive/20 text-destructive border border-destructive/20 rounded-lg transition-colors", "dashboard-action dashboard-action-danger"].filter(Boolean).join(' ')}
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -1520,7 +1521,7 @@ export default function AdminPage() {
                         <button
                           onClick={() => setC("pwa_icon", "")}
                           title="Eliminar icono"
-                          className="flex items-center justify-center w-8 h-8 bg-destructive/10 hover:bg-destructive/20 text-destructive border border-destructive/20 rounded-lg transition-colors"
+                          className={["flex items-center justify-center w-8 h-8 bg-destructive/10 hover:bg-destructive/20 text-destructive border border-destructive/20 rounded-lg transition-colors", "dashboard-action dashboard-action-danger"].filter(Boolean).join(' ')}
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -1581,7 +1582,7 @@ export default function AdminPage() {
                                 urls.splice(i, 1);
                                 setC("pwa_screenshot_mobile", urls.join(","));
                               }}
-                              className="absolute top-0.5 right-0.5 w-5 h-5 bg-destructive/80 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                              className={["absolute top-0.5 right-0.5 w-5 h-5 bg-destructive/80 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity", "dashboard-action dashboard-action-danger"].filter(Boolean).join(' ')}
                             >
                               <Trash2 className="w-3 h-3" />
                             </button>
@@ -1642,7 +1643,7 @@ export default function AdminPage() {
                                 urls.splice(i, 1);
                                 setC("pwa_screenshot_desktop", urls.join(","));
                               }}
-                              className="absolute top-0.5 right-0.5 w-5 h-5 bg-destructive/80 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                              className={["absolute top-0.5 right-0.5 w-5 h-5 bg-destructive/80 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity", "dashboard-action dashboard-action-danger"].filter(Boolean).join(' ')}
                             >
                               <Trash2 className="w-3 h-3" />
                             </button>
@@ -1853,7 +1854,7 @@ export default function AdminPage() {
                           <button
                             onClick={() => setC("favicon_value", "")}
                             title="Eliminar favicon"
-                            className="flex items-center justify-center w-8 h-8 bg-destructive/10 hover:bg-destructive/20 text-destructive border border-destructive/20 rounded-lg transition-colors"
+                            className={["flex items-center justify-center w-8 h-8 bg-destructive/10 hover:bg-destructive/20 text-destructive border border-destructive/20 rounded-lg transition-colors", "dashboard-action dashboard-action-danger"].filter(Boolean).join(' ')}
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -1922,7 +1923,7 @@ export default function AdminPage() {
                         <button
                           onClick={() => setC("seo_og_image", "")}
                           title="Eliminar imagen OG"
-                          className="absolute top-2 right-2 flex items-center justify-center w-8 h-8 bg-destructive/10 hover:bg-destructive/20 text-destructive border border-destructive/20 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                          className={["absolute top-2 right-2 flex items-center justify-center w-8 h-8 bg-destructive/10 hover:bg-destructive/20 text-destructive border border-destructive/20 rounded-lg transition-all opacity-0 group-hover:opacity-100", "dashboard-action dashboard-action-danger"].filter(Boolean).join(' ')}
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -2716,14 +2717,14 @@ function PlansManager() {
                     setEditing(plan);
                     setShowForm(true);
                   }}
-                  className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-primary transition-colors"
+                  className={["p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-primary transition-colors", "dashboard-action"].filter(Boolean).join(' ')}
                   title="Editar"
                 >
                   <Pencil className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => setDeleteTarget(plan)}
-                  className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-destructive transition-colors"
+                  className={["p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-destructive transition-colors", "dashboard-action dashboard-action-danger"].filter(Boolean).join(' ')}
                   title="Eliminar"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -3171,14 +3172,14 @@ function RanksManager() {
                     setEditing(rank);
                     setShowForm(true);
                   }}
-                  className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-primary transition-colors"
+                  className={["p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-primary transition-colors", "dashboard-action"].filter(Boolean).join(' ')}
                   title="Editar"
                 >
                   <Pencil className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => setDeleteTarget(rank)}
-                  className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-destructive transition-colors"
+                  className={["p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-destructive transition-colors", "dashboard-action dashboard-action-danger"].filter(Boolean).join(' ')}
                   title="Eliminar"
                 >
                   <Trash2 className="w-4 h-4" />

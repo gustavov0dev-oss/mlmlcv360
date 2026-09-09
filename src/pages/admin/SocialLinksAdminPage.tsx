@@ -431,7 +431,7 @@ export default function SocialLinksAdminPage() {
                         <ExternalLink className="h-3.5 w-3.5" />
                       </a>
                       <button onClick={() => openEdit(link)}
-                        className="w-8 h-8 flex items-center justify-center rounded-lg border border-border/60 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors" title="Editar">
+                        className={["w-8 h-8 flex items-center justify-center rounded-lg border border-border/60 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors", "dashboard-action"].filter(Boolean).join(' ')} title="Editar">
                         <Pencil className="h-3.5 w-3.5" />
                       </button>
                       <button onClick={() => setDeleteTarget(link)}

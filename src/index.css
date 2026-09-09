@@ -1274,3 +1274,25 @@ button:focus-visible {
 
 /* Keep content width stable as asynchronous pages gain a scrollbar. */
 html, .dashboard-scroll { scrollbar-gutter: stable; }
+
+/* Shared, compact dashboard row actions. Business status controls keep their meaning. */
+.dashboard-action {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0;
+  width: 2.25rem !important;
+  height: 2.25rem !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: .5rem !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: hsl(var(--muted-foreground)) !important;
+  transition: color 150ms, background-color 150ms;
+}
+.dashboard-action > svg { width: 1rem !important; height: 1rem !important; stroke-width: 1.75; }
+.dashboard-action:hover:not(:disabled) { color: hsl(var(--primary)) !important; background: hsl(var(--muted) / .5) !important; }
+.dashboard-action-danger:hover:not(:disabled) { color: hsl(var(--destructive)) !important; }
+.dashboard-action:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 2px; }
+.dashboard-action:disabled { opacity: .4; cursor: not-allowed; }

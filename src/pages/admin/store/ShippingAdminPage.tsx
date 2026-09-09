@@ -109,8 +109,8 @@ export default function ShippingAdminPage() {
                   </span>
                 </div>
                 <div className="flex gap-1 shrink-0">
-                  <button onClick={() => setEditZone(zone)} className="w-8 h-8 inline-flex items-center justify-center rounded-lg text-primary hover:bg-primary/10 transition-colors" aria-label="Editar zona"><Pencil className="w-4 h-4" /></button>
-                  <button onClick={() => setDeleteTarget({ id: zone.id, name: zone.name, kind: 'zone' })} className="w-8 h-8 inline-flex items-center justify-center rounded-lg text-destructive hover:bg-destructive/10 transition-colors" aria-label="Eliminar zona"><Trash2 className="w-4 h-4" /></button>
+                  <button onClick={() => setEditZone(zone)} className={["w-8 h-8 inline-flex items-center justify-center rounded-lg text-primary hover:bg-primary/10 transition-colors", "dashboard-action"].filter(Boolean).join(' ')} aria-label="Editar zona"><Pencil className="w-4 h-4" /></button>
+                  <button onClick={() => setDeleteTarget({ id: zone.id, name: zone.name, kind: 'zone' })} className={["w-8 h-8 inline-flex items-center justify-center rounded-lg text-destructive hover:bg-destructive/10 transition-colors", "dashboard-action dashboard-action-danger"].filter(Boolean).join(' ')} aria-label="Eliminar zona"><Trash2 className="w-4 h-4" /></button>
                 </div>
               </div>
               <div className="p-5">
@@ -134,8 +134,8 @@ export default function ShippingAdminPage() {
                         </p>
                       </div>
                       <div className="flex gap-1 shrink-0">
-                        <button onClick={() => setEditMethod({ ...m, zone_id: zone.id })} className="w-8 h-8 inline-flex items-center justify-center rounded-lg text-primary hover:bg-primary/10 transition-colors" aria-label="Editar método"><Pencil className="w-4 h-4" /></button>
-                        <button onClick={() => setDeleteTarget({ id: m.id, name: m.name, kind: 'method' })} className="w-8 h-8 inline-flex items-center justify-center rounded-lg text-destructive hover:bg-destructive/10 transition-colors" aria-label="Eliminar método"><Trash2 className="w-4 h-4" /></button>
+                        <button onClick={() => setEditMethod({ ...m, zone_id: zone.id })} className={["w-8 h-8 inline-flex items-center justify-center rounded-lg text-primary hover:bg-primary/10 transition-colors", "dashboard-action"].filter(Boolean).join(' ')} aria-label="Editar método"><Pencil className="w-4 h-4" /></button>
+                        <button onClick={() => setDeleteTarget({ id: m.id, name: m.name, kind: 'method' })} className={["w-8 h-8 inline-flex items-center justify-center rounded-lg text-destructive hover:bg-destructive/10 transition-colors", "dashboard-action dashboard-action-danger"].filter(Boolean).join(' ')} aria-label="Eliminar método"><Trash2 className="w-4 h-4" /></button>
                       </div>
                     </div>
                   ))}

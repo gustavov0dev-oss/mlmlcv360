@@ -342,11 +342,11 @@ export default function RegionStatsAdminPage() {
                     {item.is_active ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
                   </button>
                   <button onClick={() => { setEditing(item); setShowForm(true); }}
-                    className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-primary transition-colors" title="Editar">
+                    className={["p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-primary transition-colors", "dashboard-action"].filter(Boolean).join(' ')} title="Editar">
                     <Pencil className="w-4 h-4" />
                   </button>
                   <button onClick={() => setDeleteTarget(item)}
-                    className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-destructive transition-colors" title="Eliminar">
+                    className={["p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-destructive transition-colors", "dashboard-action dashboard-action-danger"].filter(Boolean).join(' ')} title="Eliminar">
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>

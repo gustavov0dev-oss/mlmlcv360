@@ -227,7 +227,7 @@ export default function ReviewsAdminPage() {
                       <div className="flex items-center gap-1">
                         {/* Preview */}
                         <button onClick={() => setPreview(r)} title="Ver detalle"
-                          className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors">
+                          className={["w-7 h-7 flex items-center justify-center rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors", "dashboard-action"].filter(Boolean).join(' ')}>
                           <Eye className="w-3.5 h-3.5" />
                         </button>
                         {/* Approve */}
@@ -246,7 +246,7 @@ export default function ReviewsAdminPage() {
                         )}
                         {/* Delete */}
                         <button onClick={() => setDeleteTarget(r)} title="Eliminar"
-                          className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors">
+                          className={["w-7 h-7 flex items-center justify-center rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors", "dashboard-action dashboard-action-danger"].filter(Boolean).join(' ')}>
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
@@ -322,13 +322,13 @@ export default function ReviewsAdminPage() {
               )}
               {deleteTarget?.id === preview.id ? (
                 <button onClick={() => setDeleteTarget(preview)}
-                  className="w-11 flex items-center justify-center border border-border rounded-xl hover:bg-destructive/10 hover:text-destructive hover:border-red-300 text-muted-foreground transition-colors"
+                  className={["w-11 flex items-center justify-center border border-border rounded-xl hover:bg-destructive/10 hover:text-destructive hover:border-red-300 text-muted-foreground transition-colors", "dashboard-action dashboard-action-danger"].filter(Boolean).join(' ')}
                   title="Eliminar reseña">
                   <Trash2 className="w-4 h-4" />
                 </button>
               ) : (
                 <button onClick={() => setDeleteTarget(preview)}
-                  className="w-11 flex items-center justify-center border border-border rounded-xl hover:bg-destructive/10 hover:text-destructive hover:border-red-300 text-muted-foreground transition-colors"
+                  className={["w-11 flex items-center justify-center border border-border rounded-xl hover:bg-destructive/10 hover:text-destructive hover:border-red-300 text-muted-foreground transition-colors", "dashboard-action dashboard-action-danger"].filter(Boolean).join(' ')}
                   title="Eliminar reseña">
                   <Trash2 className="w-4 h-4" />
                 </button>

@@ -380,11 +380,11 @@ export default function LegalPagesAdminPage() {
                           </Link>
                         </Button>
                       ) : (
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 opacity-30 cursor-not-allowed" disabled aria-label="Página no publicada">
+                        <Button variant="ghost" size="sm" className={["h-8 w-8 p-0 opacity-30 cursor-not-allowed", "dashboard-action"].filter(Boolean).join(' ')} disabled aria-label="Página no publicada">
                           <ExternalLink className="h-4 w-4" />
                         </Button>
                       )}
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => openEdit(p)}>
+                      <Button variant="ghost" size="sm" className={["h-8 w-8 p-0", "dashboard-action"].filter(Boolean).join(' ')} onClick={() => openEdit(p)}>
                         <Pencil className="h-4 w-4" />
                       </Button>
                       <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10"

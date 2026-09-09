@@ -1,5 +1,5 @@
 import { AuthInterface, AuthResult, Session, User } from './types';
-import { supabase } from './client';
+import { supabase, supportMode } from './client';
 
 function mapUser(supabaseUser: unknown): User | null {
   if (!supabaseUser || typeof supabaseUser !== 'object') return null;
@@ -57,7 +57,7 @@ export const supabaseAuthService: AuthInterface = {
   },
 
   async signOut(): Promise<{ error?: string }> {
-    const { error } = await supabase.auth.signOut();
+    const { error } = await supabase.auth.signOut({scope:supportMode?'local':'global'});
     return { error: error?.message };
   },
 

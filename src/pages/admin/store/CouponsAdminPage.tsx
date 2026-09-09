@@ -228,8 +228,8 @@ export default function CouponsAdminPage() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-1">
-                      <button onClick={() => openForm(c)} className="p-1.5 hover:bg-muted rounded-lg text-muted-foreground hover:text-primary"><Pencil className="w-3.5 h-3.5" /></button>
-                      <button onClick={() => setDeleteTarget(c)} className="p-1.5 hover:bg-muted rounded-lg text-muted-foreground hover:text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>
+                      <button onClick={() => openForm(c)} className={["p-1.5 hover:bg-muted rounded-lg text-muted-foreground hover:text-primary", "dashboard-action"].filter(Boolean).join(' ')}><Pencil className="w-3.5 h-3.5" /></button>
+                      <button onClick={() => setDeleteTarget(c)} className={["p-1.5 hover:bg-muted rounded-lg text-muted-foreground hover:text-destructive", "dashboard-action dashboard-action-danger"].filter(Boolean).join(' ')}><Trash2 className="w-3.5 h-3.5" /></button>
                     </div>
                   </td>
                 </tr>

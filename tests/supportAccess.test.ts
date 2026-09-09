@@ -1,0 +1,14 @@
+import {strict as assert} from 'node:assert';
+import {test} from 'node:test';
+import {canSupportAccess} from '../supabase/functions/support-access/policy';
+const actor={id:'operator',role:'admin',status:'active'};
+const target={id:'member',role:'user',status:'active'};
+test('Administrators can enter an active ordinary account',()=>assert.equal(canSupportAccess(actor,target,{}),true));
+test('Viewing users does not grant account access',()=>assert.equal(canSupportAccess({...actor,role:'support'},target,{support:{view_users:true}}),false));
+test('Explicit permission enables delegated account access',()=>assert.equal(canSupportAccess({...actor,role:'support'},target,{support:{impersonate_users:true}}),true));
+test('No privileged targets, inactive accounts or nested self access',()=>{
+ for(const role of ['admin','super_admin','support'])assert.equal(canSupportAccess(actor,{...target,role},{}),false);
+ assert.equal(canSupportAccess(actor,{...target,status:'suspended'},{}),false);
+ assert.equal(canSupportAccess({...actor,status:'suspended'},target,{}),false);
+ assert.equal(canSupportAccess(actor,{...target,id:actor.id},{}),false);
+});

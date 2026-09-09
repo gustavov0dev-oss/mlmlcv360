@@ -201,11 +201,11 @@ export default function ProductsAdminPage() {
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-end gap-1">
                           <button onClick={() => navigate(`/dashboard/admin/productos/${p.id}`)}
-                            className="p-1.5 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-primary" title="Editar">
+                            className={["p-1.5 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-primary", "dashboard-action"].filter(Boolean).join(' ')} title="Editar">
                             <Pencil className="w-3.5 h-3.5" />
                           </button>
                           <button onClick={() => duplicate(p)}
-                            className="p-1.5 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-primary" title="Duplicar">
+                            className={["p-1.5 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-primary", "dashboard-action"].filter(Boolean).join(' ')} title="Duplicar">
                             <Copy className="w-3.5 h-3.5" />
                           </button>
                           <button onClick={() => toggleStatus(p)}
@@ -213,7 +213,7 @@ export default function ProductsAdminPage() {
                             {p.status === 'active' ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                           </button>
                           <button onClick={() => setDeleteTarget(p)}
-                            className="p-1.5 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-destructive" title="Eliminar">
+                            className={["p-1.5 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-destructive", "dashboard-action dashboard-action-danger"].filter(Boolean).join(' ')} title="Eliminar">
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>

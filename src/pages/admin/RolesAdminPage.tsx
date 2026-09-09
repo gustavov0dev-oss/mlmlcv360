@@ -304,7 +304,7 @@ export default function RolesAdminPage() {
                   <button
                     type="button"
                     onClick={e => { e.stopPropagation(); setDeleteTarget(role); }}
-                    className="w-7 h-7 flex items-center justify-center rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors flex-shrink-0">
+                    className={["w-7 h-7 flex items-center justify-center rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors flex-shrink-0", "dashboard-action dashboard-action-danger"].filter(Boolean).join(' ')}>
                     <Trash2 style={{ width: 13, height: 13 }} />
                   </button>
                 )}
