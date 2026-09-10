@@ -3,23 +3,24 @@ import { useState, useEffect, useCallback } from 'react';
 import { useDatabase } from '@/lib/backend';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import type { Order } from '@/lib/storeTypes';
+import type { Order, Product } from '@/lib/storeTypes';
+import { OrderProductImage } from '@/components/store/OrderProductImage';
 import { Search, RefreshCw, ChevronRight } from 'lucide-react';
 import { useNavigate } from '@/lib/router';
 
-function fmt(n: number) { return `S/ ${n.toFixed(2)}`; }
+
 
 const STATUS_CONFIG: Record<string, { label: string; cl: string }> = {
   pending:    { label: 'Pendiente',   cl: 'text-amber-600 bg-amber-500/10' },
   confirmed:  { label: 'Revisión',  cl: 'text-primary bg-primary/10'     },
-  processing: { label: 'Procesando',  cl: 'text-primary bg-primary/10' },
-  shipped:    { label: 'Envío',     cl: 'text-cyan-600 bg-cyan-500/10'     },
+  processing: { label: 'Procesando envío',  cl: 'text-primary bg-primary/10' },
+  shipped:    { label: 'Procesando envío',     cl: 'text-cyan-600 bg-cyan-500/10'     },
   delivered:  { label: 'Entregado',   cl: 'text-emerald-600 bg-emerald-500/10'   },
   cancelled:  { label: 'Cancelado',   cl: 'text-red-600 bg-destructive/10'       },
   refunded:   { label: 'Reembolsado', cl: 'text-amber-600 bg-amber-500/10' },
 };
 
-const ALL_STATUSES = ['pending', 'confirmed', 'processing', 'shipped', 'delivered'];
+const ALL_STATUSES = ['pending', 'confirmed', 'processing', 'delivered'];
 
 export default function OrdersAdminPage() {
   const navigate = useNavigate();
@@ -33,12 +34,22 @@ export default function OrdersAdminPage() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const { data } = await database.select<Order>('orders', {
-      select: '*, items:order_items(id,product_name,image_url,quantity)',
+    const { data, error } = await database.select<Order>('orders', {
+      select: '*, items:order_items(*)',
       order: { column: 'created_at', ascending: false },
       ...(statusFilter ? { filter: { status: statusFilter } } : {}),
     });
+    if (error) { toast.error(error); setLoading(false); return; }
     let list = (data as Order[]) || [];
+    const ids = [...new Set(list.flatMap(o => (o.items || []).map(i => i.product_id).filter(Boolean)))];
+    if (ids.length) {
+      const { data: products } = await database.select<Product>('products', { select: 'id,name,images', filter: { id: ids } });
+      const catalog = new Map(((products as Product[]) || []).map(p => [p.id, p]));
+      list = list.map(o => ({ ...o, items: (o.items || []).map(i => {
+        const product = i.product_id ? catalog.get(i.product_id) : undefined;
+        return { ...i, product_name: i.product_name || product?.name || "Producto no disponible", image_url: product?.images?.[0]?.url || i.image_url };
+      }) }));
+    }
     if (search) list = list.filter(o =>
       o.order_number.toLowerCase().includes(search.toLowerCase()) ||
       (o.shipping_address as any)?.full_name?.toLowerCase().includes(search.toLowerCase())
@@ -61,7 +72,7 @@ export default function OrdersAdminPage() {
 
     const trackDesc: Record<string, string> = {
       confirmed:  'Pedido en revisión',
-      processing: 'Pedido en proceso de empaque',
+      processing: 'Pedido procesando envío',
       shipped:    'Pedido enviado — en camino',
       delivered:  'Pedido entregado exitosamente',
       cancelled:  'Pedido cancelado',
@@ -126,7 +137,7 @@ export default function OrdersAdminPage() {
                     <tr key={o.id} className="border-b border-border/40 hover:bg-muted/20 transition-colors">
                       <td className="px-4 py-3">
                         <button onClick={() => navigate(`/dashboard/admin/pedidos/${o.id}`)}
-                          className="font-bold text-primary hover:underline">{o.order_number}</button>
+                          className="font-bold text-primary hover:underline whitespace-nowrap">{o.order_number}</button>
                         <p className="text-xs text-muted-foreground">{new Date(o.created_at).toLocaleDateString('es-PE')}</p>
                       </td>
                       <td className="px-4 py-3">
@@ -134,19 +145,23 @@ export default function OrdersAdminPage() {
                         <p className="text-xs text-muted-foreground">{addr?.city}, {addr?.region}</p>
                       </td>
                       <td className="px-4 py-3">
-                        <div className="flex -space-x-2">
-                          {(o.items || []).slice(0, 3).map((i: any) => (
-                            <div key={i.id} className="w-7 h-7 rounded-lg bg-muted border border-background overflow-hidden flex-shrink-0">
-                              {i.image_url && <img src={i.image_url} alt="" className="w-full h-full object-cover" />}
+                        <div className="space-y-3 min-w-[220px]">
+                          {(o.items || []).map(i => (
+                            <div key={i.id} className="flex items-center gap-2.5">
+                              <OrderProductImage src={i.image_url} name={i.product_name} />
+                              <div className="min-w-0">
+                                <p className="font-medium text-foreground leading-snug">{i.product_name || 'Producto no disponible'}</p>
+                                {i.variant_name && <p className="text-xs text-muted-foreground">{i.variant_name}</p>}
+                                <p className="text-xs text-muted-foreground">Cantidad: {i.quantity} · {new Intl.NumberFormat('es-PE', { style: 'currency', currency: o.currency || 'PEN' }).format(i.unit_price)} c/u</p>
+                              </div>
                             </div>
                           ))}
-                          {(o.items || []).length > 3 && <span className="text-xs text-muted-foreground pl-2">+{(o.items || []).length - 3}</span>}
                         </div>
                       </td>
-                      <td className="px-4 py-3 font-bold text-foreground">{fmt(o.total)}</td>
+                      <td className="px-4 py-3 font-bold text-foreground whitespace-nowrap">{new Intl.NumberFormat('es-PE', { style: 'currency', currency: o.currency || 'PEN' }).format(o.total)}</td>
                       <td className="px-4 py-3">
                         <select
-                          value={o.status}
+                          value={o.status === 'shipped' ? 'processing' : o.status}
                           disabled={updating === o.id}
                           onChange={e => updateStatus(o.id, e.target.value)}
                           className={cn('text-xs font-bold px-2.5 py-1.5 rounded-xl border-0 outline-none cursor-pointer', sc.cl)}

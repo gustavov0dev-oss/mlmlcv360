@@ -1,3 +1,4 @@
+import { OrderProductImage } from '@/components/store/OrderProductImage';
 import { LoadingRegion } from '@/components/ui/loading-region';
 import { useState, useEffect, useCallback } from 'react';
 import { useDatabase } from '@/lib/backend';
@@ -12,14 +13,14 @@ function fmt(n: number) { return `S/ ${n.toFixed(2)}`; }
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; icon: React.FC<any> }> = {
   pending:    { label: 'Pendiente',   color: 'text-yellow-600', bg: 'bg-yellow-500/10', icon: Clock    },
   confirmed:  { label: 'Revisión',  color: 'text-primary',    bg: 'bg-primary/10',    icon: CheckCircle },
-  processing: { label: 'Procesando',  color: 'text-purple-600', bg: 'bg-purple-500/10', icon: Package  },
-  shipped:    { label: 'Envío',     color: 'text-cyan-600',   bg: 'bg-cyan-500/10',   icon: Truck    },
+  processing: { label: 'Procesando envío',  color: 'text-purple-600', bg: 'bg-purple-500/10', icon: Package  },
+  shipped:    { label: 'Procesando envío',     color: 'text-cyan-600',   bg: 'bg-cyan-500/10',   icon: Truck    },
   delivered:  { label: 'Entregado',   color: 'text-green-600',  bg: 'bg-green-500/10',  icon: CheckCircle },
   cancelled:  { label: 'Cancelado',   color: 'text-red-600',    bg: 'bg-red-500/10',    icon: XCircle  },
   refunded:   { label: 'Reembolsado', color: 'text-orange-600', bg: 'bg-orange-500/10', icon: RefreshCw },
 };
 
-const ORDER_STEPS = ['pending','confirmed','processing','shipped','delivered'];
+const ORDER_STEPS = ['pending','confirmed','processing','delivered'];
 
 // ── Invoice component (printable)
 function Invoice({ order, company }: { order: Order; company: any }) {
@@ -130,7 +131,7 @@ export default function OrderDetailPage() {
         ...orderData,
         items: (orderData.items || []).map(it => ({
           ...it,
-          product_name: it.product_id && productsById[it.product_id]?.name || it.product_name,
+          product_name: it.product_name || (it.product_id && productsById[it.product_id]?.name) || "Producto no disponible",
           image_url: it.product_id && productsById[it.product_id]?.images?.[0]?.url || it.image_url || '',
         })),
         tracking: (t as OrderTracking[]) || [],
@@ -166,7 +167,7 @@ export default function OrderDetailPage() {
   );
 
   const sc = STATUS_CONFIG[order.status] || STATUS_CONFIG.pending;
-  const currentStep = ORDER_STEPS.indexOf(order.status);
+  const currentStep = ORDER_STEPS.indexOf(order.status === 'shipped' ? 'processing' : order.status);
   const addr = order.shipping_address as any;
   const igv = order.total - order.total / 1.18;
 
@@ -259,9 +260,7 @@ export default function OrderDetailPage() {
           <div className="space-y-3">
             {(order.items || []).map(i => (
               <div key={i.id} className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-muted overflow-hidden flex-shrink-0">
-                  {i.image_url && <img src={i.image_url} alt="" className="w-full h-full object-cover" />}
-                </div>
+                <OrderProductImage src={i.image_url} name={i.product_name} />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-foreground">{i.product_name}</p>
                   {i.variant_name && <p className="text-xs text-muted-foreground">{i.variant_name}</p>}

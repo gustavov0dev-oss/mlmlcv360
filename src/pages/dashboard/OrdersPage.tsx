@@ -10,8 +10,8 @@ import { Package, ChevronRight, ShoppingBag } from 'lucide-react';
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
   pending:    { label: 'Pendiente',     color: 'text-yellow-600', bg: 'bg-yellow-500/10' },
   confirmed:  { label: 'Revisión',    color: 'text-blue-600',   bg: 'bg-blue-500/10'   },
-  processing: { label: 'Procesando',    color: 'text-purple-600', bg: 'bg-purple-500/10' },
-  shipped:    { label: 'Envío',       color: 'text-cyan-600',   bg: 'bg-cyan-500/10'   },
+  processing: { label: 'Procesando envío',    color: 'text-purple-600', bg: 'bg-purple-500/10' },
+  shipped:    { label: 'Procesando envío',       color: 'text-cyan-600',   bg: 'bg-cyan-500/10'   },
   delivered:  { label: 'Entregado',     color: 'text-green-600',  bg: 'bg-green-500/10'  },
   cancelled:  { label: 'Cancelado',     color: 'text-red-600',    bg: 'bg-red-500/10'    },
   refunded:   { label: 'Reembolsado',   color: 'text-orange-600', bg: 'bg-orange-500/10' },
