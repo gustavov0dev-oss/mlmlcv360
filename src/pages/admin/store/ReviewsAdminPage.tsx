@@ -30,6 +30,9 @@ const STATUS_CONFIG = {
 type Tab = 'pending' | 'approved' | 'rejected' | 'all';
 
 export default function ReviewsAdminPage() {
+  const database = useDatabase();
+  const [reportCounts,setReportCounts] = useState<Record<string,number>>({});
+  useEffect(()=>{void database.select<{review_id:string}>('review_feedback',{filter:{kind:'report'}}).then(({data})=>{const counts:Record<string,number>={};for(const r of (data||[]) as {review_id:string}[])counts[r.review_id]=(counts[r.review_id]||0)+1;setReportCounts(counts);});},[database]);
   const [reviews, setReviews] = useState<(ProductReview & { product: any; profile: any })[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<Tab>('pending');
@@ -38,7 +41,7 @@ export default function ReviewsAdminPage() {
   const [deleteTarget, setDeleteTarget] = useState<(ProductReview & { product: any; profile: any }) | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const database = useDatabase();
+
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -200,6 +203,7 @@ export default function ReviewsAdminPage() {
                     </td>
                     {/* Review text */}
                     <td className="px-4 py-3 max-w-[200px]">
+                      {reportCounts[r.id]>0 && <p className="text-xs text-amber-500">{reportCounts[r.id]} reporte(s) · Revisar</p>}
                       {r.title && <p className="text-xs font-bold text-foreground truncate">{r.title}</p>}
                       {r.body && <p className="text-xs text-muted-foreground truncate mt-0.5">{r.body}</p>}
                       {(r.images || []).length > 0 && (

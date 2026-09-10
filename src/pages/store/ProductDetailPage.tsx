@@ -1,3 +1,4 @@
+import { supabase } from '@/lib/backend/client';
 import { LoadingRegion } from '@/components/ui/loading-region';
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useDatabase, useStorage } from '@/lib/backend';
@@ -13,7 +14,7 @@ import type { Product, ProductVariant, ProductReview, ProductReviewReply } from 
 import {
   ShoppingCart, Star, ChevronLeft, ChevronRight, Plus, Minus,
   Truck, Shield, RotateCcw, Heart, Share2, Package, Tag, MessageSquare,
-  Layers, Upload, ThumbsUp, ThumbsDown, Flag, ChevronDown, CircleCheck as CheckCircle,
+  Layers, Upload, ThumbsUp, Flag, ChevronDown, CircleCheck as CheckCircle,
   Play, Eye, Lock, Zap, Info, ExternalLink, Image as ImageIcon,
   SlidersHorizontal, X, Award, CornerDownRight, MessageCircle, Send,
   BadgeCheck,
@@ -397,7 +398,7 @@ function ReviewsSection({
   return (
     <div className="space-y-6">
       {reviews.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-12 gap-5 p-5 rounded-xl border border-border bg-card">
+        <div className="grid grid-cols-1 sm:grid-cols-12 gap-5 py-3">
           <div className="sm:col-span-4 flex flex-row sm:flex-col items-center sm:items-start gap-4 sm:gap-2">
             <div className="flex flex-col items-center lg:items-start">
               <span className="text-4xl font-semibold text-foreground leading-none tracking-tight">{avgRating.toFixed(1)}</span>
@@ -446,7 +447,7 @@ function ReviewsSection({
       )}
 
       {reviews.length > 0 && (
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-1 border-t border-border">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-1">
           <div className="flex items-center gap-2 flex-wrap">
             <SlidersHorizontal className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
             {starFilter > 0 && (
@@ -514,7 +515,7 @@ function ReviewsSection({
         )}
       </div>
 
-      <details id="product-review-form" className="scroll-mt-24 rounded-xl border border-border p-5 max-w-3xl space-y-4">
+      <details id="product-review-form" className="scroll-mt-24 py-4 w-full space-y-4">
         <summary className="cursor-pointer list-none">
           <h3 className="text-sm font-semibold text-foreground">¿Ya compraste este producto?</h3>
           <p className="text-xs text-muted-foreground mt-0.5">Comparte tu opinión con otros compradores · Escribir reseña</p>
@@ -694,12 +695,7 @@ function ReviewCard({
               className={cn('flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium transition-colors',
                 helpfulIds.has(r.id) ? 'text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50')}>
               <ThumbsUp className={cn('w-3.5 h-3.5', helpfulIds.has(r.id) && 'fill-current')} />
-              {r.helpful_count ?? 0}
-            </button>
-            <button onClick={() => onLikeReply(r.id)} disabled={likedReplyIds.has(r.id)}
-              className={cn('flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium transition-colors',
-                likedReplyIds.has(r.id) ? 'text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50')}>
-              <ThumbsDown className={cn('w-3.5 h-3.5', likedReplyIds.has(r.id) && 'fill-current')} />
+              Útil ({r.helpful_count ?? 0})
             </button>
             <button onClick={() => setReplyOpen(v => !v)}
               className="flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors">
@@ -708,7 +704,7 @@ function ReviewCard({
             <button onClick={() => onReport(r.id)} disabled={reportedIds.has(r.id)}
               className={cn('flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium transition-colors ml-auto',
                 reportedIds.has(r.id) ? 'text-muted-foreground/50' : 'text-muted-foreground/60 hover:text-foreground')}>
-              <Flag className="w-3.5 h-3.5" />
+              <Flag className="w-3.5 h-3.5" />{reportedIds.has(r.id) ? "Reportada" : "Reportar"}
             </button>
           </div>
 
@@ -1039,19 +1035,33 @@ export default function ProductDetailPage() {
     setSubmittingReview(false);
   };
 
-  const markHelpful = async (reviewId: string, currentCount: number) => {
-    if (helpfulIds.has(reviewId)) return;
-    setHelpfulIds(s => new Set([...s, reviewId]));
-    setReviews(prev => prev.map(r => r.id === reviewId ? { ...r, helpful_count: (r.helpful_count ?? 0) + 1 } : r));
-    await database.update('product_reviews', reviewId, { helpful_count: currentCount + 1 });
-    toast.success('Marcado como útil');
+  const feedbackBusy = useRef(new Set<string>());
+  useEffect(() => {
+    let active=true;
+    setHelpfulIds(new Set()); setReportedIds(new Set());
+    if(user) void database.select<{review_id:string;kind:string}>('review_feedback',{filter:{user_id:user.id}}).then(({data})=>{
+      if(!active)return;
+      const rows=(data || []) as {review_id:string;kind:string}[];
+      setHelpfulIds(new Set(rows.filter(r=>r.kind==='helpful').map(r=>r.review_id)));
+      setReportedIds(new Set(rows.filter(r=>r.kind==='report').map(r=>r.review_id)));
+    });
+    return()=>{active=false;};
+  },[user?.id,database]);
+  const sendFeedback = async (reviewId:string,kind:'helpful'|'report') => {
+    if(!user){toast.info('Inicia sesión para participar');navigate('/login');return;}
+    const key=reviewId+kind;
+    if(feedbackBusy.current.has(key))return;
+    feedbackBusy.current.add(key);
+    try {
+      const {data,error}=await supabase.rpc('submit_review_feedback',{p_review_id:reviewId,p_kind:kind});
+      if(error){toast.error('No se pudo guardar. Inténtalo de nuevo.');return;}
+      if(kind==='helpful') {setHelpfulIds(s=>new Set([...s,reviewId]));setReviews(rs=>rs.map(r=>r.id===reviewId?{...r,helpful_count:Number(data)}:r));}
+      else setReportedIds(s=>new Set([...s,reviewId]));
+      toast.success(kind==='helpful'?'Voto guardado':'Reporte enviado al administrador');
+    } finally {feedbackBusy.current.delete(key);}
   };
-
-  const reportReview = async (reviewId: string) => {
-    if (reportedIds.has(reviewId)) { toast.info('Ya reportaste esta reseña'); return; }
-    setReportedIds(s => new Set([...s, reviewId]));
-    toast.success('Reseña reportada — la revisaremos pronto');
-  };
+  const markHelpful = (id:string) => sendFeedback(id,'helpful');
+  const reportReview = (id:string) => sendFeedback(id,'report');
 
   const submitReply = async (reviewId: string, body: string) => {
     if (!user) { navigate('/login'); return; }
