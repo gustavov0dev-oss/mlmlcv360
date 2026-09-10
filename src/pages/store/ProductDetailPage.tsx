@@ -397,20 +397,20 @@ function ReviewsSection({
   return (
     <div className="space-y-6">
       {reviews.length > 0 && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
-          <div className="lg:col-span-4 flex flex-row lg:flex-col items-center lg:items-start gap-4 lg:gap-1">
+        <div className="grid grid-cols-1 sm:grid-cols-12 gap-5 p-5 rounded-xl border border-border bg-card">
+          <div className="sm:col-span-4 flex flex-row sm:flex-col items-center sm:items-start gap-4 sm:gap-2">
             <div className="flex flex-col items-center lg:items-start">
               <span className="text-4xl font-semibold text-foreground leading-none tracking-tight">{avgRating.toFixed(1)}</span>
               <StarsDisplay value={avgRating} size={18} />
-              <span className="text-xs text-muted-foreground mt-1">{reviews.length} reseñas</span>
+              <span className="text-xs text-muted-foreground mt-1">{reviews.length} {reviews.length === 1 ? 'reseña' : 'reseñas'}</span>
             </div>
-            <button onClick={() => { window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); }}
+            <button onClick={() => { const form=document.getElementById('product-review-form') as HTMLDetailsElement | null; if(form){form.open=true;form.scrollIntoView({behavior:'smooth',block:'start'});} }}
               className="lg:mt-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-xs font-medium hover:bg-primary/90 transition-colors">
               Escribir reseña
             </button>
           </div>
 
-          <div className="lg:col-span-5 space-y-1.5">
+          <div className={cn('space-y-2',allPhotos.length ? 'sm:col-span-5' : 'sm:col-span-8')}>
             {ratingDist.map(({ n, count, pct }) => (
               <button key={n} onClick={() => setStarFilter(starFilter === n ? 0 : n)}
                 className={cn('w-full flex items-center gap-2.5 rounded-md px-1 py-0.5 transition-colors',
@@ -428,7 +428,7 @@ function ReviewsSection({
           </div>
 
           {allPhotos.length > 0 && (
-            <div className="lg:col-span-3">
+            <div className="sm:col-span-3">
               <p className="text-xs font-medium text-foreground mb-2 flex items-center gap-1.5">
                 <ImageIcon className="w-3.5 h-3.5 text-muted-foreground" /> Fotos ({allPhotos.length})
               </p>
@@ -480,22 +480,14 @@ function ReviewsSection({
         </div>
       )}
 
-      {featured && !activeFilters && sort === 'helpful' && (
-        <div className="rounded-lg border border-border p-4 space-y-3">
-          <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
-            <Award className="w-3.5 h-3.5" /> Reseña destacada
-          </div>
-          <ReviewCard r={featured} helpfulIds={helpfulIds} reportedIds={reportedIds} likedReplyIds={likedReplyIds}
-            onMarkHelpful={onMarkHelpful} onLikeReply={onLikeReply} onReport={onReport} onOpenLightbox={onOpenLightbox}
-            onReply={onReply} user={user} />
-        </div>
-      )}
-
       <div className="space-y-0 divide-y divide-border">
         {filtered.slice(0, visible).map(r => (
-          <ReviewCard key={r.id} r={r} helpfulIds={helpfulIds} reportedIds={reportedIds} likedReplyIds={likedReplyIds}
+          <div key={r.id} className="py-3">
+          {r.id===featured?.id && !activeFilters && sort==='helpful' && reviews.length>1 && <p className="flex items-center gap-1.5 text-xs text-muted-foreground"><Award className="w-3.5 h-3.5"/>Opinión más útil</p>}
+          <ReviewCard r={r} helpfulIds={helpfulIds} reportedIds={reportedIds} likedReplyIds={likedReplyIds}
             onMarkHelpful={onMarkHelpful} onLikeReply={onLikeReply} onReport={onReport} onOpenLightbox={onOpenLightbox}
             onReply={onReply} user={user} />
+          </div>
         ))}
 
         {filtered.length === 0 && reviews.length > 0 && (
@@ -522,11 +514,11 @@ function ReviewsSection({
         )}
       </div>
 
-      <div className="pt-5 border-t border-border space-y-4">
-        <div>
+      <details id="product-review-form" className="scroll-mt-24 rounded-xl border border-border p-5 max-w-3xl space-y-4">
+        <summary className="cursor-pointer list-none">
           <h3 className="text-sm font-semibold text-foreground">¿Ya compraste este producto?</h3>
-          <p className="text-xs text-muted-foreground mt-0.5">Comparte tu opinión con otros compradores</p>
-        </div>
+          <p className="text-xs text-muted-foreground mt-0.5">Comparte tu opinión con otros compradores · Escribir reseña</p>
+        </summary>
 
         {!user ? (
           <div className="flex flex-col items-start gap-3">
@@ -600,7 +592,7 @@ function ReviewsSection({
             </>)}
           </div>
         )}
-      </div>
+      </details>
     </div>
   );
 }
@@ -899,17 +891,16 @@ export default function ProductDetailPage() {
     const saved = sessionStorage.getItem('compare');
     if (saved) setCompareList(JSON.parse(saved));
 
-    if (p.category_id) {
+    {
       const { data: rel } = await database.select<Product>('products', {
         select: '*, variants:product_variants(id,price,stock,status,attributes,attribute_type,color_name)',
         filter: [
           { column: 'status', operator: 'eq', value: 'active' },
-          { column: 'category_id', operator: 'eq', value: p.category_id },
           { column: 'id', operator: 'neq', value: p.id },
         ],
         limit: 8,
       });
-      setRelated((rel as Product[]) || []);
+      setRelated(((rel as Product[]) || []).sort((a,b)=>Number(b.category_id===p.category_id)-Number(a.category_id===p.category_id)).slice(0,5));
     }
     setLoading(false);
   }, [slug, user]);
@@ -1496,7 +1487,7 @@ export default function ProductDetailPage() {
                 Ver más →
               </button>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-5">
               {related.map(p => (
                 <ProductCard key={p.id} product={p} />
               ))}
