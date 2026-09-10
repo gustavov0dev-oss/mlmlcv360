@@ -39,9 +39,9 @@ function CompareBar({ products, onRemove, onClear }: {
   const navigate = useNavigate();
   if (products.length === 0) return null;
   return (
-    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 px-4 w-full max-w-md pointer-events-none">
-      <div className="bg-card border border-border shadow-2xl shadow-black/20 rounded-2xl p-3 flex items-center gap-3 pointer-events-auto">
-        <div className="flex gap-2 flex-1 min-w-0">
+    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-max max-w-[calc(100vw-2rem)] pointer-events-none">
+      <div className="bg-card border border-border shadow-2xl shadow-black/20 rounded-2xl p-3 flex flex-wrap justify-center items-center gap-3 pointer-events-auto">
+        <div className="flex gap-2 min-w-0">
           {products.map(p => (
             <div key={p.id} className="relative flex-shrink-0">
               <div className="w-11 h-11 rounded-xl overflow-hidden border border-border bg-muted">
@@ -52,15 +52,13 @@ function CompareBar({ products, onRemove, onClear }: {
               <button
                 onClick={() => onRemove(p.id)}
                 aria-label={`Quitar ${p.name} de comparar`}
-                className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center shadow z-10 transition-colors"
+                className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-card border border-border hover:bg-muted text-foreground rounded-full flex items-center justify-center shadow z-10 transition-colors"
               >
                 <X className="w-2.5 h-2.5" />
               </button>
             </div>
           ))}
-          {Array.from({ length: Math.max(0, 3 - products.length) }).map((_, i) => (
-            <div key={i} className="flex-shrink-0 w-11 h-11 rounded-xl border-2 border-dashed border-border/40 flex items-center justify-center text-muted-foreground/30 text-xl font-light">+</div>
-          ))}
+
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           {products.length >= 2 && (
@@ -68,7 +66,7 @@ function CompareBar({ products, onRemove, onClear }: {
               onClick={() => navigate(`/tienda/comparar?ids=${products.map(p => p.id).join(',')}`)}
               className="px-4 py-2 bg-primary text-primary-foreground rounded-xl text-xs font-bold transition-all active:scale-95"
             >
-              Comparar
+              Comparar ({products.length})
             </button>
           )}
           <button onClick={onClear} aria-label="Limpiar comparación" className="p-2 border border-border rounded-xl hover:bg-muted transition-colors">

@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { ShoppingBag, Star, Heart, GitCompareArrows, Truck } from 'lucide-react';
+import { ShoppingBag, Check, Star, Heart, GitCompareArrows, Truck } from 'lucide-react';
 import type { Product, ProductVariant } from '@/lib/storeTypes';
 import { useCart } from '@/store/cartStore';
 import { useAuthStore } from '@/store/authStore';
@@ -141,14 +141,15 @@ export default function ProductCard({
               onClick={handleCompare}
               aria-label={isComparing ? "Quitar de comparación" : "Comparar"}
               aria-pressed={isComparing}
+              title={isComparing ? "Seleccionado para comparar · Quitar" : "Seleccionar para comparar"}
               className={cn(
                 'w-7 h-7 rounded-full flex items-center justify-center shadow-sm transition-all duration-150',
                 isComparing
-                  ? 'bg-foreground text-background'
+                  ? 'bg-white text-emerald-700 ring-1 ring-inset ring-emerald-600/50'
                   : 'bg-white/90 dark:bg-black/60 text-muted-foreground hover:bg-primary hover:text-primary-foreground sm:opacity-0 sm:group-hover:opacity-100 opacity-100'
               )}
             >
-              <GitCompareArrows className="w-3.5 h-3.5" />
+              {isComparing ? <Check className="w-4 h-4" strokeWidth={2} /> : <GitCompareArrows className="w-3.5 h-3.5" />}
             </button>
           )}
         </div>
@@ -156,7 +157,7 @@ export default function ProductCard({
 
         {!outOfStock && (
           <button onClick={handleAdd} disabled={adding} aria-label={`Agregar ${product.name} al carrito`}
-            className="absolute bottom-2.5 left-2.5 right-2.5 z-10 min-h-10 flex items-center justify-center gap-2 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-70 text-xs font-semibold shadow-sm transition-[opacity,transform] duration-200 lg:opacity-0 lg:translate-y-1 lg:pointer-events-none lg:group-hover:opacity-100 lg:group-hover:translate-y-0 lg:group-hover:pointer-events-auto lg:group-focus-within:opacity-100 lg:group-focus-within:translate-y-0 lg:group-focus-within:pointer-events-auto">
+            className="absolute bottom-2.5 left-2.5 right-2.5 z-10 min-h-10 flex items-center justify-center gap-2 rounded-xl bg-white/90 text-neutral-900 border border-black/10 backdrop-blur-md hover:bg-white disabled:opacity-70 text-xs font-semibold shadow-sm transition-[opacity,transform] duration-200 lg:opacity-0 lg:translate-y-1 lg:pointer-events-none lg:group-hover:opacity-100 lg:group-hover:translate-y-0 lg:group-hover:pointer-events-auto lg:group-focus-within:opacity-100 lg:group-focus-within:translate-y-0 lg:group-focus-within:pointer-events-auto">
             <ShoppingBag className="w-4 h-4" />{adding ? 'Agregado' : 'Agregar'}
           </button>
         )}
