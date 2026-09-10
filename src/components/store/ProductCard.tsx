@@ -93,8 +93,7 @@ export default function ProductCard({
     <div
       onClick={() => navigate(`/tienda/${product.slug}`)}
       className={cn(
-        'group relative flex flex-col cursor-pointer select-none h-full',
-        isComparing && 'ring-2 ring-primary ring-offset-2 rounded-xl'
+        'group relative flex flex-col cursor-pointer select-none h-full'
       )}
     >
       {/* ── IMAGE ── */}
@@ -140,11 +139,12 @@ export default function ProductCard({
           {onCompareToggle && (
             <button
               onClick={handleCompare}
-              aria-label="Comparar"
+              aria-label={isComparing ? "Quitar de comparación" : "Comparar"}
+              aria-pressed={isComparing}
               className={cn(
                 'w-7 h-7 rounded-full flex items-center justify-center shadow-sm transition-all duration-150',
                 isComparing
-                  ? 'bg-primary text-primary-foreground'
+                  ? 'bg-foreground text-background'
                   : 'bg-white/90 dark:bg-black/60 text-muted-foreground hover:bg-primary hover:text-primary-foreground sm:opacity-0 sm:group-hover:opacity-100 opacity-100'
               )}
             >
@@ -154,6 +154,12 @@ export default function ProductCard({
         </div>
 
 
+        {!outOfStock && (
+          <button onClick={handleAdd} disabled={adding} aria-label={`Agregar ${product.name} al carrito`}
+            className="absolute bottom-2.5 left-2.5 right-2.5 z-10 min-h-10 flex items-center justify-center gap-2 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-70 text-xs font-semibold shadow-sm transition-[opacity,transform] duration-200 lg:opacity-0 lg:translate-y-1 lg:pointer-events-none lg:group-hover:opacity-100 lg:group-hover:translate-y-0 lg:group-hover:pointer-events-auto lg:group-focus-within:opacity-100 lg:group-focus-within:translate-y-0 lg:group-focus-within:pointer-events-auto">
+            <ShoppingBag className="w-4 h-4" />{adding ? 'Agregado' : 'Agregar'}
+          </button>
+        )}
       </div>
 
       {/* ── INFO ── */}
@@ -212,10 +218,7 @@ export default function ProductCard({
             Envío gratis
           </span>
         )}
-        <button onClick={handleAdd} disabled={adding || outOfStock} aria-label={`Agregar ${product.name} al carrito`}
-          className="mt-3 w-full min-h-11 flex items-center justify-center gap-2 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 text-sm font-semibold transition-colors">
-          <ShoppingBag className="w-4 h-4" />{outOfStock ? 'Agotado' : adding ? 'Agregado' : 'Agregar'}
-        </button>
+
       </div>
     </div>
   );
