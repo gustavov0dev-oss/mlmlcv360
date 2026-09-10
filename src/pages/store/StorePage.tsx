@@ -292,7 +292,7 @@ export default function StorePage() {
   const categoryRail = (
     <div className="-mx-4 px-4 sm:mx-0 sm:px-0">
       <div className="flex items-center gap-4 overflow-x-auto touch-pan-x snap-x snap-proximity scroll-smooth scrollbar-hide pb-1">
-        <button onClick={() => setCatFilter('')} className="flex flex-col items-center gap-1.5 shrink-0 w-16 snap-start">
+        <button onClick={() => setCatFilter('')} className="flex flex-col items-center gap-1.5 shrink-0 w-16 h-[92px] snap-start">
           <div className={cn(
             'w-14 h-14 rounded-full flex items-center justify-center border transition-all',
             !catFilter ? 'border-primary bg-primary/10 ring-1 ring-primary/20' : 'border-border/40 bg-muted/30'
@@ -302,7 +302,7 @@ export default function StorePage() {
           <span className={cn('text-[11px] font-semibold text-center', !catFilter ? 'text-primary' : 'text-foreground/70')}>Todo</span>
         </button>
         {categories.map(cat => (
-          <button key={cat.id} onClick={() => setCatFilter(catFilter === cat.id ? '' : cat.id)} className="flex flex-col items-center gap-1.5 shrink-0 w-16 snap-start">
+          <button key={cat.id} onClick={() => setCatFilter(catFilter === cat.id ? '' : cat.id)} className="flex flex-col items-center gap-1.5 shrink-0 w-16 h-[92px] snap-start">
             <div className={cn(
               'w-14 h-14 rounded-full overflow-hidden flex items-center justify-center border transition-all',
               catFilter === cat.id ? 'border-primary ring-1 ring-primary/20' : 'border-border/40 bg-muted/30'
@@ -456,7 +456,7 @@ export default function StorePage() {
             </button>
           </div>
 
-          {categoryRail}
+          <div className="min-h-[96px]">{categoryRail}</div>
         </div>
       </section>
 
@@ -473,9 +473,8 @@ export default function StorePage() {
                 Reintentar
               </button>
             </div>
-          ) : (
+          ) : loading ? <LoadingRegion className="min-h-[100vh]" /> : (
             <>
-              {showPromoRails && loading && <LoadingRegion className="min-h-[24rem]" />}
               {showPromoRails && !loading && featured.length > 0 && (
                 <section className="mb-10">
                   <div className="flex items-center gap-2 mb-4">

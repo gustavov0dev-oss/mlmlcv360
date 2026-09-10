@@ -153,29 +153,7 @@ export default function ProductCard({
           )}
         </div>
 
-        {/* Add to cart button — icon-only on mobile/tablet, icon+text pill on desktop hover */}
-        {!outOfStock && (
-          <button
-            onClick={handleAdd}
-            disabled={adding}
-            aria-label="Agregar al carrito"
-            className={cn(
-              'absolute bottom-2.5 right-2.5 z-10 flex items-center justify-center gap-1.5 rounded-full shadow-md transition-all duration-200 font-semibold whitespace-nowrap',
-              adding
-                ? 'bg-emerald-500 text-white'
-                : 'bg-primary text-primary-foreground hover:bg-primary/90 active:scale-95',
-              // Mobile/tablet (below lg): round icon-only, always visible
-              'w-8 h-8 lg:w-auto lg:h-auto',
-              // Desktop (lg+): pill with text, hidden until hover
-              'lg:opacity-0 lg:group-hover:opacity-100 lg:translate-y-1 lg:group-hover:translate-y-0',
-              'lg:px-3.5 lg:py-2 lg:text-xs',
-              'opacity-100'
-            )}
-          >
-            <ShoppingBag className={cn('w-4 h-4', adding && 'animate-bounce')} />
-            <span className="hidden lg:inline">{adding ? 'Agregado' : 'Agregar'}</span>
-          </button>
-        )}
+
       </div>
 
       {/* ── INFO ── */}
@@ -234,6 +212,10 @@ export default function ProductCard({
             Envío gratis
           </span>
         )}
+        <button onClick={handleAdd} disabled={adding || outOfStock} aria-label={`Agregar ${product.name} al carrito`}
+          className="mt-3 w-full min-h-11 flex items-center justify-center gap-2 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 text-sm font-semibold transition-colors">
+          <ShoppingBag className="w-4 h-4" />{outOfStock ? 'Agotado' : adding ? 'Agregado' : 'Agregar'}
+        </button>
       </div>
     </div>
   );

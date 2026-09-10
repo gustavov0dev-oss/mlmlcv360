@@ -1,3 +1,5 @@
+import ProductCard from '@/components/store/ProductCard';
+import { useCartCoupon } from '@/hooks/useCartCoupon';
 import { LoadingRegion, StableRegion } from '@/components/ui/loading-region';
 import React from 'react';
 import { useState, useEffect } from 'react';
@@ -7,7 +9,7 @@ import { useConfig } from '@/store/configStore';
 import { useNavigate } from '@/lib/router';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import type { Coupon, ShippingMethod } from '@/lib/storeTypes';
+import type { Coupon, ShippingMethod, Product } from '@/lib/storeTypes';
 import { ShoppingCart, Trash2, Plus, Minus, Tag, X, ArrowRight, ChevronLeft, Truck, CircleCheck as CheckCircle, Package, ShoppingBag, Check } from 'lucide-react';
 
 // Mismo ancho máximo que usa StorePage, para que ambas vistas queden
@@ -90,13 +92,21 @@ export default function CartPage() {
   const { company } = useConfig();
   const navigate = useNavigate();
   const [couponCode, setCouponCode] = useState('');
-  const [coupon, setCoupon] = useState<Coupon | null>(null);
+  const { coupon, setCoupon } = useCartCoupon(subtotal);
   const [couponError, setCouponError] = useState('');
   const [checkingCoupon, setCheckingCoupon] = useState(false);
   const [shippingMethods, setShippingMethods] = useState<ShippingMethod[]>([]);
   const [selectedShipping, setSelectedShipping] = useState<ShippingMethod | null>(null);
   const [loadingShipping, setLoadingShipping] = useState(true);
   const [availableCoupons, setAvailableCoupons] = useState<Coupon[]>([]);
+  const [recommendations, setRecommendations] = useState<Product[]>([]);
+  useEffect(() => {
+    let active=true;
+    database.select<Product>('products', {select:'*, category:product_categories(*), variants:product_variants(*)',filter:{status:'active'},limit:8}).then(({data})=>{
+      if(active)setRecommendations(((data as Product[])||[]).filter(p=>!p.track_stock || p.allow_backorder || (p.variants?.some(v=>v.status==='active' && v.stock>0)) || p.general_stock>0).slice(0,4));
+    });
+    return()=>{active=false;};
+  },[database]);
   const freeThreshold = parseFloat(company.free_shipping_threshold || '150');
 
   useEffect(() => {
@@ -107,7 +117,7 @@ export default function CartPage() {
     ]).then(([{ data: methods }, { data: coupons }]) => {
       const ms = (methods || []) as ShippingMethod[];
       setShippingMethods(ms);
-      if (ms.length > 0) setSelectedShipping(ms[0]);
+      if (ms.length > 0) setSelectedShipping(prev => ms.find(m=>m.id===prev?.id) || ms[0]);
       setLoadingShipping(false);
 
       const now = new Date();
@@ -133,7 +143,7 @@ export default function CartPage() {
       ],
       maybeSingle: true,
     });
-    if (!data) {
+    if (!data || ((data as Coupon).expires_at && new Date((data as Coupon).expires_at!).getTime() <= Date.now()) || ((data as Coupon).usage_limit && (data as Coupon).used_count >= (data as Coupon).usage_limit!)) {
       setCouponError('Cupón inválido o expirado');
       setCoupon(null);
     } else if ((data as Coupon).min_order_amount && subtotal < (data as Coupon).min_order_amount!) {
@@ -150,7 +160,7 @@ export default function CartPage() {
   const discount = coupon
     ? coupon.type === 'percentage'
       ? Math.min(subtotal * coupon.value / 100, coupon.max_discount ?? Infinity)
-      : coupon.value
+      : Math.min(subtotal, coupon.value)
     : 0;
 
   const shippingCost = (() => {
@@ -166,12 +176,12 @@ export default function CartPage() {
   if (itemCount === 0) {
     return (
       <>
-        <div className="flex flex-col items-center justify-center gap-5 px-4 min-h-[80vh]">
+        <div className="flex flex-col items-center justify-center gap-5 px-4 py-12">
           <div className="w-24 h-24 rounded-3xl bg-muted flex items-center justify-center">
             <ShoppingCart className="w-12 h-12 text-muted-foreground/30" />
           </div>
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-foreground">Tu carrito esta vacio</h2>
+            <h2 className="text-2xl font-bold text-foreground">Tu carrito está vacío</h2>
             <p className="text-muted-foreground text-sm mt-1">Explora nuestra tienda y agrega los productos que te gusten</p>
           </div>
           <button onClick={() => navigate('/tienda')}
@@ -179,6 +189,10 @@ export default function CartPage() {
             <ShoppingBag className="w-4 h-4" /> Explorar tienda
           </button>
         </div>
+        {recommendations.length>0 && <section className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+          <h2 className="text-xl font-semibold mb-5">Descubre estos productos</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-5">{recommendations.map(p=><ProductCard key={p.id} product={p}/>)}</div>
+        </section>}
       </>
     );
   }

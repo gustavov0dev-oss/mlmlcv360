@@ -1,3 +1,4 @@
+import { useCartCoupon } from '@/hooks/useCartCoupon';
 import { LoadingRegion, StableRegion } from '@/components/ui/loading-region';
 import { useState, useEffect } from 'react';
 import { useDatabase } from '@/lib/backend';
@@ -125,7 +126,7 @@ export default function CheckoutPage() {
   const selectedGateway = selectedGatewayIdx >= 0 ? (gateways[selectedGatewayIdx] ?? null) : null;
   const paymentMethod = selectedGateway?.slug || selectedGateway?.id || '';
   const [couponCode, setCouponCode] = useState('');
-  const [coupon, setCoupon] = useState<Coupon | null>(null);
+  const { coupon, setCoupon, validating: validatingCoupon } = useCartCoupon(subtotal);
   const [couponError, setCouponError] = useState('');
   const [notes, setNotes] = useState('');
   const [placing, setPlacing] = useState(false);
@@ -182,7 +183,7 @@ export default function CheckoutPage() {
   const discount = coupon
     ? coupon.type === 'percentage'
       ? Math.min(subtotal * coupon.value / 100, coupon.max_discount ?? Infinity)
-      : coupon.value
+      : Math.min(subtotal, coupon.value)
     : 0;
 
   const subtotalAfterDiscount = subtotal - discount;
@@ -211,6 +212,7 @@ export default function CheckoutPage() {
     });
     if (!data) { setCouponError('Cupón inválido'); setCoupon(null); return; }
     const c = data as Coupon;
+    if ((c.expires_at && new Date(c.expires_at).getTime() <= Date.now()) || (c.usage_limit && c.used_count >= c.usage_limit)) {setCouponError("Cupón vencido o agotado");setCoupon(null);return;}
     if (subtotal < (c.min_order_amount ?? 0)) { setCouponError(`Mínimo: ${fmt(c.min_order_amount)}`); setCoupon(null); return; }
     setCoupon(c); setCouponError(''); toast.success('Cupón aplicado');
   };
@@ -257,6 +259,7 @@ export default function CheckoutPage() {
   };
 
   const placeOrder = async () => {
+    if(validatingCoupon)return;
     if (!user || items.length === 0) return;
     setPlacing(true);
     await saveAddress();
@@ -286,6 +289,7 @@ export default function CheckoutPage() {
       toast.error(data?.error || error || 'Error al procesar el pedido');
       setPlacing(false); return;
     }
+    setCoupon(null);
     clearCart();
     setPlacedOrder({ order_number: data.order_number, order_id: data.order_id, total: data.total });
     setStep(5);
@@ -825,7 +829,7 @@ export default function CheckoutPage() {
                 <button onClick={() => setStep(3)} className="flex-1 border border-border/50 rounded-lg py-3 font-bold text-sm hover:bg-muted/30 transition-colors">
                   <ChevronLeft className="w-4 h-4 inline mr-1" /> Anterior
                 </button>
-                <button onClick={placeOrder} disabled={placing}
+                <button onClick={placeOrder} disabled={placing || validatingCoupon}
                   className="flex-1 bg-primary text-primary-foreground rounded-lg py-3 font-bold text-sm hover:bg-primary/90 transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
                   {placing ? <><Loader2 className="w-4 h-4 animate-spin" /> Procesando...</> : <><Package className="w-4 h-4" /> Confirmar pedido</>}
                 </button>
