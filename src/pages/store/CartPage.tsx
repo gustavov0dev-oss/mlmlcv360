@@ -103,7 +103,7 @@ export default function CartPage() {
   useEffect(() => {
     let active=true;
     database.select<Product>('products', {select:'*, category:product_categories(*), variants:product_variants(*)',filter:{status:'active'},limit:8}).then(({data})=>{
-      if(active)setRecommendations(((data as Product[])||[]).filter(p=>!p.track_stock || p.allow_backorder || (p.variants?.some(v=>v.status==='active' && v.stock>0)) || p.general_stock>0).slice(0,4));
+      if(active)setRecommendations(((data as Product[])||[]).filter(p=>!p.track_stock || p.allow_backorder || (p.variants?.some(v=>v.status==='active' && v.stock>0)) || p.general_stock>0).slice(0,5));
     });
     return()=>{active=false;};
   },[database]);
@@ -176,7 +176,7 @@ export default function CartPage() {
   if (itemCount === 0) {
     return (
       <>
-        <div className="flex flex-col items-center justify-center gap-5 px-4 py-12">
+        <div className="flex flex-col items-center justify-center gap-5 px-4 pt-28 sm:pt-32 pb-10">
           <div className="w-24 h-24 rounded-3xl bg-muted flex items-center justify-center">
             <ShoppingCart className="w-12 h-12 text-muted-foreground/30" />
           </div>
@@ -191,7 +191,7 @@ export default function CartPage() {
         </div>
         {recommendations.length>0 && <section className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 pb-12">
           <h2 className="text-xl font-semibold mb-5">Descubre estos productos</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-5">{recommendations.map(p=><ProductCard key={p.id} product={p}/>)}</div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-5">{recommendations.map(p=><ProductCard key={p.id} product={p}/>)}</div>
         </section>}
       </>
     );

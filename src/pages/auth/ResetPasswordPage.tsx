@@ -93,7 +93,7 @@ export default function ResetPasswordPage() {
         {checking ? (
           /* Checking state */
           <div className="glass-card rounded-2xl p-8 text-center">
-            <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <span className="sr-only" role="status">Cargando</span>
             <p className="text-sm text-muted-foreground">Verificando enlace de recuperación...</p>
           </div>
         ) : !valid ? (

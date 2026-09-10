@@ -385,7 +385,7 @@ export default function PagoPage() {
       <>
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <span className="sr-only" role="status">Cargando</span>
             <p className="text-muted-foreground text-sm">Cargando opciones de pago...</p>
           </div>
         </div>
