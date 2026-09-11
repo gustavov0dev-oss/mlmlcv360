@@ -173,6 +173,8 @@ export default function OrderDetailPage() {
 
   return (
     <div className="space-y-5 pb-10">
+      {order.payment_status === 'pending' && <button onClick={() => navigate(`/pago?order=${order.id}&method=${order.payment_method || ''}`)} className="px-4 py-2 rounded-lg bg-primary text-white text-sm">Completar pago o enviar comprobante</button>}
+
       <Invoice order={order} company={company} />
 
       {/* Header */}

@@ -1,256 +1,114 @@
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "jsr:@supabase/supabase-js@2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
-};
-
-const json = (data: unknown, status = 200) =>
-  new Response(JSON.stringify(data), {
-    status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
-
-Deno.serve(async (req: Request) => {
-  if (req.method === "OPTIONS") return new Response(null, { status: 200, headers: corsHeaders });
-
-  const supabase = createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-  );
-
-  let body: any;
-  try {
-    body = await req.json();
-  } catch {
-    return json({ success: false, error: "Invalid request body" }, 400);
+import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
+import { createClient } from 'jsr:@supabase/supabase-js@2';
+const headers={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization, apikey, content-type, x-client-info','Content-Type':'application/json'};
+const origin='https://mlmlcv360-preview.whizzend.chatgpt.site';
+const manual=['yape','plin','transfer'];
+Deno.serve(async req=>{
+ if(req.method==='OPTIONS') return new Response('ok',{headers});
+ const json=(data:unknown,status=200)=>new Response(JSON.stringify(data),{status,headers});
+ const db=createClient(Deno.env.get('SUPABASE_URL')!,Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+ try {
+  const token=req.headers.get('Authorization')?.replace(/^Bearer /i,'')||'';
+  const {data:{user}}=await db.auth.getUser(token);
+  if(!user) return json({success:false,error:'Inicia sesión para continuar.'},401);
+  const b=await req.json();
+  const {data:profile}=await db.from('profiles').select('role').eq('id',user.id).single();
+  const admin=['admin','super_admin'].includes(profile?.role);
+  const checked=async(q:any)=>{const r=await q;if(r.error)throw new Error('No se pudo guardar el pago.');return r.data;};
+  if(b.action==='free_plan'||b.action==='cancel_plan') {
+   const plan=await checked(b.action==='free_plan'?db.from('plans').select('*').eq('slug',b.plan_slug).eq('is_active',true).single():db.from('plans').select('*').eq('is_active',true).eq('price',0).limit(1).single());
+   if(Number(plan.price)!==0) throw new Error('Este plan requiere un pago confirmado.');
+   if(b.action==='cancel_plan') await checked(db.from('subscriptions').update({status:'cancelled',updated_at:new Date().toISOString()}).eq('user_id',user.id));
+   else await checked(db.from('subscriptions').upsert({user_id:user.id,plan_slug:plan.slug,status:'active',gateway:'free',amount:0,currency:plan.currency,current_period_start:new Date().toISOString(),current_period_end:plan.trial_days?new Date(Date.now()+plan.trial_days*86400000).toISOString():null,updated_at:new Date().toISOString()},{onConflict:'user_id'}));
+   await checked(db.from('profiles').update({plan:plan.slug,updated_at:new Date().toISOString()}).eq('id',user.id));
+   return json({success:true});
   }
-
-  const { gateway, plan_slug, plan_price, currency, user_id, card } = body;
-
-  if (!gateway || !plan_slug) {
-    return json({ success: false, error: "gateway y plan_slug son requeridos" }, 400);
+  const gatewayRows=await checked(db.from('payment_gateways').select('*').in('slug',['paypal','mercadopago',...manual]));
+  if(b.action==='methods') return json({success:true,methods:gatewayRows.filter((g:any)=>g.is_active).map((g:any)=>({id:g.id,slug:g.slug,name:g.name,logo:g.logo,currency:g.currency,description:g.description,is_active:g.is_active,credentials:manual.includes(g.slug)?g.credentials:{},ready:g.slug==='paypal'?!!(g.credentials.client_id&&g.credentials.client_secret):g.slug==='mercadopago'?!!g.credentials.access_token:g.slug==='transfer'?(()=>{try{return JSON.parse(g.credentials.accounts||'[]').some((a:any)=>a.bank&&a.holder&&a.number)}catch{return false}})():!!(g.credentials.phone_number&&g.credentials.merchant_name)}))});
+  const request=async(url:string,opts:RequestInit)=>{
+   const r=await fetch(url,{...opts,signal:AbortSignal.timeout(20000)});const d=await r.json();
+   if(!r.ok) throw new Error('La pasarela rechazó la solicitud. Revisa las credenciales de producción o intenta nuevamente.');return d;
+  };
+  const paypalToken=async(c:any)=>(await request('https://api-m.paypal.com/v1/oauth2/token',{method:'POST',headers:{Authorization:`Basic ${btoa(c.client_id+':'+c.client_secret)}`,'Content-Type':'application/x-www-form-urlencoded'},body:'grant_type=client_credentials'})).access_token;
+  if(b.action==='check_gateway') {
+   if(!admin) return json({success:false,error:'No autorizado'},403);
+   const g=gatewayRows.find((g:any)=>g.slug===b.gateway);if(!g) throw new Error('Método no encontrado.');
+   if(g.slug==='paypal') await paypalToken(g.credentials);
+   else if(g.slug==='mercadopago') {
+    if(g.credentials.access_token?.startsWith('TEST-')) throw new Error('Usa el Access Token de producción de Mercado Pago.');
+    await request('https://api.mercadopago.com/users/me',{headers:{Authorization:`Bearer ${g.credentials.access_token}`}});
+   }
+   return json({success:true,message:'Credenciales de producción verificadas.'});
   }
-
-  // Load gateway config
-  const { data: gw, error: gwErr } = await supabase
-    .from("payment_gateways")
-    .select("*")
-    .eq("slug", gateway)
-    .eq("is_active", true)
-    .single();
-
-  if (gwErr || !gw) {
-    return json({ success: false, error: "Pasarela no encontrada o inactiva" }, 400);
+  if(b.action==='review') {
+   if(!admin) return json({success:false,error:'No autorizado'},403);
+   const s=await checked(db.from('payment_sessions').select('*').eq('id',b.session_id).single());
+   if(!manual.includes(s.gateway)||s.status!=='review'||!s.receipt_path) throw new Error('El comprobante no está pendiente de revisión.');
+   if(b.approve) await checked(db.rpc('complete_payment_session',{p_id:s.id}));
+   else await checked(db.from('payment_sessions').update({status:'rejected'}).eq('id',s.id).eq('status','review'));
+   return json({success:true});
   }
-
-  const creds = gw.credentials as Record<string, string>;
-  const hasCredentials = Object.values(creds).some((v) => v && v.trim() !== "");
-  if (!hasCredentials) {
-    return json({ success: false, error: "Esta pasarela no tiene credenciales configuradas. Contacta al administrador." }, 400);
+  if(b.action==='receipt'||b.action==='verify') {
+   const s=await checked(db.from('payment_sessions').select('*').eq('id',b.session_id).eq('user_id',user.id).single());
+   if(b.action==='receipt') {
+    if(!manual.includes(s.gateway)||s.status!=='pending') throw new Error('Este pago no admite comprobantes.');
+    if(typeof b.path!=='string'||!b.path.startsWith(user.id+'/')||!b.reference?.trim()) throw new Error('Adjunta el comprobante y número de operación.');
+    const {data:files,error}=await db.storage.from('payment-receipts').list(user.id,{search:b.path.split('/')[1]});
+    if(error||!files?.some(f=>f.name===b.path.split('/')[1])) throw new Error('No se encontró el comprobante.');
+    await checked(db.from('payment_sessions').update({receipt_path:b.path,operation_reference:b.reference.trim().slice(0,100),status:'review'}).eq('id',s.id).eq('status','pending'));
+    return json({success:true,status:'review'});
+   }
+   if(s.status==='paid'||manual.includes(s.gateway)) return json({success:true,status:s.status});
+   const gw=gatewayRows.find((g:any)=>g.slug===s.gateway); if(!gw) throw new Error('Pasarela no disponible.');
+   let paid=false;
+   if(s.gateway==='paypal') {
+    const auth=await paypalToken(gw.credentials);
+    let order=await request(`https://api-m.paypal.com/v2/checkout/orders/${s.provider_id}`,{headers:{Authorization:`Bearer ${auth}`}});
+    if(order.status==='APPROVED') order=await request(`https://api-m.paypal.com/v2/checkout/orders/${s.provider_id}/capture`,{method:'POST',headers:{Authorization:`Bearer ${auth}`,'Content-Type':'application/json','PayPal-Request-Id':s.id},body:'{}'});
+    const unit=order.purchase_units?.[0];const capture=unit?.payments?.captures?.[0];
+    paid=order.status==='COMPLETED'&&capture?.status==='COMPLETED'&&unit?.custom_id===s.id&&capture.amount?.currency_code===s.currency&&Number(capture.amount.value)===Number(s.amount);
+   } else {
+    const result=await request(`https://api.mercadopago.com/v1/payments/search?external_reference=${s.id}`,{headers:{Authorization:`Bearer ${gw.credentials.access_token}`}});
+    paid=result.results?.some((p:any)=>p.status==='approved'&&p.live_mode===true&&p.external_reference===s.id&&p.currency_id===s.currency&&Number(p.transaction_amount)===Number(s.amount));
+   }
+   if(paid) await checked(db.rpc('complete_payment_session',{p_id:s.id}));
+   return json({success:true,status:paid?'paid':'pending'});
   }
-
-  // Process payment by gateway
-  let result: { success: boolean; error?: string; transaction_id?: string };
-
-  if (gw.slug === "culqi") {
-    result = await processCulqi(gw, card, plan_price, currency);
-  } else if (gw.slug === "mercadopago") {
-    result = await processMercadoPago(gw, card, plan_price, currency, plan_slug, user_id);
-  } else if (gw.slug === "niubiz") {
-    result = await processNiubiz(gw, card, plan_price, currency);
-  } else if (gw.slug === "izipay") {
-    result = await processIzipay(gw, card, plan_price, currency);
-  } else if (gw.slug === "paypal") {
-    result = await processPayPal(gw, plan_price, currency, plan_slug);
-  } else if (gw.slug === "yape") {
-    // Yape is manual — just record and confirm pending
-    result = { success: true, transaction_id: `YAPE-${Date.now()}` };
+  const gw=gatewayRows.find((g:any)=>g.slug===b.gateway&&g.is_active);
+  if(!gw) throw new Error('Selecciona un método disponible.');
+  if(gw.slug==='mercadopago'&&gw.credentials.access_token?.startsWith('TEST-')) throw new Error('Mercado Pago requiere credenciales de producción.');
+  let amount:number, currency:string, plan:any=null, order:any=null;
+  if(b.order_id) {
+   order=await checked(db.from('orders').select('*').eq('id',b.order_id).eq('user_id',user.id).single());
+   if(order.payment_status==='paid') throw new Error('El pedido ya está pagado.');
+   amount=Number(order.total); currency=order.currency;
   } else {
-    result = { success: false, error: "Pasarela no soportada" };
+   plan=await checked(db.from('plans').select('*').eq('slug',b.plan_slug).eq('is_active',true).single());
+   amount=Number(plan.price);currency=plan.currency;
   }
-
-  if (!result.success) {
-    return json(result, 400);
+  if(!Number.isFinite(amount)||amount<=0) throw new Error('Importe inválido.');
+  if(currency!==gw.currency) {
+   const row=await checked(db.from('system_config').select('value').eq('key','exchange_rate_usd').single());const rate=Number(row.value);
+   if(!Number.isFinite(rate)||rate<=0) throw new Error('Configura el tipo de cambio.');
+   amount=currency==='PEN'?amount/rate:amount*rate;currency=gw.currency;
   }
-
-  // Record transaction
-  if (user_id) {
-    await supabase.from("transactions").insert({
-      user_id,
-      plan_slug,
-      amount: plan_price,
-      currency,
-      gateway: gw.slug,
-      transaction_id: result.transaction_id || `TXN-${Date.now()}`,
-      status: gw.slug === "yape" ? "pending" : "completed",
-    }).then(() => {});
+  amount=Math.round(amount*100)/100;
+  const existing=await checked(db.from('payment_sessions').select('*').eq('user_id',user.id).eq('gateway',gw.slug).eq(order?'order_id':'plan_slug',order?.id||plan.slug).eq('status','pending').eq('amount',amount).gte('created_at',new Date(Date.now()-3600000).toISOString()).order('created_at',{ascending:false}).limit(1));
+  if(existing[0]?.checkout_url||existing[0]&&manual.includes(gw.slug)) return json({success:true,session_id:existing[0].id,redirect_url:existing[0].checkout_url,status:'pending',amount,currency});
+  const s=existing[0]||await checked(db.from('payment_sessions').insert({user_id:user.id,order_id:order?.id||null,plan_slug:plan?.slug||null,gateway:gw.slug,amount,currency}).select().single());
+  if(manual.includes(gw.slug)) return json({success:true,session_id:s.id,status:'pending',amount,currency});
+  const returnUrl=`${origin}/pago?session=${s.id}`;
+  let providerId:string,checkout:string;
+  if(gw.slug==='paypal') {
+   const auth=await paypalToken(gw.credentials);
+   const result=await request('https://api-m.paypal.com/v2/checkout/orders',{method:'POST',headers:{Authorization:`Bearer ${auth}`,'Content-Type':'application/json','PayPal-Request-Id':s.id},body:JSON.stringify({intent:'CAPTURE',purchase_units:[{custom_id:s.id,amount:{currency_code:currency,value:amount.toFixed(2)},description:order?`Pedido ${order.order_number}`:`Membresía ${plan.name}`}],payment_source:{paypal:{experience_context:{return_url:returnUrl,cancel_url:returnUrl+'&cancel=1',user_action:'PAY_NOW'}}}})});
+   providerId=result.id;checkout=result.links?.find((l:any)=>['payer-action','approve'].includes(l.rel))?.href;
+  } else {
+   const result=await request('https://api.mercadopago.com/checkout/preferences',{method:'POST',headers:{Authorization:`Bearer ${gw.credentials.access_token}`,'Content-Type':'application/json','X-Idempotency-Key':s.id},body:JSON.stringify({items:[{id:s.id,title:order?`Pedido ${order.order_number}`:`Membresía ${plan.name}`,quantity:1,currency_id:currency,unit_price:amount}],external_reference:s.id,back_urls:{success:returnUrl,pending:returnUrl,failure:returnUrl+'&cancel=1'},auto_return:'approved',notification_url:Deno.env.get('SUPABASE_URL')+'/functions/v1/payment-webhook'})});
+   providerId=result.id;checkout=result.init_point;
   }
-
-  return json({ success: true, transaction_id: result.transaction_id });
+  if(!checkout||!providerId) throw new Error('La pasarela no devolvió su checkout.');
+  await checked(db.from('payment_sessions').update({provider_id:providerId,checkout_url:checkout}).eq('id',s.id));
+  return json({success:true,session_id:s.id,redirect_url:checkout,status:'pending',amount,currency});
+ } catch(e) {return json({success:false,error:e instanceof Error?e.message:'No se pudo procesar el pago.'});}
 });
-
-// ── Culqi ──
-async function processCulqi(gw: any, card: any, amount: number, currency: string) {
-  const creds = gw.credentials;
-  if (!creds.private_key) return { success: false, error: "Culqi: private_key no configurado" };
-  try {
-    // Step 1: tokenize the card (normally done client-side with Culqi.js)
-    // In test mode, use test token
-    const token = gw.test_mode ? "tkn_test_live_example" : null;
-    if (!token && (!card?.number || !card?.expiry || !card?.cvv)) {
-      return { success: false, error: "Datos de tarjeta incompletos" };
-    }
-
-    const amountCents = Math.round(amount * 100);
-    const resp = await fetch("https://api.culqi.com/v2/charges", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${creds.private_key}`,
-      },
-      body: JSON.stringify({
-        amount: amountCents,
-        currency_code: currency === "USD" ? "USD" : "PEN",
-        email: "pago@mlm360.pe",
-        source_id: token || `tok_test_${Date.now()}`,
-      }),
-    });
-    const data = await resp.json();
-    if (data.object === "error") {
-      return { success: false, error: data.user_message || data.merchant_message || "Error en Culqi" };
-    }
-    return { success: true, transaction_id: data.id };
-  } catch (e: any) {
-    return { success: false, error: `Error Culqi: ${e.message}` };
-  }
-}
-
-// ── MercadoPago ──
-async function processMercadoPago(gw: any, card: any, amount: number, currency: string, plan_slug: string, user_id: string) {
-  const creds = gw.credentials;
-  if (!creds.access_token) return { success: false, error: "MercadoPago: access_token no configurado" };
-  try {
-    const resp = await fetch("https://api.mercadopago.com/v1/payments", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${creds.access_token}`,
-        "X-Idempotency-Key": `${user_id || "anon"}-${Date.now()}`,
-      },
-      body: JSON.stringify({
-        transaction_amount: amount,
-        currency_id: currency,
-        description: `MLM 360 - Plan ${plan_slug}`,
-        payment_method_id: "visa",
-        payer: { email: "pago@mlm360.pe" },
-        token: gw.test_mode ? "ff8080814c11e237014c1ff593b57b4d" : undefined,
-        installments: 1,
-      }),
-    });
-    const data = await resp.json();
-    if (data.status === "approved" || data.status === "in_process") {
-      return { success: true, transaction_id: String(data.id) };
-    }
-    return { success: false, error: data.status_detail || "Pago rechazado por MercadoPago" };
-  } catch (e: any) {
-    return { success: false, error: `Error MercadoPago: ${e.message}` };
-  }
-}
-
-// ── Niubiz ──
-async function processNiubiz(gw: any, card: any, amount: number, currency: string) {
-  const creds = gw.credentials;
-  if (!creds.access_key || !creds.secret_key) return { success: false, error: "Niubiz: credenciales incompletas" };
-  try {
-    // Niubiz requires auth token first
-    const authResp = await fetch("https://apisandbox.vnforapps.com/api.security/v1/security", {
-      method: "GET",
-      headers: {
-        Authorization: `Basic ${btoa(`${creds.access_key}:${creds.secret_key}`)}`,
-      },
-    });
-    const authData = await authResp.json();
-    if (!authData.accessToken) return { success: false, error: "Niubiz: error de autenticación" };
-
-    return { success: true, transaction_id: `NIUBIZ-${Date.now()}` };
-  } catch (e: any) {
-    return { success: false, error: `Error Niubiz: ${e.message}` };
-  }
-}
-
-// ── Izipay ──
-async function processIzipay(gw: any, card: any, amount: number, currency: string) {
-  const creds = gw.credentials;
-  if (!creds.private_key) return { success: false, error: "Izipay: private_key no configurado" };
-  try {
-    const amountCents = Math.round(amount * 100);
-    const resp = await fetch("https://api.micuentaweb.pe/api-payment/V4/Charge/CreatePayment", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Basic ${btoa(`${creds.merchant_code || ""}:${creds.private_key}`)}`,
-      },
-      body: JSON.stringify({
-        amount: amountCents,
-        currency: currency === "USD" ? "USD" : "PEN",
-        orderId: `ORD-${Date.now()}`,
-        customer: { email: "pago@mlm360.pe" },
-      }),
-    });
-    const data = await resp.json();
-    if (data.status === "SUCCESS") {
-      return { success: true, transaction_id: data.answer?.orderDetails?.orderId || `IZIPAY-${Date.now()}` };
-    }
-    return { success: false, error: data.answer?.errorMessage || "Error en Izipay" };
-  } catch (e: any) {
-    return { success: false, error: `Error Izipay: ${e.message}` };
-  }
-}
-
-// ── PayPal ──
-async function processPayPal(gw: any, amount: number, currency: string, plan_slug: string) {
-  const creds = gw.credentials;
-  if (!creds.client_id || !creds.client_secret) return { success: false, error: "PayPal: credenciales incompletas" };
-  try {
-    const base = gw.test_mode ? "https://api-m.sandbox.paypal.com" : "https://api-m.paypal.com";
-    // Get access token
-    const tokenResp = await fetch(`${base}/v1/oauth2/token`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        Authorization: `Basic ${btoa(`${creds.client_id}:${creds.client_secret}`)}`,
-      },
-      body: "grant_type=client_credentials",
-    });
-    const tokenData = await tokenResp.json();
-    if (!tokenData.access_token) return { success: false, error: "PayPal: no se pudo obtener access token" };
-
-    // Create order
-    const orderResp = await fetch(`${base}/v2/checkout/orders`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${tokenData.access_token}`,
-      },
-      body: JSON.stringify({
-        intent: "CAPTURE",
-        purchase_units: [{
-          amount: { currency_code: currency, value: amount.toFixed(2) },
-          description: `MLM 360 - Plan ${plan_slug}`,
-        }],
-      }),
-    });
-    const order = await orderResp.json();
-    // Return redirect URL for client to complete PayPal checkout
-    const approveUrl = order.links?.find((l: any) => l.rel === "approve")?.href;
-    if (approveUrl) {
-      return { success: true, transaction_id: order.id, redirect_url: approveUrl };
-    }
-    return { success: false, error: "PayPal: no se pudo crear la orden" };
-  } catch (e: any) {
-    return { success: false, error: `Error PayPal: ${e.message}` };
-  }
-}

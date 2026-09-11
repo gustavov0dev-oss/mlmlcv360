@@ -141,7 +141,7 @@ export default function CheckoutPage() {
       setLoadingGateways(true);
       const [addrRes, gwRes] = await Promise.all([
         user ? database.select<AddressForm>('saved_addresses', { filter: { user_id: user.id }, order: { column: 'is_default', ascending: false } }) : Promise.resolve({ data: [] }),
-        database.select('payment_gateways', { filter: { is_active: true }, order: { column: 'name' } }),
+        database.invoke<any>('process-payment', { body: { action: 'methods' } }).then(r => ({ ...r, data: r.data?.methods?.filter((m: any) => m.ready) || [] })),
       ]);
       const addrs = (addrRes.data || []) as AddressForm[];
       setSavedAddresses(addrs);
@@ -278,8 +278,8 @@ export default function CheckoutPage() {
       p_shipping_name: selectedShipping?.name || 'Estándar',
       p_shipping_cost: shippingCost,
       p_coupon_code: coupon?.code || null,
-      p_currency: displayCurrency,
-      p_exchange_rate: displayCurrency === 'USD' ? exchangeRate : 1,
+      p_currency: 'PEN',
+      p_exchange_rate: 1,
       p_notes: notes || null,
       p_payment_method: paymentMethod,
     };
@@ -291,6 +291,12 @@ export default function CheckoutPage() {
     }
     setCoupon(null);
     clearCart();
+    const { data: payment, error: paymentError } = await database.invoke<any>('process-payment', { body: { order_id: data.order_id, gateway: paymentMethod } });
+    if (!paymentError && payment?.success) {
+      window.location.assign(payment.redirect_url || `/pago?session=${payment.session_id}`);
+      return;
+    }
+    toast.error(payment?.error || 'El pedido se guardó, pero no se pudo abrir el pago.');
     setPlacedOrder({ order_number: data.order_number, order_id: data.order_id, total: data.total });
     setStep(5);
     setPlacing(false);
@@ -756,7 +762,7 @@ export default function CheckoutPage() {
               {selectedGateway?.slug === 'yape' && selectedGateway.credentials?.phone_number && (
                 <div className="border-l-2 border-primary/40 pl-3">
                   <p className="text-xs font-bold text-primary mb-1">📱 Instrucciones Yape</p>
-                  <p className="text-xs text-muted-foreground">Realiza el pago a <strong className="text-foreground">{selectedGateway.credentials.phone_number}</strong> ({selectedGateway.credentials.merchant_name}). Envía el comprobante por WhatsApp para confirmar.</p>
+                  <p className="text-xs text-muted-foreground">Realiza el pago a <strong className="text-foreground">{selectedGateway.credentials.phone_number}</strong> ({selectedGateway.credentials.merchant_name}). Podrás adjuntar tu comprobante después de confirmar el pedido.</p>
                 </div>
               )}
 

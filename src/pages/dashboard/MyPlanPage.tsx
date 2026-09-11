@@ -24,7 +24,7 @@ interface DBGateway {
 }
 
 function gatewayReady(g: DBGateway) {
-  return Object.values(g.credentials || {}).some(v => typeof v === 'string' && v.trim() !== '');
+  return (g as any).ready === true;
 }
 
 export default function MyPlanPage() {
@@ -61,7 +61,7 @@ export default function MyPlanPage() {
   const [selectedGatewayId, setSelectedGatewayId] = useState('');
   const [currency, setCurrency] = useState<Currency>((sysCurrency as Currency) || 'PEN');
   const [targetPlanSlug, setTargetPlanSlug] = useState('');
-  const [payLoading, setPayLoading] = useState(false);
+  const payLoading = false;
 
   const activePlans = [...plans].filter(p => p.is_active).sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
   const currentPlanSlug = (user as any)?.plan || 'free';
@@ -81,8 +81,8 @@ export default function MyPlanPage() {
 
   // Load gateways
   useEffect(() => {
-    database.select('payment_gateways', { filter: { is_active: true } })
-      .then(({ data }) => { if (data) setGatewaysState(data as DBGateway[]); });
+    database.invoke<any>('process-payment', { body: { action: 'methods' } })
+      .then(({ data }) => { if (data?.methods) setGatewaysState(data.methods); });
   }, []);
 
   // Auto-select gateway
@@ -93,19 +93,6 @@ export default function MyPlanPage() {
     if (ready && ready.id !== selectedGatewayId) setSelectedGatewayId(ready.id);
   }, [currency, gateways]);
 
-  // Handle return from payment gateway
-  useEffect(() => {
-    const p = searchParams.get('payment');
-    const planParam = searchParams.get('plan');
-    if (p === 'success' && planParam && user) {
-      // Activate subscription from redirect
-      activateSubscription(planParam, `REDIRECT-${Date.now()}`).then(() => {
-        toast.success('¡Pago confirmado! Tu plan fue activado.');
-        window.history.replaceState({}, '', '/dashboard/mi-plan');
-      });
-    }
-  }, [searchParams, user]);
-
   const isExpired = subscription?.status === 'cancelled' || subscription?.status === 'expired' ||
     (subscription?.current_period_end && new Date(subscription.current_period_end) < new Date());
   const isActive = subscription?.status === 'active' && !isExpired;
@@ -114,68 +101,17 @@ export default function MyPlanPage() {
     : null;
 
   const cancelPlan = async () => {
-    if (!user) return;
     setWorking(true);
-    const freePlan = activePlans.find(p => p.is_free || Number(p.price) === 0);
-    const targetSlug = freePlan?.slug || 'free';
-    const now = new Date().toISOString();
-    await Promise.all([
-      database.update('profiles', user.id, { plan: targetSlug, updated_at: now }),
-      database.update('subscriptions', { user_id: user.id, status: 'active' }, { status: 'cancelled', updated_at: now }),
-    ]);
-    await fetchProfile(user.id);
-    toast.success('Plan cancelado. Tu cuenta ahora es gratuita.');
-    setShowCancel(false);
-    setSubscription((prev: any) => prev ? { ...prev, status: 'cancelled' } : null);
+    const { data, error } = await database.invoke<any>('process-payment', {body:{action:'cancel_plan'}});
+    if(error || !data?.success) toast.error(data?.error || 'No se pudo cancelar.');
+    else { if(user) await fetchProfile(user.id); setSubscription((p:any)=>p?{...p,status:'cancelled'}:null); setShowCancel(false); toast.success('Plan cancelado.'); }
     setWorking(false);
   };
-
-  const activateSubscription = async (planSlug: string, ref: string, gwSlug?: string) => {
-    if (!user?.id) return;
-    const targetPlan = activePlans.find(p => p.slug === planSlug);
-    if (!targetPlan) return;
-    const now = new Date();
-    const end = new Date(now); end.setMonth(end.getMonth() + 1);
-    await Promise.all([
-      database.update('profiles', user.id, { plan: planSlug, updated_at: now.toISOString() }),
-      database.upsert('subscriptions', {
-        user_id: user.id, plan_slug: planSlug, status: 'active',
-        current_period_start: now.toISOString(),
-        current_period_end: end.toISOString(),
-        gateway: gwSlug || 'manual',
-        amount: Number(targetPlan.price),
-        currency, payment_reference: ref,
-        updated_at: now.toISOString(),
-      }, 'user_id'),
-    ]);
-    await fetchProfile(user.id);
-    // Refresh subscription UI
-    const { data } = await database.select('subscriptions', {
-      filter: { user_id: user.id },
-      order: { column: 'created_at', ascending: false },
-      limit: 1,
-      maybeSingle: true,
-    });
-    setSubscription(data);
-  };
-
   const handleActivateFree = async (planSlug: string) => {
-    if (!user) return;
     setWorking(true);
-    const now = new Date().toISOString();
-    await Promise.all([
-      database.update('profiles', user.id, { plan: planSlug, updated_at: now }),
-      database.upsert('subscriptions', {
-        user_id: user.id, plan_slug: planSlug, status: 'active',
-        current_period_start: now,
-        current_period_end: new Date(Date.now() + 100 * 365 * 86400000).toISOString(),
-        gateway: 'free', amount: 0, currency: 'PEN',
-        updated_at: now,
-      }, 'user_id'),
-    ]);
-    await fetchProfile(user.id);
-    toast.success('Plan gratuito activado.');
-    setTab('current');
+    const { data, error } = await database.invoke<any>('process-payment', {body:{action:'free_plan',plan_slug:planSlug}});
+    if(error || !data?.success) toast.error(data?.error || 'No se pudo activar el plan.');
+    else { if(user) await fetchProfile(user.id); setTab('current'); toast.success('Plan gratuito activado.'); }
     setWorking(false);
   };
 
@@ -187,78 +123,7 @@ export default function MyPlanPage() {
   const handlePay = async () => {
     if (!targetPlan || !user) return;
     if (targetIsFree) { await handleActivateFree(targetPlanSlug); return; }
-    if (!selectedGateway || !gatewayReady(selectedGateway)) {
-      toast.error('Selecciona un método de pago disponible.');
-      return;
-    }
-
-    const isYape = selectedGateway.slug === 'yape';
-    const isPayPal = selectedGateway.slug === 'paypal';
-    const isMercadoPago = selectedGateway.slug === 'mercadopago';
-
-    setPayLoading(true);
-
-    if (isYape) {
-      const ref = `YAPE-${Date.now()}`;
-      await database.upsert('subscriptions', {
-        user_id: user.id, plan_slug: targetPlanSlug, status: 'pending',
-        current_period_start: new Date().toISOString(),
-        current_period_end: new Date(Date.now() + 30 * 86400000).toISOString(),
-        gateway: 'yape', amount: Number(targetPlan.price), currency,
-        payment_reference: ref, updated_at: new Date().toISOString(),
-      }, 'user_id');
-      toast.success('Pago registrado. Sigue las instrucciones de Yape.');
-      navigate(`/pago?plan=${targetPlanSlug}`);
-      setPayLoading(false);
-      return;
-    }
-
-    if (isPayPal || isMercadoPago) {
-      try {
-        const { data, error } = await database.invoke<{ redirect_url?: string; success?: boolean; reference?: string; error?: string }>('process-payment', {
-          body: {
-            gateway: selectedGateway.slug,
-            plan_slug: targetPlanSlug, plan_name: targetPlan.name,
-            plan_price: targetPlan.price, currency,
-            user_id: user.id, user_email: user.email,
-            return_url: `${window.location.origin}/dashboard/mi-plan?payment=success&plan=${targetPlanSlug}`,
-            cancel_url: `${window.location.origin}/dashboard/mi-plan?tab=change`,
-          },
-        });
-        if (!error && data?.redirect_url) {
-          window.location.href = data.redirect_url;
-          return;
-        }
-        // Fallback: simulate success
-        const ref = `${selectedGateway.slug.toUpperCase()}-${Date.now()}`;
-        await activateSubscription(targetPlanSlug, ref, selectedGateway.slug);
-        toast.success(`¡Plan ${targetPlan.name} activado!`);
-        setTab('current');
-      } catch {
-        toast.error('Error de conexión.');
-      }
-      setPayLoading(false);
-      return;
-    }
-
-    // Generic
-    try {
-      const { data, error } = await database.invoke<{ success?: boolean; reference?: string; error?: string }>('process-payment', {
-        body: {
-          gateway: selectedGateway.slug,
-          plan_slug: targetPlanSlug, plan_price: targetPlan.price,
-          currency, user_id: user.id, user_email: user.email,
-        },
-      });
-      if (!error && data?.success) {
-        await activateSubscription(targetPlanSlug, data.reference || `${selectedGateway.slug}-${Date.now()}`, selectedGateway.slug);
-        toast.success(`¡Plan ${targetPlan.name} activado!`);
-        setTab('current');
-      } else {
-        toast.error(data?.error || 'Error al procesar el pago.');
-      }
-    } catch { toast.error('Error de conexión.'); }
-    setPayLoading(false);
+    navigate(`/pago?plan=${encodeURIComponent(targetPlanSlug)}&method=${selectedGateway?.slug||''}`);
   };
 
   if (loading) {
@@ -507,7 +372,7 @@ export default function MyPlanPage() {
                             <div className="flex items-center gap-2 flex-wrap">
                               <span className={cn('text-sm font-semibold', isSelected ? 'text-primary' : 'text-foreground')}>{g.name}</span>
                               {!ready && <span className="text-xs bg-amber-500/10 text-amber-600 px-1.5 py-0.5 rounded-full">No disponible</span>}
-                              {g.test_mode && ready && <span className="text-xs bg-amber-500/10 text-amber-600 px-1.5 py-0.5 rounded-full">Prueba</span>}
+
                             </div>
                             <p className="text-xs text-muted-foreground truncate mt-0.5">{g.description}</p>
                           </div>
@@ -529,7 +394,7 @@ export default function MyPlanPage() {
                     {selectedGateway.slug === 'yape' && (
                       <p className="text-xs text-muted-foreground flex items-start gap-2">
                         <Smartphone className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-purple-500" />
-                        Yape: verás instrucciones de transferencia al número {selectedGateway.credentials.phone_number}. Activación en máx. 24h.
+                        Yape: verás instrucciones de transferencia al número {selectedGateway.credentials.phone_number}. La activación se realiza tras revisar tu comprobante.
                       </p>
                     )}
                     {(selectedGateway.slug === 'paypal' || selectedGateway.slug === 'mercadopago') && (
