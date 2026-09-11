@@ -86,6 +86,8 @@ Deno.serve(async req=>{
    plan=await checked(db.from('plans').select('*').eq('slug',b.plan_slug).eq('is_active',true).single());
    amount=Number(plan.price);currency=plan.currency;
   }
+  const inReview=await checked(db.from('payment_sessions').select('id,amount,currency').eq('user_id',user.id).eq(order?'order_id':'plan_slug',order?.id||plan.slug).eq('status','review').order('created_at',{ascending:false}).limit(1));
+  if(inReview[0]) return json({success:true,session_id:inReview[0].id,status:'review',amount:inReview[0].amount,currency:inReview[0].currency});
   if(!Number.isFinite(amount)||amount<=0) throw new Error('Importe inválido.');
   if(currency!==gw.currency) {
    const row=await checked(db.from('system_config').select('value').eq('key','exchange_rate_usd').single());const rate=Number(row.value);
