@@ -1,3 +1,5 @@
+import { PaymentMethods } from '@/components/payments/PaymentMethods';
+import { continuePayment } from '@/lib/payments/checkout';
 import { useCartCoupon } from '@/hooks/useCartCoupon';
 import { LoadingRegion, StableRegion } from '@/components/ui/loading-region';
 import { useState, useEffect } from 'react';
@@ -293,7 +295,7 @@ export default function CheckoutPage() {
     clearCart();
     const { data: payment, error: paymentError } = await database.invoke<any>('process-payment', { body: { order_id: data.order_id, gateway: paymentMethod } });
     if (!paymentError && payment?.success) {
-      window.location.assign(payment.redirect_url || `/pago?session=${payment.session_id}`);
+      continuePayment(payment);
       return;
     }
     toast.error(payment?.error || 'El pedido se guardó, pero no se pudo abrir el pago.');
@@ -706,7 +708,7 @@ export default function CheckoutPage() {
             <StableRegion className="space-y-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-sm font-bold text-foreground flex items-center gap-2">
-                  <CreditCard className="w-4 h-4 text-primary" /> Método de pago
+                  <CreditCard className="w-4 h-4 text-primary" /> Finaliza tu pedido
                 </h2>
                 <div className="flex items-center gap-1 rounded-full border border-border/40 p-0.5">
                   {['PEN', 'USD'].map(c => (
@@ -722,41 +724,8 @@ export default function CheckoutPage() {
               {loadingGateways ? <LoadingRegion className="min-h-[12rem]" /> : gateways.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-4">No hay métodos de pago configurados. Contacta al administrador.</p>
               ) : (
-                <div className="divide-y divide-border/20 border-t border-border/20">
-                  {gateways.map((gw, idx) => {
-                    const gwIcons: Record<string, string> = { yape: '📱', culqi: '💳', niubiz: '💳', mercadopago: '💙', paypal: '🅿️', izipay: '💳', transfer: '🏦', efectivo: '💵' };
-                    const icon = gwIcons[gw.slug] || '💰';
-                    const gwDesc: Record<string, string> = {
-                      yape: gw.credentials?.phone_number ? `Yape al ${gw.credentials.phone_number}` : 'Pago móvil instantáneo',
-                      culqi: 'Visa, Mastercard, Amex • Perú',
-                      niubiz: 'Visa, Mastercard, Amex • Perú',
-                      mercadopago: 'Múltiples métodos • Latinoamérica',
-                      paypal: 'Tarjeta de crédito / PayPal Balance',
-                      izipay: 'Visa, Mastercard, Diners • Perú',
-                      transfer: 'BCP, Interbank, BBVA, Scotiabank',
-                      efectivo: 'Paga al recibir tu pedido',
-                    };
-                    // Fix: comparar por índice, no por slug/id — así el clic siempre
-                    // marca el radio correcto sin depender de la limpieza del dato.
-                    const isSelected = selectedGatewayIdx === idx;
-                    return (
-                      <label key={gw.id ?? idx}
-                        className="group flex items-center gap-3 py-4 pl-3 -ml-3 cursor-pointer border-l-2 border-transparent transition-colors has-[:checked]:border-primary">
-                        <input type="radio" name="payment" value={gw.slug || gw.id} checked={isSelected}
-                          onChange={() => setSelectedGatewayIdx(idx)}
-                          className="accent-primary focus:outline-none" />
-                        <span className="text-xl flex-shrink-0">{icon}</span>
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-foreground/70 transition-colors group-has-[:checked]:font-semibold group-has-[:checked]:text-foreground">{gw.name}</p>
-                          <p className="text-xs text-muted-foreground">{gw.description || gwDesc[gw.slug] || ''}</p>
-                        </div>
-                        {gw.commission_rate > 0 && (
-                          <span className="text-[10px] text-muted-foreground border border-border/40 px-1.5 py-0.5 rounded-full">+{gw.commission_rate}%</span>
-                        )}
-                      </label>
-                    );
-                  })}
-                </div>
+                <PaymentMethods methods={gateways} value={paymentMethod} onChange={slug=>setSelectedGatewayIdx(gateways.findIndex(g=>g.slug===slug))} disabled={placing}/>
+
               )}
 
               {selectedGateway?.slug === 'yape' && selectedGateway.credentials?.phone_number && (
@@ -835,7 +804,7 @@ export default function CheckoutPage() {
                 <button onClick={() => setStep(3)} className="flex-1 border border-border/50 rounded-lg py-3 font-bold text-sm hover:bg-muted/30 transition-colors">
                   <ChevronLeft className="w-4 h-4 inline mr-1" /> Anterior
                 </button>
-                <button onClick={placeOrder} disabled={placing || validatingCoupon}
+                <button onClick={placeOrder} disabled={placing || validatingCoupon || !paymentMethod}
                   className="flex-1 bg-primary text-primary-foreground rounded-lg py-3 font-bold text-sm hover:bg-primary/90 transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
                   {placing ? <><Loader2 className="w-4 h-4 animate-spin" /> Procesando...</> : <><Package className="w-4 h-4" /> Confirmar pedido</>}
                 </button>

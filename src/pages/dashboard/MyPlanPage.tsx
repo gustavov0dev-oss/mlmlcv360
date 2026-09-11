@@ -8,24 +8,12 @@ import { cn } from '@/lib/utils';
 import {
   CreditCard, CircleCheck as CheckCircle, X, Loader as Loader2,
   TriangleAlert as AlertTriangle, RefreshCw, ArrowRight,
-  Crown, Zap, Lock, ExternalLink, Smartphone, ShieldCheck,
-  DollarSign,
+  Crown, Zap, Lock,
 } from 'lucide-react';
 import { useNavigate, useSearchParams } from '@/lib/router';
 
 type Tab = 'current' | 'change';
 type Currency = 'PEN' | 'USD';
-
-interface DBGateway {
-  id: string; slug: string; name: string; logo: string;
-  currency: string; is_active: boolean;
-  credentials: Record<string, string>;
-  test_mode: boolean; description: string;
-}
-
-function gatewayReady(g: DBGateway) {
-  return (g as any).ready === true;
-}
 
 export default function MyPlanPage() {
   const database = useDatabase();
@@ -53,13 +41,12 @@ export default function MyPlanPage() {
   // Plan/subscription state
   const [loading, setLoading] = useState(true);
   const [subscription, setSubscription] = useState<any>(null);
+  const [pendingContract,setPendingContract]=useState<any>(null);
   const [working, setWorking] = useState(false);
   const [showCancel, setShowCancel] = useState(false);
 
   // Payment state (for "Cambiar Plan" tab)
-  const [gateways, setGatewaysState] = useState<DBGateway[]>([]);
-  const [selectedGatewayId, setSelectedGatewayId] = useState('');
-  const [currency, setCurrency] = useState<Currency>((sysCurrency as Currency) || 'PEN');
+  const [currency] = useState<Currency>((sysCurrency as Currency) || 'PEN');
   const [targetPlanSlug, setTargetPlanSlug] = useState('');
   const payLoading = false;
 
@@ -71,6 +58,7 @@ export default function MyPlanPage() {
   // Load subscription
   useEffect(() => {
     if (!user) return;
+    database.select<any>('billing_contracts',{filter:{user_id:user.id,status:['pending','active','suspended']},maybeSingle:true}).then(({data})=>setPendingContract(data));
     database.select('subscriptions', {
       filter: { user_id: user.id },
       order: { column: 'created_at', ascending: false },
@@ -79,21 +67,7 @@ export default function MyPlanPage() {
     }).then(({ data }) => { setSubscription(data); setLoading(false); });
   }, [user]);
 
-  // Load gateways
-  useEffect(() => {
-    database.invoke<any>('process-payment', { body: { action: 'methods' } })
-      .then(({ data }) => { if (data?.methods) setGatewaysState(data.methods); });
-  }, []);
-
-  // Auto-select gateway
-  useEffect(() => {
-    if (!gateways.length) return;
-    const forCurrency = gateways.filter(g => g.currency === currency);
-    const ready = forCurrency.find(g => gatewayReady(g)) || forCurrency[0];
-    if (ready && ready.id !== selectedGatewayId) setSelectedGatewayId(ready.id);
-  }, [currency, gateways]);
-
-  const isExpired = subscription?.status === 'cancelled' || subscription?.status === 'expired' ||
+  const isExpired = subscription?.status === 'expired' ||
     (subscription?.current_period_end && new Date(subscription.current_period_end) < new Date());
   const isActive = subscription?.status === 'active' && !isExpired;
   const daysLeft = subscription?.current_period_end
@@ -102,9 +76,9 @@ export default function MyPlanPage() {
 
   const cancelPlan = async () => {
     setWorking(true);
-    const { data, error } = await database.invoke<any>('process-payment', {body:{action:'cancel_plan'}});
+    const { data, error } = await database.invoke<any>('subscription-billing', {body:{action:'cancel'}});
     if(error || !data?.success) toast.error(data?.error || 'No se pudo cancelar.');
-    else { if(user) await fetchProfile(user.id); setSubscription((p:any)=>p?{...p,status:'cancelled'}:null); setShowCancel(false); toast.success('Plan cancelado.'); }
+    else { if(user) await fetchProfile(user.id); setSubscription((p:any)=>p?{...p,cancel_at_period_end:true,auto_renew:false}:null); setShowCancel(false); toast.success(data.message || 'Renovación cancelada. Tus beneficios siguen vigentes hasta finalizar el período pagado.'); }
     setWorking(false);
   };
   const handleActivateFree = async (planSlug: string) => {
@@ -115,15 +89,13 @@ export default function MyPlanPage() {
     setWorking(false);
   };
 
-  const selectedGateway = gateways.find(g => g.id === selectedGatewayId) || null;
   const targetPlan = activePlans.find(p => p.slug === targetPlanSlug);
   const targetIsFree = targetPlan?.is_free || Number(targetPlan?.price ?? 1) === 0;
-  const gatewaysForCurrency = gateways.filter(g => g.currency === currency);
 
   const handlePay = async () => {
     if (!targetPlan || !user) return;
     if (targetIsFree) { await handleActivateFree(targetPlanSlug); return; }
-    navigate(`/pago?plan=${encodeURIComponent(targetPlanSlug)}&method=${selectedGateway?.slug||''}`);
+    navigate(`/pago?plan=${encodeURIComponent(targetPlanSlug)}`);
   };
 
   if (loading) {
@@ -138,6 +110,7 @@ export default function MyPlanPage() {
         <p className="text-muted-foreground text-sm mt-1">Administra tu suscripción y beneficios.</p>
       </div>
 
+      {pendingContract&&pendingContract.id!==subscription?.contract_id&&<div className="rounded-xl bg-muted/40 p-4 space-y-3"><p className="text-sm">Tienes una autorización mensual pendiente. Tu plan actual sigue igual hasta confirmar el pago.</p><div className="flex gap-4 text-sm"><button className="text-primary" onClick={()=>navigate(`/pago?subscription=${pendingContract.id}`)}>Continuar autorización</button><button disabled={working} onClick={async()=>{setWorking(true);const {data,error}=await database.invoke<any>('subscription-billing',{body:{action:'cancel',contract_id:pendingContract.id}});if(error||!data?.success)toast.error(data?.error||'No se pudo cancelar.');else{setPendingContract(null);toast.success('Autorización descartada.');}setWorking(false);}}>Descartar autorización</button></div></div>}
       {/* Tabs */}
       <div className="flex gap-1 bg-muted rounded-xl p-1 w-fit">
         {([['current', 'Plan Actual'], ['change', 'Cambiar Plan']] as [Tab, string][]).map(([t, label]) => (
@@ -177,12 +150,12 @@ export default function MyPlanPage() {
                 </div>
               </div>
               <div className="flex flex-col gap-2 min-w-[140px]">
-                {!isFree && isActive && (
+                {!isFree && isActive && !subscription?.cancel_at_period_end && (
                   <button
                     onClick={() => setShowCancel(true)}
                     className="px-4 py-2.5 border border-border rounded-xl text-sm font-medium text-muted-foreground hover:bg-red-500/5 hover:text-red-500 hover:border-red-500/30 transition-colors flex items-center gap-2"
                   >
-                    <X className="w-3.5 h-3.5" /> Cancelar
+                    <X className="w-3.5 h-3.5" /> Cancelar renovación
                   </button>
                 )}
                 {!isFree && !isActive && (
@@ -212,9 +185,9 @@ export default function MyPlanPage() {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-border">
                 {[
                   { label: 'Estado', value: subscription.status === 'active' ? 'Activo' : subscription.status === 'pending' ? 'Pendiente' : subscription.status === 'cancelled' ? 'Cancelado' : 'Vencido' },
-                  { label: 'Pasarela', value: subscription.gateway || '—' },
+                  { label: 'Renovación', value: subscription.cancel_at_period_end ? 'Cancelada · conservas tus beneficios' : subscription.auto_renew ? 'Automática cada mes' : 'Manual' },
                   { label: 'Inicio', value: subscription.current_period_start ? new Date(subscription.current_period_start).toLocaleDateString('es-PE') : '—' },
-                  { label: daysLeft !== null ? `Vence en ${daysLeft}d` : 'Vencimiento', value: subscription.current_period_end ? new Date(subscription.current_period_end).toLocaleDateString('es-PE') : '—' },
+                  { label: subscription.auto_renew ? 'Próxima renovación' : 'Beneficios hasta', value: subscription.current_period_end ? new Date(subscription.current_period_end).toLocaleDateString('es-PE') : '—' },
                 ].map(({ label, value }) => (
                   <div key={label} className="bg-muted/50 rounded-xl p-3">
                     <div className="text-xs text-muted-foreground mb-0.5">{label}</div>
@@ -225,7 +198,7 @@ export default function MyPlanPage() {
             )}
 
             {/* Warnings */}
-            {!isFree && daysLeft !== null && daysLeft <= 7 && daysLeft > 0 && (
+            {!isFree && daysLeft !== null && daysLeft <= 7 && !subscription?.auto_renew && daysLeft > 0 && (
               <div className="mt-4 flex items-start gap-2.5 bg-amber-500/10 border border-amber-500/20 rounded-xl p-3.5">
                 <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
                 <p className="text-sm text-amber-700 dark:text-amber-300">
@@ -313,106 +286,6 @@ export default function MyPlanPage() {
               </div>
             </div>
 
-            {/* Currency — only for paid plans */}
-            {targetPlan && !targetIsFree && (
-              <div className="bg-card border border-border rounded-xl p-5">
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Moneda</p>
-                <div className="grid grid-cols-2 gap-3">
-                  {(['PEN', 'USD'] as Currency[]).map(c => (
-                    <button
-                      key={c}
-                      onClick={() => setCurrency(c)}
-                      className={cn(
-                        'flex items-center gap-3 p-3 rounded-xl border transition-all',
-                        currency === c ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/30'
-                      )}
-                    >
-                      <span className="text-xl">{c === 'PEN' ? '🇵🇪' : '🇺🇸'}</span>
-                      <div>
-                        <div className={cn('text-sm font-bold', currency === c ? 'text-primary' : 'text-foreground')}>{c}</div>
-                        <div className="text-xs text-muted-foreground">{c === 'PEN' ? 'Sol' : 'Dólar'}</div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-                {currency === 'USD' && (
-                  <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
-                    <DollarSign className="w-3 h-3" /> T/C: S/ {exchangeRate} = USD 1.00
-                  </p>
-                )}
-              </div>
-            )}
-
-            {/* Gateway selector — only for paid plans */}
-            {targetPlan && !targetIsFree && (
-              <div className="bg-card border border-border rounded-xl p-5">
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Método de pago</p>
-                {gatewaysForCurrency.length === 0 ? (
-                  <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4">
-                    <p className="text-sm text-amber-700 dark:text-amber-300">No hay pasarelas para {currency}. Prueba otra moneda.</p>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    {gatewaysForCurrency.map(g => {
-                      const ready = gatewayReady(g);
-                      const isSelected = selectedGatewayId === g.id;
-                      return (
-                        <button
-                          key={g.id}
-                          onClick={() => ready && setSelectedGatewayId(g.id)}
-                          disabled={!ready}
-                          className={cn(
-                            'w-full flex items-center gap-3 p-4 rounded-xl border transition-all text-left',
-                            !ready && 'opacity-40 cursor-not-allowed border-border',
-                            isSelected && ready ? 'border-primary bg-primary/5' : ready ? 'border-border hover:border-primary/30 cursor-pointer' : ''
-                          )}
-                        >
-                          <span className="text-2xl leading-none">{g.logo}</span>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className={cn('text-sm font-semibold', isSelected ? 'text-primary' : 'text-foreground')}>{g.name}</span>
-                              {!ready && <span className="text-xs bg-amber-500/10 text-amber-600 px-1.5 py-0.5 rounded-full">No disponible</span>}
-
-                            </div>
-                            <p className="text-xs text-muted-foreground truncate mt-0.5">{g.description}</p>
-                          </div>
-                          <div className={cn(
-                            'w-5 h-5 rounded-full border flex-shrink-0 flex items-center justify-center',
-                            isSelected && ready ? 'border-primary bg-primary' : 'border-muted-foreground/30'
-                          )}>
-                            {isSelected && ready && <div className="w-2 h-2 rounded-full bg-white" />}
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-
-                {/* Gateway hint */}
-                {selectedGateway && gatewayReady(selectedGateway) && (
-                  <div className="mt-3 p-3 bg-muted/50 rounded-xl">
-                    {selectedGateway.slug === 'yape' && (
-                      <p className="text-xs text-muted-foreground flex items-start gap-2">
-                        <Smartphone className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-purple-500" />
-                        Yape: verás instrucciones de transferencia al número {selectedGateway.credentials.phone_number}. La activación se realiza tras revisar tu comprobante.
-                      </p>
-                    )}
-                    {(selectedGateway.slug === 'paypal' || selectedGateway.slug === 'mercadopago') && (
-                      <p className="text-xs text-muted-foreground flex items-start gap-2">
-                        <ExternalLink className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-primary" />
-                        Serás redirigido a {selectedGateway.name} para completar el pago de forma segura.
-                      </p>
-                    )}
-                    {selectedGateway.slug !== 'yape' && selectedGateway.slug !== 'paypal' && selectedGateway.slug !== 'mercadopago' && (
-                      <p className="text-xs text-muted-foreground flex items-start gap-2">
-                        <ShieldCheck className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-green-500" />
-                        Pago procesado de forma segura. No almacenamos datos de tarjeta.
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
           </div>
 
           {/* Right: Summary + CTA */}
@@ -436,37 +309,14 @@ export default function MyPlanPage() {
                     </div>
                   </div>
 
-                  {!targetIsFree && (
-                    <div className="border-t border-border py-3 mb-4 space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Subtotal</span>
-                        <span className="text-foreground">{formatPrice(targetPlan.price, currency, currencySymbol, exchangeRate)}</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">IGV (18%)</span>
-                        <span className="text-foreground">
-                          {currency === 'PEN'
-                            ? `S/ ${(Number(targetPlan.price) * 0.18).toFixed(2)}`
-                            : `USD ${(Number(targetPlan.price) / exchangeRate * 0.18).toFixed(2)}`}
-                        </span>
-                      </div>
-                      <div className="flex justify-between font-bold text-foreground border-t border-border pt-2">
-                        <span>Total</span>
-                        <span>
-                          {currency === 'PEN'
-                            ? `S/ ${(Number(targetPlan.price) * 1.18).toFixed(2)}`
-                            : `USD ${(Number(targetPlan.price) / exchangeRate * 1.18).toFixed(2)}`}
-                        </span>
-                      </div>
-                    </div>
-                  )}
+                  {!targetIsFree && <p className="text-sm text-muted-foreground mb-4">Elige tu método en el siguiente paso. Verás el importe mensual y las condiciones antes de confirmar.</p>}
 
                   <button
                     onClick={handlePay}
-                    disabled={payLoading || working || (!targetIsFree && (!selectedGateway || !gatewayReady(selectedGateway)))}
+                    disabled={payLoading || working}
                     className={cn(
                       'w-full font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 text-sm',
-                      (!targetIsFree && (!selectedGateway || !gatewayReady(selectedGateway)))
+                      working
                         ? 'bg-muted text-muted-foreground cursor-not-allowed'
                         : 'bg-primary hover:bg-primary/90 text-white'
                     )}
@@ -476,10 +326,7 @@ export default function MyPlanPage() {
                     ) : (
                       <>
                         <Lock className="w-4 h-4" />
-                        {targetIsFree ? 'Activar plan gratuito' :
-                          selectedGateway?.slug === 'yape' ? 'Ver instrucciones Yape' :
-                          (selectedGateway?.slug === 'paypal' || selectedGateway?.slug === 'mercadopago') ? `Pagar con ${selectedGateway.name}` :
-                          'Confirmar pago'}
+                        {targetIsFree ? 'Activar plan gratuito' : 'Continuar'}
                       </>
                     )}
                   </button>
@@ -503,7 +350,7 @@ export default function MyPlanPage() {
             </div>
             <h3 className="text-base font-bold text-foreground text-center mb-2">Cancelar plan</h3>
             <p className="text-sm text-muted-foreground text-center mb-2">
-              Se cancelará tu suscripción a <strong className="text-foreground">{currentPlan?.name}</strong> y se activará el plan gratuito.
+              Detendremos las próximas renovaciones de <strong className="text-foreground">{currentPlan?.name}</strong>. Tus beneficios seguirán disponibles hasta el <strong>{subscription?.current_period_end ? new Date(subscription.current_period_end).toLocaleDateString('es-PE') : 'final del período pagado'}</strong>. Después pasarás al plan gratuito.
             </p>
             <p className="text-xs text-center text-amber-600 mb-5">Esta acción no genera reembolso automático.</p>
             <div className="flex gap-3">

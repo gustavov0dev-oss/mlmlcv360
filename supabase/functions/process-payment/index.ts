@@ -15,7 +15,14 @@ Deno.serve(async req=>{
   const {data:profile}=await db.from('profiles').select('role').eq('id',user.id).single();
   const admin=['admin','super_admin'].includes(profile?.role);
   const checked=async(q:any)=>{const r=await q;if(r.error)throw new Error('No se pudo guardar el pago.');return r.data;};
-  if(b.action==='free_plan'||b.action==='cancel_plan') {
+  if(b.action==='cancel_plan') {
+   const r=await fetch(Deno.env.get('SUPABASE_URL')+'/functions/v1/subscription-billing',{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({action:'cancel'})});
+   return json(await r.json(),r.status);
+  }
+  if(b.action==='free_plan') {
+   const current=await checked(db.from('subscriptions').select('current_period_end').eq('user_id',user.id).maybeSingle());
+   if(current?.current_period_end && new Date(current.current_period_end)>new Date()) throw new Error('Tus beneficios pagados siguen vigentes. Cancela la renovación en Mi Plan; pasarás al plan gratuito al terminar el período.');
+
    const plan=await checked(b.action==='free_plan'?db.from('plans').select('*').eq('slug',b.plan_slug).eq('is_active',true).single():db.from('plans').select('*').eq('is_active',true).eq('price',0).limit(1).single());
    if(Number(plan.price)!==0) throw new Error('Este plan requiere un pago confirmado.');
    if(b.action==='cancel_plan') await checked(db.from('subscriptions').update({status:'cancelled',updated_at:new Date().toISOString()}).eq('user_id',user.id));
@@ -77,6 +84,10 @@ Deno.serve(async req=>{
   const gw=gatewayRows.find((g:any)=>g.slug===b.gateway&&g.is_active);
   if(!gw) throw new Error('Selecciona un método disponible.');
   if(gw.slug==='mercadopago'&&gw.credentials.access_token?.startsWith('TEST-')) throw new Error('Mercado Pago requiere credenciales de producción.');
+  if(!b.order_id){
+   const contract=await checked(db.from('billing_contracts').select('id').eq('user_id',user.id).in('status',['active','pending','suspended']).limit(1));
+   if(contract.length)throw new Error('Gestiona tu suscripción actual en Mi Plan antes de iniciar otro pago.');
+  }
   let amount:number, currency:string, plan:any=null, order:any=null;
   if(b.order_id) {
    order=await checked(db.from('orders').select('*').eq('id',b.order_id).eq('user_id',user.id).single());
