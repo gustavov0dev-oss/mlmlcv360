@@ -1,4 +1,4 @@
-import { Sheet, SheetContent, SheetTitle, SheetDescription } from '@/components/ui/sheet';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useProductReviews } from '@/hooks/useProductReviews';
 import { supabase } from '@/lib/backend/client';
 import { LoadingRegion } from '@/components/ui/loading-region';
@@ -16,7 +16,7 @@ import type { Product, ProductVariant, ProductReview, ProductReviewReply } from 
 import {
   ShoppingCart, Star, ChevronLeft, ChevronRight, Plus, Minus,
   Truck, Shield, RotateCcw, Heart, Share2, Package, Tag, MessageSquare,
-  Layers, Upload, ThumbsUp, Flag, ChevronDown, CircleCheck as CheckCircle,
+  Layers, Upload, ThumbsUp, Flag, CircleCheck as CheckCircle,
   Play, Eye, Lock, Zap, Info, ExternalLink, Image as ImageIcon,
   SlidersHorizontal, X, CornerDownRight, MessageCircle, Send,
   BadgeCheck,
@@ -361,6 +361,9 @@ function ReviewsSection({
   user: any; navigate: (path: string) => void;
 }) {
   const [formOpen, setFormOpen] = useState(false);
+  useEffect(() => {
+    if (formOpen) document.getElementById('product-review-form')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, [formOpen]);
   const sentinel = useRef<HTMLDivElement>(null);
   const { star: starFilter, photos: photosOnly, verified: verifiedOnly, sort } = filters;
   const setStarFilter = (star: number) => setFilters(p => ({ ...p, star }));
@@ -408,82 +411,14 @@ function ReviewsSection({
             </button>
           ))}
         </div>
-        <button onClick={() => setFormOpen(true)} className="w-full sm:w-auto lg:w-full px-5 py-2.5 rounded-lg border border-primary/60 text-primary text-sm font-medium hover:bg-primary/10 transition-colors">Escribir reseña</button>
+        <button aria-expanded={formOpen} aria-controls="product-review-form" onClick={() => { setFormOpen(v => !v); }} className="w-full sm:w-auto lg:w-full px-5 py-2.5 rounded-lg border border-primary/60 text-primary text-sm font-medium hover:bg-primary/10 transition-colors">Escribir reseña</button>
       </aside>
       <div className="min-w-0 space-y-5">
-      {total > 0 && (
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-1">
-          <div className="flex items-center gap-2 flex-wrap">
-            <SlidersHorizontal className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
-            {starFilter > 0 && (
-              <button onClick={() => setStarFilter(0)}
-                className="flex items-center gap-1 px-2.5 py-1 bg-muted text-foreground rounded-md text-xs font-medium">
-                {starFilter} ★ <X className="w-3 h-3" />
-              </button>
-            )}
-            <button aria-pressed={photosOnly} onClick={() => setFilters(p => ({ ...p, photos: !p.photos }))}
-              className={cn('flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium border transition-colors',
-                photosOnly ? 'bg-primary/10 text-primary border-primary/40' : 'border-border text-muted-foreground hover:text-foreground hover:border-muted-foreground/40')}>
-              <ImageIcon className="w-3.5 h-3.5" /> Con fotos
-            </button>
-            <button aria-pressed={verifiedOnly} onClick={() => setFilters(p => ({ ...p, verified: !p.verified }))}
-              className={cn('flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium border transition-colors',
-                verifiedOnly ? 'bg-primary/10 text-primary border-primary/40' : 'border-border text-muted-foreground hover:text-foreground hover:border-muted-foreground/40')}>
-              <CheckCircle className="w-3.5 h-3.5" /> Verificadas
-            </button>
-            {activeFilters && (
-              <button onClick={clearFilters} className="text-xs text-muted-foreground hover:text-foreground font-medium px-1 underline">Limpiar</button>
-            )}
+        {formOpen && <section id="product-review-form" aria-label="Escribir reseña" className="scroll-mt-28 max-w-xl space-y-4 pb-5">
+          <div className="flex items-center justify-between gap-4">
+            <h3 className="text-base font-semibold">Escribe tu reseña</h3>
+            <button type="button" onClick={() => setFormOpen(false)} className="text-sm text-muted-foreground hover:text-foreground px-2 py-2">Cerrar</button>
           </div>
-
-          <div className="relative sm:ml-auto">
-            <select value={sort} aria-label="Ordenar opiniones" onChange={e => setFilters(p => ({ ...p, sort: e.target.value as SortKey }))}
-              className="has-chevron appearance-none pl-3 pr-8 py-1 bg-transparent border border-border rounded-md text-xs font-medium text-foreground outline-none focus:border-primary cursor-pointer">
-              {sortOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-            </select>
-            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground pointer-events-none" />
-          </div>
-        </div>
-      )}
-
-      <div className="min-h-[180px] space-y-0 divide-y divide-border/50">
-        {reviews.map(r => (
-          <div key={r.id} className="py-3">
-
-          <ReviewCard r={r} helpfulIds={helpfulIds} reportedIds={reportedIds} likedReplyIds={likedReplyIds}
-            onMarkHelpful={onMarkHelpful} onLikeReply={onLikeReply} onReport={onReport} onOpenLightbox={onOpenLightbox}
-            onReply={onReply} user={user} />
-          </div>
-        ))}
-
-        {reviews.length === 0 && total > 0 && !loadingReviews && !reviewError && (
-          <div className="text-center py-10 space-y-2">
-            <MessageSquare className="w-10 h-10 mx-auto text-muted-foreground/20" />
-            <p className="text-sm font-medium text-foreground">Sin reseñas con estos filtros</p>
-            <button onClick={clearFilters} className="text-xs text-primary hover:underline font-medium">Ver todas</button>
-          </div>
-        )}
-
-        {total === 0 && !loadingReviews && !reviewError && (
-          <div className="text-center py-10 space-y-2">
-            <MessageSquare className="w-10 h-10 mx-auto text-muted-foreground/20" />
-            <p className="text-sm font-medium text-foreground">Sin reseñas aún</p>
-            <p className="text-xs text-muted-foreground">Sé el primero en compartir tu experiencia</p>
-          </div>
-        )}
-
-      </div>
-        <div ref={sentinel} className="min-h-10 text-center text-sm text-muted-foreground" aria-live="polite">
-          {loadingReviews ? 'Cargando opiniones…' : reviewError ? <><p>{reviewError}</p><button className="text-primary py-2" onClick={loadMore}>Reintentar</button></> : hasMore ? <button className="text-primary py-2" onClick={loadMore}>Ver más opiniones</button> : reviews.length > 0 ? 'Has visto todas las opiniones' : null}
-        </div>
-      </div>
-      <Sheet open={formOpen} onOpenChange={setFormOpen}>
-      <SheetContent className="w-full sm:max-w-[460px] bg-background p-0 flex flex-col gap-0">
-        <div className="px-6 pt-8 pb-5">
-          <SheetTitle>Tu experiencia con el producto</SheetTitle>
-          <SheetDescription className="mt-1">Ayuda a otros compradores a elegir.</SheetDescription>
-        </div>
-        <div className="px-6 pb-6 overflow-y-auto flex-1 space-y-5">
         {!user ? (
           <div className="flex flex-col items-start gap-3">
             <p className="text-sm text-foreground">Inicia sesión para escribir una reseña</p>
@@ -556,9 +491,74 @@ function ReviewsSection({
             </>)}
           </div>
         )}
+        </section>}
+
+      {total > 0 && (
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <SlidersHorizontal className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+            {starFilter > 0 && (
+              <button onClick={() => setStarFilter(0)}
+                className="flex items-center gap-1 px-2.5 py-1 bg-muted text-foreground rounded-md text-xs font-medium">
+                {starFilter} ★ <X className="w-3 h-3" />
+              </button>
+            )}
+            <button aria-pressed={photosOnly} onClick={() => setFilters(p => ({ ...p, photos: !p.photos }))}
+              className={cn('flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium border transition-colors',
+                photosOnly ? 'bg-primary/10 text-primary border-primary/40' : 'border-border text-muted-foreground hover:text-foreground hover:border-muted-foreground/40')}>
+              <ImageIcon className="w-3.5 h-3.5" /> Con fotos
+            </button>
+            <button aria-pressed={verifiedOnly} onClick={() => setFilters(p => ({ ...p, verified: !p.verified }))}
+              className={cn('flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium border transition-colors',
+                verifiedOnly ? 'bg-primary/10 text-primary border-primary/40' : 'border-border text-muted-foreground hover:text-foreground hover:border-muted-foreground/40')}>
+              <CheckCircle className="w-3.5 h-3.5" /> Verificadas
+            </button>
+            {activeFilters && (
+              <button onClick={clearFilters} className="text-xs text-muted-foreground hover:text-foreground font-medium px-1 underline">Limpiar</button>
+            )}
+          </div>
+
+          <Select value={sort} onValueChange={value => setFilters(p => ({ ...p, sort: value as SortKey }))}>
+            <SelectTrigger aria-label="Ordenar opiniones" className="w-full sm:w-44 sm:ml-auto bg-background text-foreground shadow-none"><SelectValue /></SelectTrigger>
+            <SelectContent className="bg-popover text-popover-foreground border-border">
+              {sortOptions.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+            </SelectContent>
+          </Select>
         </div>
-      </SheetContent>
-      </Sheet>
+      )}
+
+      <div className="min-h-[180px] space-y-0 divide-y divide-border/50">
+        {reviews.map(r => (
+          <div key={r.id} className="py-3">
+
+          <ReviewCard r={r} helpfulIds={helpfulIds} reportedIds={reportedIds} likedReplyIds={likedReplyIds}
+            onMarkHelpful={onMarkHelpful} onLikeReply={onLikeReply} onReport={onReport} onOpenLightbox={onOpenLightbox}
+            onReply={onReply} user={user} />
+          </div>
+        ))}
+
+        {reviews.length === 0 && total > 0 && !loadingReviews && !reviewError && (
+          <div className="text-center py-10 space-y-2">
+            <MessageSquare className="w-10 h-10 mx-auto text-muted-foreground/20" />
+            <p className="text-sm font-medium text-foreground">Sin reseñas con estos filtros</p>
+            <button onClick={clearFilters} className="text-xs text-primary hover:underline font-medium">Ver todas</button>
+          </div>
+        )}
+
+        {total === 0 && !loadingReviews && !reviewError && (
+          <div className="text-center py-10 space-y-2">
+            <MessageSquare className="w-10 h-10 mx-auto text-muted-foreground/20" />
+            <p className="text-sm font-medium text-foreground">Sin reseñas aún</p>
+            <p className="text-xs text-muted-foreground">Sé el primero en compartir tu experiencia</p>
+          </div>
+        )}
+
+      </div>
+        <div ref={sentinel} className="min-h-10 text-center text-sm text-muted-foreground" aria-live="polite">
+          {loadingReviews ? 'Cargando opiniones…' : reviewError ? <><p>{reviewError}</p><button className="text-primary py-2" onClick={loadMore}>Reintentar</button></> : hasMore ? <button className="text-primary py-2" onClick={loadMore}>Ver más opiniones</button> : reviews.length > 0 ? 'Has visto todas las opiniones' : null}
+        </div>
+      </div>
+
     </div>
   );
 }
@@ -1087,7 +1087,7 @@ export default function ProductDetailPage() {
     <>
 
       {/* Breadcrumb */}
-      <div className="pt-16">
+      <div className="pt-20 sm:pt-24">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-1.5 text-xs text-muted-foreground flex-wrap">
           <button onClick={() => navigate('/')} className="hover:text-foreground transition-colors">Inicio</button>
           <span className="text-muted-foreground/40">/</span>
