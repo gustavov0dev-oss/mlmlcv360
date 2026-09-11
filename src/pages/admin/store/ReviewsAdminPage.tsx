@@ -1,3 +1,4 @@
+import { supabase } from '@/lib/backend/client';
 import { LoadingRegion, StableRegion } from '@/components/ui/loading-region';
 import { useState, useEffect, useCallback } from 'react';
 import { useDatabase } from '@/lib/backend';
@@ -32,7 +33,7 @@ type Tab = 'pending' | 'approved' | 'rejected' | 'all';
 export default function ReviewsAdminPage() {
   const database = useDatabase();
   const [reportCounts,setReportCounts] = useState<Record<string,number>>({});
-  useEffect(()=>{void database.select<{review_id:string}>('review_feedback',{filter:{kind:'report'}}).then(({data})=>{const counts:Record<string,number>={};for(const r of (data||[]) as {review_id:string}[])counts[r.review_id]=(counts[r.review_id]||0)+1;setReportCounts(counts);});},[database]);
+
   const [reviews, setReviews] = useState<(ProductReview & { product: any; profile: any })[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<Tab>('pending');
@@ -51,7 +52,11 @@ export default function ReviewsAdminPage() {
         product:products(id, name, slug, images)`,
       order: { column: 'created_at', ascending: false },
     });
-    setReviews((data as any) || []);
+    const rows = (data as any) || [];
+    setReviews(rows);
+    const { data: reports, error: reportError } = await supabase.rpc('review_report_counts', { p_review_ids: rows.map((r: ProductReview) => r.id) });
+    if (reportError) toast.error('No se pudieron actualizar los reportes');
+    else setReportCounts(Object.fromEntries((reports || []).map((r: {review_id: string; total: number}) => [r.review_id, Number(r.total)])));
     setLoading(false);
   }, [database]);
 

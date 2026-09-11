@@ -157,7 +157,7 @@ export default function ProductCard({
 
         {!outOfStock && (
           <button onClick={handleAdd} disabled={adding} aria-label={`Agregar ${product.name} al carrito`}
-            className="absolute bottom-2.5 left-2.5 right-2.5 z-10 min-h-10 flex items-center justify-center gap-2 rounded-xl bg-amber-950/80 text-white border border-primary/60 backdrop-blur-md hover:bg-amber-900/90 disabled:opacity-70 text-xs font-semibold shadow-sm transition-[opacity,transform] duration-200 lg:opacity-0 lg:translate-y-1 lg:pointer-events-none lg:group-hover:opacity-100 lg:group-hover:translate-y-0 lg:group-hover:pointer-events-auto lg:group-focus-within:opacity-100 lg:group-focus-within:translate-y-0 lg:group-focus-within:pointer-events-auto">
+            className="absolute bottom-2.5 left-2.5 right-2.5 z-10 min-h-10 flex items-center justify-center gap-2 rounded-xl bg-primary/90 text-white border border-white/20 backdrop-blur-md hover:bg-primary shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary disabled:opacity-70 text-xs font-semibold shadow-sm transition-[opacity,transform] duration-200 lg:opacity-0 lg:translate-y-1 lg:pointer-events-none lg:group-hover:opacity-100 lg:group-hover:translate-y-0 lg:group-hover:pointer-events-auto lg:group-focus-within:opacity-100 lg:group-focus-within:translate-y-0 lg:group-focus-within:pointer-events-auto">
             <ShoppingBag className="w-4 h-4" />{adding ? 'Agregado' : 'Agregar'}
           </button>
         )}

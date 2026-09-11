@@ -1,3 +1,5 @@
+import { Sheet, SheetContent, SheetTitle, SheetDescription } from '@/components/ui/sheet';
+import { useProductReviews } from '@/hooks/useProductReviews';
 import { supabase } from '@/lib/backend/client';
 import { LoadingRegion } from '@/components/ui/loading-region';
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
@@ -16,7 +18,7 @@ import {
   Truck, Shield, RotateCcw, Heart, Share2, Package, Tag, MessageSquare,
   Layers, Upload, ThumbsUp, Flag, ChevronDown, CircleCheck as CheckCircle,
   Play, Eye, Lock, Zap, Info, ExternalLink, Image as ImageIcon,
-  SlidersHorizontal, X, Award, CornerDownRight, MessageCircle, Send,
+  SlidersHorizontal, X, CornerDownRight, MessageCircle, Send,
   BadgeCheck,
 } from 'lucide-react';
 
@@ -62,7 +64,7 @@ function StarPicker({ value, onChange }: { value: number; onChange: (v: number) 
         {Array.from({ length: 5 }).map((_, i) => (
           <button key={i} type="button"
             onMouseEnter={() => setHover(i + 1)} onMouseLeave={() => setHover(0)}
-            onClick={() => onChange(i + 1)}>
+            onClick={() => onChange(i + 1)} aria-label={`${i + 1} de 5 estrellas`} aria-pressed={value === i + 1} className="p-1 rounded-md focus-visible:outline focus-visible:outline-1 focus-visible:outline-primary">
             <Star className={cn('w-7 h-7 transition-colors',
               i < (hover || value) ? 'text-amber-400 fill-amber-400' : 'text-muted-foreground/20')} />
           </button>
@@ -338,10 +340,13 @@ function BenefitsStrip() {
 type SortKey = 'helpful' | 'recent' | 'high' | 'low';
 
 function ReviewsSection({
-  reviews, avgRating, ratingDist, helpfulIds, reportedIds, likedReplyIds,
+  reviews, avgRating, ratingDist, total, loadingReviews, reviewError, hasMore, loadMore, filters, setFilters, helpfulIds, reportedIds, likedReplyIds,
   onMarkHelpful, onLikeReply, onReport, onOpenLightbox, onReply,
   reviewForm, setReviewForm, uploadingImg, onUploadImg, submittingReview, onSubmitReview, user, navigate,
 }: {
+  total: number; loadingReviews: boolean; reviewError: string; hasMore: boolean; loadMore: () => void;
+  filters: { sort: SortKey; star: number; photos: boolean; verified: boolean };
+  setFilters: React.Dispatch<React.SetStateAction<{ sort: SortKey; star: number; photos: boolean; verified: boolean }>>;
   reviews: ProductReview[]; avgRating: number; ratingDist: { n: number; count: number; pct: number }[];
   helpfulIds: Set<string>; reportedIds: Set<string>; likedReplyIds: Set<string>;
   onMarkHelpful: (id: string, count: number) => void;
@@ -355,39 +360,25 @@ function ReviewsSection({
   submittingReview: boolean; onSubmitReview: () => void;
   user: any; navigate: (path: string) => void;
 }) {
-  const [starFilter, setStarFilter] = useState(0);
-  const [photosOnly, setPhotosOnly] = useState(false);
-  const [verifiedOnly, setVerifiedOnly] = useState(false);
-  const [sort, setSort] = useState<SortKey>('helpful');
-  const [visible, setVisible] = useState(5);
-
-  const allPhotos = useMemo(
-    () => reviews.flatMap(r => (r.images || []).map(url => ({ url, reviewId: r.id }))),
-    [reviews]
-  );
-
-  const filtered = useMemo(() => {
-    let list = [...reviews];
-    if (starFilter > 0) list = list.filter(r => r.rating === starFilter);
-    if (photosOnly) list = list.filter(r => (r.images || []).length > 0);
-    if (verifiedOnly) list = list.filter(r => r.verified_purchase);
-    switch (sort) {
-      case 'recent': list.sort((a, b) => b.created_at.localeCompare(a.created_at)); break;
-      case 'high': list.sort((a, b) => b.rating - a.rating); break;
-      case 'low': list.sort((a, b) => a.rating - b.rating); break;
-      default: list.sort((a, b) => (b.helpful_count ?? 0) - (a.helpful_count ?? 0)); break;
-    }
-    return list;
-  }, [reviews, starFilter, photosOnly, verifiedOnly, sort]);
-
-  const featured = useMemo(() => {
-    if (reviews.length === 0) return null;
-    return [...reviews].sort((a, b) => (b.helpful_count ?? 0) - (a.helpful_count ?? 0))[0];
-  }, [reviews]);
-
+  const [formOpen, setFormOpen] = useState(false);
+  const sentinel = useRef<HTMLDivElement>(null);
+  const { star: starFilter, photos: photosOnly, verified: verifiedOnly, sort } = filters;
+  const setStarFilter = (star: number) => setFilters(p => ({ ...p, star }));
   const activeFilters = starFilter > 0 || photosOnly || verifiedOnly;
-  const clearFilters = () => { setStarFilter(0); setPhotosOnly(false); setVerifiedOnly(false); };
-
+  const clearFilters = () => setFilters(p => ({ ...p, star: 0, photos: false, verified: false }));
+  useEffect(() => {
+    if (!hasMore || loadingReviews || reviewError) return;
+    const observer = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting) loadMore();
+    }, { rootMargin: '240px' });
+    if (sentinel.current) observer.observe(sentinel.current);
+    return () => observer.disconnect();
+  }, [hasMore, loadingReviews, reviewError, loadMore]);
+  const wasSubmitting = useRef(false);
+  useEffect(() => {
+    if (wasSubmitting.current && !submittingReview && reviewForm.rating === 0) setFormOpen(false);
+    wasSubmitting.current = submittingReview;
+  }, [submittingReview, reviewForm.rating]);
   const sortOptions: { value: SortKey; label: string }[] = [
     { value: 'helpful', label: 'Más útiles' },
     { value: 'recent', label: 'Más recientes' },
@@ -396,57 +387,31 @@ function ReviewsSection({
   ];
 
   return (
-    <div className="space-y-6">
-      {reviews.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-12 gap-5 py-3">
-          <div className="sm:col-span-4 flex flex-row sm:flex-col items-center sm:items-start gap-4 sm:gap-2">
-            <div className="flex flex-col items-center lg:items-start">
-              <span className="text-4xl font-semibold text-foreground leading-none tracking-tight">{avgRating.toFixed(1)}</span>
-              <StarsDisplay value={avgRating} size={18} />
-              <span className="text-xs text-muted-foreground mt-1">{reviews.length} {reviews.length === 1 ? 'reseña' : 'reseñas'}</span>
+    <div className="grid gap-8 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-12 py-6 max-w-6xl mx-auto">
+      <aside className="self-start lg:sticky lg:top-24 space-y-5">
+        <div>
+          <h3 className="text-base font-semibold mb-3">Opiniones de clientes</h3>
+          <div className="flex items-center gap-3">
+            <span className="text-5xl font-semibold tracking-tight">{total ? avgRating.toFixed(1) : '—'}</span>
+            <div className="space-y-1"><StarsDisplay value={avgRating} size={17} />
+              <p className="text-sm text-muted-foreground">{total.toLocaleString('es-PE')} {total === 1 ? 'opinión' : 'opiniones'}</p>
             </div>
-            <button onClick={() => { const form=document.getElementById('product-review-form') as HTMLDetailsElement | null; if(form){form.open=true;form.scrollIntoView({behavior:'smooth',block:'start'});} }}
-              className="lg:mt-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-xs font-medium hover:bg-primary/90 transition-colors">
-              Escribir reseña
-            </button>
           </div>
-
-          <div className={cn('space-y-2',allPhotos.length ? 'sm:col-span-5' : 'sm:col-span-8')}>
-            {ratingDist.map(({ n, count, pct }) => (
-              <button key={n} onClick={() => setStarFilter(starFilter === n ? 0 : n)}
-                className={cn('w-full flex items-center gap-2.5 rounded-md px-1 py-0.5 transition-colors',
-                  starFilter === n ? 'bg-muted/60' : 'hover:bg-muted/40')}>
-                <div className="flex items-center gap-0.5 w-12 flex-shrink-0">
-                  <span className="text-xs font-medium text-foreground w-3 text-right">{n}</span>
-                  <Star className={cn('w-3 h-3 ml-0.5', count > 0 ? 'text-amber-400 fill-amber-400' : 'text-muted-foreground/25')} />
-                </div>
-                <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
-                  <div className="h-full bg-amber-400 rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
-                </div>
-                <span className="text-xs text-muted-foreground w-7 text-right flex-shrink-0">{count}</span>
-              </button>
-            ))}
-          </div>
-
-          {allPhotos.length > 0 && (
-            <div className="sm:col-span-3">
-              <p className="text-xs font-medium text-foreground mb-2 flex items-center gap-1.5">
-                <ImageIcon className="w-3.5 h-3.5 text-muted-foreground" /> Fotos ({allPhotos.length})
-              </p>
-              <div className="grid grid-cols-4 lg:grid-cols-3 gap-1.5">
-                {allPhotos.slice(0, 9).map((p, i) => (
-                  <button key={i} onClick={() => onOpenLightbox(p.url)}
-                    className="aspect-square rounded-md overflow-hidden border border-border hover:border-muted-foreground/40 transition-colors">
-                    <img src={p.url} alt="" className="w-full h-full object-cover" loading="lazy" />
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
-      )}
-
-      {reviews.length > 0 && (
+        <div className="space-y-1 max-w-sm">
+          {ratingDist.map(({ n, count, pct }) => (
+            <button key={n} onClick={() => setStarFilter(starFilter === n ? 0 : n)} aria-label={`Filtrar por ${n} estrellas: ${count} opiniones`} aria-pressed={starFilter === n}
+              className={cn('w-full flex items-center gap-2 py-1 rounded-md text-sm hover:bg-muted/50', starFilter === n && 'text-primary bg-primary/5')}>
+              <span>{n}</span><Star className="w-3 h-3 text-primary fill-primary" />
+              <span className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden"><span className="block h-full bg-primary rounded-full" style={{ width: `${pct}%` }} /></span>
+              <span className="w-10 text-right text-xs text-muted-foreground">{Math.round(pct)}%</span>
+            </button>
+          ))}
+        </div>
+        <button onClick={() => setFormOpen(true)} className="w-full sm:w-auto lg:w-full px-5 py-2.5 rounded-lg border border-primary/60 text-primary text-sm font-medium hover:bg-primary/10 transition-colors">Escribir reseña</button>
+      </aside>
+      <div className="min-w-0 space-y-5">
+      {total > 0 && (
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-1">
           <div className="flex items-center gap-2 flex-wrap">
             <SlidersHorizontal className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
@@ -456,14 +421,14 @@ function ReviewsSection({
                 {starFilter} ★ <X className="w-3 h-3" />
               </button>
             )}
-            <button onClick={() => setPhotosOnly(v => !v)}
+            <button aria-pressed={photosOnly} onClick={() => setFilters(p => ({ ...p, photos: !p.photos }))}
               className={cn('flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium border transition-colors',
-                photosOnly ? 'bg-foreground text-background border-foreground' : 'border-border text-muted-foreground hover:text-foreground hover:border-muted-foreground/40')}>
+                photosOnly ? 'bg-primary/10 text-primary border-primary/40' : 'border-border text-muted-foreground hover:text-foreground hover:border-muted-foreground/40')}>
               <ImageIcon className="w-3.5 h-3.5" /> Con fotos
             </button>
-            <button onClick={() => setVerifiedOnly(v => !v)}
+            <button aria-pressed={verifiedOnly} onClick={() => setFilters(p => ({ ...p, verified: !p.verified }))}
               className={cn('flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium border transition-colors',
-                verifiedOnly ? 'bg-foreground text-background border-foreground' : 'border-border text-muted-foreground hover:text-foreground hover:border-muted-foreground/40')}>
+                verifiedOnly ? 'bg-primary/10 text-primary border-primary/40' : 'border-border text-muted-foreground hover:text-foreground hover:border-muted-foreground/40')}>
               <CheckCircle className="w-3.5 h-3.5" /> Verificadas
             </button>
             {activeFilters && (
@@ -472,7 +437,7 @@ function ReviewsSection({
           </div>
 
           <div className="relative sm:ml-auto">
-            <select value={sort} onChange={e => setSort(e.target.value as SortKey)}
+            <select value={sort} aria-label="Ordenar opiniones" onChange={e => setFilters(p => ({ ...p, sort: e.target.value as SortKey }))}
               className="has-chevron appearance-none pl-3 pr-8 py-1 bg-transparent border border-border rounded-md text-xs font-medium text-foreground outline-none focus:border-primary cursor-pointer">
               {sortOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
             </select>
@@ -481,17 +446,17 @@ function ReviewsSection({
         </div>
       )}
 
-      <div className="space-y-0 divide-y divide-border">
-        {filtered.slice(0, visible).map(r => (
+      <div className="min-h-[180px] space-y-0 divide-y divide-border/50">
+        {reviews.map(r => (
           <div key={r.id} className="py-3">
-          {r.id===featured?.id && !activeFilters && sort==='helpful' && reviews.length>1 && <p className="flex items-center gap-1.5 text-xs text-muted-foreground"><Award className="w-3.5 h-3.5"/>Opinión más útil</p>}
+
           <ReviewCard r={r} helpfulIds={helpfulIds} reportedIds={reportedIds} likedReplyIds={likedReplyIds}
             onMarkHelpful={onMarkHelpful} onLikeReply={onLikeReply} onReport={onReport} onOpenLightbox={onOpenLightbox}
             onReply={onReply} user={user} />
           </div>
         ))}
 
-        {filtered.length === 0 && reviews.length > 0 && (
+        {reviews.length === 0 && total > 0 && !loadingReviews && !reviewError && (
           <div className="text-center py-10 space-y-2">
             <MessageSquare className="w-10 h-10 mx-auto text-muted-foreground/20" />
             <p className="text-sm font-medium text-foreground">Sin reseñas con estos filtros</p>
@@ -499,7 +464,7 @@ function ReviewsSection({
           </div>
         )}
 
-        {reviews.length === 0 && (
+        {total === 0 && !loadingReviews && !reviewError && (
           <div className="text-center py-10 space-y-2">
             <MessageSquare className="w-10 h-10 mx-auto text-muted-foreground/20" />
             <p className="text-sm font-medium text-foreground">Sin reseñas aún</p>
@@ -507,20 +472,18 @@ function ReviewsSection({
           </div>
         )}
 
-        {filtered.length > visible && (
-          <button onClick={() => setVisible(v => v + 5)}
-            className="w-full flex items-center justify-center gap-2 py-3 text-xs font-medium text-primary hover:bg-muted/40 rounded-lg transition-colors">
-            <ChevronDown className="w-4 h-4" /> Ver más ({filtered.length - visible} restantes)
-          </button>
-        )}
       </div>
-
-      <details id="product-review-form" className="scroll-mt-24 py-4 w-full space-y-4">
-        <summary className="cursor-pointer list-none">
-          <h3 className="text-sm font-semibold text-foreground">¿Ya compraste este producto?</h3>
-          <p className="text-xs text-muted-foreground mt-0.5">Comparte tu opinión con otros compradores · Escribir reseña</p>
-        </summary>
-
+        <div ref={sentinel} className="min-h-10 text-center text-sm text-muted-foreground" aria-live="polite">
+          {loadingReviews ? 'Cargando opiniones…' : reviewError ? <><p>{reviewError}</p><button className="text-primary py-2" onClick={loadMore}>Reintentar</button></> : hasMore ? <button className="text-primary py-2" onClick={loadMore}>Ver más opiniones</button> : reviews.length > 0 ? 'Has visto todas las opiniones' : null}
+        </div>
+      </div>
+      <Sheet open={formOpen} onOpenChange={setFormOpen}>
+      <SheetContent className="w-full sm:max-w-[460px] bg-background p-0 flex flex-col gap-0">
+        <div className="px-6 pt-8 pb-5">
+          <SheetTitle>Tu experiencia con el producto</SheetTitle>
+          <SheetDescription className="mt-1">Ayuda a otros compradores a elegir.</SheetDescription>
+        </div>
+        <div className="px-6 pb-6 overflow-y-auto flex-1 space-y-5">
         {!user ? (
           <div className="flex flex-col items-start gap-3">
             <p className="text-sm text-foreground">Inicia sesión para escribir una reseña</p>
@@ -532,14 +495,14 @@ function ReviewsSection({
         ) : (
           <div className="space-y-4">
             <div>
-              <p className="text-xs font-medium text-foreground mb-2.5">1. ¿Cómo calificarías este producto? *</p>
+              <p className="text-xs font-medium text-foreground mb-2.5">¿Cómo calificarías tu compra?</p>
               <StarPicker value={reviewForm.rating} onChange={v => setReviewForm(p => ({ ...p, rating: v }))} />
             </div>
 
             {reviewForm.rating > 0 && (<>
               <div>
-                <p className="text-xs font-medium text-foreground mb-2">2. Ponle un título a tu reseña</p>
-                <input value={reviewForm.title}
+                <label htmlFor="review-title" className="block text-sm font-medium mb-2">Título (opcional)</label>
+                <input id="review-title" value={reviewForm.title}
                   onChange={e => setReviewForm(p => ({ ...p, title: e.target.value }))}
                   placeholder={reviewForm.rating >= 4 ? 'Ej: Excelente calidad, muy recomendado' : reviewForm.rating === 3 ? 'Ej: Bueno pero mejorable' : 'Ej: No cumplió mis expectativas'}
                   maxLength={100}
@@ -547,8 +510,8 @@ function ReviewsSection({
               </div>
 
               <div>
-                <p className="text-xs font-medium text-foreground mb-2">3. Cuéntanos más</p>
-                <textarea value={reviewForm.body}
+                <label htmlFor="review-body" className="block text-sm font-medium mb-2">Tu opinión</label>
+                <textarea id="review-body" value={reviewForm.body}
                   onChange={e => setReviewForm(p => ({ ...p, body: e.target.value }))}
                   placeholder="¿Qué te gustó? ¿Qué no? ¿Volverías a comprarlo?"
                   rows={4} maxLength={1000}
@@ -557,7 +520,7 @@ function ReviewsSection({
               </div>
 
               <div>
-                <p className="text-xs font-medium text-foreground mb-2">4. Agrega fotos <span className="font-normal text-muted-foreground">(opcional)</span></p>
+                <p className="text-xs font-medium text-foreground mb-2">Fotos <span className="font-normal text-muted-foreground">(opcional)</span></p>
                 <div className="flex gap-2 flex-wrap">
                   {reviewForm.images.map((img, i) => (
                     <div key={i} className="relative" style={{ width: 72, height: 72 }}>
@@ -571,7 +534,7 @@ function ReviewsSection({
                       uploadingImg ? 'opacity-50 cursor-not-allowed border-border' : 'border-border hover:border-primary')}
                       style={{ width: 72, height: 72 }}>
                       {uploadingImg
-                        ? <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                        ? <span className="text-xs">Subiendo…</span>
                         : <>
                           <Upload className="w-4 h-4 text-muted-foreground" />
                           <span className="text-[10px] text-muted-foreground mt-1">Foto</span>
@@ -584,16 +547,18 @@ function ReviewsSection({
               </div>
 
               <button onClick={onSubmitReview}
-                disabled={submittingReview || reviewForm.rating === 0}
-                className="flex items-center justify-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors">
+                disabled={submittingReview || uploadingImg || reviewForm.rating === 0}
+                className="w-full flex items-center justify-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors">
                 {submittingReview
-                  ? <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Publicando...</>
+                  ? 'Publicando…'
                   : 'Publicar reseña'}
               </button>
             </>)}
           </div>
         )}
-      </details>
+        </div>
+      </SheetContent>
+      </Sheet>
     </div>
   );
 }
@@ -618,7 +583,19 @@ function ReviewCard({
   const [submitting, setSubmitting] = useState(false);
   const [showFullMedia, setShowFullMedia] = useState(false);
 
-  const replies = (r.replies as ProductReviewReply[]) || [];
+  const [extraReplies, setExtraReplies] = useState<ProductReviewReply[]>([]);
+  const [moreReplies, setMoreReplies] = useState((r.replies?.length || 0) >= 3);
+  const [loadingReplies, setLoadingReplies] = useState(false);
+  const replies = [...((r.replies as ProductReviewReply[]) || []), ...extraReplies].filter((reply, i, list) => list.findIndex(p => p.id === reply.id) === i);
+  const loadReplies = async () => {
+    if (loadingReplies) return;
+    setLoadingReplies(true);
+    const { data, error } = await supabase.from('product_review_replies').select('*').eq('review_id', r.id)
+      .order('created_at').order('id').range(replies.length, replies.length + 9);
+    if (error) toast.error('No pudimos cargar las respuestas');
+    else { setExtraReplies(previous => [...previous, ...(data || [])]); setMoreReplies((data || []).length === 10); }
+    setLoadingReplies(false);
+  };
   const isLong = (r.body || '').length > 280;
   const displayBody = expanded || !isLong ? r.body : (r.body || '').slice(0, 280) + '…';
   const media = (r.images as string[]) || [];
@@ -637,7 +614,7 @@ function ReviewCard({
   };
 
   return (
-    <div className="py-4 first:pt-0">
+    <div className="py-2">
       <div className="flex gap-3">
         <div className="w-9 h-9 rounded-full overflow-hidden bg-muted flex items-center justify-center text-muted-foreground font-medium text-xs flex-shrink-0">
           {avatarUrl
@@ -660,7 +637,7 @@ function ReviewCard({
           {r.title && <p className="text-sm font-medium text-foreground">{r.title}</p>}
 
           {displayBody && (
-            <p className="text-sm text-foreground/70 leading-relaxed whitespace-pre-wrap">
+            <p className="text-base text-foreground/80 leading-relaxed whitespace-pre-wrap">
               {displayBody}
               {isLong && (
                 <button onClick={() => setExpanded(v => !v)}
@@ -702,7 +679,7 @@ function ReviewCard({
               <MessageCircle className="w-3.5 h-3.5" /> Responder
             </button>
             <button onClick={() => onReport(r.id)} disabled={reportedIds.has(r.id)}
-              className={cn('flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium transition-colors ml-auto',
+              className={cn('flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium transition-colors',
                 reportedIds.has(r.id) ? 'text-muted-foreground/50' : 'text-muted-foreground/60 hover:text-foreground')}>
               <Flag className="w-3.5 h-3.5" />{reportedIds.has(r.id) ? "Reportada" : "Reportar"}
             </button>
@@ -740,7 +717,7 @@ function ReviewCard({
             <button onClick={() => setShowReplies(v => !v)}
               className="flex items-center gap-1.5 text-xs font-medium text-primary hover:underline pt-1">
               <CornerDownRight className="w-3.5 h-3.5" />
-              {showReplies ? 'Ocultar' : `${replies.length} ${replies.length === 1 ? 'respuesta' : 'respuestas'}`}
+              {showReplies ? 'Ocultar' : `Ver respuestas${moreReplies ? '' : ` (${replies.length})`}`}
             </button>
           )}
 
@@ -754,6 +731,7 @@ function ReviewCard({
                   onLike={() => onLikeReply(reply.id)}
                 />
               ))}
+              {moreReplies && <button disabled={loadingReplies} onClick={loadReplies} className="text-sm text-primary py-2">{loadingReplies ? 'Cargando respuestas…' : 'Ver más respuestas'}</button>}
             </div>
           )}
         </div>
@@ -804,7 +782,7 @@ export default function ProductDetailPage() {
   const navigate = useNavigate();
 
   const [product, setProduct] = useState<Product | null>(null);
-  const [reviews, setReviews] = useState<ProductReview[]>([]);
+  const { reviews, setReviews, summary, filters, setFilters, loading: loadingReviews, error: reviewError, hasMore, loadMore } = useProductReviews(product?.id);
   const [related, setRelated] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
@@ -854,34 +832,7 @@ export default function ProductDetailPage() {
       setSelectedAttrs(initAttrs);
     }
 
-    const [{ data: revs }, { data: wl }] = await Promise.all([
-      database.select('product_reviews', {
-        select: '*, profile:profiles(full_name,avatar_url)',
-        filter: [
-          { column: 'product_id', operator: 'eq', value: p.id },
-          { column: 'status', operator: 'eq', value: 'approved' },
-        ],
-        order: { column: 'helpful_count', ascending: false },
-      }),
-      user ? database.select('wishlists', { select: 'id', filter: [{ column: 'user_id', operator: 'eq', value: user.id }, { column: 'product_id', operator: 'eq', value: p.id }], maybeSingle: true })
-           : Promise.resolve({ data: null }),
-    ]);
-    const reviewsList = (revs || []) as ProductReview[];
-    if (reviewsList.length > 0) {
-      const reviewIds = reviewsList.map(r => r.id);
-      const { data: repliesData } = await database.select<ProductReviewReply>('product_review_replies', {
-        filter: [{ column: 'review_id', operator: 'in', value: reviewIds }],
-        order: { column: 'created_at', ascending: true },
-      });
-      const repliesByReview = new Map<string, ProductReviewReply[]>();
-      ((repliesData as ProductReviewReply[]) || []).forEach((rp: ProductReviewReply) => {
-        const arr = repliesByReview.get(rp.review_id) || [];
-        arr.push(rp);
-        repliesByReview.set(rp.review_id, arr);
-      });
-      reviewsList.forEach(r => { r.replies = repliesByReview.get(r.id) || []; });
-    }
-    setReviews(reviewsList);
+    const { data: wl } = user ? await database.select('wishlists', { select: 'id', filter: [{ column: 'user_id', operator: 'eq', value: user.id }, { column: 'product_id', operator: 'eq', value: p.id }], maybeSingle: true }) : { data: null };
     setIsWishlisted(!!wl);
 
     const saved = sessionStorage.getItem('compare');
@@ -1039,14 +990,14 @@ export default function ProductDetailPage() {
   useEffect(() => {
     let active=true;
     setHelpfulIds(new Set()); setReportedIds(new Set());
-    if(user) void database.select<{review_id:string;kind:string}>('review_feedback',{filter:{user_id:user.id}}).then(({data})=>{
+    if(user && reviews.length) void database.select<{review_id:string;kind:string}>('review_feedback',{filter:[{column:'user_id',operator:'eq',value:user.id},{column:'review_id',operator:'in',value:reviews.map(r=>r.id)}]}).then(({data})=>{
       if(!active)return;
       const rows=(data || []) as {review_id:string;kind:string}[];
       setHelpfulIds(new Set(rows.filter(r=>r.kind==='helpful').map(r=>r.review_id)));
       setReportedIds(new Set(rows.filter(r=>r.kind==='report').map(r=>r.review_id)));
     });
     return()=>{active=false;};
-  },[user?.id,database]);
+  },[user?.id,database,reviews.map(r=>r.id).join(',')]);
   const sendFeedback = async (reviewId:string,kind:'helpful'|'report') => {
     if(!user){toast.info('Inicia sesión para participar');navigate('/login');return;}
     const key=reviewId+kind;
@@ -1095,11 +1046,11 @@ export default function ProductDetailPage() {
     });
   };
 
-  const avgRating = reviews.length > 0
-    ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length : 0;
+  const reviewTotal = summary.total;
+  const avgRating = summary.average;
   const ratingDist = [5, 4, 3, 2, 1].map(n => ({
-    n, count: reviews.filter(r => r.rating === n).length,
-    pct: reviews.length > 0 ? (reviews.filter(r => r.rating === n).length / reviews.length) * 100 : 0,
+    n, count: summary.stars[n - 1] || 0,
+    pct: reviewTotal ? ((summary.stars[n - 1] || 0) / reviewTotal) * 100 : 0,
   }));
 
   const specs = (product as any)?.specs || {};
@@ -1110,7 +1061,7 @@ export default function ProductDetailPage() {
   const tabs = [
     { id: 'description' as const, label: 'Descripción', icon: Info },
     ...(hasSpecs ? [{ id: 'specs' as const, label: 'Especificaciones', icon: Layers }] : []),
-    { id: 'reviews' as const, label: `Reseñas (${reviews.length})`, icon: MessageSquare },
+    { id: 'reviews' as const, label: `Reseñas (${reviewTotal.toLocaleString('es-PE')})`, icon: MessageSquare },
   ];
 
   if (loading) {
@@ -1205,17 +1156,17 @@ export default function ProductDetailPage() {
 
             {/* Rating */}
             <div>
-              {reviews.length > 0 ? (
+              {reviewTotal > 0 ? (
                 <button onClick={() => { setActiveTab('reviews'); document.getElementById('product-tabs')?.scrollIntoView({ behavior: 'smooth' }); }}
                   className="flex items-center gap-2 group">
                   <StarsDisplay value={avgRating} size={15} />
                   <span className="text-sm font-medium text-foreground">{avgRating.toFixed(1)}</span>
                   <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
-                    ({reviews.length} {reviews.length === 1 ? 'valoración' : 'valoraciones'})
+                    ({reviewTotal.toLocaleString('es-PE')} {reviewTotal === 1 ? 'valoración' : 'valoraciones'})
                   </span>
                   <span className="text-muted-foreground/30">·</span>
                   <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
-                    <CheckCircle className="w-3 h-3" /> {reviews.filter(r => r.verified_purchase).length} verificadas
+                    <CheckCircle className="w-3 h-3" /> {summary.verified.toLocaleString('es-PE')} verificadas
                   </span>
                 </button>
               ) : (
@@ -1475,6 +1426,7 @@ export default function ProductDetailPage() {
             {activeTab === 'reviews' && (
               <ReviewsSection
                 reviews={reviews} avgRating={avgRating} ratingDist={ratingDist}
+                total={reviewTotal} loadingReviews={loadingReviews} reviewError={reviewError} hasMore={hasMore} loadMore={loadMore} filters={filters} setFilters={setFilters}
                 helpfulIds={helpfulIds} reportedIds={reportedIds} likedReplyIds={likedReplyIds}
                 onMarkHelpful={markHelpful} onLikeReply={onLikeReply} onReport={reportReview} onOpenLightbox={setLightboxImg}
                 onReply={submitReply}
