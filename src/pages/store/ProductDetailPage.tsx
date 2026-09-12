@@ -1,4 +1,3 @@
-import { PaymentCurrency } from '@/components/payments/PaymentMethods';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useProductReviews } from '@/hooks/useProductReviews';
 import { supabase } from '@/lib/backend/client';
@@ -779,7 +778,7 @@ export default function ProductDetailPage() {
   const slug = window.location.pathname.split('/').filter(p => p && p !== 'tienda').pop() || '';
   const { addItem, items } = useCart();
   const { user } = useAuthStore();
-  const { exchangeRate, showUsd, setShowUsd, company, currencySymbol } = useConfig();
+  const { exchangeRate, showUsd, company, currencySymbol } = useConfig();
   const navigate = useNavigate();
 
   const [product, setProduct] = useState<Product | null>(null);
@@ -918,9 +917,9 @@ export default function ProductDetailPage() {
     ...(product?.videos || []).map(v => ({ url: v.url, alt: 'Video', isVideo: true, thumbnail: v.thumbnail })),
   ], [product]);
 
-  const handleAdd = () => {
+  const handleAdd = async () => {
     if (!product || outOfStock) return;
-    addItem(product, selectedVariant ?? undefined, qty);
+    if (!await addItem(product, selectedVariant ?? undefined, qty)) return;
     setAddedToCart(true);
     setTimeout(() => setAddedToCart(false), 3000);
     toast.success('Agregado al carrito', {
@@ -929,9 +928,9 @@ export default function ProductDetailPage() {
     });
   };
 
-  const handleBuyNow = () => {
+  const handleBuyNow = async () => {
     if (!product || outOfStock) return;
-    addItem(product, selectedVariant ?? undefined, qty);
+    if (!await addItem(product, selectedVariant ?? undefined, qty)) return;
     navigate('/checkout');
   };
 
@@ -1217,7 +1216,7 @@ export default function ProductDetailPage() {
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> En stock
                   </span>
                 )}
-                <PaymentCurrency value={showUsd ? "USD" : "PEN"} onChange={value=>setShowUsd(value==="USD")}/>
+
               </div>
 
               {/* SKU — subtle standalone line */}

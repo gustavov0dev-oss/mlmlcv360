@@ -100,7 +100,8 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
   const [company, setCompany] = useState<Record<string, string>>({});
   const [tax, setTax] = useState<TaxConfig>({ enabled: false, rate: 18, includedInPrice: true, name: 'IGV' });
   const [loading, setLoading] = useState(true);
-  const [showUsd, setShowUsd] = useState(false);
+  const [showUsd, updateShowUsd] = useState(() => localStorage.getItem('cluv360_currency') === 'USD');
+  const setShowUsd = (value: boolean) => { localStorage.setItem('cluv360_currency', value ? 'USD' : 'PEN'); updateShowUsd(value); };
   const [logoValue, setLogoValue] = useState('');
   const [logoSizes, setLogoSizes] = useState({ navbar: 32, navbarHeight: 32, sidebar: 36, sidebarHeight: 36, collapsed: 40, login: 48, loginHeight: 48 });
 
@@ -186,7 +187,7 @@ export function useConfig() {
 
 export function formatPrice(amount: number, currency: string, symbol: string, rate: number) {
   if (currency === 'USD') {
-    const usd = Math.round(amount / rate);
+    const usd = (amount / rate).toFixed(2);
     return `USD ${usd}`;
   }
   return `${symbol} ${amount}`;

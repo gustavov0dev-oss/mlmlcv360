@@ -16,7 +16,7 @@ import { ShoppingCart, Trash2, Plus, Minus, Tag, X, ArrowRight, ChevronLeft, Tru
 // perfectamente alineadas.
 const PAGE_MAX_W = 'max-w-[1100px]';
 
-function fmt(n: number) { return `S/ ${n.toFixed(2)}`; }
+
 
 // Mismo estilo del indicador de envío gratis de la tienda, integrado sin
 // tarjeta propia.
@@ -88,9 +88,11 @@ function FreeShippingIndicator({ subtotal, threshold, currencySymbol, className 
 
 export default function CartPage() {
   const database = useDatabase();
-  const { items, removeItem, updateQty, subtotal, itemCount } = useCart();
-  const { company } = useConfig();
+  const { items, removeItem, updateQty, subtotal, itemCount, refreshStock } = useCart();
+  const { company,showUsd,exchangeRate } = useConfig();
+  const fmt=(n:number)=>new Intl.NumberFormat('es-PE',{style:'currency',currency:showUsd?'USD':'PEN'}).format(showUsd?n/exchangeRate:n);
   const navigate = useNavigate();
+  useEffect(()=>{void refreshStock();},[refreshStock]);
   const [couponCode, setCouponCode] = useState('');
   const { coupon, setCoupon } = useCartCoupon(subtotal);
   const [couponError, setCouponError] = useState('');
@@ -218,7 +220,7 @@ export default function CartPage() {
         <div className="lg:col-span-3 flex flex-col">
           {/* Free shipping */}
           {subtotal > 0 && (
-            <FreeShippingIndicator subtotal={subtotal} threshold={freeThreshold} currencySymbol="S/" className="mb-6" />
+            <FreeShippingIndicator subtotal={showUsd?subtotal/exchangeRate:subtotal} threshold={showUsd?freeThreshold/exchangeRate:freeThreshold} currencySymbol={showUsd?'US$':'S/'} className="mb-6" />
           )}
 
           {/* Items */}
@@ -367,7 +369,7 @@ export default function CartPage() {
               </div>
             </div>
 
-            <button onClick={() => navigate('/checkout')}
+            <button onClick={async () => {if(await refreshStock()) navigate('/checkout');}}
               className="w-full flex items-center justify-center gap-2 bg-primary text-white py-4 rounded-lg font-bold text-base">
               Finalizar compra <ArrowRight className="w-5 h-5" />
             </button>

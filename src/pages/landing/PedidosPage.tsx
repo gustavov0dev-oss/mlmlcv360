@@ -302,7 +302,7 @@ export default function PedidosPage({ initialTab = 'pedidos' }: { initialTab?: T
                           )}
                           <div className="flex items-center justify-between pt-1">
                             <span className="text-sm font-semibold text-foreground">{fmt(p.base_price, p.currency)}</span>
-                            <button onClick={() => { addItem(p as any); navigate('/carrito'); }}
+                            <button onClick={async () => { if(await addItem(p as any)) navigate('/carrito'); }}
                               className="w-8 h-8 rounded-md bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/90 transition-colors outline-none">
                               <ShoppingCart className="w-3.5 h-3.5" />
                             </button>
@@ -415,7 +415,7 @@ export default function PedidosPage({ initialTab = 'pedidos' }: { initialTab?: T
                         <td className="sticky left-0 z-10 bg-background p-3"></td>
                         {compareItems.map(p => (
                           <td key={p.id} className="p-3">
-                            <button onClick={() => { addItem(p as any); navigate('/carrito'); }}
+                            <button onClick={async () => { if(await addItem(p as any)) navigate('/carrito'); }}
                               className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground rounded-md text-xs font-medium hover:bg-primary/90 transition-colors outline-none">
                               <ShoppingCart className="w-3.5 h-3.5" /> Agregar
                             </button>

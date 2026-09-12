@@ -1,3 +1,4 @@
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { PaymentReviews } from '@/components/payments/PaymentReviews';
 import { LoadingRegion, StableRegion } from '@/components/ui/loading-region';
 import { useState, useEffect, useCallback } from 'react';
@@ -42,11 +43,11 @@ export default function OrdersAdminPage() {
     });
     if (error) { toast.error(error); setLoading(false); return; }
     let list = (data as Order[]) || [];
-    const ids = [...new Set(list.flatMap(o => (o.items || []).map(i => i.product_id).filter(Boolean)))];
+    const ids = [...new Set(list.flatMap(o => (o.items || []).slice(0,1).map(i => i.product_id).filter(Boolean)))];
     if (ids.length) {
       const { data: products } = await database.select<Product>('products', { select: 'id,name,images', filter: { id: ids } });
       const catalog = new Map(((products as Product[]) || []).map(p => [p.id, p]));
-      list = list.map(o => ({ ...o, items: (o.items || []).map(i => {
+      list = list.map(o => ({ ...o, items: (o.items || []).slice(0,1).map(i => {
         const product = i.product_id ? catalog.get(i.product_id) : undefined;
         return { ...i, product_name: i.product_name || product?.name || "Producto no disponible", image_url: product?.images?.[0]?.url || i.image_url };
       }) }));
@@ -106,18 +107,14 @@ export default function OrdersAdminPage() {
         </button>
       </div>
 
-      <PaymentReviews onReviewed={load}/>
+      <details className="rounded-xl border border-border bg-card p-4"><summary className="cursor-pointer font-medium">Revisar comprobantes pendientes</summary><div className="mt-4"><PaymentReviews onReviewed={load}/></div></details>
       <div className="flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar por número o cliente..."
             className="w-full pl-10 pr-4 py-2.5 bg-card border border-border rounded-xl text-sm text-foreground outline-none focus:border-primary" />
         </div>
-        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
-          className="px-4 py-2.5 bg-card border border-border rounded-xl text-sm text-foreground outline-none focus:border-primary">
-          <option value="">Todos los estados</option>
-          {ALL_STATUSES.map(s => <option key={s} value={s}>{STATUS_CONFIG[s].label}</option>)}
-        </select>
+        <Select value={statusFilter || 'all'} onValueChange={value=>setStatusFilter(value==='all'?'':value)}><SelectTrigger className="w-52 bg-card"><SelectValue/></SelectTrigger><SelectContent><SelectItem value="all">Todos los estados</SelectItem>{ALL_STATUSES.map(s=><SelectItem key={s} value={s}>{STATUS_CONFIG[s].label}</SelectItem>)}</SelectContent></Select>
       </div>
 
       {loading ? <LoadingRegion className="min-h-[24rem]" /> : (
@@ -147,29 +144,23 @@ export default function OrdersAdminPage() {
                         <p className="text-xs text-muted-foreground">{addr?.city}, {addr?.region}</p>
                       </td>
                       <td className="px-4 py-3">
-                        <div className="space-y-3 min-w-[220px]">
-                          {(o.items || []).map(i => (
+                        <div className="space-y-2 w-[230px]">
+                          {(o.items || []).slice(0,1).map(i => (
                             <div key={i.id} className="flex items-center gap-2.5">
                               <OrderProductImage src={i.image_url} name={i.product_name} />
                               <div className="min-w-0">
-                                <p className="font-medium text-foreground leading-snug">{i.product_name || 'Producto no disponible'}</p>
+                                <p className="font-medium text-foreground leading-snug line-clamp-2">{i.product_name || 'Producto no disponible'}</p>
                                 {i.variant_name && <p className="text-xs text-muted-foreground">{i.variant_name}</p>}
                                 <p className="text-xs text-muted-foreground">Cantidad: {i.quantity} · {new Intl.NumberFormat('es-PE', { style: 'currency', currency: o.currency || 'PEN' }).format(i.unit_price)} c/u</p>
                               </div>
                             </div>
                           ))}
                         </div>
+                        {(o.items?.length || 0)>1&&<button className="mt-2 text-xs text-primary" onClick={()=>navigate(`/dashboard/admin/pedidos/${o.id}`)}>Ver los {o.items?.length} productos</button>}
                       </td>
                       <td className="px-4 py-3 font-bold text-foreground whitespace-nowrap">{new Intl.NumberFormat('es-PE', { style: 'currency', currency: o.currency || 'PEN' }).format(o.total)}</td>
                       <td className="px-4 py-3">
-                        <select
-                          value={o.status === 'shipped' ? 'processing' : o.status}
-                          disabled={updating === o.id}
-                          onChange={e => updateStatus(o.id, e.target.value)}
-                          className={cn('text-xs font-bold px-2.5 py-1.5 rounded-xl border-0 outline-none cursor-pointer', sc.cl)}
-                        >
-                          {ALL_STATUSES.map(s => <option key={s} value={s}>{STATUS_CONFIG[s].label}</option>)}
-                        </select>
+                        <Select value={o.status==='shipped'?'processing':o.status} disabled={updating===o.id} onValueChange={value=>updateStatus(o.id,value)}><SelectTrigger className={cn('w-44 h-9 border-0 text-xs',sc.cl)}><SelectValue/></SelectTrigger><SelectContent>{ALL_STATUSES.map(s=><SelectItem key={s} value={s}>{STATUS_CONFIG[s].label}</SelectItem>)}</SelectContent></Select>
                       </td>
                       <td className="px-4 py-3">
                         <span className={cn('text-xs font-bold px-2 py-0.5 rounded-full',

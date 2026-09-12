@@ -40,7 +40,7 @@ export default function ProductCard({
   const [adding, setAdding] = useState(false);
 
   const activeVariants = (product.variants || []).filter((v: any) => v.status === 'active');
-  const firstVariant = activeVariants[0] as ProductVariant | undefined;
+  const firstVariant = (activeVariants.find(v => !product.track_stock || v.stock > 0) || activeVariants[0]) as ProductVariant | undefined;
 
   const price = (firstVariant?.price && firstVariant.price > 0) ? firstVariant.price : product.base_price;
   const comparePrice = (firstVariant?.compare_price && firstVariant.compare_price > 0)
@@ -49,7 +49,7 @@ export default function ProductCard({
     ? Math.round(((comparePrice - price) / comparePrice) * 100) : 0;
 
   const totalVariantStock = activeVariants.reduce((s, v: any) => s + (v.stock || 0), 0);
-  const stock = activeVariants.length > 0 ? totalVariantStock : (product.general_stock ?? 99);
+  const stock = activeVariants.length > 0 ? totalVariantStock : (product.general_stock ?? 0);
   const outOfStock = product.track_stock && stock === 0;
   const lowStock = product.track_stock && stock > 0 && stock <= 5;
   const qualifiesFreeShip = freeShipThreshold ? price >= freeShipThreshold : false;
@@ -58,11 +58,11 @@ export default function ProductCard({
   const rating = product.avg_rating ?? 0;
   const reviewCount = product.review_count ?? 0;
 
-  const handleAdd = (e: React.MouseEvent) => {
+  const handleAdd = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (outOfStock || adding) return;
     setAdding(true);
-    addItem(product, firstVariant, 1);
+    if (!await addItem(product, firstVariant, 1)) { setAdding(false); return; }
     toast.success('¡Agregado al carrito!', {
       description: product.name,
       action: { label: 'Ver carrito', onClick: () => navigate('/carrito') },

@@ -11,7 +11,7 @@ import { useNavigate } from '@/lib/router';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import type { ShippingMethod, Coupon } from '@/lib/storeTypes';
-import { CircleCheck as CheckCircle, ChevronLeft, ChevronRight, MapPin, Truck, CreditCard, ClipboardList, Tag, Package, Plus, Trash2, Globe, X, Loader as Loader2, Pencil } from 'lucide-react';
+import { CircleCheck as CheckCircle, ChevronLeft, ChevronRight, MapPin, Truck, CreditCard, Tag, Plus, Trash2, Globe, X, Pencil } from 'lucide-react';
 
 // Mismo ancho máximo que StorePage / CartPage.
 const PAGE_MAX_W = 'max-w-[1100px]';
@@ -42,12 +42,7 @@ const REFERENCE_HINTS = [
   'Casa de 2 pisos', 'Portón verde', 'Cerca de la iglesia', 'Zona rural',
 ];
 
-const STEPS = [
-  { id: 1, label: 'Dirección', icon: MapPin },
-  { id: 2, label: 'Envío', icon: Truck },
-  { id: 3, label: 'Pago', icon: CreditCard },
-  { id: 4, label: 'Confirmar', icon: ClipboardList },
-];
+const STEPS = [{id:1,label:'Datos de entrega',icon:MapPin},{id:2,label:'Envío y pago',icon:CreditCard}];
 
 type AddressForm = {
   id?: string;
@@ -94,10 +89,11 @@ function FieldSection({ title, children, first = false }: { title: string; child
 
 export default function CheckoutPage() {
   const database = useDatabase();
-  const { items, subtotal, clearCart } = useCart();
-  const { company, currency: storeCurrency, exchangeRate, tax } = useConfig();
+  const { items, subtotal, clearCart, refreshStock } = useCart();
+  const { company, showUsd, setShowUsd, exchangeRate, tax } = useConfig();
   const { user } = useAuthStore();
   const navigate = useNavigate();
+  useEffect(()=>{void refreshStock();},[refreshStock]);
 
   const [step, setStep] = useState(1);
   const [addr, setAddr] = useState<AddressForm>({ ...EMPTY_ADDR, full_name: user?.full_name || '', phone: (user as any)?.phone || '' });
@@ -133,7 +129,8 @@ export default function CheckoutPage() {
   const [notes, setNotes] = useState('');
   const [placing, setPlacing] = useState(false);
   const [placedOrder, setPlacedOrder] = useState<{ order_number: string; order_id: string; total: number } | null>(null);
-  const [displayCurrency, setDisplayCurrency] = useState(storeCurrency || 'PEN');
+  const displayCurrency = showUsd ? 'USD' : 'PEN';
+  const setDisplayCurrency = (value: string) => setShowUsd(value === 'USD');
 
   const freeThreshold = parseFloat(company.free_shipping_threshold || '150');
 
@@ -157,7 +154,7 @@ export default function CheckoutPage() {
       const gws = (gwRes.data || []) as any[];
       setGateways(gws);
       if (gws.length > 0) {
-        setSelectedGatewayIdx(0);
+        setSelectedGatewayIdx(gws.findIndex(g=>g.currency === (showUsd ? 'USD':'PEN')));
       }
       setLoadingGateways(false);
     };
@@ -685,26 +682,18 @@ export default function CheckoutPage() {
                         </div>
                         <span className={cn('text-sm font-bold transition-colors',
                           cost === 0 ? 'text-primary' : 'text-foreground/70 group-has-[:checked]:text-primary')}>
-                          {cost === 0 ? '¡Gratis!' : `S/ ${cost.toFixed(2)}`}
+                          {cost === 0 ? '¡Gratis!' : fmt(cost, displayCurrency, exchangeRate)}
                         </span>
                       </label>
                     );
                   })}
                 </div>
               )}
-              <div className="flex gap-3 pt-2">
-                <button onClick={() => setStep(1)} className="flex-1 border border-border/50 rounded-lg py-3 font-bold text-sm hover:bg-muted/30 transition-colors">
-                  <ChevronLeft className="w-4 h-4 inline mr-1" /> Anterior
-                </button>
-                <button onClick={() => setStep(3)} className="flex-1 bg-primary text-primary-foreground rounded-lg py-3 font-bold text-sm hover:bg-primary/90 transition-colors">
-                  Continuar <ChevronRight className="w-4 h-4 inline ml-1" />
-                </button>
-              </div>
             </StableRegion>
           )}
 
           {/* ── STEP 3: Payment ── */}
-          {step === 3 && (
+          {step === 2 && (
             <StableRegion className="space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <h2 className="text-sm font-bold text-foreground flex items-center gap-2">
@@ -716,7 +705,7 @@ export default function CheckoutPage() {
               {loadingGateways ? <LoadingRegion className="min-h-[12rem]" /> : gateways.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-4">No hay métodos de pago configurados. Contacta al administrador.</p>
               ) : (
-                <PaymentMethods methods={gateways.filter(g=>g.currency===displayCurrency)} value={paymentMethod} onChange={slug=>setSelectedGatewayIdx(gateways.findIndex(g=>g.slug===slug))} disabled={placing}/>
+                <PaymentMethods methods={gateways.filter(g=>g.currency===displayCurrency)} value={paymentMethod} onChange={slug=>setSelectedGatewayIdx(gateways.findIndex(g=>g.slug===slug&&g.currency===displayCurrency))} disabled={placing}/>
 
               )}
 
@@ -735,74 +724,16 @@ export default function CheckoutPage() {
               </div>
 
               <div className="flex gap-3 pt-2">
-                <button onClick={() => setStep(2)} className="flex-1 border border-border/50 rounded-lg py-3 font-bold text-sm hover:bg-muted/30 transition-colors">
+                <button onClick={() => setStep(1)} className="flex-1 border border-border/50 rounded-lg py-3 font-bold text-sm hover:bg-muted/30 transition-colors">
                   <ChevronLeft className="w-4 h-4 inline mr-1" /> Anterior
                 </button>
-                <button onClick={() => setStep(4)} className="flex-1 bg-primary text-primary-foreground rounded-lg py-3 font-bold text-sm hover:bg-primary/90 transition-colors">
-                  Revisar pedido <ChevronRight className="w-4 h-4 inline ml-1" />
+                <button onClick={placeOrder} disabled={placing || validatingCoupon || !paymentMethod || !selectedShipping} className="flex-1 bg-primary text-primary-foreground rounded-lg py-3 font-bold text-sm hover:bg-primary/90 transition-colors">
+                  {placing ? 'Preparando pago…' : 'Continuar al pago'}
                 </button>
               </div>
             </StableRegion>
           )}
 
-          {/* ── STEP 4: Review ── */}
-          {step === 4 && (
-            <div className="space-y-5">
-              <h2 className="text-sm font-bold text-foreground flex items-center gap-2">
-                <ClipboardList className="w-4 h-4 text-primary" /> Confirmar pedido
-              </h2>
-
-              {/* Address summary */}
-              <div className="border-t border-b border-border/20 py-4 space-y-1 text-sm">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Dirección</span>
-                  <button onClick={() => { setStep(1); setShowForm(true); }} className="text-xs text-primary hover:underline">Editar</button>
-                </div>
-                <p className="font-bold text-foreground">{addr.full_name}</p>
-                <p className="text-muted-foreground">{addr.address}</p>
-                {addr.district && <p className="text-muted-foreground">{addr.district}, {addr.city}, {addr.region}</p>}
-                {!addr.district && <p className="text-muted-foreground">{addr.city}, {addr.region}, {addr.country_name}</p>}
-                {addr.reference && <p className="text-muted-foreground italic">Ref: {addr.reference}</p>}
-                <p className="text-muted-foreground">📞 {addr.phone}</p>
-                {addr.invoice_type === 'factura' && <p className="text-muted-foreground">RUC: {addr.ruc} — {addr.razon_social}</p>}
-              </div>
-
-              {/* Items */}
-              <div className="divide-y divide-border/20">
-                {items.map(i => (
-                  <div key={i.id} className="flex items-center gap-3 py-3">
-                    {/* Fix: antes rounded-lg (8px) hacía que la miniatura se viera
-                        demasiado redonda; ahora rounded-md, coherente con el resto
-                        de esquinas del checkout pero menos circular. */}
-                    {/* Fix: rounded-md aún se veía redondeado en el tamaño real de la
-                        miniatura; rounded-sm da un borde casi recto, coherente con el
-                        resto del checkout. */}
-                    <div className="w-10 h-10 rounded-sm bg-muted/30 overflow-hidden flex-shrink-0">
-                      {(i.product.images?.[0]?.url || i.variant?.images?.[0]?.url) && (
-                        <img src={i.variant?.images?.[0]?.url || i.product.images?.[0]?.url} alt="" className="w-full h-full object-cover" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-foreground line-clamp-1">{i.product.name}</p>
-                      {i.variant && <p className="text-xs text-muted-foreground">{i.variant.name}</p>}
-                      <p className="text-xs text-muted-foreground">× {i.quantity}</p>
-                    </div>
-                    <span className="text-sm font-bold text-foreground">{fmt(i.price * i.quantity)}</span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex gap-3">
-                <button onClick={() => setStep(3)} className="flex-1 border border-border/50 rounded-lg py-3 font-bold text-sm hover:bg-muted/30 transition-colors">
-                  <ChevronLeft className="w-4 h-4 inline mr-1" /> Anterior
-                </button>
-                <button onClick={placeOrder} disabled={placing || validatingCoupon || !paymentMethod}
-                  className="flex-1 bg-primary text-primary-foreground rounded-lg py-3 font-bold text-sm hover:bg-primary/90 transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
-                  {placing ? <><Loader2 className="w-4 h-4 animate-spin" /> Procesando...</> : <><Package className="w-4 h-4" /> Confirmar pedido</>}
-                </button>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* ── ORDER SUMMARY ── */}
@@ -815,7 +746,7 @@ export default function CheckoutPage() {
               {items.map(i => (
                 <div key={i.id} className="flex justify-between text-xs text-muted-foreground">
                   <span className="flex-1 truncate pr-2">{i.product.name}{i.variant ? ` (${i.variant.name})` : ''} ×{i.quantity}</span>
-                  <span className="font-semibold text-foreground whitespace-nowrap">{fmt(i.price * i.quantity)}</span>
+                  <span className="font-semibold text-foreground whitespace-nowrap">{fmt(i.price * i.quantity, displayCurrency, exchangeRate)}</span>
                 </div>
               ))}
             </div>

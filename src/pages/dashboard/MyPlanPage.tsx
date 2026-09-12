@@ -19,7 +19,7 @@ type Currency = 'PEN' | 'USD';
 export default function MyPlanPage() {
   const database = useDatabase();
   const { user, fetchProfile } = useAuthStore();
-  const { plans, currency: sysCurrency, currencySymbol, exchangeRate } = useConfig();
+  const { plans, showUsd, setShowUsd, currencySymbol, exchangeRate } = useConfig();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -47,7 +47,8 @@ export default function MyPlanPage() {
   const [showCancel, setShowCancel] = useState(false);
 
   // Payment state (for "Cambiar Plan" tab)
-  const [currency, setCurrency] = useState<Currency>((sysCurrency as Currency) || 'PEN');
+  const currency: Currency = showUsd ? 'USD' : 'PEN';
+  const setCurrency = (value: Currency) => setShowUsd(value === 'USD');
   const [targetPlanSlug, setTargetPlanSlug] = useState('');
   const payLoading = false;
 

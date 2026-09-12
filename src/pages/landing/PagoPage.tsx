@@ -9,13 +9,13 @@ import { continuePayment } from '@/lib/payments/checkout';
 import { ArrowLeft, CheckCircle, ShieldCheck, Info } from 'lucide-react';
 
 export default function PagoPage() {
- const db=useDatabase();const [params]=useSearchParams();const {user,fetchProfile}=useAuthStore();const {exchangeRate}=useConfig();
+ const db=useDatabase();const [params]=useSearchParams();const {user,fetchProfile}=useAuthStore();const {exchangeRate,showUsd,setShowUsd}=useConfig();
  const [methods,setMethods]=useState<any[]>([]);const [selected,setSelected]=useState(params.get('method')||'');
  const [session,setSession]=useState<any>(null);const [contract,setContract]=useState<any>(null);const [plan,setPlan]=useState<any>(null);
  const [payerEmail,setPayerEmail]=useState(user?.email||'');
  const [pending,setPending]=useState<any>(null);
  const [busy,setBusy]=useState(false);const [loaded,setLoaded]=useState(false);const [error,setError]=useState('');const [notice,setNotice]=useState('');
- const [currency,setCurrency]=useState(params.get('currency')==='USD'?'USD':'PEN');
+ const currency=showUsd?'USD':'PEN';const setCurrency=(value:string)=>setShowUsd(value==='USD');
  const [reference,setReference]=useState('');const [file,setFile]=useState<File|null>(null);
  const sessionId=params.get('session'),contractId=params.get('subscription'),planSlug=params.get('plan'),orderId=params.get('order');const cancelled=params.get('cancel')==='1';
  const invoke=async(name:string,body:any)=>{const {data,error}=await db.invoke<any>(name,{body});if(error||!data?.success)throw new Error(data?.error||'No pudimos conectar. Inténtalo de nuevo.');return data;};

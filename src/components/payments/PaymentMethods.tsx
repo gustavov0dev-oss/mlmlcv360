@@ -24,5 +24,5 @@ export function PaymentMethods({ methods, value, onChange, membership = false, d
 }
 
 export function PaymentCurrency({value,onChange,disabled=false}:{value:string;onChange:(value:string)=>void;disabled?:boolean}) {
- return <fieldset disabled={disabled} className="flex items-center gap-2"><legend className="text-sm text-muted-foreground mb-2">Moneda de pago</legend>{[['PEN','Soles · S/'],['USD','Dólares · US$']].map(([code,label])=><button key={code} type="button" aria-pressed={value===code} onClick={()=>onChange(code)} className={`rounded-lg border px-4 py-2 text-sm ${value===code?'border-primary text-primary bg-primary/5':'border-border text-muted-foreground'}`}>{label}</button>)}</fieldset>;
+ return <fieldset disabled={disabled} className="flex items-center gap-2"><legend className="sr-only">Moneda</legend>{[['PEN','S/ PEN'],['USD','US$ USD']].map(([code,label])=><button key={code} type="button" aria-pressed={value===code} onClick={()=>onChange(code)} className={`rounded-lg border px-3 py-2 text-sm ${value===code?'border-primary text-primary bg-primary/5':'border-border text-muted-foreground'}`}>{label}</button>)}</fieldset>;
 }

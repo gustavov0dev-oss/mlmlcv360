@@ -8,7 +8,8 @@ import { toast } from 'sonner';
 import { useState } from 'react';
 
 export default function PlanesPage() {
-  const { plans, currency, currencySymbol, exchangeRate } = useConfig();
+  const { plans, showUsd, currencySymbol, exchangeRate } = useConfig();
+  const currency = showUsd ? 'USD' : 'PEN';
   const { user, fetchProfile } = useAuthStore();
   const database = useDatabase();
   const navigate = useNavigate();
@@ -23,23 +24,15 @@ export default function PlanesPage() {
     if (!user) { navigate(`/registro?plan=${plan.slug}`); return; }
     if (isFree) {
       setActivating(plan.slug);
-      const now = new Date().toISOString();
-      const endDate = new Date(Date.now() + 100 * 365 * 86400000).toISOString();
-      await Promise.all([
-        database.update('profiles', user.id, { plan: plan.slug, updated_at: now }),
-        database.upsert('subscriptions', {
-          user_id: user.id, plan_slug: plan.slug, status: 'active',
-          current_period_start: now, current_period_end: endDate,
-          gateway: 'free', amount: 0, currency: 'PEN', updated_at: now,
-        }, 'user_id'),
-      ]);
+      const {data,error} = await database.invoke<any>('process-payment', {body:{action:'free_plan', plan_slug:plan.slug}});
+      if(error||!data?.success){toast.error(data?.error||'No se pudo activar el plan');setActivating(null);return;}
       await fetchProfile(user.id);
       toast.success(`Plan ${plan.name} activado`);
       navigate('/dashboard/mi-plan');
       setActivating(null);
       return;
     }
-    navigate(`/dashboard/mi-plan?tab=change&plan=${plan.slug}`);
+    navigate(`/pago?plan=${plan.slug}&currency=${currency}`);
   };
 
   const featureRows = sortedPlans[0]?.features || [];
