@@ -567,7 +567,7 @@ export default function DashboardHeader() {
                   ) : dbNotifications.length > 0 ? dbNotifications.map(n => (
                     <div key={n.id}
                       className={cn('group flex gap-3 px-4 py-3 hover:bg-muted transition-colors border-b border-border/50 cursor-pointer', !n.read && 'bg-primary/5')}
-                      onClick={() => !n.read && markAsRead(n.id)}
+                      onClick={() => {if(!n.read)void markAsRead(n.id);if(n.link?.startsWith('/')&&!n.link.startsWith('//')){navigate(n.link);setNotifOpen(false);}}}
                     >
                       <div className={cn('w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0',
                         n.type === 'success' ? 'bg-green-500/20 text-green-500' :

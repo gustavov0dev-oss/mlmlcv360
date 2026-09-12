@@ -737,16 +737,16 @@ export default function CheckoutPage() {
         </div>
 
         {/* ── ORDER SUMMARY ── */}
-        <div className="lg:col-span-2 lg:pl-12 lg:border-l lg:border-border/20">
+        <div className="lg:col-span-2 min-w-0 lg:pl-8 lg:border-l lg:border-border/20">
           <div className="lg:sticky lg:top-24 space-y-5">
             <h3 className="text-base font-bold text-foreground">Resumen del pedido</h3>
 
             {/* Items mini list */}
             <div className="space-y-2 max-h-48 overflow-y-auto">
               {items.map(i => (
-                <div key={i.id} className="flex justify-between text-xs text-muted-foreground">
+                <div key={i.id} className="grid grid-cols-[minmax(0,1fr)_110px] gap-3 text-xs text-muted-foreground">
                   <span className="flex-1 truncate pr-2">{i.product.name}{i.variant ? ` (${i.variant.name})` : ''} ×{i.quantity}</span>
-                  <span className="font-semibold text-foreground whitespace-nowrap">{fmt(i.price * i.quantity, displayCurrency, exchangeRate)}</span>
+                  <span className="font-semibold text-foreground whitespace-nowrap text-right tabular-nums">{fmt(i.price * i.quantity, displayCurrency, exchangeRate)}</span>
                 </div>
               ))}
             </div>

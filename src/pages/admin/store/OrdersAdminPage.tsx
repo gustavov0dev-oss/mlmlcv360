@@ -1,3 +1,4 @@
+import { supabase } from '@/lib/backend/client';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { PaymentReviews } from '@/components/payments/PaymentReviews';
 import { LoadingRegion, StableRegion } from '@/components/ui/loading-region';
@@ -33,6 +34,8 @@ export default function OrdersAdminPage() {
   const [updating, setUpdating] = useState<string | null>(null);
 
   const database = useDatabase();
+  const [pendingCount,setPendingCount]=useState(0);
+  useEffect(()=>{const refresh=()=>{void supabase.from('payment_sessions').select('id',{count:'exact',head:true}).eq('status','review').then(({count})=>setPendingCount(count||0));};refresh();const timer=setInterval(refresh,30000);return()=>clearInterval(timer);},[]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -107,7 +110,7 @@ export default function OrdersAdminPage() {
         </button>
       </div>
 
-      <details className="rounded-xl border border-border bg-card p-4"><summary className="cursor-pointer font-medium">Revisar comprobantes pendientes</summary><div className="mt-4"><PaymentReviews onReviewed={load}/></div></details>
+      <details className="rounded-xl border border-border bg-card p-4"><summary className="cursor-pointer font-medium">Revisar comprobantes pendientes <span className="ml-2 rounded-full bg-primary/15 px-2 py-0.5 text-primary">{pendingCount}</span></summary><div className="mt-4"><PaymentReviews onReviewed={load}/></div></details>
       <div className="flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />

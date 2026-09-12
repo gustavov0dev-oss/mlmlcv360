@@ -53,14 +53,14 @@ export default function MyPlanPage() {
   const payLoading = false;
 
   const activePlans = [...plans].filter(p => p.is_active).sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
-  const currentPlanSlug = (user as any)?.plan || 'free';
+  const currentPlanSlug = subscription?.plan_slug || (user as any)?.plan || 'free';
   const currentPlan = activePlans.find(p => p.slug === currentPlanSlug);
   const isFree = !currentPlan || currentPlan.is_free || Number(currentPlan.price) === 0;
 
   // Load subscription
   useEffect(() => {
     if (!user) return;
-    database.select<any>('billing_contracts',{filter:{user_id:user.id,status:['pending','active','suspended']},maybeSingle:true}).then(({data})=>setPendingContract(data));
+    database.select<any>('billing_contracts',{filter:{user_id:user.id,status:['pending','active','suspended']},order:{column:'created_at',ascending:false},limit:1,maybeSingle:true}).then(({data})=>setPendingContract(data));
     database.select('subscriptions', {
       filter: { user_id: user.id },
       order: { column: 'created_at', ascending: false },
@@ -78,9 +78,9 @@ export default function MyPlanPage() {
 
   const cancelPlan = async () => {
     setWorking(true);
-    const { data, error } = await database.invoke<any>('subscription-billing', {body:{action:'cancel'}});
+    const { data, error } = await database.invoke<any>('subscription-billing', {body:{action:'cancel',contract_id:subscription?.contract_id||pendingContract?.id}});
     if(error || !data?.success) toast.error(data?.error || 'No se pudo cancelar.');
-    else { if(user) await fetchProfile(user.id); setSubscription((p:any)=>p?{...p,cancel_at_period_end:true,auto_renew:false}:null); setShowCancel(false); toast.success(data.message || 'Renovación cancelada. Tus beneficios siguen vigentes hasta finalizar el período pagado.'); }
+    else { if(user) await fetchProfile(user.id); setSubscription((p:any)=>p?{...p,cancel_at_period_end:true,auto_renew:false}:null); setPendingContract(null); setShowCancel(false); toast.success(data.message || 'Renovación cancelada. Tus beneficios siguen vigentes hasta finalizar el período pagado.'); }
     setWorking(false);
   };
   const handleActivateFree = async (planSlug: string) => {
@@ -152,7 +152,7 @@ export default function MyPlanPage() {
                 </div>
               </div>
               <div className="flex flex-col gap-2 min-w-[140px]">
-                {!isFree && isActive && !subscription?.cancel_at_period_end && (
+                {(subscription?.auto_renew || pendingContract?.status==='active' || pendingContract?.status==='suspended') && !subscription?.cancel_at_period_end && (
                   <button
                     onClick={() => setShowCancel(true)}
                     className="px-4 py-2.5 border border-border rounded-xl text-sm font-medium text-muted-foreground hover:bg-red-500/5 hover:text-red-500 hover:border-red-500/30 transition-colors flex items-center gap-2"
@@ -160,6 +160,7 @@ export default function MyPlanPage() {
                     <X className="w-3.5 h-3.5" /> Cancelar renovación
                   </button>
                 )}
+                {subscription && !subscription.auto_renew && <p className="text-xs text-muted-foreground max-w-[220px]">{subscription.cancel_at_period_end?'Renovación cancelada.':'Este plan no se renueva automáticamente.'} {subscription.current_period_end?`Conservas tus beneficios hasta ${new Date(subscription.current_period_end).toLocaleDateString('es-PE')}.`:''}</p>}
                 {!isFree && !isActive && (
                   <button
                     onClick={() => { setTargetPlanSlug(currentPlanSlug); setTab('change'); }}

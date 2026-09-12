@@ -1,3 +1,4 @@
+import {deliverPaymentEmail} from '../_shared/payment-email.ts';
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 // The notification is only a hint. Authenticate the payment by retrieving it
@@ -17,6 +18,7 @@ Deno.serve(async req=>{
   const {data:s}=await db.from('payment_sessions').select('*').eq('id',payment.external_reference).eq('gateway','mercadopago').single();
   if(!s||s.currency!==payment.currency_id||Number(s.amount)!==Number(payment.transaction_amount))return new Response('mismatch',{status:400});
   const {error}=await db.rpc('complete_payment_session',{p_id:s.id});
+  if(!error)await deliverPaymentEmail(db,s.id).catch(()=>{});
   return new Response(error?'retry':'ok',{status:error?500:200});
  }catch{return new Response('retry',{status:500})}
 });

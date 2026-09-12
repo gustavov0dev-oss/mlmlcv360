@@ -1,3 +1,4 @@
+import {deliverPaymentEmail} from '../_shared/payment-email.ts';
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 const headers={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization, apikey, content-type, x-client-info','Content-Type':'application/json'};
@@ -37,6 +38,7 @@ Deno.serve(async req=>{
    if(!r.ok) throw new Error('La pasarela rechazó la solicitud. Revisa las credenciales de producción o intenta nuevamente.');return d;
   };
   const paypalToken=async(c:any)=>(await request('https://api-m.paypal.com/v1/oauth2/token',{method:'POST',headers:{Authorization:`Basic ${btoa(c.client_id+':'+c.client_secret)}`,'Content-Type':'application/x-www-form-urlencoded'},body:'grant_type=client_credentials'})).access_token;
+  if(b.action==='retry_emails'){if(!admin)return json({success:false},403);const result=await deliverPaymentEmail(db,b.session_id);return json({success:true,...result});}
   if(b.action==='check_gateway') {
    if(!admin) return json({success:false,error:'No autorizado'},403);
    const g=gatewayRows.find((g:any)=>g.slug===b.gateway);if(!g) throw new Error('Método no encontrado.');
@@ -53,6 +55,7 @@ Deno.serve(async req=>{
    if(!manual.includes(s.gateway)||s.status!=='review'||!s.receipt_path) throw new Error('El comprobante no está pendiente de revisión.');
    if(b.approve) await checked(db.rpc('complete_payment_session',{p_id:s.id}));
    else await checked(db.from('payment_sessions').update({status:'rejected'}).eq('id',s.id).eq('status','review'));
+   await deliverPaymentEmail(db,s.id).catch(()=>{});
    return json({success:true});
   }
   if(b.action==='receipt'||b.action==='verify') {
@@ -63,6 +66,7 @@ Deno.serve(async req=>{
     const {data:files,error}=await db.storage.from('payment-receipts').list(user.id,{search:b.path.split('/')[1]});
     if(error||!files?.some(f=>f.name===b.path.split('/')[1])) throw new Error('No se encontró el comprobante.');
     await checked(db.from('payment_sessions').update({receipt_path:b.path,operation_reference:b.reference.trim().slice(0,100),status:'review'}).eq('id',s.id).eq('status','pending'));
+    await deliverPaymentEmail(db,s.id).catch(()=>{});
     return json({success:true,status:'review'});
    }
    if(s.status==='paid'||manual.includes(s.gateway)) return json({success:true,status:s.status});
@@ -78,7 +82,7 @@ Deno.serve(async req=>{
     const result=await request(`https://api.mercadopago.com/v1/payments/search?external_reference=${s.id}`,{headers:{Authorization:`Bearer ${gw.credentials.access_token}`}});
     paid=result.results?.some((p:any)=>p.status==='approved'&&p.live_mode===true&&p.external_reference===s.id&&p.currency_id===s.currency&&Number(p.transaction_amount)===Number(s.amount));
    }
-   if(paid) await checked(db.rpc('complete_payment_session',{p_id:s.id}));
+   if(paid) {await checked(db.rpc('complete_payment_session',{p_id:s.id}));await deliverPaymentEmail(db,s.id).catch(()=>{});}
    return json({success:true,status:paid?'paid':'pending'});
   }
   const gw=gatewayRows.find((g:any)=>g.slug===b.gateway&&g.is_active);

@@ -1,6 +1,5 @@
 import ProductCard from '@/components/store/ProductCard';
 import { useCartCoupon } from '@/hooks/useCartCoupon';
-import { LoadingRegion, StableRegion } from '@/components/ui/loading-region';
 import React from 'react';
 import { useState, useEffect } from 'react';
 import { useDatabase } from '@/lib/backend';
@@ -9,7 +8,7 @@ import { useConfig } from '@/store/configStore';
 import { useNavigate } from '@/lib/router';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import type { Coupon, ShippingMethod, Product } from '@/lib/storeTypes';
+import type { Coupon, Product } from '@/lib/storeTypes';
 import { ShoppingCart, Trash2, Plus, Minus, Tag, X, ArrowRight, ChevronLeft, Truck, CircleCheck as CheckCircle, Package, ShoppingBag, Check } from 'lucide-react';
 
 // Mismo ancho máximo que usa StorePage, para que ambas vistas queden
@@ -97,9 +96,6 @@ export default function CartPage() {
   const { coupon, setCoupon } = useCartCoupon(subtotal);
   const [couponError, setCouponError] = useState('');
   const [checkingCoupon, setCheckingCoupon] = useState(false);
-  const [shippingMethods, setShippingMethods] = useState<ShippingMethod[]>([]);
-  const [selectedShipping, setSelectedShipping] = useState<ShippingMethod | null>(null);
-  const [loadingShipping, setLoadingShipping] = useState(true);
   const [availableCoupons, setAvailableCoupons] = useState<Coupon[]>([]);
   const [recommendations, setRecommendations] = useState<Product[]>([]);
   useEffect(() => {
@@ -112,16 +108,7 @@ export default function CartPage() {
   const freeThreshold = parseFloat(company.free_shipping_threshold || '150');
 
   useEffect(() => {
-    setLoadingShipping(true);
-    Promise.all([
-      database.select<ShippingMethod>('shipping_methods', { filter: { status: 'active' } }),
-      database.select<Coupon>('coupons', { filter: { status: 'active' } }),
-    ]).then(([{ data: methods }, { data: coupons }]) => {
-      const ms = (methods || []) as ShippingMethod[];
-      setShippingMethods(ms);
-      if (ms.length > 0) setSelectedShipping(prev => ms.find(m=>m.id===prev?.id) || ms[0]);
-      setLoadingShipping(false);
-
+    database.select<Coupon>('coupons', { filter: { status: 'active' } }).then(({data:coupons}) => {
       const now = new Date();
       const valid = ((coupons || []) as Coupon[]).filter((c: Coupon) => {
         if (c.expires_at && new Date(c.expires_at) < now) return false;
@@ -165,13 +152,7 @@ export default function CartPage() {
       : Math.min(subtotal, coupon.value)
     : 0;
 
-  const shippingCost = (() => {
-    if (!selectedShipping) return 0;
-    if (subtotal >= freeThreshold) return 0;
-    if (selectedShipping.type === 'free_threshold' && selectedShipping.free_threshold && subtotal >= selectedShipping.free_threshold) return 0;
-    return selectedShipping.price;
-  })();
-
+  const shippingCost = 0;
   const total = subtotal - discount + shippingCost;
   const igv = total - total / 1.18;
 
@@ -263,34 +244,6 @@ export default function CartPage() {
             })}
           </div>
 
-          {/* Shipping selector */}
-          <StableRegion className="mt-8">
-            <h3 className="text-sm font-bold text-foreground flex items-center gap-2 mb-1">
-              <Truck className="w-4 h-4 text-primary" /> Estimación de envío
-            </h3>
-            {loadingShipping ? <LoadingRegion className="min-h-[7rem]" /> : (
-              <div className="divide-y divide-border/20 border-t border-border/20">
-                {shippingMethods.map(m => {
-                  const cost = subtotal >= freeThreshold || (m.type === 'free_threshold' && m.free_threshold && subtotal >= m.free_threshold) ? 0 : m.price;
-                  const selected = selectedShipping?.id === m.id;
-                  return (
-                    <label key={m.id} className="flex items-center gap-3 py-4 cursor-pointer">
-                      <input type="radio" name="shipping" value={m.id} checked={selected}
-                        onChange={() => setSelectedShipping(m)} className="accent-primary" />
-                      <div className="flex-1">
-                        <p className={cn('text-sm', selected ? 'font-semibold text-foreground' : 'font-medium text-foreground/70')}>{m.name}</p>
-                        {m.estimated_days_min != null && <p className="text-xs text-muted-foreground">{m.estimated_days_min}–{m.estimated_days_max} días hábiles</p>}
-                      </div>
-                      <span className={cn('text-sm font-bold', cost === 0 ? 'text-green-500' : selected ? 'text-primary' : 'text-foreground/70')}>
-                        {cost === 0 ? 'Gratis' : fmt(cost)}
-                      </span>
-                    </label>
-                  );
-                })}
-                {shippingMethods.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">El costo de envío se calculará al hacer checkout</p>}
-              </div>
-            )}
-          </StableRegion>
         </div>
 
         {/* ── Order Summary ── */}
@@ -356,7 +309,7 @@ export default function CartPage() {
               <div className="flex justify-between text-muted-foreground">
                 <span>Envío estimado</span>
                 <span className={shippingCost === 0 ? 'text-green-500 font-semibold' : ''}>
-                  {shippingCost === 0 ? 'Gratis' : fmt(shippingCost)}
+                  Se calcula al continuar
                 </span>
               </div>
               <div className="flex justify-between text-muted-foreground text-xs">
@@ -364,7 +317,7 @@ export default function CartPage() {
                 <span>{fmt(igv)}</span>
               </div>
               <div className="flex justify-between font-bold text-foreground text-base border-t border-border/20 pt-3">
-                <span>Total estimado</span>
+                <span>Subtotal a pagar</span>
                 <span>{fmt(total)}</span>
               </div>
             </div>

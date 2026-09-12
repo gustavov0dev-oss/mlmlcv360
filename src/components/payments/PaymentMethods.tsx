@@ -13,10 +13,10 @@ export function PaymentBrand({ slug }: { slug: string }) {
 export function PaymentMethods({ methods, value, onChange, membership = false, disabled = false }: {
   methods: PaymentMethod[]; value: string; onChange: (slug: string) => void; membership?: boolean; disabled?: boolean;
 }) {
-  return <fieldset disabled={disabled} className="space-y-2"><legend className="mb-3 text-base font-semibold">Método de pago</legend>
+  return <fieldset disabled={disabled} className="space-y-2 min-h-[290px]"><legend className="mb-3 text-base font-semibold">Método de pago</legend>
     {methods.filter(m => m.ready !== false).map(m => <label key={m.id || m.slug} className={`flex items-center gap-3 rounded-xl border p-3 cursor-pointer transition-colors ${value===m.slug?'border-primary/60 bg-primary/5':'border-border hover:bg-muted/40'} ${disabled?'opacity-60':''}`}>
       <input type="radio" name="payment-method" value={m.slug} checked={value===m.slug} onChange={()=>onChange(m.slug)} className="sr-only peer"/>
-      <PaymentBrand slug={m.slug}/><span className="flex-1"><span className="block text-sm font-semibold">{m.name}</span><span className="block text-sm text-muted-foreground">{membership ? automaticPayment(m.slug) ? 'Renovación mensual automática' : 'Un mes · sin renovación automática' : automaticPayment(m.slug) ? 'Pago seguro en '+m.name : 'Transferencia con comprobante'} · {m.currency}</span></span>
+      <PaymentBrand slug={m.slug}/><span className="flex-1 min-w-0"><span className="block text-sm font-semibold">{m.name}</span><span className="block text-sm text-muted-foreground">{membership ? automaticPayment(m.slug) ? 'Renovación mensual automática' : 'Un mes · sin renovación automática' : automaticPayment(m.slug) ? 'Pago seguro en '+m.name : 'Transferencia con comprobante'} · {m.currency}</span></span>
       <span className="w-5 h-5 rounded-full border border-border flex items-center justify-center peer-focus-visible:ring-2 peer-focus-visible:ring-primary">{value===m.slug&&<Check className="w-3.5 h-3.5 text-primary"/>}</span>
     </label>)}
     {!methods.length&&<p className="text-sm text-muted-foreground">No hay métodos disponibles en este momento.</p>}
