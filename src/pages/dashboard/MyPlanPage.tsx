@@ -1,3 +1,4 @@
+import { PaymentCurrency } from '@/components/payments/PaymentMethods';
 import { LoadingRegion } from '@/components/ui/loading-region';
 import { useState, useEffect } from 'react';
 import { useDatabase } from '@/lib/backend';
@@ -46,7 +47,7 @@ export default function MyPlanPage() {
   const [showCancel, setShowCancel] = useState(false);
 
   // Payment state (for "Cambiar Plan" tab)
-  const [currency] = useState<Currency>((sysCurrency as Currency) || 'PEN');
+  const [currency, setCurrency] = useState<Currency>((sysCurrency as Currency) || 'PEN');
   const [targetPlanSlug, setTargetPlanSlug] = useState('');
   const payLoading = false;
 
@@ -95,7 +96,7 @@ export default function MyPlanPage() {
   const handlePay = async () => {
     if (!targetPlan || !user) return;
     if (targetIsFree) { await handleActivateFree(targetPlanSlug); return; }
-    navigate(`/pago?plan=${encodeURIComponent(targetPlanSlug)}`);
+    navigate(`/pago?plan=${encodeURIComponent(targetPlanSlug)}&currency=${currency}`);
   };
 
   if (loading) {
@@ -247,6 +248,7 @@ export default function MyPlanPage() {
           {/* Left: Plan + Gateway selection */}
           <div className="lg:col-span-3 space-y-5">
 
+            <PaymentCurrency value={currency} onChange={value=>setCurrency(value as Currency)}/>
             {/* Plan selector */}
             <div className="bg-card border border-border rounded-xl p-5">
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Elige tu nuevo plan</p>

@@ -262,7 +262,7 @@ export default function CheckoutPage() {
 
   const placeOrder = async () => {
     if(validatingCoupon)return;
-    if (!user || items.length === 0) return;
+    if (!user || items.length === 0 || selectedGateway?.currency !== displayCurrency) return;
     setPlacing(true);
     await saveAddress();
 
@@ -292,9 +292,9 @@ export default function CheckoutPage() {
       setPlacing(false); return;
     }
     setCoupon(null);
-    clearCart();
     const { data: payment, error: paymentError } = await database.invoke<any>('process-payment', { body: { order_id: data.order_id, gateway: paymentMethod } });
     if (!paymentError && payment?.success) {
+      clearCart();
       continuePayment(payment);
       return;
     }
@@ -320,8 +320,8 @@ export default function CheckoutPage() {
               <CheckCircle className="w-8 h-8 text-primary" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-foreground">¡Pedido realizado!</h2>
-              <p className="text-muted-foreground text-sm mt-1">Gracias por tu compra. Te notificaremos al confirmar el pago.</p>
+              <h2 className="text-2xl font-bold text-foreground">Pago sin completar</h2>
+              <p className="text-muted-foreground text-sm mt-1">Todavía no se ha confirmado ningún pago. Puedes reintentarlo sin crear otro pedido.</p>
             </div>
 
             <div className="divide-y divide-border/20 border-y border-border/20 text-sm text-left">
@@ -346,15 +346,15 @@ export default function CheckoutPage() {
                   <p className="text-muted-foreground">Envía el pago a Yape/Plin: <span className="font-bold text-foreground">{selectedGateway.credentials.phone_number}</span> a nombre de {selectedGateway.credentials.merchant_name}</p>
                 )}
                 {(selectedGateway.slug === 'transfer' || !selectedGateway.credentials?.phone_number) && (
-                  <p className="text-muted-foreground">Recibirás los detalles de pago por correo electrónico. Tu pedido se confirmará tras verificar el pago.</p>
+                  <p className="text-muted-foreground">Continúa para consultar los datos de pago. Tu compra aparecerá en Mis pedidos cuando se confirme el pago.</p>
                 )}
               </div>
             )}
 
             <div className="flex gap-3 pt-2">
-              <button onClick={() => navigate('/dashboard/pedidos')}
+              <button onClick={() => navigate(`/pago?order=${placedOrder.order_id}&currency=${displayCurrency}`)}
                 className="flex-1 bg-primary text-primary-foreground py-3 rounded-lg font-bold text-sm hover:bg-primary/90 transition-colors">
-                Ver mis pedidos
+                Reintentar pago
               </button>
               <button onClick={() => navigate('/tienda')}
                 className="flex-1 border border-border/50 py-3 rounded-lg font-bold text-sm hover:bg-muted/30 transition-colors">
@@ -367,7 +367,7 @@ export default function CheckoutPage() {
     );
   }
 
-  if (items.length === 0) {
+  if (items.length === 0 && !placing && !placedOrder) {
     navigate('/carrito');
     return null;
   }
@@ -712,7 +712,7 @@ export default function CheckoutPage() {
                 </h2>
                 <div className="flex items-center gap-1 rounded-full border border-border/40 p-0.5">
                   {['PEN', 'USD'].map(c => (
-                    <button key={c} onClick={() => setDisplayCurrency(c)}
+                    <button key={c} onClick={() => {setDisplayCurrency(c);setSelectedGatewayIdx(-1);}}
                       className={cn('px-3 py-1.5 rounded-full text-xs font-bold transition-colors',
                         displayCurrency === c ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground')}>
                       {c === 'PEN' ? 'S/ Soles' : '$ USD'}
@@ -724,7 +724,7 @@ export default function CheckoutPage() {
               {loadingGateways ? <LoadingRegion className="min-h-[12rem]" /> : gateways.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-4">No hay métodos de pago configurados. Contacta al administrador.</p>
               ) : (
-                <PaymentMethods methods={gateways} value={paymentMethod} onChange={slug=>setSelectedGatewayIdx(gateways.findIndex(g=>g.slug===slug))} disabled={placing}/>
+                <PaymentMethods methods={gateways.filter(g=>g.currency===displayCurrency)} value={paymentMethod} onChange={slug=>setSelectedGatewayIdx(gateways.findIndex(g=>g.slug===slug))} disabled={placing}/>
 
               )}
 

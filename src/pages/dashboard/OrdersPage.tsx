@@ -29,7 +29,7 @@ export default function OrdersPage() {
     setLoading(true);
     const { data } = await database.select<Order>('orders', {
       select: '*, items:order_items(*)',
-      filter: { user_id: user.id },
+      filter: { user_id: user.id, payment_status: 'paid' },
       order: { column: 'created_at', ascending: false },
     });
     const ordersData = (data as Order[]) || [];

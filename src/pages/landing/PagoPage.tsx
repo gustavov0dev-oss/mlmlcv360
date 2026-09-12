@@ -4,7 +4,7 @@ import { useDatabase } from '@/lib/backend';
 import { supabase } from '@/lib/backend/client';
 import { useAuthStore } from '@/store/authStore';
 import { useConfig } from '@/store/configStore';
-import { PaymentMethods, PaymentBrand, automaticPayment } from '@/components/payments/PaymentMethods';
+import { PaymentMethods, PaymentBrand, PaymentCurrency, automaticPayment } from '@/components/payments/PaymentMethods';
 import { continuePayment } from '@/lib/payments/checkout';
 import { ArrowLeft, CheckCircle, ShieldCheck, Info } from 'lucide-react';
 
@@ -12,7 +12,9 @@ export default function PagoPage() {
  const db=useDatabase();const [params]=useSearchParams();const {user,fetchProfile}=useAuthStore();const {exchangeRate}=useConfig();
  const [methods,setMethods]=useState<any[]>([]);const [selected,setSelected]=useState(params.get('method')||'');
  const [session,setSession]=useState<any>(null);const [contract,setContract]=useState<any>(null);const [plan,setPlan]=useState<any>(null);
+ const [pending,setPending]=useState<any>(null);
  const [busy,setBusy]=useState(false);const [loaded,setLoaded]=useState(false);const [error,setError]=useState('');const [notice,setNotice]=useState('');
+ const [currency,setCurrency]=useState(params.get('currency')==='USD'?'USD':'PEN');
  const [reference,setReference]=useState('');const [file,setFile]=useState<File|null>(null);
  const sessionId=params.get('session'),contractId=params.get('subscription'),planSlug=params.get('plan'),orderId=params.get('order');const cancelled=params.get('cancel')==='1';
  const invoke=async(name:string,body:any)=>{const {data,error}=await db.invoke<any>(name,{body});if(error||!data?.success)throw new Error(data?.error||'No pudimos conectar. Inténtalo de nuevo.');return data;};
@@ -23,6 +25,7 @@ export default function PagoPage() {
  useEffect(()=>{if(!user)return;let active=true;setLoaded(false);setError('');
   (async()=>{
    const d=await invoke('process-payment',{action:'methods'});if(!active)return;setMethods(d.methods.filter((m:any)=>m.ready));
+   if(planSlug){const {data}=await db.select<any>('billing_contracts',{filter:{user_id:user.id},order:{column:'created_at',ascending:false}});if(active)setPending((data||[]).find((c:any)=>['pending','active','suspended'].includes(c.status))||null);}
    if(planSlug||orderId){const {data,error}=await db.select<any>(orderId?'orders':'plans',{filter:orderId?{id:orderId,user_id:user.id}:{slug:planSlug,is_active:true},single:true});if(error)throw new Error('No pudimos encontrar el pedido o plan.');if(active)setPlan(data);}
    if(cancelled){
     if(sessionId){const {data}=await db.select<any>('payment_sessions',{filter:{id:sessionId},single:true});if(active)setSession(data);}
@@ -30,11 +33,12 @@ export default function PagoPage() {
    }else if(sessionId||contractId)await refresh();
   })().catch(e=>active&&setError(e.message)).finally(()=>active&&setLoaded(true));return()=>{active=false};
  },[user?.id,sessionId,contractId,planSlug,orderId,cancelled]);
- const method=methods.find(m=>m.slug===(session?.gateway||contract?.gateway||selected));
+ const compatibleMethods=methods.filter(m=>m.currency===currency);
+ const method=(!!(sessionId||contractId)?methods:compatibleMethods).find(m=>m.slug===(session?.gateway||contract?.gateway||selected));
  const isOrder=!!(orderId||session?.order_id);const returning=!!(sessionId||contractId);const record=session||contract;
  const paid=session?.status==='paid'||!!(contract?.paid_until&&new Date(contract.paid_until)>new Date());
  const auto=!!planSlug&&automaticPayment(selected);
- const base=Number(plan?.price??plan?.total??0);const quoted=method&&plan?.currency!==method.currency?(plan?.currency==='PEN'?base/exchangeRate:base*exchangeRate):base;
+ const base=Number(plan?.price??plan?.total??0);const quoted=plan?.currency!==currency?(plan?.currency==='PEN'?base/exchangeRate:base*exchangeRate):base;
  const back=isOrder?'/dashboard/pedidos':'/dashboard/mi-plan';
  const start=async()=>{if(!method)return;setBusy(true);setError('');try{const d=await invoke(auto?'subscription-billing':'process-payment',auto?{action:'create',gateway:selected,plan_slug:planSlug}:{gateway:selected,plan_slug:planSlug,order_id:orderId});continuePayment(d);}catch(e:any){setError(e.message);setBusy(false)}};
  const verify=async()=>{setBusy(true);setError('');try{await refresh();setNotice('Estado actualizado directamente con la pasarela.');}catch(e:any){setError(e.message)}finally{setBusy(false)}};
@@ -55,10 +59,12 @@ export default function PagoPage() {
    {notice&&<p role="status" className="text-muted-foreground text-sm">{notice}</p>}
    {cancelled&&!paid&&<div role="status" className="flex gap-3 rounded-xl bg-muted/50 p-4"><Info className="w-5 h-5 shrink-0 text-primary"/><p className="text-sm">Saliste del pago sin completarlo. {isOrder?'Tu pedido sigue pendiente; puedes retomarlo cuando quieras.':'Tu membresía anterior no ha cambiado.'}</p></div>}
    {!returning&&<>
-    <div className="flex items-center justify-between gap-4 py-3"><div><p className="font-semibold">{plan?.name||plan?.order_number||'Preparando el resumen…'}</p><p className="text-sm text-muted-foreground">{auto?'Mensual · cancela futuras renovaciones cuando quieras':isOrder?'Un solo pago':'Un mes de acceso'}</p></div><p className="text-xl font-semibold whitespace-nowrap">{loaded&&plan?`${method?.currency||plan.currency} ${quoted.toFixed(2)}`:''}{auto&&<span className="text-sm font-normal text-muted-foreground">/mes</span>}</p></div>
-    {loaded&&<PaymentMethods methods={methods} value={selected} onChange={setSelected} membership={!!planSlug} disabled={busy}/>}
+    <div className="flex items-center justify-between gap-4 py-3"><div><p className="font-semibold">{plan?.name||plan?.order_number||'Preparando el resumen…'}</p><p className="text-sm text-muted-foreground">{auto?'Mensual · cancela futuras renovaciones cuando quieras':isOrder?'Un solo pago':'Un mes de acceso'}</p></div><p className="text-xl font-semibold whitespace-nowrap">{loaded&&plan?`${currency} ${quoted.toFixed(2)}`:''}{auto&&<span className="text-sm font-normal text-muted-foreground">/mes</span>}</p></div>
+    {pending&&<div className="space-y-3 rounded-lg bg-muted/30 p-4 text-sm"><p>{pending.status==='pending'?'Tienes una autorización pendiente para '+pending.plan_slug+'. Puedes retomarla o descartarla para elegir otra moneda o método.':'Ya tienes una suscripción mensual. Administra su renovación desde Mi Plan.'}</p><div className="flex flex-wrap gap-4"><Link className="text-primary" to={`/pago?subscription=${pending.id}`}>Revisar autorización</Link>{pending.status==='pending'&&<button disabled={busy} onClick={async()=>{setBusy(true);setError('');try{await invoke('subscription-billing',{action:'cancel',contract_id:pending.id});setPending(null);setNotice('Autorización descartada. Ahora puedes continuar con tu selección.');}catch(e:any){setError(e.message)}finally{setBusy(false)}}}>Descartar autorización pendiente</button>}</div></div>}
+    {loaded&&<PaymentCurrency value={currency} disabled={busy} onChange={value=>{setCurrency(value);setSelected('');}}/>}
+    {loaded&&<PaymentMethods methods={compatibleMethods} value={selected} onChange={setSelected} membership={!!planSlug} disabled={busy}/>}
     {method&&<p className="text-sm text-muted-foreground">{auto?`Autorizarás el cobro de ${method.currency} ${quoted.toFixed(2)} cada mes en ${method.name}. Puedes cancelar la renovación desde Mi Plan y conservar el acceso hasta la fecha pagada.`:automaticPayment(selected)?`Continuarás de forma segura en ${method.name}, en esta misma pestaña.`:'Al continuar verás los datos para transferir y adjuntar tu comprobante.'}</p>}
-    <button className={button+' w-full'} disabled={!loaded||busy||!method||!plan} onClick={start}>{busy?`Conectando con ${method?.name}…`:auto?`Suscribirme con ${method?.name||''}`:method?`Continuar con ${method.name}`:'Selecciona un método'}</button>
+    <button className={button+' w-full'} disabled={!loaded||busy||!method||!plan||!!(pending&&(pending.status!=='pending'||pending.plan_slug!==planSlug||pending.gateway!==selected))} onClick={start}>{busy?`Conectando con ${method?.name}…`:auto?`Suscribirme con ${method?.name||''}`:method?`Continuar con ${method.name}`:'Selecciona un método'}</button>
     <p className="flex items-center justify-center gap-2 text-sm text-muted-foreground"><ShieldCheck className="w-4 h-4"/>Tus datos de tarjeta se ingresan en la pasarela.</p>
    </>}
    {returning&&record&&<>

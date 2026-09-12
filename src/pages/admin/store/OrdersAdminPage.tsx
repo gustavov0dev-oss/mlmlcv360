@@ -37,7 +37,7 @@ export default function OrdersAdminPage() {
     const { data, error } = await database.select<Order>('orders', {
       select: '*, items:order_items(*)',
       order: { column: 'created_at', ascending: false },
-      ...(statusFilter ? { filter: { status: statusFilter } } : {}),
+      filter: { payment_status: 'paid', ...(statusFilter ? { status: statusFilter } : {}) },
     });
     if (error) { toast.error(error); setLoading(false); return; }
     let list = (data as Order[]) || [];

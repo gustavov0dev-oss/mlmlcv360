@@ -22,3 +22,7 @@ export function PaymentMethods({ methods, value, onChange, membership = false, d
     {!methods.length&&<p className="text-sm text-muted-foreground">No hay métodos disponibles en este momento.</p>}
   </fieldset>;
 }
+
+export function PaymentCurrency({value,onChange,disabled=false}:{value:string;onChange:(value:string)=>void;disabled?:boolean}) {
+ return <fieldset disabled={disabled} className="flex items-center gap-2"><legend className="text-sm text-muted-foreground mb-2">Moneda de pago</legend>{[['PEN','Soles · S/'],['USD','Dólares · US$']].map(([code,label])=><button key={code} type="button" aria-pressed={value===code} onClick={()=>onChange(code)} className={`rounded-lg border px-4 py-2 text-sm ${value===code?'border-primary text-primary bg-primary/5':'border-border text-muted-foreground'}`}>{label}</button>)}</fieldset>;
+}
