@@ -54,7 +54,7 @@ export default function PagoPage() {
  const button='inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-primary text-white font-semibold text-sm hover:bg-primary/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary disabled:opacity-50';
  return <main className="max-w-3xl mx-auto w-full px-5 pt-28 md:pt-32 pb-16">
   <Link to={back} className="inline-flex items-center gap-2 text-sm text-muted-foreground mb-7"><ArrowLeft className="w-4 h-4"/>{isOrder?'Mis pedidos':'Mi plan'}</Link>
-  <h1 className="text-2xl font-bold mb-2">{returning?paid?'Pago confirmado':'Estado de tu pago':isOrder?'Completa tu pedido':'Activa tu membresía'}</h1>
+  <h1 className="text-2xl font-bold mb-2">{returning?paid?'Pago confirmado':'Estado de tu pago':isOrder?'Completa tu pedido':pending?'Completa tu autorización':'Activa tu membresía'}</h1>
   {!user?<p className="mt-5"><Link to="/login" className="text-primary">Inicia sesión</Link> para continuar.</p>:<div className="mt-6 space-y-6" aria-busy={busy}>
    {error&&<p role="alert" className="text-red-500 text-sm">{error}</p>}
    {notice&&<p role="status" className="text-muted-foreground text-sm">{notice}</p>}
