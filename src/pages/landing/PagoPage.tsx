@@ -12,6 +12,7 @@ export default function PagoPage() {
  const db=useDatabase();const [params]=useSearchParams();const {user,fetchProfile}=useAuthStore();const {exchangeRate}=useConfig();
  const [methods,setMethods]=useState<any[]>([]);const [selected,setSelected]=useState(params.get('method')||'');
  const [session,setSession]=useState<any>(null);const [contract,setContract]=useState<any>(null);const [plan,setPlan]=useState<any>(null);
+ const [payerEmail,setPayerEmail]=useState(user?.email||'');
  const [pending,setPending]=useState<any>(null);
  const [busy,setBusy]=useState(false);const [loaded,setLoaded]=useState(false);const [error,setError]=useState('');const [notice,setNotice]=useState('');
  const [currency,setCurrency]=useState(params.get('currency')==='USD'?'USD':'PEN');
@@ -40,7 +41,7 @@ export default function PagoPage() {
  const auto=!!planSlug&&automaticPayment(selected);
  const base=Number(plan?.price??plan?.total??0);const quoted=plan?.currency!==currency?(plan?.currency==='PEN'?base/exchangeRate:base*exchangeRate):base;
  const back=isOrder?'/dashboard/pedidos':'/dashboard/mi-plan';
- const start=async()=>{if(!method)return;setBusy(true);setError('');try{const d=await invoke(auto?'subscription-billing':'process-payment',auto?{action:'create',gateway:selected,plan_slug:planSlug}:{gateway:selected,plan_slug:planSlug,order_id:orderId});continuePayment(d);}catch(e:any){setError(e.message);setBusy(false)}};
+ const start=async()=>{if(!method)return;setBusy(true);setError('');try{const d=await invoke(auto?'subscription-billing':'process-payment',auto?{action:'create',gateway:selected,plan_slug:planSlug,payer_email:payerEmail}:{gateway:selected,plan_slug:planSlug,order_id:orderId});continuePayment(d);}catch(e:any){setError(e.message);setBusy(false)}};
  const verify=async()=>{setBusy(true);setError('');try{await refresh();setNotice('Estado actualizado directamente con la pasarela.');}catch(e:any){setError(e.message)}finally{setBusy(false)}};
  const upload=async()=>{if(!file||!user||!reference.trim())return;setBusy(true);setError('');try{
   if(file.size>5*1024*1024)throw new Error('El archivo debe pesar menos de 5 MB.');
@@ -63,6 +64,7 @@ export default function PagoPage() {
     {pending&&<div className="space-y-3 rounded-lg bg-muted/30 p-4 text-sm"><p>{pending.status==='pending'?'Tienes una autorización pendiente para '+pending.plan_slug+'. Puedes retomarla o descartarla para elegir otra moneda o método.':'Ya tienes una suscripción mensual. Administra su renovación desde Mi Plan.'}</p><div className="flex flex-wrap gap-4"><Link className="text-primary" to={`/pago?subscription=${pending.id}`}>Revisar autorización</Link>{pending.status==='pending'&&<button disabled={busy} onClick={async()=>{setBusy(true);setError('');try{await invoke('subscription-billing',{action:'cancel',contract_id:pending.id});setPending(null);setNotice('Autorización descartada. Ahora puedes continuar con tu selección.');}catch(e:any){setError(e.message)}finally{setBusy(false)}}}>Descartar autorización pendiente</button>}</div></div>}
     {loaded&&<PaymentCurrency value={currency} disabled={busy} onChange={value=>{setCurrency(value);setSelected('');}}/>}
     {loaded&&<PaymentMethods methods={compatibleMethods} value={selected} onChange={setSelected} membership={!!planSlug} disabled={busy}/>}
+    {auto&&selected==='mercadopago'&&<label className="block text-sm">Correo de tu cuenta de Mercado Pago Perú<input type="email" autoComplete="email" value={payerEmail} onChange={e=>setPayerEmail(e.target.value)} className="block w-full mt-2 rounded-lg border border-border bg-muted p-3"/><span className="block text-sm text-muted-foreground mt-2">Debe corresponder a tu cuenta compradora de Perú. Puede ser distinto del correo con el que ingresas aquí.</span></label>}
     {method&&<p className="text-sm text-muted-foreground">{auto?`Autorizarás el cobro de ${method.currency} ${quoted.toFixed(2)} cada mes en ${method.name}. Puedes cancelar la renovación desde Mi Plan y conservar el acceso hasta la fecha pagada.`:automaticPayment(selected)?`Continuarás de forma segura en ${method.name}, en esta misma pestaña.`:'Al continuar verás los datos para transferir y adjuntar tu comprobante.'}</p>}
     <button className={button+' w-full'} disabled={!loaded||busy||!method||!plan||!!(pending&&(pending.status!=='pending'||pending.plan_slug!==planSlug||pending.gateway!==selected))} onClick={start}>{busy?`Conectando con ${method?.name}…`:auto?`Suscribirme con ${method?.name||''}`:method?`Continuar con ${method.name}`:'Selecciona un método'}</button>
     <p className="flex items-center justify-center gap-2 text-sm text-muted-foreground"><ShieldCheck className="w-4 h-4"/>Tus datos de tarjeta se ingresan en la pasarela.</p>

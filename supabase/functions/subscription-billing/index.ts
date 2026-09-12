@@ -5,7 +5,14 @@ const origin='https://mlmlcv360-preview.whizzend.chatgpt.site';
 const checked=async(q:any)=>{const r=await q;if(r.error){console.error('billing_database_error',r.error.code,r.error.message);throw new Error('No se pudo actualizar tu suscripción. Inténtalo nuevamente.');}return r.data;};
 async function api(url:string,token:string,method='GET',body?:unknown,id?:string){
  const r=await fetch(url,{method,headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json',...(id?{'PayPal-Request-Id':id,'X-Idempotency-Key':id}:{})},body:body?JSON.stringify(body):undefined,signal:AbortSignal.timeout(15000)});
- if(!r.ok)throw new Error('La pasarela no pudo completar la suscripción. Revisa tu cuenta o elige otro método.');
+ if(!r.ok){
+  const detail=await r.json().catch(()=>({}));const message=String(detail.message||detail.name||'');
+  console.error('subscription_provider_rejected',{status:r.status,path:new URL(url).pathname,code:message.slice(0,180)});
+  if(message.includes('Payer is associated with a different site'))throw new Error('El correo indicado pertenece a Mercado Pago de otro país. Ingresa el correo de tu cuenta de Mercado Pago Perú o elige PayPal en dólares.');
+  if(/payer.*collector|collector.*payer/i.test(message))throw new Error('La cuenta del comprador debe ser distinta de la cuenta que recibe el pago.');
+  if(r.status===401||r.status===403)throw new Error('La cuenta de la pasarela no tiene autorización para suscripciones. Contacta con soporte o elige otro método.');
+  throw new Error('La pasarela rechazó la autorización mensual. No se realizó ningún cobro. Revisa tu cuenta o elige otro método.');
+ }
  return r.status===204?{}:await r.json();
 }
 async function tokenFor(g:any){
@@ -106,7 +113,7 @@ Deno.serve(async req=>{
    result=await api('https://api-m.paypal.com/v1/billing/subscriptions',t,'POST',{plan_id:providerPlan,custom_id:c.id,application_context:{brand_name:'CLUV360',user_action:'SUBSCRIBE_NOW',return_url:back,cancel_url:back+'&cancel=1'}},c.id);
    result.checkout=result.links?.find((l:any)=>l.rel==='approve')?.href;
   }else{
-   result=await api('https://api.mercadopago.com/preapproval',t,'POST',{reason:`CLUV360 ${plan.name} mensual`,external_reference:c.id,payer_email:user.email,auto_recurring:{frequency:1,frequency_type:'months',transaction_amount:Number(c.amount),currency_id:c.currency},back_url:back,status:'pending'},c.id);
+   result=await api('https://api.mercadopago.com/preapproval',t,'POST',{reason:`CLUV360 ${plan.name} mensual`,external_reference:c.id,payer_email:typeof b.payer_email==='string'&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(b.payer_email.trim())?b.payer_email.trim():user.email,auto_recurring:{frequency:1,frequency_type:'months',transaction_amount:Number(c.amount),currency_id:c.currency},back_url:back,status:'pending'},c.id);
    result.checkout=result.init_point;
   }
   if(!result.checkout||!result.id)throw new Error('No se pudo abrir la autorización mensual.');

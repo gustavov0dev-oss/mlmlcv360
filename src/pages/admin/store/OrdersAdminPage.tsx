@@ -1,3 +1,4 @@
+import { PaymentReviews } from '@/components/payments/PaymentReviews';
 import { LoadingRegion, StableRegion } from '@/components/ui/loading-region';
 import { useState, useEffect, useCallback } from 'react';
 import { useDatabase } from '@/lib/backend';
@@ -105,6 +106,7 @@ export default function OrdersAdminPage() {
         </button>
       </div>
 
+      <PaymentReviews onReviewed={load}/>
       <div className="flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />

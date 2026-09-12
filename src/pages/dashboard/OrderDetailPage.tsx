@@ -22,81 +22,6 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; 
 
 const ORDER_STEPS = ['pending','confirmed','processing','delivered'];
 
-// ── Invoice component (printable)
-function Invoice({ order, company }: { order: Order; company: any }) {
-  const base = order.total / 1.18;
-  const igv  = order.total - base;
-  const addr = order.shipping_address as any;
-  const isFactura = addr?.invoice_type === 'factura';
-  const series = company.invoice_series || 'B001';
-  const docNum = order.order_number.replace('ORD-', '');
-
-  return (
-    <div id="invoice" className="bg-white text-black p-8 max-w-2xl mx-auto text-sm font-sans hidden print:block">
-      <div className="border border-black">
-        <div className="flex border-b border-black">
-          <div className="flex-1 p-4 border-r border-black">
-            <p className="font-bold text-base">{company.company_name || 'MLM360'}</p>
-            <p className="text-xs">RUC: {company.company_ruc || '20000000001'}</p>
-            <p className="text-xs">{company.company_address || ''}</p>
-          </div>
-          <div className="w-48 p-4 text-center">
-            <p className="font-bold text-sm border-b border-black pb-1 mb-2">
-              {isFactura ? 'FACTURA ELECTRÓNICA' : 'BOLETA DE VENTA'}
-            </p>
-            <p className="font-bold">{series}-{docNum}</p>
-          </div>
-        </div>
-        <div className="p-4 border-b border-black space-y-1 text-xs">
-          <p><strong>Cliente:</strong> {addr?.full_name || order.user_id}</p>
-          <p><strong>Dirección:</strong> {addr?.address}, {addr?.district}, {addr?.city}</p>
-          {isFactura && <><p><strong>RUC:</strong> {addr?.ruc}</p><p><strong>Razón Social:</strong> {addr?.razon_social}</p></>}
-          <p><strong>Fecha:</strong> {new Date(order.created_at).toLocaleDateString('es-PE')}</p>
-        </div>
-        <table className="w-full text-xs">
-          <thead>
-            <tr className="border-b border-black bg-gray-100">
-              <th className="p-2 text-left">Descripción</th>
-              <th className="p-2 text-center w-12">Cant.</th>
-              <th className="p-2 text-right w-20">P. Unit.</th>
-              <th className="p-2 text-right w-20">Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            {(order.items || []).map(i => (
-              <tr key={i.id} className="border-b border-gray-200">
-                <td className="p-2">{i.product_name}{i.variant_name ? ` (${i.variant_name})` : ''}</td>
-                <td className="p-2 text-center">{i.quantity}</td>
-                <td className="p-2 text-right">{fmt(i.unit_price / 1.18)}</td>
-                <td className="p-2 text-right">{fmt((i.unit_price / 1.18) * i.quantity)}</td>
-              </tr>
-            ))}
-            {order.shipping_amount > 0 && (
-              <tr className="border-b border-gray-200">
-                <td className="p-2">Servicio de envío — {order.shipping_method_name}</td>
-                <td className="p-2 text-center">1</td>
-                <td className="p-2 text-right">{fmt(order.shipping_amount / 1.18)}</td>
-                <td className="p-2 text-right">{fmt(order.shipping_amount / 1.18)}</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-        <div className="flex justify-end">
-          <div className="w-56 border-t border-black text-xs">
-            <div className="flex justify-between p-1.5 border-b border-gray-200"><span>Op. Gravada:</span><span>{fmt(base)}</span></div>
-            <div className="flex justify-between p-1.5 border-b border-gray-200"><span>IGV (18%):</span><span>{fmt(igv)}</span></div>
-            {order.discount_amount > 0 && <div className="flex justify-between p-1.5 border-b border-gray-200 text-red-600"><span>Descuento:</span><span>-{fmt(order.discount_amount)}</span></div>}
-            <div className="flex justify-between p-2 font-bold text-sm"><span>TOTAL:</span><span>{fmt(order.total)}</span></div>
-          </div>
-        </div>
-        <div className="p-3 text-center text-[10px] text-gray-500 border-t border-black">
-          Representación impresa de comprobante electrónico — Autorizado por SUNAT
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default function OrderDetailPage() {
   const database = useDatabase();
   const orderId = window.location.pathname.split('/').pop() || '';
@@ -105,15 +30,14 @@ export default function OrderDetailPage() {
   const [order, setOrder] = useState<Order | null>(null);
   const [tracking, setTracking] = useState<OrderTracking[]>([]);
   const [loading, setLoading] = useState(true);
-  const [company, setCompany] = useState<Record<string, string>>({});
+
 
   const load = useCallback(async () => {
     if (!orderId) return;
     setLoading(true);
-    const [{ data: o }, { data: t }, { data: cfg }] = await Promise.all([
+    const [{ data: o }, { data: t }] = await Promise.all([
       database.select<Order>('orders', { select: '*, items:order_items(*)', filter: { id: orderId }, maybeSingle: true }),
       database.select<OrderTracking>('order_tracking', { filter: { order_id: orderId }, order: { column: 'created_at' } }),
-      database.select<{ key: string; value: string }>('system_config', { select: 'key,value' }),
     ]);
     if (o) {
       const orderData = o as Order;
@@ -139,11 +63,7 @@ export default function OrderDetailPage() {
       setOrder(enriched);
     }
     setTracking((t as OrderTracking[]) || []);
-    if (cfg) {
-      const c: Record<string, string> = {};
-      (cfg as any[]).forEach(r => { c[r.key] = r.value; });
-      setCompany(c);
-    }
+
     setLoading(false);
   }, [orderId]);
 
@@ -169,13 +89,13 @@ export default function OrderDetailPage() {
   const sc = STATUS_CONFIG[order.status] || STATUS_CONFIG.pending;
   const currentStep = ORDER_STEPS.indexOf(order.status === 'shipped' ? 'processing' : order.status);
   const addr = order.shipping_address as any;
-  const igv = order.total - order.total / 1.18;
+  const igv = Number(order.tax_amount) || 0;
 
   return (
     <div className="space-y-5 pb-10">
       {order.payment_status === 'pending' && <button onClick={() => navigate(`/pago?order=${order.id}&method=${order.payment_method || ''}`)} className="px-4 py-2 rounded-lg bg-primary text-white text-sm">Completar pago o enviar comprobante</button>}
 
-      <Invoice order={order} company={company} />
+
 
       {/* Header */}
       <div className="flex items-center gap-3">
@@ -296,9 +216,9 @@ export default function OrderDetailPage() {
           </div>
 
           {/* Print invoice */}
-          <button onClick={() => window.print()}
+          <button onClick={() => navigate(`/dashboard/pedidos/factura/${order.id}`)}
             className="w-full flex items-center justify-center gap-2 border border-border rounded-xl py-3 text-sm font-semibold hover:bg-muted transition-colors">
-            <Printer className="w-4 h-4 text-primary" /> Imprimir {addr?.invoice_type === 'factura' ? 'factura' : 'boleta'}
+            <Printer className="w-4 h-4 text-primary" /> Ver documento de compra
           </button>
         </div>
       </div>
