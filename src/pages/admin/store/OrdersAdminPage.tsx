@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import type { Order, Product } from '@/lib/storeTypes';
 import { OrderProductImage } from '@/components/store/OrderProductImage';
-import { Search, RefreshCw, ChevronRight } from 'lucide-react';
+import { Search, RefreshCw } from 'lucide-react';
 import { useNavigate } from '@/lib/router';
 
 
@@ -43,11 +43,11 @@ export default function OrdersAdminPage() {
     });
     if (error) { toast.error(error); setLoading(false); return; }
     let list = (data as Order[]) || [];
-    const ids = [...new Set(list.flatMap(o => (o.items || []).slice(0,1).map(i => i.product_id).filter(Boolean)))];
+    const ids = [...new Set(list.flatMap(o => (o.items || []).map(i => i.product_id).filter(Boolean)))];
     if (ids.length) {
       const { data: products } = await database.select<Product>('products', { select: 'id,name,images', filter: { id: ids } });
       const catalog = new Map(((products as Product[]) || []).map(p => [p.id, p]));
-      list = list.map(o => ({ ...o, items: (o.items || []).slice(0,1).map(i => {
+      list = list.map(o => ({ ...o, items: (o.items || []).map(i => {
         const product = i.product_id ? catalog.get(i.product_id) : undefined;
         return { ...i, product_name: i.product_name || product?.name || "Producto no disponible", image_url: product?.images?.[0]?.url || i.image_url };
       }) }));
@@ -123,7 +123,7 @@ export default function OrdersAdminPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/30">
-                  {['Pedido', 'Cliente', 'Productos', 'Total', 'Estado', 'Pago', 'Acciones'].map(h => (
+                  {['Pedido', 'Cliente', 'Productos', 'Total', 'Estado'].map(h => (
                     <th key={h} className="text-left px-4 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
@@ -136,7 +136,7 @@ export default function OrdersAdminPage() {
                     <tr key={o.id} className="border-b border-border/40 hover:bg-muted/20 transition-colors">
                       <td className="px-4 py-3">
                         <button onClick={() => navigate(`/dashboard/admin/pedidos/${o.id}`)}
-                          className="font-bold text-primary hover:underline whitespace-nowrap">{o.order_number}</button>
+                          className="font-bold text-primary hover:underline text-left break-words max-w-[155px]">{o.order_number}</button>
                         <p className="text-xs text-muted-foreground">{new Date(o.created_at).toLocaleDateString('es-PE')}</p>
                       </td>
                       <td className="px-4 py-3">
@@ -144,7 +144,7 @@ export default function OrdersAdminPage() {
                         <p className="text-xs text-muted-foreground">{addr?.city}, {addr?.region}</p>
                       </td>
                       <td className="px-4 py-3">
-                        <div className="space-y-2 w-[230px]">
+                        <div className="space-y-2 w-[180px]">
                           {(o.items || []).slice(0,1).map(i => (
                             <div key={i.id} className="flex items-center gap-2.5">
                               <OrderProductImage src={i.image_url} name={i.product_name} />
@@ -160,26 +160,13 @@ export default function OrdersAdminPage() {
                       </td>
                       <td className="px-4 py-3 font-bold text-foreground whitespace-nowrap">{new Intl.NumberFormat('es-PE', { style: 'currency', currency: o.currency || 'PEN' }).format(o.total)}</td>
                       <td className="px-4 py-3">
-                        <Select value={o.status==='shipped'?'processing':o.status} disabled={updating===o.id} onValueChange={value=>updateStatus(o.id,value)}><SelectTrigger className={cn('w-44 h-9 border-0 text-xs',sc.cl)}><SelectValue/></SelectTrigger><SelectContent>{ALL_STATUSES.map(s=><SelectItem key={s} value={s}>{STATUS_CONFIG[s].label}</SelectItem>)}</SelectContent></Select>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className={cn('text-xs font-bold px-2 py-0.5 rounded-full',
-                          o.payment_status === 'paid' ? 'bg-emerald-500/10 text-emerald-600' :
-                          o.payment_status === 'failed' ? 'bg-destructive/10 text-red-600' : 'bg-muted text-muted-foreground')}>
-                          {o.payment_status === 'paid' ? 'Pagado' : o.payment_status === 'failed' ? 'Fallido' : 'Pendiente'}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <button onClick={() => navigate(`/dashboard/admin/pedidos/${o.id}`)}
-                          className="p-1.5 hover:bg-muted rounded-lg text-muted-foreground hover:text-primary transition-colors">
-                          <ChevronRight className="w-4 h-4" />
-                        </button>
+                        <Select value={o.status==='shipped'?'processing':o.status} disabled={updating===o.id} onValueChange={value=>updateStatus(o.id,value)}><SelectTrigger className={cn('w-36 h-9 border-0 text-xs',sc.cl)}><SelectValue/></SelectTrigger><SelectContent>{ALL_STATUSES.map(s=><SelectItem key={s} value={s}>{STATUS_CONFIG[s].label}</SelectItem>)}</SelectContent></Select>
                       </td>
                     </tr>
                   );
                 })}
                 {orders.length === 0 && (
-                  <tr><td colSpan={7} className="px-4 py-12 text-center text-muted-foreground">No hay pedidos</td></tr>
+                  <tr><td colSpan={5} className="px-4 py-12 text-center text-muted-foreground">No hay pedidos</td></tr>
                 )}
               </tbody>
             </table>
