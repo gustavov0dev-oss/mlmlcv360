@@ -156,7 +156,7 @@ function DesktopUserMenu() {
 
       {/* Logout confirmation dialog */}
       {showLogoutConfirm && (
-        <div className="fixed inset-0 z-[70] bg-black/50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[70] app-modal-overlay flex items-center justify-center p-4">
           <div className="bg-card border border-border rounded-xl w-full max-w-sm shadow-2xl p-6">
             <div className="flex flex-col items-center text-center mb-5">
               <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mb-3">
@@ -464,7 +464,7 @@ export default function Navbar() {
 
       {/* Logout confirmation dialog */}
       {showLogoutConfirm && (
-        <div className="fixed inset-0 z-[70] bg-black/50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[70] app-modal-overlay flex items-center justify-center p-4">
           <div className="bg-card border border-border rounded-xl w-full max-w-sm shadow-2xl p-6">
             <div className="flex flex-col items-center text-center mb-5">
               <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mb-3">

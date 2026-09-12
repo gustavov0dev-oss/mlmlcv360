@@ -1,4 +1,4 @@
-import { PaymentMethods } from '@/components/payments/PaymentMethods';
+import { PaymentMethods, PaymentCurrency } from '@/components/payments/PaymentMethods';
 import { continuePayment } from '@/lib/payments/checkout';
 import { useCartCoupon } from '@/hooks/useCartCoupon';
 import { LoadingRegion, StableRegion } from '@/components/ui/loading-region';
@@ -706,19 +706,11 @@ export default function CheckoutPage() {
           {/* ── STEP 3: Payment ── */}
           {step === 3 && (
             <StableRegion className="space-y-4">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-wrap items-center justify-between gap-4">
                 <h2 className="text-sm font-bold text-foreground flex items-center gap-2">
                   <CreditCard className="w-4 h-4 text-primary" /> Finaliza tu pedido
                 </h2>
-                <div className="flex items-center gap-1 rounded-full border border-border/40 p-0.5">
-                  {['PEN', 'USD'].map(c => (
-                    <button key={c} onClick={() => {setDisplayCurrency(c);setSelectedGatewayIdx(-1);}}
-                      className={cn('px-3 py-1.5 rounded-full text-xs font-bold transition-colors',
-                        displayCurrency === c ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground')}>
-                      {c === 'PEN' ? 'S/ Soles' : '$ USD'}
-                    </button>
-                  ))}
-                </div>
+                <PaymentCurrency value={displayCurrency} disabled={placing} onChange={value=>{setDisplayCurrency(value);setSelectedGatewayIdx(-1);}}/>
               </div>
 
               {loadingGateways ? <LoadingRegion className="min-h-[12rem]" /> : gateways.length === 0 ? (

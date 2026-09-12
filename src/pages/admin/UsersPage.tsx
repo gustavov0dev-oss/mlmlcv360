@@ -195,7 +195,7 @@ function UserModal({
   const title = { create: 'Crear nuevo usuario', edit: 'Editar usuario', view: 'Detalle de usuario' }[mode!];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 app-modal-overlay">
       <div className="bg-card border border-border rounded-xl w-full max-w-xl shadow-2xl flex flex-col max-h-[92vh]">
 
         {/* Header */}

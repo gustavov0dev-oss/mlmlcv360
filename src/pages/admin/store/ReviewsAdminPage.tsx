@@ -270,7 +270,7 @@ export default function ReviewsAdminPage() {
 
       {/* Preview modal */}
       {preview && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setPreview(null)}>
+        <div className="fixed inset-0 z-50 app-modal-overlay flex items-center justify-center p-4" onClick={() => setPreview(null)}>
           <div className="bg-card border border-border rounded-xl w-full max-w-lg shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-border">

@@ -134,7 +134,7 @@ function CommissionModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 app-modal-overlay">
       <div className="bg-card border border-border rounded-xl w-full max-w-lg shadow-2xl flex flex-col max-h-[90vh]">
         <div className="flex items-center justify-between px-6 py-4 border-b border-border flex-shrink-0">
           <div className="flex items-center gap-2">
@@ -731,7 +731,7 @@ export default function AdminCommissionsPage() {
 
       {/* View detail */}
       {viewRow && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 app-modal-overlay">
           <div className="bg-card border border-border rounded-xl w-full max-w-sm shadow-2xl p-6">
             <div className="flex items-center justify-between mb-5">
               <h3 className="text-base font-bold text-foreground">Detalle de comisión</h3>

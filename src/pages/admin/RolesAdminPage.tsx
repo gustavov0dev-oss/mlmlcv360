@@ -204,7 +204,7 @@ export default function RolesAdminPage() {
 
       {/* Create modal */}
       {showCreate && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 app-modal-overlay flex items-center justify-center p-4">
           <div className="bg-card border border-border rounded-xl w-full max-w-md shadow-2xl p-6">
             <div className="flex items-center justify-between mb-5">
               <h3 className="text-lg font-bold text-foreground">Crear nuevo rol</h3>

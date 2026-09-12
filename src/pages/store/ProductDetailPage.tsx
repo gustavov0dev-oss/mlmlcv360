@@ -1,3 +1,4 @@
+import { PaymentCurrency } from '@/components/payments/PaymentMethods';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useProductReviews } from '@/hooks/useProductReviews';
 import { supabase } from '@/lib/backend/client';
@@ -1216,10 +1217,7 @@ export default function ProductDetailPage() {
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> En stock
                   </span>
                 )}
-                <button onClick={() => setShowUsd(!showUsd)}
-                  className="ml-auto text-xs font-medium px-2.5 py-1 rounded-md border border-border text-muted-foreground hover:text-foreground hover:border-muted-foreground/40 transition-colors">
-                  {showUsd ? 'USD' : 'PEN'}
-                </button>
+                <PaymentCurrency value={showUsd ? "USD" : "PEN"} onChange={value=>setShowUsd(value==="USD")}/>
               </div>
 
               {/* SKU — subtle standalone line */}
@@ -1492,7 +1490,7 @@ export default function ProductDetailPage() {
 
       {/* Lightbox */}
       {lightboxImg && (
-        <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
+        <div className="fixed inset-0 z-50 app-modal-overlay flex items-center justify-center p-4"
           onClick={() => setLightboxImg(null)}>
           <button className="absolute top-4 right-4 w-9 h-9 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors">✕</button>
           <img src={lightboxImg} alt="" className="max-w-full max-h-full rounded-lg object-contain" onClick={e => e.stopPropagation()} />
@@ -1513,7 +1511,7 @@ export default function ProductDetailPage() {
         const isWebPage = !isVideoFile && !embedUrl;
 
         return (
-          <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4" onClick={() => setShowDemo(false)}>
+          <div className="fixed inset-0 z-50 app-modal-overlay flex items-center justify-center p-4" onClick={() => setShowDemo(false)}>
             <div className="bg-card rounded-lg overflow-hidden border border-border w-full max-w-3xl" onClick={e => e.stopPropagation()}>
               <div className="flex items-center justify-between px-5 py-3.5 border-b border-border">
                 <div className="flex items-center gap-2 min-w-0">

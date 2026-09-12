@@ -107,7 +107,7 @@ function RegionFormModal({ item, onSave, onClose, saving }: {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 app-modal-overlay"
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div className="bg-card border border-border rounded-xl w-full max-w-md shadow-2xl flex flex-col max-h-[90dvh]">

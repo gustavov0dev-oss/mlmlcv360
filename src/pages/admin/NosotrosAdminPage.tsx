@@ -657,7 +657,7 @@ function FounderFormModal({ founder, onSave, onClose, saving }: {
   const set = (k: keyof typeof form, v: any) => setForm(p => ({ ...p, [k]: v }));
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm"
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 app-modal-overlay"
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="bg-card border border-border rounded-xl w-full max-w-md shadow-2xl flex flex-col max-h-[90dvh]">
         <div className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
@@ -722,7 +722,7 @@ function TimelineFormModal({ item, onSave, onClose, saving }: {
   const set = (k: keyof typeof form, v: any) => setForm(p => ({ ...p, [k]: v }));
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm"
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 app-modal-overlay"
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="bg-card border border-border rounded-xl w-full max-w-md shadow-2xl flex flex-col max-h-[90dvh]">
         <div className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
@@ -788,7 +788,7 @@ function InfraFormModal({ item, onSave, onClose, saving }: {
   const set = (k: keyof typeof form, v: any) => setForm(p => ({ ...p, [k]: v }));
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm"
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 app-modal-overlay"
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="bg-card border border-border rounded-xl w-full max-w-md shadow-2xl flex flex-col max-h-[90dvh]">
         <div className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
@@ -847,7 +847,7 @@ function ValueFormModal({ item, onSave, onClose, saving }: {
   const set = (k: keyof typeof form, v: any) => setForm(p => ({ ...p, [k]: v }));
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm"
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 app-modal-overlay"
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="bg-card border border-border rounded-xl w-full max-w-md shadow-2xl flex flex-col max-h-[90dvh]">
         <div className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">

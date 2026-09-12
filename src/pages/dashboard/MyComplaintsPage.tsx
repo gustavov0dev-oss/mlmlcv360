@@ -78,7 +78,7 @@ function DetailPanel({ complaint, onClose }: { complaint: Complaint; onClose: ()
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 app-modal-overlay" onClick={onClose} />
 
       {/* Panel */}
       <div className="relative z-10 w-full sm:max-w-lg bg-background border border-border/60 rounded-t-xl sm:rounded-xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-200">

@@ -224,7 +224,7 @@ export default function CategoriesAdminPage() {
 
       {/* Form modal */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 app-modal-overlay">
           <div className="bg-card border border-border rounded-xl w-full max-w-md p-5 space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-bold text-foreground">{form.id ? 'Editar categoría' : 'Nueva categoría'}</h3>

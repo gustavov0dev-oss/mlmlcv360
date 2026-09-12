@@ -484,7 +484,7 @@ function AddMemberModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 app-modal-overlay" onClick={onClose} />
       <div className="relative bg-card border border-border rounded-t-3xl sm:rounded-xl w-full sm:max-w-lg shadow-2xl flex flex-col max-h-[90vh] z-10">
 
         <div className="flex justify-center pt-3 pb-1 sm:hidden">
@@ -866,7 +866,7 @@ function NodeDrawer({
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 app-modal-overlay" onClick={onClose} />
       <div className="relative bg-card border border-border rounded-t-3xl sm:rounded-xl w-full sm:max-w-md shadow-2xl flex flex-col max-h-[90vh] z-10">
 
         <div className="flex justify-center pt-3 pb-1 sm:hidden">

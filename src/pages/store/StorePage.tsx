@@ -1,3 +1,4 @@
+import { PaymentCurrency } from '@/components/payments/PaymentMethods';
 import { LoadingRegion, StableRegion } from '@/components/ui/loading-region';
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useDatabase } from '@/lib/backend';
@@ -435,23 +436,7 @@ export default function StorePage() {
               )}
             </div>
 
-            <button
-              onClick={() => setShowUsd(!showUsd)}
-              aria-label={`Cambiar moneda a ${showUsd ? 'soles' : 'dólares'}`}
-              className={cn(
-                'flex items-center gap-1.5 px-3.5 py-3.5 rounded-xl text-xs font-bold shrink-0 transition-all active:scale-95',
-                showUsd
-                  ? 'bg-primary/10 text-primary border border-primary/30'
-                  : 'bg-muted/40 text-foreground/70 border border-border/60 hover:bg-muted'
-              )}
-              title="Cambiar moneda"
-            >
-              <span className={cn('w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black',
-                showUsd ? 'bg-primary text-primary-foreground' : 'bg-muted-foreground/20 text-muted-foreground')}>
-                {showUsd ? '$' : 'S'}
-              </span>
-              {showUsd ? 'USD' : 'PEN'}
-            </button>
+            <PaymentCurrency value={showUsd ? "USD" : "PEN"} onChange={value=>setShowUsd(value==="USD")}/>
           </div>
 
           <div className="min-h-[96px]">{categoryRail}</div>

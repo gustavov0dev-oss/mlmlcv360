@@ -1298,3 +1298,10 @@ html, .dashboard-scroll { scrollbar-gutter: stable; }
 .dashboard-action:disabled { opacity: .4; cursor: not-allowed; }
 
 .dashboard-action svg { color: inherit !important; }
+
+/* Shared scrim for dialogs, confirmations and drawers across the application. */
+.app-modal-overlay {
+  background-color: rgb(0 0 0 / 0.6);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}

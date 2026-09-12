@@ -345,7 +345,7 @@ export default function MyPlanPage() {
 
       {/* Cancel modal */}
       {showCancel && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 app-modal-overlay">
           <div className="bg-card border border-border rounded-xl w-full max-w-sm p-6 shadow-2xl">
             <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4">
               <X className="w-6 h-6 text-red-500" />
