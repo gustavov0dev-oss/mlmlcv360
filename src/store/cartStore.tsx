@@ -1,3 +1,5 @@
+import { checkoutSnapshots, forgetCheckout, subtractPurchased } from '@/lib/checkoutCart';
+import { useAuthStore } from '@/store/authStore';
 import { availableCartVariant } from '@/lib/cartAvailability';
 import { supabase } from '@/lib/backend/client';
 import { toast } from 'sonner';
@@ -30,6 +32,7 @@ function loadCart(): CartItem[] {
 }
 
 export function CartProvider({ children }: { children: ReactNode }) {
+  const {user}=useAuthStore();
   const [items, setItems] = useState<CartItem[]>(loadCart);
 
   const current = useRef(items);
@@ -39,6 +42,28 @@ export function CartProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     localStorage.setItem(LS_KEY, JSON.stringify(items));
   }, [items]);
+
+  useEffect(()=>{
+    if(!user)return;
+    let active=true,checking=false;
+    const reconcile=async()=>{
+      if(checking)return;checking=true;
+      try{
+        const snapshots=checkoutSnapshots().filter(s=>s.userId===user.id);
+        if(!snapshots.length)return;
+        const {data,error}=await supabase.from('orders').select('id,payment_status').eq('user_id',user.id).in('id',snapshots.map(s=>s.orderId));
+        if(error||!active)return;
+        for(const order of data||[]){if(order.payment_status!=='paid')continue;
+          const snapshot=checkoutSnapshots().find(s=>s.orderId===order.id&&s.userId===user.id);
+          if(!snapshot)continue;
+          const next=subtractPurchased(current.current,snapshot.items);
+          current.current=next;localStorage.setItem(LS_KEY,JSON.stringify(next));setItems(next);forgetCheckout(order.id);
+        }
+      }finally{checking=false;}
+    };
+    void reconcile();const timer=setInterval(reconcile,30000);window.addEventListener('focus',reconcile);
+    return()=>{active=false;clearInterval(timer);window.removeEventListener('focus',reconcile);};
+  },[user?.id]);
 
   const addItem = useCallback(async (product: Product, variant?: ProductVariant, qty = 1) => {
     if (adding.current) return false;
@@ -72,16 +97,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const next=snapshot.flatMap(item=>{
       const product=data?.find(p=>p.id===item.product.id);
       const variant=item.variant?product?.variants?.find((v:ProductVariant)=>v.id===item.variant!.id&&v.status==='active'):undefined;
-      if(!product||product.status!=='active'||(item.variant&&!variant)){changed=true;return [];}
+      if(!product||product.status!=='active'||(item.variant&&!variant)){changed=true;return [item];}
       const available=product.track_stock?Number(variant?.stock??product.general_stock??0):item.quantity;
-      if(available<=0){changed=true;return [];}
-      const quantity=Math.min(item.quantity,available);if(quantity!==item.quantity)changed=true;
+      if(available<=0){changed=true;return [item];}
+      const quantity=item.quantity;if(quantity>available)changed=true;
       return [{...item,product:{...item.product,...product},variant,quantity}];
     });
     // Do not overwrite a cart changed while the request was running.
     if(current.current!==snapshot) return false;
     current.current=next;setItems(next);
-    if(changed)toast.info('Actualizamos tu carrito según el stock disponible. Revisa las cantidades.');
+    if(changed)toast.info('Algunos productos ya no tienen la cantidad disponible. Conservamos tu carrito para que puedas revisarlo.');
     return !changed;
   }, []);
 

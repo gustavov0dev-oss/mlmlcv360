@@ -1,3 +1,5 @@
+import { checkoutSnapshots } from '@/lib/checkoutCart';
+import { useAuthStore } from '@/store/authStore';
 import ProductCard from '@/components/store/ProductCard';
 import { useCartCoupon } from '@/hooks/useCartCoupon';
 import React from 'react';
@@ -87,7 +89,15 @@ function FreeShippingIndicator({ subtotal, threshold, currencySymbol, className 
 
 export default function CartPage() {
   const database = useDatabase();
+  const {user}=useAuthStore();
+  const [pendingOrder,setPendingOrder]=useState<string|null>(null);
   const { items, removeItem, updateQty, subtotal, itemCount, refreshStock } = useCart();
+  useEffect(()=>{
+    let active=true;setPendingOrder(null);
+    const snapshot=checkoutSnapshots().filter(s=>s.userId===user?.id&&s.items.length===items.length&&s.items.every(p=>items.some(i=>i.id===p.id&&i.quantity===p.quantity))).at(-1);
+    if(snapshot)database.select<any>('orders',{filter:{id:snapshot.orderId,user_id:user?.id},single:true}).then(({data})=>{if(active&&data?.payment_status==='pending')setPendingOrder(snapshot.orderId);});
+    return()=>{active=false;};
+  },[user?.id,items,database]);
   const { company,showUsd,exchangeRate } = useConfig();
   const fmt=(n:number)=>new Intl.NumberFormat('es-PE',{style:'currency',currency:showUsd?'USD':'PEN'}).format(showUsd?n/exchangeRate:n);
   const navigate = useNavigate();
@@ -199,6 +209,7 @@ export default function CartPage() {
       <div className={cn(PAGE_MAX_W, 'mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-20 pb-16 grid grid-cols-1 lg:grid-cols-5 gap-10 lg:gap-16')}>
         {/* ── Items + Shipping ── */}
         <div className="lg:col-span-3 flex flex-col">
+          {pendingOrder&&<div className="mb-6 flex flex-wrap items-center justify-between gap-3 text-sm"><p className="text-muted-foreground">Tu carrito está guardado. Tienes un pago sin completar.</p><button className="text-primary font-semibold" onClick={()=>navigate(`/pago?order=${pendingOrder}`)}>Retomar pago</button></div>}
           {/* Free shipping */}
           {subtotal > 0 && (
             <FreeShippingIndicator subtotal={showUsd?subtotal/exchangeRate:subtotal} threshold={showUsd?freeThreshold/exchangeRate:freeThreshold} currencySymbol={showUsd?'US$':'S/'} className="mb-6" />

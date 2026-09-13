@@ -1,11 +1,12 @@
 import { useConfig } from '@/store/configStore';
-import { downloadPurchasePdf, printPurchaseDocument } from '@/lib/purchasePdf';
+import { downloadPurchasePdf, printPurchaseDocument, installPurchasePrint } from '@/lib/purchasePdf';
 import { toast } from 'sonner';
 import { useEffect, useState } from 'react';
 import { useDatabase } from '@/lib/backend';
 import { PurchaseDocument } from '@/components/store/PurchaseDocument';
 import { useNavigate } from '@/lib/router';
 export default function InvoicePage(){
+ useEffect(()=>installPurchasePrint(),[]);
  const {company,logoValue}=useConfig();const [downloading,setDownloading]=useState(false);
  const db=useDatabase(),navigate=useNavigate();const [order,setOrder]=useState<any>(null);const [loaded,setLoaded]=useState(false);const id=window.location.pathname.split('/').pop();
  useEffect(()=>{db.select('orders',{select:'*, items:order_items(*)',filter:{id},maybeSingle:true}).then(({data})=>{setOrder(data);setLoaded(true)})},[id]);

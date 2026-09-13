@@ -3,6 +3,7 @@ import { createClient } from 'jsr:@supabase/supabase-js@2';
 const headers={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization, apikey, content-type, x-client-info','Content-Type':'application/json'};
 const origin='https://mlmlcv360-preview.whizzend.chatgpt.site';
 const checked=async(q:any)=>{const r=await q;if(r.error){console.error('billing_database_error',r.error.code,r.error.message);throw new Error('No se pudo actualizar tu suscripción. Inténtalo nuevamente.');}return r.data;};
+class ProviderError extends Error { constructor(message:string,readonly status:number,readonly code:string){super(message);} }
 async function api(url:string,token:string,method='GET',body?:unknown,id?:string){
  const r=await fetch(url,{method,headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json',...(id?{'PayPal-Request-Id':id,'X-Idempotency-Key':id}:{})},body:body?JSON.stringify(body):undefined,signal:AbortSignal.timeout(15000)});
  if(!r.ok){
@@ -11,7 +12,9 @@ async function api(url:string,token:string,method='GET',body?:unknown,id?:string
   if(message.includes('Payer is associated with a different site'))throw new Error('El correo indicado pertenece a Mercado Pago de otro país. Ingresa el correo de tu cuenta de Mercado Pago Perú o elige PayPal en dólares.');
   if(/payer.*collector|collector.*payer/i.test(message))throw new Error('La cuenta del comprador debe ser distinta de la cuenta que recibe el pago.');
   if(r.status===401||r.status===403)throw new Error('La cuenta de la pasarela no tiene autorización para suscripciones. Contacta con soporte o elige otro método.');
-  throw new Error('La pasarela rechazó la autorización mensual. No se realizó ningún cobro. Revisa tu cuenta o elige otro método.');
+  const issue=String(detail.details?.[0]?.issue||message);
+  if(r.status===404||issue==='INVALID_RESOURCE_ID')throw new ProviderError('La autorización guardada ya no está disponible en la pasarela. Puedes descartarla y preparar una nueva.',r.status,issue);
+  throw new ProviderError(method==='GET'?'No pudimos consultar el estado en la pasarela. Inténtalo nuevamente; no iniciaremos otro cobro.':'No se pudo preparar la autorización mensual. Revisa los datos de tu cuenta o elige otro método.',r.status,issue);
  }
  return r.status===204?{}:await r.json();
 }
@@ -74,7 +77,11 @@ Deno.serve(async req=>{
    if(contractId){
     const c=await checked(db.from('billing_contracts').select('*').eq('id',contractId).eq('user_id',user.id).single());
     const g=await checked(db.from('payment_gateways').select('*').eq('slug',c.gateway).single());
-    const latest=await sync(db,c,g);
+    let latest;
+    try{latest=await sync(db,c,g);}catch(e){
+     if(e instanceof ProviderError&&e.status===404&&c.status==='pending'&&!c.paid_until)latest={...c,status:'cancelled'};
+     else throw e;
+    }
     if(latest.status!=='cancelled'&&c.provider_id){
      const t=await tokenFor(g);
      await api(c.gateway==='paypal'?`https://api-m.paypal.com/v1/billing/subscriptions/${c.provider_id}/cancel`:`https://api.mercadopago.com/preapproval/${c.provider_id}`,t,c.gateway==='paypal'?'POST':'PUT',c.gateway==='paypal'?{reason:'Cancelado por el titular desde Mi Plan'}:{status:'cancelled'});
@@ -87,7 +94,11 @@ Deno.serve(async req=>{
   if(b.action==='verify'){
    const c=await checked(db.from('billing_contracts').select('*').eq('id',b.contract_id).eq('user_id',user.id).single());
    const g=await checked(db.from('payment_gateways').select('*').eq('slug',c.gateway).single());
-   const contract=await sync(db,c,g);return json({success:true,contract});
+   try{const contract=await sync(db,c,g);return json({success:true,contract});}
+   catch(e){if(e instanceof ProviderError&&e.status===404&&c.status==='pending'&&!c.paid_until){
+    await checked(db.from('billing_contracts').update({last_error:e.message}).eq('id',c.id));
+    return json({success:true,contract:{...c,checkout_url:null,authorization_unavailable:true,last_error:e.message}});
+   }throw e;}
   }
   if(b.action!=='create')return json({success:false,error:'Acción no válida.'},400);
   const plan=await checked(db.from('plans').select('*').eq('slug',b.plan_slug).eq('is_active',true).single());

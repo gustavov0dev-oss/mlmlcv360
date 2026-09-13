@@ -1,3 +1,4 @@
+import { checkoutSnapshots, rememberCheckout } from '@/lib/checkoutCart';
 import { PaymentMethods, PaymentCurrency } from '@/components/payments/PaymentMethods';
 import { continuePayment } from '@/lib/payments/checkout';
 import { useCartCoupon } from '@/hooks/useCartCoupon';
@@ -89,7 +90,7 @@ function FieldSection({ title, children, first = false }: { title: string; child
 
 export default function CheckoutPage() {
   const database = useDatabase();
-  const { items, subtotal, clearCart, refreshStock } = useCart();
+  const { items, subtotal, refreshStock } = useCart();
   const { company, showUsd, setShowUsd, exchangeRate, tax } = useConfig();
   const { user } = useAuthStore();
   const navigate = useNavigate();
@@ -283,15 +284,24 @@ export default function CheckoutPage() {
       p_payment_method: paymentMethod,
     };
 
-    const { data, error } = await database.rpc<any>('place_order', payload);
+    const fingerprint=JSON.stringify({...payload,p_shipping_addr:{...shippingAddr,id:undefined},p_billing_addr:{...shippingAddr,id:undefined},p_payment_method:undefined});
+    const existing=checkoutSnapshots().find(s=>s.userId===user.id&&s.fingerprint===fingerprint);
+    let data:any=null,error:any=null;
+    if(existing){
+      const result=await database.select<any>('orders',{filter:{id:existing.orderId,user_id:user.id},single:true});
+      if(result.error){toast.error('No pudimos consultar tu pago anterior. Inténtalo de nuevo.');setPlacing(false);return;}
+      if(result.data?.payment_status==='pending')data={success:true,order_id:result.data.id,order_number:result.data.order_number,total:result.data.total};
+      else if(result.data?.payment_status==='paid'){toast.info('Este pedido ya está pagado. Puedes verlo en Mis pedidos.');setPlacing(false);return;}
+    }
+    if(!data){const result=await database.rpc<any>('place_order',payload);data=result.data;error=result.error;}
+
     if (error || !data?.success) {
       toast.error(data?.error || error || 'Error al procesar el pedido');
       setPlacing(false); return;
     }
-    setCoupon(null);
+    rememberCheckout({userId:user.id,orderId:data.order_id,fingerprint,items:items.map(i=>({id:i.id,quantity:i.quantity}))});
     const { data: payment, error: paymentError } = await database.invoke<any>('process-payment', { body: { order_id: data.order_id, gateway: paymentMethod } });
     if (!paymentError && payment?.success) {
-      clearCart();
       continuePayment(payment);
       return;
     }
