@@ -1,3 +1,4 @@
+import { GuestPlanCheckout } from '@/components/auth/GuestPlanCheckout';
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from '@/lib/router';
 import { useDatabase } from '@/lib/backend';
@@ -40,7 +41,7 @@ export default function PagoPage() {
  const paid=session?.status==='paid'||!!(contract?.paid_until&&new Date(contract.paid_until)>new Date());
  const auto=!!planSlug&&automaticPayment(selected);
  const base=Number(plan?.price??plan?.total??0);const quoted=plan?.currency!==currency?(plan?.currency==='PEN'?base/exchangeRate:base*exchangeRate):base;
- const back=isOrder?'/dashboard/pedidos':'/dashboard/mi-plan';
+ const back=!user?'/planes':isOrder?'/dashboard/pedidos':'/dashboard/mi-plan';
  const start=async()=>{if(!method)return;setBusy(true);setError('');try{const d=await invoke(auto?'subscription-billing':'process-payment',auto?{action:'create',gateway:selected,plan_slug:planSlug,payer_email:payerEmail}:{gateway:selected,plan_slug:planSlug,order_id:orderId});continuePayment(d);}catch(e:any){setError(e.message);setBusy(false)}};
  const verify=async()=>{setBusy(true);setError('');try{await refresh();setNotice('Estado actualizado directamente con la pasarela.');}catch(e:any){setError(e.message)}finally{setBusy(false)}};
  const upload=async()=>{if(!file||!user||!reference.trim())return;setBusy(true);setError('');try{
@@ -53,9 +54,9 @@ export default function PagoPage() {
  let accounts:any[]=[];try{accounts=JSON.parse(method?.credentials?.accounts||'[]')}catch{}
  const button='inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-primary text-white font-semibold text-sm hover:bg-primary/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary disabled:opacity-50';
  return <main className="max-w-3xl mx-auto w-full px-5 pt-28 md:pt-32 pb-16">
-  <Link to={back} className="inline-flex items-center gap-2 text-sm text-muted-foreground mb-7"><ArrowLeft className="w-4 h-4"/>{isOrder?'Mis pedidos':'Mi plan'}</Link>
+  <Link to={back} className="inline-flex items-center gap-2 text-sm text-muted-foreground mb-7"><ArrowLeft className="w-4 h-4"/>{!user?'Planes':isOrder?'Mis pedidos':'Mi plan'}</Link>
   <h1 className="text-2xl font-bold mb-2">{returning?paid?'Pago confirmado':'Estado de tu pago':isOrder?'Completa tu pedido':'Tu membresía'}</h1>
-  {!user?<p className="mt-5"><Link to="/login" className="text-primary">Inicia sesión</Link> para continuar.</p>:<div className="mt-6 space-y-6 min-h-[320px]" aria-busy={busy||!loaded}>
+  {!user?planSlug?<GuestPlanCheckout slug={planSlug}/>:<p className="mt-5"><Link to="/login" className="text-primary">Inicia sesión</Link> para continuar.</p>:<div className="mt-6 space-y-6 min-h-[320px]" aria-busy={busy||!loaded}>
    {error&&<p role="alert" className="text-red-500 text-sm">{error}</p>}
    {notice&&<p role="status" className="text-muted-foreground text-sm">{notice}</p>}
    {cancelled&&!paid&&<div role="status" className="flex gap-3 rounded-xl bg-muted/50 p-4"><Info className="w-5 h-5 shrink-0 text-primary"/><p className="text-sm">Saliste del pago sin completarlo. {isOrder?'Tu carrito se conserva; puedes retomar el pago cuando quieras.':'Tu membresía anterior no ha cambiado.'}</p></div>}

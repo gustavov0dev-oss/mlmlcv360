@@ -21,7 +21,7 @@ export default function PlanesPage() {
 
   const handleSelectPlan = async (plan: any) => {
     const isFree = plan.is_free || Number(plan.price) === 0;
-    if (!user) { navigate(`/registro?plan=${plan.slug}`); return; }
+    if (!user) { navigate(isFree?'/registro':`/pago?plan=${encodeURIComponent(plan.slug)}`); return; }
     if (isFree) {
       setActivating(plan.slug);
       const {data,error} = await database.invoke<any>('process-payment', {body:{action:'free_plan', plan_slug:plan.slug}});

@@ -1,3 +1,4 @@
+import { authDestination } from '@/lib/authDestination';
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, Navigate } from '@/lib/router';
 import { useForm } from 'react-hook-form';
@@ -51,6 +52,7 @@ function GoogleIcon() {
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const destination = authDestination();
   const backend = useBackend();
   const { theme, setTheme } = useThemeStore();
   const { user, fetchProfile } = useAuthStore();
@@ -79,7 +81,7 @@ export default function LoginPage() {
     }
   }, [setValue]);
 
-  if (user) return <Navigate to="/dashboard" />;
+  if (user) return <Navigate to={destination} />;
 
   const onSubmit = async (data: FormData) => {
     setLoading(true);
@@ -100,7 +102,7 @@ export default function LoginPage() {
         displayName = profile?.full_name?.split(' ')[0] || profile?.username || '';
       }
       toast.success(displayName ? `¡Bienvenido, ${displayName}!` : '¡Bienvenido!');
-      navigate('/dashboard');
+      navigate(destination);
     }
   };
 

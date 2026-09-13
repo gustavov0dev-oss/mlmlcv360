@@ -7,7 +7,7 @@ function mapUser(supabaseUser: unknown): User | null {
   return {
     id: u.id as string,
     email: u.email as string,
-    emailConfirmed: u.email_confirmed === true,
+    emailConfirmed: typeof u.email_confirmed_at === 'string' && u.email_confirmed_at.length > 0,
     createdAt: u.created_at as string,
     lastSignInAt: u.last_sign_in_at as string | undefined,
     metadata: u.user_metadata as Record<string, unknown> | undefined,
@@ -36,6 +36,9 @@ export const supabaseAuthService: AuthInterface = {
     });
     if (error) {
       return { success: false, error: error.message };
+    }
+    if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+      return { success: false, error: 'Email already registered' };
     }
     return { success: true, session: mapSession(data.session) || undefined };
   },

@@ -1897,9 +1897,7 @@ export default function LandingPage() {
               ) : (
                 <Link
                   to={
-                    user
-                      ? "/dashboard/mi-plan"
-                      : `/registro?plan=${plan.slug}`
+                    Number(plan.price) === 0 ? (user ? "/dashboard/mi-plan" : "/registro") : `/pago?plan=${encodeURIComponent(plan.slug)}`
                   }
                   className={cn(
                     "block text-center py-2.5 rounded-lg text-sm font-semibold transition-colors",

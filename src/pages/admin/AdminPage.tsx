@@ -2144,8 +2144,7 @@ export default function AdminPage() {
                   Configuración de Registro
                 </h2>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Decide cómo los usuarios se registran: con plan, sin plan, o
-                  plan obligatorio.
+                  Configura la selección opcional de membresía y quién invita a los nuevos usuarios.
                 </p>
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -2164,47 +2163,8 @@ export default function AdminPage() {
                       onChange={(v) => setC("register_show_plans", String(v))}
                     />
                   </div>
-                  {c("register_show_plans") !== "false" && (
-                    <div className="flex items-center justify-between p-4 bg-muted rounded-xl border border-border gap-3">
-                      <div className="min-w-0">
-                        <div className="text-sm font-semibold text-foreground">
-                          Requerir selección de plan
-                        </div>
-                        <div className="text-xs text-muted-foreground mt-0.5">
-                          El usuario no puede avanzar sin elegir un plan
-                        </div>
-                      </div>
-                      <ToggleSwitch
-                        checked={c("register_require_plan") === "true"}
-                        onChange={(v) =>
-                          setC("register_require_plan", String(v))
-                        }
-                      />
-                    </div>
-                  )}
-                </div>
-                <div className="space-y-3">
-                  <div className="p-4 bg-muted rounded-xl border border-border">
-                    <label className="block text-sm font-semibold text-foreground mb-1">
-                      Plan por defecto{" "}
-                      <span className="font-normal text-muted-foreground">
-                        (slug)
-                      </span>
-                    </label>
-                    <p className="text-xs text-muted-foreground mb-2">
-                      Si el usuario no elige plan, se asigna este
-                      automáticamente. Dejar vacío para no asignar ninguno.
-                    </p>
-                    <input
-                      value={c("register_default_plan")}
-                      onChange={(e) =>
-                        setC("register_default_plan", e.target.value)
-                      }
-                      placeholder="ej: basico"
-                      className="w-full px-3 py-2.5 bg-background border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary font-mono"
-                    />
-                  </div>
-                </div>
+                  <div className="flex items-center justify-between p-4 bg-muted rounded-xl border border-border gap-3"><div><p className="font-semibold text-sm">Código de referido obligatorio</p><p className="text-sm text-muted-foreground mt-1">Si está desactivado, se usa el referido de la empresa cuando el usuario no ingresa uno.</p></div><ToggleSwitch checked={c("register_referral_required")==="true"} onChange={v=>setC("register_referral_required",String(v))}/></div>
+                </div><div className="p-4 bg-muted rounded-xl border border-border"><label className="block text-sm font-semibold">Referido de la empresa<input value={c("register_default_referral_code")} onChange={e=>setC("register_default_referral_code",e.target.value.toUpperCase().trim())} className="w-full mt-3 p-3 rounded-lg bg-background border border-border"/></label><p className="text-sm text-muted-foreground mt-2">Debe ser un código de referido existente. La membresía siempre es opcional y sus beneficios requieren pago confirmado.</p></div>
               </div>
               <div className="mt-6 pt-4 border-t border-border flex justify-end">
                 <button
@@ -2212,8 +2172,8 @@ export default function AdminPage() {
                     saveConfigKeys(
                       [
                         "register_show_plans",
-                        "register_require_plan",
-                        "register_default_plan",
+                        "register_referral_required",
+                        "register_default_referral_code",
                       ],
                       "registration",
                     )

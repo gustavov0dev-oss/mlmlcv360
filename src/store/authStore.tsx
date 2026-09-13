@@ -1,3 +1,4 @@
+import { authDestination } from '@/lib/authDestination';
 import { supportMode } from '@/lib/backend/client';
 import { endSupportAccess, returningFromSupport } from '@/lib/backend/supportAccess';
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
@@ -23,17 +24,11 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 const AUTH_PATHS = ['/login', '/registro'];
-const ADMIN_ROLES = ['super_admin', 'admin', 'inspector', 'support'];
 
 function doRedirect(path: string) {
   window.history.pushState({}, '', path);
   window.dispatchEvent(new Event('locationchange'));
-}
-
-function defaultDashboardPath(role?: string): string {
-  if (!role) return '/dashboard';
-  if (ADMIN_ROLES.includes(role)) return '/dashboard';
-  return '/dashboard';
+  sessionStorage.removeItem('cluv-auth-next');
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -98,12 +93,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (sessionData?.user?.id) {
         try {
-          const profile = await fetchProfile(sessionData.user.id);
+          await fetchProfile(sessionData.user.id);
           if (mounted) {
             clearTimeout(safetyTimer);
             setLoading(false);
             if (AUTH_PATHS.includes(window.location.pathname)) {
-              doRedirect(defaultDashboardPath(profile?.role));
+              doRedirect(authDestination());
             }
           }
         } catch {
@@ -142,13 +137,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             if (event === 'SIGNED_IN') {
               const currentPath = window.location.pathname;
               if (fromOAuth || AUTH_PATHS.includes(currentPath)) {
-                doRedirect(defaultDashboardPath(profile?.role));
+                doRedirect(authDestination());
               }
             }
           } catch {
             if (mounted) { clearTimeout(safetyTimer); setLoading(false); }
           }
         } else if (event === 'SIGNED_OUT') {
+          sessionStorage.removeItem('cluv-auth-next');
           if (returningFromSupport) return;
           setUser(null);
           clearTimeout(safetyTimer);

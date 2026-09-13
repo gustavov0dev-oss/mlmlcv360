@@ -1,3 +1,4 @@
+import { EmailReminder } from '@/components/auth/EmailReminder';
 import { supportMode } from '@/lib/backend/client';
 import { endSupportAccess } from '@/lib/backend/supportAccess';
 import { LoadingRegion } from '@/components/ui/loading-region';
@@ -112,7 +113,7 @@ export default function DashboardLayout() {
   }
 
   if (!user && supportMode) return <div className="p-8"><p>La sesión de soporte terminó.</p><button onClick={()=>void endSupportAccess()} className="text-primary mt-4">Volver a mi cuenta</button></div>;
-  if (!user) return <Navigate to="/login" />;
+  if (!user) return <Navigate to={'/login?next='+encodeURIComponent(window.location.pathname+window.location.search)} />;
 
   return (
     <div className="relative flex h-[100dvh] w-full max-w-7xl mx-auto bg-background overflow-hidden lg:border-x lg:border-border/50">
@@ -121,7 +122,7 @@ export default function DashboardLayout() {
         sidebarCollapsed ? 'lg:ml-[72px]' : 'lg:ml-[260px]')}>
         <DashboardHeader />
         {supportMode&&<div role="status" className="flex flex-wrap items-center justify-between gap-2 px-4 py-2 text-sm border-b border-amber-500/30 bg-amber-500/10"><span>Acceso de soporte: <strong>{user.full_name||user.username}</strong></span><button onClick={()=>void endSupportAccess()} className="font-semibold text-primary underline underline-offset-4">Volver a mi cuenta</button></div>}
-        <MaintenanceBanner />
+        <MaintenanceBanner /><EmailReminder/>
         <main className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 lg:p-8 bg-background dashboard-scroll">
           <div className="w-full max-w-[1400px] mx-auto px-1 sm:px-2 min-h-[calc(100dvh-8rem)]">
             <DashboardContent />

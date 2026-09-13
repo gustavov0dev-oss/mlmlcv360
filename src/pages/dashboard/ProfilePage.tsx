@@ -1,3 +1,4 @@
+import { DefaultReferral } from '@/components/auth/DefaultReferral';
 import { LoadingRegion } from '@/components/ui/loading-region';
 import { useState, useEffect } from 'react';
 import { useBackend, useDatabase, useStorage } from '@/lib/backend';
@@ -116,7 +117,7 @@ export default function ProfilePage() {
   const initials = (form.full_name || form.email || 'U').split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
 
   return (
-    <div className="space-y-4 sm:space-y-5 max-w-6xl">
+    <div className="space-y-4 sm:space-y-5 max-w-6xl"><DefaultReferral/>
       <div>
         <h1 className="text-xl sm:text-2xl font-bold text-foreground">Mi Perfil</h1>
         <p className="text-muted-foreground text-sm mt-1">Gestiona tu información personal.</p>
