@@ -24,6 +24,8 @@ export interface Product {
   compare_price?: number;
   cost_price?: number;
   points?: number;
+  earning_type?: import("./mlmPacks").EarningType | null;
+  earning_value?: number;
   currency: 'PEN' | 'USD';
   status: 'draft' | 'active' | 'archived';
   weight?: number;
@@ -67,6 +69,7 @@ export interface ProductVariant {
 }
 
 export interface CartItem {
+  pack?: import("./mlmPacks").PackQuote;
   id: string;
   product: Product;
   variant?: ProductVariant;

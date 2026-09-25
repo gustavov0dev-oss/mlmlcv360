@@ -280,7 +280,7 @@ function PersonalInfoSection({ user, form, setForm, onSaved }: {
       </div>
 
       {editing ? (
-        <div className="flex items-center justify-end mt-6 pt-6 border-t border-border">
+        <div className="flex items-center justify-end mt-6 pt-6 border-t border-border form-actions">
           <button onClick={handleSave} disabled={saving || !isDirty}
             className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-medium transition-colors disabled:opacity-50 outline-none">
             {saving ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <Save className="w-4 h-4" />}
@@ -444,7 +444,7 @@ function ChangePasswordSection() {
           {renderField('confirm', 'Confirmar contraseña')}
         </div>
       </div>
-      <div className="flex items-center justify-end mt-auto pt-6 border-t border-border">
+      <div className="flex items-center justify-end mt-auto pt-6 border-t border-border form-actions">
         <button onClick={handleChange} disabled={saving}
           className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-medium transition-colors disabled:opacity-50 outline-none">
           {saving ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <Save className="w-4 h-4" />}

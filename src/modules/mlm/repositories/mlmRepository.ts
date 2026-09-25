@@ -29,6 +29,7 @@ export interface Rank {
   bg_color?: string;
   border_color?: string;
   sort_order?: number;
+  is_active?: boolean;
 }
 
 export interface SystemConfig {
@@ -177,7 +178,8 @@ class MLMRepositoryImpl implements MLMRepository {
       p_position: params.p_position || 'left',
     });
     if (error) return { error };
-    return { success: true, data };
+    const result = data as { success?: boolean; error?: string } | null;
+    return { success: result?.success === true, error: result?.error, data };
   }
 
   async assignExistingUserToNetwork(params: {
@@ -185,13 +187,14 @@ class MLMRepositoryImpl implements MLMRepository {
     p_sponsor_id: string;
     p_position: 'left' | 'right';
   }): Promise<{ success?: boolean; error?: string }> {
-    const { error } = await this.db.rpc('assign_existing_user_to_network', {
+    const { data, error } = await this.db.rpc('assign_existing_user_to_network', {
       p_user_id: params.p_user_id,
       p_sponsor_id: params.p_sponsor_id,
       p_position: params.p_position,
     });
     if (error) return { error };
-    return { success: true };
+    const result = data as { success?: boolean; error?: string } | null;
+    return { success: result?.success === true, error: result?.error };
   }
 
   async moveUserInNetwork(params: {
@@ -199,22 +202,24 @@ class MLMRepositoryImpl implements MLMRepository {
     p_new_sponsor_id: string;
     p_position: 'left' | 'right';
   }): Promise<{ success?: boolean; error?: string }> {
-    const { error } = await this.db.rpc('move_user_in_network', {
+    const { data, error } = await this.db.rpc('move_user_in_network', {
       p_user_id: params.p_user_id,
       p_new_sponsor_id: params.p_new_sponsor_id,
       p_position: params.p_position,
     });
     if (error) return { error };
-    return { success: true };
+    const result = data as { success?: boolean; error?: string } | null;
+    return { success: result?.success === true, error: result?.error };
   }
 
   // Commissions
   async getCommissions(userId: string): Promise<Commission[]> {
-    const { data } = await this.db.select<Commission>('commissions', {
+    const { data, error } = await this.db.select<Commission>('commissions', {
       select: 'id,user_id,from_user_id,type,amount,currency,status,description,created_at',
       filter: { user_id: userId },
       order: { column: 'created_at', ascending: false },
     });
+    if (error) throw new Error(error);
     return (data as Commission[]) || [];
   }
 

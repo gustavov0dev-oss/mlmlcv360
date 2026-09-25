@@ -101,6 +101,7 @@ Deno.serve(async req=>{
    }throw e;}
   }
   if(b.action!=='create')return json({success:false,error:'Acción no válida.'},400);
+  if(b.action==='create'){const setting=await db.from('system_config').select('value').eq('key','system_plans_enabled').maybeSingle();if(setting.error)throw new Error('No se pudo verificar la disponibilidad de membresías.');if(setting.data?.value==='false')throw new Error('No se ofrecen nuevas membresías. Puedes continuar usando tu cuenta y la tienda.');}
   const plan=await checked(db.from('plans').select('*').eq('slug',b.plan_slug).eq('is_active',true).single());
   const g=await checked(db.from('payment_gateways').select('*').eq('slug',b.gateway).eq('is_active',true).single());
   if(!['paypal','mercadopago'].includes(g.slug)||Number(plan.price)<=0)throw new Error('Elige un método compatible con renovación mensual.');

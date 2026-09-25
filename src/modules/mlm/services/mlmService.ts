@@ -79,7 +79,7 @@ class MLMService {
   // Commission aggregations
   calculateCommissionStats(commissions: Commission[]): CommissionStats {
     return {
-      total: commissions.reduce((sum, c) => sum + Number(c.amount), 0),
+      total: commissions.filter(c=>c.status!=='rejected').reduce((sum, c) => sum + Number(c.amount), 0),
       paid: commissions.filter(c => c.status === 'paid').reduce((sum, c) => sum + Number(c.amount), 0),
       pending: commissions.filter(c => c.status === 'pending').reduce((sum, c) => sum + Number(c.amount), 0),
       approved: commissions.filter(c => c.status === 'approved').length,
@@ -96,7 +96,7 @@ class MLMService {
       const capitalized = monthName.charAt(0).toUpperCase() + monthName.slice(1);
       const total = commissions.filter(c => {
         const cd = new Date(c.created_at);
-        return cd.getMonth() === d.getMonth() && cd.getFullYear() === d.getFullYear();
+        return c.status!=='rejected' && cd.getMonth() === d.getMonth() && cd.getFullYear() === d.getFullYear();
       }).reduce((sum, c) => sum + Number(c.amount), 0);
       result.push({ name: capitalized, comisiones: total });
     }
@@ -210,8 +210,8 @@ class MLMService {
   // Rank calculations
   findCurrentRank(ranks: Rank[], userRank: string | undefined): { current: Rank | null; index: number; next: Rank | null } {
     const index = ranks.findIndex(r => r.slug === userRank);
-    if (index === -1) return { current: ranks[0] || null, index: 0, next: ranks[1] || null };
-    return { current: ranks[index], index, next: ranks[index + 1] || null };
+    if (index === -1) return { current: null, index: -1, next: ranks.find(r=>r.is_active!==false) || null };
+    return { current: ranks[index], index, next: ranks.find(r=>r.is_active!==false && (r.sort_order??0)>(ranks[index].sort_order??0)) || null };
   }
 
   calculateRankProgress(stats: { affiliates: number; volume: number }, nextRank: Rank | null): {
@@ -220,22 +220,17 @@ class MLMService {
   } {
     if (!nextRank) return { affiliateProgress: 100, volumeProgress: 100 };
     return {
-      affiliateProgress: Math.min(100, (stats.affiliates / nextRank.min_affiliates) * 100),
-      volumeProgress: Math.min(100, (stats.volume / nextRank.min_volume) * 100),
+      affiliateProgress: Math.min(100, nextRank.min_affiliates > 0 ? (stats.affiliates / nextRank.min_affiliates) * 100 : 100),
+      volumeProgress: Math.min(100, nextRank.min_volume > 0 ? (stats.volume / nextRank.min_volume) * 100 : 100),
     };
   }
 
   // Export helper
   exportCommissionsToCSV(commissions: Commission[]): void {
-    const header = 'Fecha,Tipo,Estado,Monto,Descripcion';
-    const rows = commissions.map(c => [
-      this.formatDate(c.created_at),
-      TYPE_LABELS[c.type] || c.type,
-      STATUS_CONFIG[c.status]?.label || c.status,
-      Number(c.amount).toFixed(2),
-      c.description || '',
-    ].join(','));
-    const csv = [header, ...rows].join('\n');
+    const escape = (value: string) => '"' + (/^[=+@-]/.test(value) ? "'" + value : value).replace(/"/g, '""') + '"';
+    const header = 'Fecha;Tipo;Estado;Moneda;Monto;Descripcion';
+    const rows = commissions.map(c => [this.formatDate(c.created_at), TYPE_LABELS[c.type] || c.type, STATUS_CONFIG[c.status]?.label || c.status, c.currency, Number(c.amount).toFixed(2), c.description || ''].map(escape).join(';'));
+    const csv = '\uFEFF' + [header, ...rows].join('\r\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');

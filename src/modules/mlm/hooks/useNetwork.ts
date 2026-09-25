@@ -1,3 +1,4 @@
+import {supabase} from '@/lib/backend/client';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useMLMRepository, type Profile } from '../repositories/mlmRepository';
 import { mlmService, type ProfileNode, type NetworkStats } from '../services/mlmService';
@@ -61,7 +62,7 @@ export function useNetwork(options: UseNetworkOptions): UseNetworkReturn {
       if (isAdmin && viewAllNetwork) {
         data = await repo.getAllProfiles();
       } else {
-        data = await repo.getDownline(userId, maxDepth);
+        const result=await supabase.rpc('network_tree',{p_root:userId});if(result.error)throw result.error;data=result.data||[];
       }
       setProfiles(data);
     } catch (e: any) {
@@ -140,15 +141,15 @@ export function useNetwork(options: UseNetworkOptions): UseNetworkReturn {
   }, [repo, fetchData]);
 
   const updateProfile = useCallback(async (profileUserId: string, updates: Partial<Profile>) => {
-    const { error } = await repo.updateProfile(profileUserId, updates);
+    const { error } = await supabase.rpc('update_network_member',{p_user:profileUserId,p_changes:updates});
     if (!error) await fetchData();
-    return { success: !error, error };
+    return { success: !error, error:error?.message };
   }, [repo, fetchData]);
 
   const unlinkUser = useCallback(async (profileUserId: string) => {
-    const { error } = await repo.updateProfile(profileUserId, { sponsor_id: null as any });
+    const { error } = await supabase.rpc('unlink_network_member',{p_user:profileUserId});
     if (!error) await fetchData();
-    return { success: !error, error };
+    return { success: !error, error:error?.message };
   }, [repo, fetchData]);
 
   return {

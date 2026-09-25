@@ -1,3 +1,4 @@
+import {planAccent} from '@/lib/planAppearance';
 import { LoadingRegion, StableRegion } from '@/components/ui/loading-region';
 import { Link } from "@/lib/router";
 import {
@@ -612,6 +613,7 @@ export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const {
     plans: allPlans,
+    company,
     ranks,
     currency,
     currencySymbol,
@@ -619,7 +621,7 @@ export default function LandingPage() {
   } = useConfig();
   const dbTestimonials = useTestimonials();
   const regionStats = useRegionStats();
-  const plans = allPlans.filter((p) => p.is_active);
+  const plans = allPlans.filter((p) => p.is_active && company.system_plans_enabled!=='false');
   const { user } = useAuthStore();
   const database = useDatabase();
   const platformStats = usePlatformStats();
@@ -1826,6 +1828,7 @@ export default function LandingPage() {
           return (
             <div
               key={plan.id}
+              style={{borderColor:planAccent(plan.color)}}
               className={cn(
                 "pt-6 flex flex-col h-full",
                 plan.is_popular

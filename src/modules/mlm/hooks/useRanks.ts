@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useMLMRepository } from '../repositories/mlmRepository';
+import {supabase} from '@/lib/backend/client';
 import { useAuthStore } from '@/store/authStore';
 import { useConfig } from '@/store/configStore';
 import { mlmService } from '../services/mlmService';
@@ -28,8 +28,9 @@ export interface UseRanksReturn {
 export function useRanks(options: UseRanksOptions = {}): UseRanksReturn {
   const { userId } = options;
   const { user } = useAuthStore();
-  const { ranks } = useConfig();
-  const repo = useMLMRepository();
+  const { ranks,loading:configLoading } = useConfig();
+  const [volume,setVolume]=useState(0);
+  const [rankSlug,setRankSlug]=useState<string>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [affiliateCount, setAffiliateCount] = useState(0);
@@ -43,13 +44,12 @@ export function useRanks(options: UseRanksOptions = {}): UseRanksReturn {
       setLoading(true);
       setError(null);
       try {
-        const [referrals, commissions] = await Promise.all([
-          repo.getDownline(targetUserId, 1),
-          repo.getCommissions(targetUserId),
-        ]);
-        setAffiliateCount(referrals.filter(p => p.sponsor_id === targetUserId).length);
-        const total = commissions.reduce((s, c) => s + Number(c.amount), 0);
-        setTotalCommissions(total);
+        const {data,error}=await supabase.rpc('rank_points_progress',{p_user:targetUserId});
+        if(error) throw error;
+        setAffiliateCount(Number(data.affiliates));
+        setVolume(Number(data.volume));
+        setRankSlug(data.rank);
+        setTotalCommissions(0);
       } catch (e: any) {
         setError(e?.message || 'Error al cargar estadísticas');
       } finally {
@@ -57,24 +57,24 @@ export function useRanks(options: UseRanksOptions = {}): UseRanksReturn {
       }
     }
     fetchStats();
-  }, [targetUserId, repo]);
+  }, [targetUserId]);
 
   const stats = useMemo(() => ({
     affiliates: affiliateCount,
-    volume: totalCommissions * 10, // Approximate volume
+    volume,
     totalCommissions,
-  }), [affiliateCount, totalCommissions]);
+  }), [affiliateCount, totalCommissions,volume]);
 
   const { current, index, next } = useMemo(() => {
-    return mlmService.findCurrentRank(ranks, user?.rank);
-  }, [ranks, user?.rank]);
+    return mlmService.findCurrentRank(ranks, rankSlug);
+  }, [ranks, rankSlug]);
 
   const progress = useMemo(() => {
     return mlmService.calculateRankProgress(stats, next);
   }, [stats, next]);
 
   return {
-    loading: loading || ranks.length === 0,
+    loading:loading || configLoading,
     error,
     stats,
     currentRank: current,

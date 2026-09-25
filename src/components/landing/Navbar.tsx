@@ -232,7 +232,7 @@ export default function Navbar() {
     { icon: Package, label: 'Pedidos', action: () => navigate('/dashboard/pedidos') },
     { icon: Heart, label: 'Favoritos', action: () => navigate('/favoritos') },
     { icon: Scale, label: 'Comparar', action: () => navigate('/comparar') },
-    { icon: Zap, label: 'Mi Plan', action: () => navigate('/dashboard/mi-plan') },
+    ...(company.system_plans_enabled !== 'false' ? [{ icon: Zap, label: 'Mi Plan', action: () => navigate('/dashboard/mi-plan') }] : []),
   ];
 
   // Quick access for guests (removed duplicate Blog and Contacto)
@@ -274,7 +274,7 @@ export default function Navbar() {
 
             {/* Desktop nav links */}
             <div className="hidden lg:flex items-center gap-0.5 flex-1 justify-center">
-              {navLinks.map(link => (
+              {navLinks.filter(link=>link.href!=='/planes'||company.system_plans_enabled!=='false').map(link => (
                 <Link key={link.href} to={link.href}
                   className={cn(
                     'px-3.5 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap',
@@ -418,7 +418,7 @@ export default function Navbar() {
 
             {/* Navigation links grid */}
             <div className="grid grid-cols-3 gap-2 mb-3">
-              {navLinks.map(link => (
+              {navLinks.filter(link=>link.href!=='/planes'||company.system_plans_enabled!=='false').map(link => (
                 <Link key={link.href} to={link.href} onClick={() => setMobileNavOpen(false)}
                   className={cn(
                     'py-3 rounded-xl text-center text-sm font-medium transition-colors',

@@ -1,3 +1,8 @@
+import RankPointsAdmin from '@/components/RankPointsAdmin';
+import PlanModuleControl from '@/components/admin/PlanModuleControl';
+import {planAccent} from '@/lib/planAppearance';
+import MlmPacksManager from '@/components/admin/MlmPacksManager';
+import { MaintenanceEditor } from '@/components/admin/MaintenanceEditor';
 import PaymentsManager from '@/components/payments/PaymentsManager';
 import { WhatsAppSettings } from '@/components/admin/WhatsAppSettings';
 import { LoadingRegion } from '@/components/ui/loading-region';
@@ -9,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import {
   Building2,
+  Users,
   Shield,
   Smartphone,
   Search,
@@ -29,7 +35,6 @@ import {
   CircleCheck as CheckCircle,
   DollarSign,
   Wrench,
-  TriangleAlert as AlertTriangle,
   Image,
   GripVertical,
 } from "lucide-react";
@@ -67,6 +72,8 @@ function RenderIcon({
 }
 
 const modules = [
+  { id: "tienda", icon: Building2, label: "Tienda", desc: "Condiciones de envío" },
+  { id: "red", icon: Users, label: "Red MLM", desc: "Configuración del árbol y afiliados" },
   {
     id: "empresa",
     icon: Building2,
@@ -171,7 +178,7 @@ const permissionList = [
   },
   {
     key: "assign_existing_user",
-    label: "Asignar usuarios existentes",
+    label: "Invitar usuarios a otras redes",
     group: "Red MLM",
   },
   {
@@ -191,7 +198,7 @@ const permissionList = [
   },
   {
     key: "view_full_network",
-    label: "Ver toda la red (todas las ramas)",
+    label: "Consultar el árbol de otros usuarios",
     group: "Red MLM",
   },
   // Tienda
@@ -203,8 +210,8 @@ const permissionList = [
   { key: "manage_shipping", label: "Configurar envíos", group: "Tienda" },
   {
     key: "manage_mlm_commissions",
-    label: "Configurar comisiones MLM tienda",
-    group: "Tienda",
+    label: "Configurar reglas de comisión MLM",
+    group: "Red MLM",
   },
   // Comisiones
   { key: "view_commissions", label: "Ver comisiones", group: "Comisiones" },
@@ -306,6 +313,7 @@ export default function AdminPage() {
   const database = useDatabase();
   const storage = useStorage();
   const [searchParamsAdmin] = useSearchParams();
+  const [plansExpanded,setPlansExpanded]=useState(false);
   const [activeModule, setActiveModule] = useState(
     () => searchParamsAdmin.get("module") || "empresa",
   );
@@ -600,9 +608,10 @@ export default function AdminPage() {
           {/* Mobile pill strip */}
           <div className="lg:hidden flex overflow-x-auto gap-1 bg-muted/50 rounded-xl p-1.5 scrollbar-hide">
             {modules.map((mod) => (
-              <button
+              <div key={mod.id}><button
                 key={mod.id}
-                onClick={() => setActiveModule(mod.id)}
+                aria-expanded={mod.id === "planes" ? plansExpanded : undefined}
+                onClick={() => {if(mod.id==="planes"){setPlansExpanded(v=>!v);if(!activeModule.startsWith("planes"))setActiveModule(mod.id);}else setActiveModule(mod.id);}}
                 className={cn(
                   "flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors flex-shrink-0",
                   activeModule === mod.id
@@ -612,15 +621,17 @@ export default function AdminPage() {
               >
                 <mod.icon className="w-4 h-4 flex-shrink-0" />
                 {mod.label}
-              </button>
+                {mod.id === "planes" && <ChevronRight aria-hidden="true" className={cn("w-3 h-3 shrink-0", plansExpanded && "rotate-90")} />}
+              </button>{mod.id==='planes'&&plansExpanded&&<div className="pl-8 pr-3 pb-3 flex flex-col gap-1 text-sm"><button className={cn('text-left py-2 px-3 rounded-lg text-sm hover:bg-muted/50 hover:text-foreground',activeModule==='planes'?'text-foreground bg-muted/40 font-medium':'text-muted-foreground')} onClick={()=>setActiveModule('planes')}>Planes del sistema</button><button className={cn('text-left py-2 px-3 rounded-lg text-sm hover:bg-muted/50 hover:text-foreground',activeModule==='planes-mlm'?'text-foreground bg-muted/40 font-medium':'text-muted-foreground')} onClick={()=>setActiveModule('planes-mlm')}>Planes MLM</button></div>}</div>
             ))}
           </div>
           {/* Desktop list */}
           <div className="hidden lg:block bg-card border border-border rounded-xl overflow-hidden">
             {modules.map((mod) => (
-              <button
+              <div key={mod.id}><button
                 key={mod.id}
-                onClick={() => setActiveModule(mod.id)}
+                aria-expanded={mod.id === "planes" ? plansExpanded : undefined}
+                onClick={() => {if(mod.id==="planes"){setPlansExpanded(v=>!v);if(!activeModule.startsWith("planes"))setActiveModule(mod.id);}else setActiveModule(mod.id);}}
                 className={cn(
                   "w-full flex items-center gap-3 px-4 py-3 text-left border-b border-border/50 last:border-0 transition-colors",
                   activeModule === mod.id
@@ -632,8 +643,8 @@ export default function AdminPage() {
                 <div className="flex-1 min-w-0">
                   <div className="text-sm font-medium">{mod.label}</div>
                 </div>
-                <ChevronRight className="w-3 h-3 flex-shrink-0 text-muted-foreground/50" />
-              </button>
+                <ChevronRight aria-hidden="true" className={cn("w-3 h-3 flex-shrink-0 text-muted-foreground", mod.id === "planes" && plansExpanded && "rotate-90")} />
+              </button>{mod.id==='planes'&&plansExpanded&&<div className="pl-8 pr-3 pb-3 flex flex-col gap-1 text-sm"><button className={cn('text-left py-2 px-3 rounded-lg text-sm hover:bg-muted/50 hover:text-foreground',activeModule==='planes'?'text-foreground bg-muted/40 font-medium':'text-muted-foreground')} onClick={()=>setActiveModule('planes')}>Planes del sistema</button><button className={cn('text-left py-2 px-3 rounded-lg text-sm hover:bg-muted/50 hover:text-foreground',activeModule==='planes-mlm'?'text-foreground bg-muted/40 font-medium':'text-muted-foreground')} onClick={()=>setActiveModule('planes-mlm')}>Planes MLM</button></div>}</div>
             ))}
           </div>
         </div>
@@ -993,7 +1004,7 @@ export default function AdminPage() {
               </div>
 
               {/* Single save button */}
-              <div className="mt-6 pt-4 border-t border-border flex justify-end">
+              <div className="mt-6 pt-4 border-t border-border flex justify-end form-actions">
                 <button
                   onClick={() =>
                     saveConfigKeys([
@@ -1165,7 +1176,12 @@ export default function AdminPage() {
                 </div>
               </div>
 
-              {/* Configuración de red MLM */}
+
+            </div>
+          )}
+
+          {activeModule === "tienda" && <section className="bg-card border border-border rounded-xl p-5 space-y-5"><div><h2 className="text-lg font-bold">Condiciones de envío</h2><p className="text-sm text-muted-foreground mt-2">Configura el umbral que utiliza la tienda para ofrecer envío gratuito.</p></div><label className="block space-y-2 text-sm"><span className="block">Envío gratis desde (S/)</span><input type="number" min="0" step="0.01" value={c('free_shipping_threshold')} onChange={e=>setC('free_shipping_threshold',e.target.value)} className="w-full max-w-sm px-3 py-3 border border-border rounded-xl bg-background"/></label><div className="form-actions"><button disabled={savingConfig} onClick={()=>saveConfigKeys(['free_shipping_threshold'],'store')} className="px-5 py-3 rounded-xl bg-primary text-primary-foreground font-semibold">Guardar</button></div></section>}
+          {activeModule === "red" && (<div className="space-y-5"><RankPointsAdmin/>              {/* Configuración de red MLM */}
               <div className="bg-card border border-border rounded-xl p-5 space-y-4">
                 <div>
                   <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
@@ -1193,11 +1209,11 @@ export default function AdminPage() {
                   <div className="flex items-center justify-between p-3 bg-muted rounded-xl">
                     <div>
                       <div className="text-sm font-semibold text-foreground">
-                        Asignar usuarios existentes a la red
+                        Invitar usuarios a otras redes
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        Permite que el admin vincule usuarios ya registrados sin
-                        crear uno nuevo
+                        Permite buscar cuentas existentes y enviarles una
+                        solicitud de afiliación. El usuario debe aceptarla.
                       </div>
                     </div>
                     <ToggleSwitch
@@ -1224,7 +1240,7 @@ export default function AdminPage() {
                     />
                   </div>
                 </div>
-                <button
+                <div className="form-actions"><button
                   onClick={() =>
                     saveConfigKeys(
                       [
@@ -1243,10 +1259,8 @@ export default function AdminPage() {
                     <Save className="w-4 h-4" />
                   )}{" "}
                   Guardar
-                </button>
-              </div>
-            </div>
-          )}
+                </button></div>
+              </div></div>)}
 
           {/* Auth Social */}
           {activeModule === "auth" && (
@@ -1368,7 +1382,7 @@ export default function AdminPage() {
                   </div>
                 </div>
               </div>
-              <div className="mt-6 pt-4 border-t border-border flex justify-end">
+              <div className="mt-6 pt-4 border-t border-border flex justify-end form-actions">
                 <button
                   onClick={() =>
                     saveConfigKeys(
@@ -1655,7 +1669,7 @@ export default function AdminPage() {
                   </div>
                 </div>
               </div>
-              <div className="mt-6 pt-4 border-t border-border flex justify-end">
+              <div className="mt-6 pt-4 border-t border-border flex justify-end form-actions">
                 <button
                   onClick={() =>
                     saveConfigKeys(
@@ -1987,7 +2001,7 @@ export default function AdminPage() {
                   </div>
                 </div>
               </div>
-              <div className="mt-6 pt-4 border-t border-border flex justify-end">
+              <div className="mt-6 pt-4 border-t border-border flex justify-end form-actions">
                 <button
                   onClick={() =>
                     saveConfigKeys(
@@ -2108,7 +2122,7 @@ export default function AdminPage() {
                   </div>
                 </div>
               </div>
-              <div className="mt-6 pt-4 border-t border-border flex justify-end">
+              <div className="mt-6 pt-4 border-t border-border flex justify-end form-actions">
                 <button
                   onClick={() =>
                     saveConfigKeys(
@@ -2166,7 +2180,7 @@ export default function AdminPage() {
                   <div className="flex items-center justify-between p-4 bg-muted rounded-xl border border-border gap-3"><div><p className="font-semibold text-sm">Código de referido obligatorio</p><p className="text-sm text-muted-foreground mt-1">Si está desactivado, se usa el referido de la empresa cuando el usuario no ingresa uno.</p></div><ToggleSwitch checked={c("register_referral_required")==="true"} onChange={v=>setC("register_referral_required",String(v))}/></div>
                 </div><div className="p-4 bg-muted rounded-xl border border-border"><label className="block text-sm font-semibold">Referido de la empresa<input value={c("register_default_referral_code")} onChange={e=>setC("register_default_referral_code",e.target.value.toUpperCase().trim())} className="w-full mt-3 p-3 rounded-lg bg-background border border-border"/></label><p className="text-sm text-muted-foreground mt-2">Debe ser un código de referido existente. La membresía siempre es opcional y sus beneficios requieren pago confirmado.</p></div>
               </div>
-              <div className="mt-6 pt-4 border-t border-border flex justify-end">
+              <div className="mt-6 pt-4 border-t border-border flex justify-end form-actions">
                 <button
                   onClick={() =>
                     saveConfigKeys(
@@ -2193,240 +2207,16 @@ export default function AdminPage() {
           )}
 
           {/* ── PLANES ── */}
+          {['planes','planes-mlm'].includes(activeModule)&&<div className="flex gap-5 border-b border-border mb-6 text-sm"><button className={'pb-3 '+(activeModule==='planes'?'border-b-2 border-primary text-primary':'text-muted-foreground')} onClick={()=>setActiveModule('planes')}>Planes del sistema</button><button className={'pb-3 '+(activeModule==='planes-mlm'?'border-b-2 border-primary text-primary':'text-muted-foreground')} onClick={()=>setActiveModule('planes-mlm')}>Planes MLM</button></div>}
           {activeModule === "planes" && <PlansManager />}
-          {activeModule === "mantenimiento" && (
-            <div className="bg-card border border-border rounded-xl p-5 sm:p-6">
-              <div className="flex items-center gap-3 mb-5">
-                <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center flex-shrink-0">
-                  <Wrench className="w-5 h-5 text-amber-600" />
-                </div>
-                <div>
-                  <h2 className="text-lg font-semibold text-foreground">
-                    Modo Mantenimiento
-                  </h2>
-                  <p className="text-xs text-muted-foreground">
-                    Controla el acceso público al sistema
-                  </p>
-                </div>
-              </div>
-
-              {/* Estado — ancho completo, siempre visible arriba de las dos columnas */}
-              <div
-                className={cn(
-                  "flex items-center justify-between p-4 rounded-xl border transition-colors gap-3 mb-3",
-                  c("maintenance_mode") === "true"
-                    ? "bg-amber-500/10 border-amber-500/30"
-                    : "bg-emerald-500/10 border-green-500/20",
-                )}
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div
-                    className={cn(
-                      "w-2.5 h-2.5 rounded-full shrink-0",
-                      c("maintenance_mode") === "true"
-                        ? "bg-amber-500 animate-pulse"
-                        : "bg-emerald-500",
-                    )}
-                  />
-                  <div className="min-w-0">
-                    <div className="text-sm font-semibold text-foreground">
-                      {c("maintenance_mode") === "true"
-                        ? "Sistema en mantenimiento"
-                        : "Sistema operativo"}
-                    </div>
-                    <div className="text-xs text-muted-foreground mt-0.5">
-                      {c("maintenance_mode") === "true"
-                        ? "Los usuarios no pueden acceder. Solo administradores."
-                        : "Todos los usuarios pueden acceder normalmente."}
-                    </div>
-                  </div>
-                </div>
-                <ToggleSwitch
-                  checked={c("maintenance_mode") === "true"}
-                  onChange={(v) => {
-                    setC("maintenance_mode", String(v));
-                  }}
-                />
-              </div>
-
-              {c("maintenance_mode") === "true" && (
-                <div className="flex items-start gap-2.5 bg-amber-500/10 border border-amber-500/20 rounded-lg p-3.5 mb-6">
-                  <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
-                  <p className="text-xs text-amber-700 dark:text-amber-300">
-                    El modo mantenimiento está <strong>ACTIVO</strong>. Solo
-                    los administradores y superadmins pueden acceder al
-                    sistema.
-                  </p>
-                </div>
-              )}
-
-              {/* Dos columnas equitativas: mensaje al usuario ← / → temporizador */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Columna 1: Contenido visible para el usuario */}
-                <div className="space-y-4">
-                  <h3 className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-                    Mensaje para el usuario
-                  </h3>
-                  <div>
-                    <label className="block text-xs font-medium text-foreground mb-1.5">
-                      Título de la página
-                    </label>
-                    <input
-                      type="text"
-                      value={c("maintenance_title")}
-                      onChange={(e) => setC("maintenance_title", e.target.value)}
-                      placeholder="Volveremos pronto"
-                      className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors"
-                    />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Título principal que se mostrará en la página de mantenimiento.
-                    </p>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-foreground mb-1.5">
-                      Mensaje para los usuarios
-                    </label>
-                    <textarea
-                      value={c("maintenance_message")}
-                      onChange={(e) => setC("maintenance_message", e.target.value)}
-                      rows={5}
-                      placeholder="Estamos realizando mejoras. Volvemos pronto."
-                      className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors resize-none"
-                    />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Este mensaje se mostrará en la página de mantenimiento.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Columna 2: Temporizador de cuenta regresiva — opcional */}
-                <div className="space-y-4">
-                  <h3 className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-                    Cuenta regresiva
-                  </h3>
-                  <div className="flex items-center justify-between p-4 rounded-xl border-2 border-border bg-muted/30 gap-3">
-                    <div className="min-w-0">
-                      <div className="text-sm font-semibold text-foreground">
-                        Temporizador de cuenta regresiva
-                      </div>
-                      <div className="text-xs text-muted-foreground mt-0.5">
-                        Muestra un contador en la página de mantenimiento.
-                      </div>
-                    </div>
-                    <ToggleSwitch
-                      checked={c("maintenance_countdown_enabled") === "true"}
-                      onChange={(v) => setC("maintenance_countdown_enabled", String(v))}
-                    />
-                  </div>
-                  {c("maintenance_countdown_enabled") === "true" ? (
-                    <div className="space-y-3">
-                      <div>
-                        <label className="block text-xs font-medium text-foreground mb-1.5">
-                          Fecha y hora de reapertura
-                        </label>
-                        <input
-                          type="datetime-local"
-                          value={c("maintenance_countdown_date") ? c("maintenance_countdown_date").slice(0, 16) : ""}
-                          onChange={(e) => setC("maintenance_countdown_date", e.target.value ? new Date(e.target.value).toISOString() : "")}
-                          className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors"
-                        />
-                        {c("maintenance_countdown_date") && (() => {
-                          const d = new Date(c("maintenance_countdown_date"));
-                          if (isNaN(d.getTime())) return null;
-                          try {
-                            return (
-                              <p className="text-xs text-primary font-medium mt-1">
-                                {new Intl.DateTimeFormat('es-PE', { dateStyle: 'full', timeStyle: 'short' }).format(d)}
-                              </p>
-                            );
-                          } catch { return null; }
-                        })()}
-                      </div>
-                      <MaintenanceCountdownPreview
-                        dateIso={c("maintenance_countdown_date")}
-                      />
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center gap-2 h-[168px] rounded-xl border border-dashed border-border bg-muted/20 text-center px-6">
-                      <AlertTriangle className="w-5 h-5 text-muted-foreground/40" />
-                      <p className="text-xs text-muted-foreground/70">
-                        Activa el temporizador para mostrar una cuenta regresiva a tus usuarios.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="mt-6 pt-4 border-t border-border flex justify-end">
-                <button
-                  onClick={() =>
-                    saveConfigKeys(["maintenance_mode", "maintenance_title", "maintenance_message", "maintenance_countdown_enabled", "maintenance_countdown_date"])
-                  }
-                  disabled={savingConfig}
-                  className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-medium transition-colors disabled:opacity-50"
-                >
-                  {savingConfig ? (
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Save className="w-4 h-4" />
-                  )}
-                  Guardar
-                </button>
-              </div>
-            </div>
-          )}
+          {activeModule === "planes-mlm" && <MlmPacksManager />}
+          {activeModule === "mantenimiento" && <MaintenanceEditor get={c} set={setC} save={saveConfigKeys} saving={savingConfig} />}
           {/* ── RANGOS ── */}
           {activeModule === "rangos" && <RanksManager />}
 
           {/* ── FINANZAS ── */}
           {activeModule === "finanzas" && <PaymentsManager />}
         </div>
-      </div>
-    </div>
-  );
-}
-
-// ── Maintenance Manager ──
-function MaintenanceCountdownPreview({ dateIso }: { dateIso: string }) {
-  const [remaining, setRemaining] = useState<number | null>(null);
-  useEffect(() => {
-    if (!dateIso) { setRemaining(null); return; }
-    const target = new Date(dateIso).getTime();
-    if (isNaN(target)) { setRemaining(null); return; }
-    const tick = () => setRemaining(Math.max(0, target - Date.now()));
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, [dateIso]);
-
-  if (remaining === null) return null;
-
-  const total = Math.floor(remaining / 1000);
-  const d = Math.floor(total / 86400);
-  const h = Math.floor((total % 86400) / 3600);
-  const m = Math.floor((total % 3600) / 60);
-  const s = total % 60;
-  const units = [{ v: d, l: 'Días' }, { v: h, l: 'Horas' }, { v: m, l: 'Min' }, { v: s, l: 'Seg' }];
-
-  return (
-    <div className="p-4 bg-muted/40 border border-border rounded-xl">
-      <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">Vista previa del contador</p>
-      <div className="flex gap-2 justify-center">
-        {units.map((u, i) => (
-          <div key={i} className="flex flex-col items-center gap-1">
-            <div
-              className="w-12 h-12 rounded-xl flex items-center justify-center text-xl font-bold tabular-nums"
-              style={{
-                background: 'hsl(var(--muted))',
-                border: '1px solid hsl(var(--border))',
-                color: 'hsl(var(--foreground))',
-              }}
-            >
-              {String(u.v).padStart(2, '0')}
-            </div>
-            <span className="text-[9px] text-muted-foreground uppercase tracking-wide font-medium">{u.l}</span>
-          </div>
-        ))}
       </div>
     </div>
   );
@@ -2557,6 +2347,7 @@ function PlansManager() {
 
   return (
     <div className="space-y-4">
+      <PlanModuleControl kind="system"/>
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold text-foreground">
@@ -2571,7 +2362,7 @@ function PlansManager() {
             setEditing(null);
             setShowForm(true);
           }}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
+          className="inline-flex h-10 shrink-0 items-center justify-center gap-2 px-4 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
           <Plus className="w-4 h-4" /> Nuevo plan
         </button>
@@ -2613,7 +2404,7 @@ function PlansManager() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-sm font-bold text-foreground">
+                  <span className="text-sm font-bold text-foreground border-l-2 pl-2" style={{borderColor:planAccent(plan.color)}}>
                     {plan.name}
                   </span>
                   {plan.badge && (
@@ -2621,7 +2412,7 @@ function PlansManager() {
                       {plan.badge}
                     </span>
                   )}
-                  {plan.is_popular && (
+                  {plan.is_popular && !plan.badge && (
                     <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 font-medium">
                       Popular
                     </span>
@@ -2742,7 +2533,8 @@ function PlanForm({
     is_free: plan?.is_free ?? false,
     sort_order: String(plan?.sort_order ?? "0"),
     trial_days: String(plan?.trial_days ?? "0"),
-    features: (plan?.features || []).join("\n"),
+    features: plan?.features?.length ? [...plan.features] : [""],
+    color: plan?.color?.startsWith("#") ? plan.color : "#e9a014",
   });
   const [slugTouched, setSlugTouched] = useState(!!plan?.slug);
 
@@ -2766,7 +2558,8 @@ function PlanForm({
       is_free: form.is_free,
       sort_order: Number(form.sort_order) || 0,
       trial_days: Number(form.trial_days) || 0,
-      features: form.features.split("\n").filter(Boolean),
+      features: form.features.map(f=>f.trim()).filter(Boolean),
+      color: form.color,
     });
   };
 
@@ -2863,18 +2656,8 @@ function PlanForm({
           className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary"
         />
       </div>
-      <div>
-        <label className="block text-xs font-medium text-foreground mb-1.5">
-          Características (una por línea)
-        </label>
-        <textarea
-          value={form.features}
-          onChange={(e) => setForm((p) => ({ ...p, features: e.target.value }))}
-          rows={6}
-          placeholder={"Red ilimitada\nComisiones 8%\nSoporte 24/7"}
-          className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary resize-none"
-        />
-      </div>
+      <div className="space-y-3"><label className="block text-sm font-medium" htmlFor="plan-accent">Color del plan</label><div className="flex items-center gap-3"><input id="plan-accent" type="color" value={form.color} onChange={e=>setForm(p=>({...p,color:e.target.value}))} className="h-11 w-14 cursor-pointer rounded-lg border border-border bg-background p-1"/><span className="text-sm text-muted-foreground">Se aplica a los detalles y al borde del plan.</span></div></div>
+      <div className="space-y-3"><p className="text-sm font-medium">Beneficios del plan</p>{form.features.map((feature,index)=><div key={index} className="flex items-center gap-2"><input aria-label={`Beneficio ${index+1}`} value={feature} placeholder="Escribe un beneficio" onChange={e=>setForm(p=>({...p,features:p.features.map((f,i)=>i===index?e.target.value:f)}))} className="min-w-0 flex-1 rounded-lg border border-border bg-muted px-3 py-2.5 text-sm"/><button type="button" aria-label={`Quitar beneficio ${index+1}`} className="grid h-10 w-10 shrink-0 place-items-center rounded-lg hover:bg-muted" onClick={()=>setForm(p=>({...p,features:p.features.filter((_,i)=>i!==index)}))}><Trash2 className="h-4 w-4"/></button></div>)}<button type="button" onClick={()=>setForm(p=>({...p,features:[...p.features,'']}))} className="inline-flex items-center gap-2 text-sm text-primary"><Plus className="h-4 w-4"/>Agregar beneficio</button></div>
       <div className="flex items-center gap-6 flex-wrap">
         <label className="flex items-center gap-2 text-sm text-foreground">
           <input
@@ -2914,7 +2697,7 @@ function PlanForm({
           Activo
         </label>
       </div>
-      <div className="mt-6 pt-4 border-t border-border flex justify-end">
+      <div className="mt-6 pt-4 border-t border-border flex justify-end form-actions">
         <button
           onClick={handleSave}
           disabled={saving}
@@ -3049,7 +2832,7 @@ function RanksManager() {
             setEditing(null);
             setShowForm(true);
           }}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
+          className="inline-flex h-10 shrink-0 items-center justify-center gap-2 px-4 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
           <Plus className="w-4 h-4" /> Nuevo rango
         </button>
@@ -3108,7 +2891,7 @@ function RanksManager() {
                 </div>
                 <div className="text-xs text-muted-foreground">
                   Bono: S/ {rank.bonus} · {rank.min_affiliates} afiliados · S/{" "}
-                  {rank.min_volume} volumen
+                  {rank.min_volume} puntos
                 </div>
               </div>
               <div className="flex items-center gap-1 flex-shrink-0">
@@ -3197,6 +2980,7 @@ function RankForm({
     bonus: String(rank?.bonus ?? ""),
     min_affiliates: String(rank?.min_affiliates ?? ""),
     min_volume: String(rank?.min_volume ?? ""),
+    auto_qualify: rank?.auto_qualify ?? true,
     sort_order: String(rank?.sort_order ?? "0"),
     is_active: rank?.is_active ?? true,
   });
@@ -3241,6 +3025,7 @@ function RankForm({
       bonus: Number(form.bonus),
       min_affiliates: Number(form.min_affiliates),
       min_volume: Number(form.min_volume),
+      auto_qualify: form.auto_qualify,
       sort_order: Number(form.sort_order),
       is_active: form.is_active,
     });
@@ -3326,7 +3111,7 @@ function RankForm({
         </div>
         <div>
           <label className="block text-xs font-medium text-foreground mb-1.5">
-            Min. volumen
+            Puntos requeridos
           </label>
           <input
             type="text"
@@ -3394,7 +3179,7 @@ function RankForm({
           Activo
         </label>
       </div>
-      <div className="mt-6 pt-4 border-t border-border flex justify-end">
+      <label className="flex items-center gap-3 mt-5 text-sm"><input type="checkbox" checked={form.auto_qualify} onChange={e=>setForm(p=>({...p,auto_qualify:e.target.checked}))}/>Ascenso automático al cumplir puntos y afiliados</label><p className="text-xs text-muted-foreground mt-2">Configura al menos un requisito mayor que cero. Se evalúa con cada nueva acreditación de puntos o afiliado directo. Los rangos ya obtenidos se conservan.</p><div className="mt-6 pt-4 border-t border-border flex justify-end form-actions">
         <button
           onClick={handleSave}
           disabled={saving}

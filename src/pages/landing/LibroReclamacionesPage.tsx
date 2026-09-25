@@ -406,9 +406,7 @@ function RegisterTab({ step, form, errors, submitting, correlativo, steps,
         </div>
       )}
 
-      {/* Card */}
-      <div className="bg-card border border-border/60 rounded-xl overflow-hidden">
-        <div className="p-5 sm:p-6 space-y-5">
+      <div className="space-y-5">
 
           {/* ── Step 0: Datos personales ── */}
           {step === 0 && (
@@ -560,7 +558,7 @@ function RegisterTab({ step, form, errors, submitting, correlativo, steps,
                 </div>
               </div>
 
-              <div className="rounded-xl border border-border/50 divide-y divide-border/50 text-sm">
+              <div className="divide-y divide-border/50 text-sm">
                 <div className="p-4">
                   <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-3">Tus datos</p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-1.5 gap-x-4">
@@ -659,8 +657,6 @@ function RegisterTab({ step, form, errors, submitting, correlativo, steps,
             )}
           </div>
         )}
-      </div>
-
       {/* Legal footnote */}
       {step < 3 && (
         <p className="text-xs text-muted-foreground leading-relaxed px-1">

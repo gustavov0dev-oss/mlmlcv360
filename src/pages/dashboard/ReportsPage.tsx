@@ -1,213 +1,35 @@
-import { LoadingRegion } from '@/components/ui/loading-region';
-import { useState, useEffect } from 'react';
-import { useDatabase } from '@/lib/backend';
-import { useAuthStore } from '@/store/authStore';
-import {
-  AreaChart, Area, BarChart, Bar, LineChart, Line,
-  ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, Cell
-} from 'recharts';
-import { Download, TrendingUp, Users, DollarSign, Award } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { toast } from 'sonner';
-
-const rankColors: Record<string, string> = {
-  bronze: '#cd7f32', silver: '#c0c0c0', gold: '#ffd700',
-  platinum: '#e5e4e2', diamond: '#b9f2ff', crown: '#ffd700',
-};
-const rankLabels: Record<string, string> = {
-  bronze: 'Bronce', silver: 'Plata', gold: 'Oro',
-  platinum: 'Platino', diamond: 'Diamante', crown: 'Corona',
-};
-
-function CustomTooltip({ active, payload, label }: any) {
-  if (!active || !payload?.length) return null;
-  return (
-    <div className="bg-card border border-border rounded-lg px-3 py-2 shadow-lg text-xs">
-      {label && <div className="font-semibold text-foreground mb-1">{label}</div>}
-      {payload.map((p: any, i: number) => (
-        <div key={i} className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full" style={{ background: p.color || p.fill }} />
-          <span className="text-muted-foreground">{p.name}:</span>
-          <span className="font-semibold text-foreground">{typeof p.value === 'number' ? `S/ ${p.value.toLocaleString()}` : p.value}</span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-export default function ReportsPage() {
-  const database = useDatabase();
-  const { user } = useAuthStore();
-  const [loading, setLoading] = useState(true);
-  const [commissionData, setCommissionData] = useState<any[]>([]);
-  const [referralData, setReferralData] = useState<any[]>([]);
-  const [rankData, setRankData] = useState<any[]>([]);
-  const [stats, setStats] = useState({ total: 0, count: 0, referrals: 0, growth: 0 });
-
-  useEffect(() => {
-    async function fetchReports() {
-      if (!user) return;
-      setLoading(true);
-      const { data } = await database.select<any>('commissions', {
-        select: 'amount, created_at',
-        filter: { user_id: user.id },
-      });
-      const commissions = data as any;
-      const { data: rData } = await database.select<any>('profiles', {
-        select: 'id, rank, created_at, status',
-        filter: { sponsor_id: user.id },
-      });
-      const referrals = rData as any;
-
-      // Monthly commission data
-      const now = new Date();
-      const months: any[] = [];
-      for (let i = 5; i >= 0; i--) {
-        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-        const monthName = d.toLocaleDateString('es-PE', { month: 'short' });
-        const total = (commissions || []).filter((c: any) => {
-          const cd = new Date(c.created_at);
-          return cd.getMonth() === d.getMonth() && cd.getFullYear() === d.getFullYear();
-        }).reduce((s: number, c: any) => s + Number(c.amount), 0);
-        months.push({ name: monthName.charAt(0).toUpperCase() + monthName.slice(1), comisiones: total });
-      }
-      setCommissionData(months);
-
-      // Referral growth
-      const referralMonths: any[] = [];
-      for (let i = 5; i >= 0; i--) {
-        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-        const monthName = d.toLocaleDateString('es-PE', { month: 'short' });
-        const count = (referrals || []).filter((r: any) => {
-          const rd = new Date(r.created_at);
-          return rd.getMonth() === d.getMonth() && rd.getFullYear() === d.getFullYear();
-        }).length;
-        referralMonths.push({ name: monthName.charAt(0).toUpperCase() + monthName.slice(1), afiliados: count });
-      }
-      setReferralData(referralMonths);
-
-      // Rank distribution
-      const rankMap: Record<string, number> = {};
-      (referrals || []).forEach((r: any) => { rankMap[r.rank] = (rankMap[r.rank] || 0) + 1; });
-      setRankData(Object.entries(rankMap).map(([k, v]) => ({ name: rankLabels[k] || k, value: v, fill: rankColors[k] || '#999' })));
-
-      const total = (commissions || []).reduce((s: number, c: any) => s + Number(c.amount), 0);
-      setStats({ total, count: commissions?.length || 0, referrals: referrals?.length || 0, growth: 0 });
-      setLoading(false);
-    }
-    fetchReports();
-  }, [user]);
-
-  const handleExport = () => {
-    toast.success('Reporte exportado');
-  };
-
-  if (loading) {
-    return <LoadingRegion className="min-h-[calc(100dvh-8rem)]" />;
-  }
-
-  return (
-    <div className="space-y-5 animate-fade-in">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Reportes</h1>
-          <p className="text-muted-foreground text-sm mt-1">Analiza tu rendimiento y crecimiento.</p>
-        </div>
-        <button onClick={handleExport} className="flex items-center gap-2 px-4 py-2.5 border border-border rounded-xl text-sm font-medium text-foreground hover:bg-muted transition-colors">
-          <Download className="w-4 h-4" /> Exportar
-        </button>
-      </div>
-
-      {/* Summary */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { label: 'Ingresos totales', value: `S/ ${stats.total.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, icon: DollarSign, color: 'text-primary bg-primary/10' },
-          { label: 'Transacciones', value: String(stats.count), icon: TrendingUp, color: 'text-green-500 bg-green-500/10' },
-          { label: 'Afiliados', value: String(stats.referrals), icon: Users, color: 'text-purple-500 bg-purple-500/10' },
-          { label: 'Crecimiento', value: `+${stats.growth}%`, icon: Award, color: 'text-orange-500 bg-orange-500/10' },
-        ].map(s => (
-          <div key={s.label} className="bg-card border border-border rounded-xl p-4 flex items-center gap-3">
-            <div className={cn('w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0', s.color)}>
-              <s.icon className="w-4 h-4" />
-            </div>
-            <div className="min-w-0">
-              <div className="text-lg font-bold text-foreground truncate">{s.value}</div>
-              <div className="text-xs text-muted-foreground">{s.label}</div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Charts grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Commission area */}
-        <div className="bg-card border border-border rounded-xl p-4 sm:p-5">
-          <h3 className="text-sm font-semibold text-foreground mb-4">Ingresos mensuales</h3>
-          <ResponsiveContainer width="100%" height={220}>
-            <AreaChart data={commissionData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
-              <defs>
-                <linearGradient id="colorArea" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
-              <XAxis dataKey="name" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
-              <Tooltip content={<CustomTooltip />} />
-              <Area type="monotone" dataKey="comisiones" name="Ingresos" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#colorArea)" />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Referral bar */}
-        <div className="bg-card border border-border rounded-xl p-4 sm:p-5">
-          <h3 className="text-sm font-semibold text-foreground mb-4">Nuevos afiliados por mes</h3>
-          <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={referralData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
-              <XAxis dataKey="name" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
-              <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="afiliados" name="Afiliados" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Rank distribution */}
-        <div className="bg-card border border-border rounded-xl p-4 sm:p-5">
-          <h3 className="text-sm font-semibold text-foreground mb-4">Distribución por rango</h3>
-          {rankData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={220}>
-              <BarChart data={rankData} layout="vertical" margin={{ top: 5, right: 10, left: 20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} horizontal={false} />
-                <XAxis type="number" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
-                <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} width={70} />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="value" name="Afiliados" radius={[0, 4, 4, 0]}>
-                  {rankData.map((entry, i) => <Cell key={i} fill={entry.fill} />)}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="h-[220px] flex items-center justify-center text-sm text-muted-foreground">Sin afiliados para mostrar</div>
-          )}
-        </div>
-
-        {/* Commission trend line */}
-        <div className="bg-card border border-border rounded-xl p-4 sm:p-5">
-          <h3 className="text-sm font-semibold text-foreground mb-4">Tendencia de comisiones</h3>
-          <ResponsiveContainer width="100%" height={220}>
-            <LineChart data={commissionData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
-              <XAxis dataKey="name" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
-              <Tooltip content={<CustomTooltip />} />
-              <Line type="monotone" dataKey="comisiones" name="Comisiones" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4, fill: 'hsl(var(--primary))' }} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-    </div>
-  );
+import {useEffect,useState} from 'react';
+import {supabase} from '@/lib/backend/client';
+import {useAuthStore} from '@/store/authStore';
+import {Select,SelectTrigger,SelectValue,SelectContent,SelectItem} from '@/components/ui/select';
+import {Download} from 'lucide-react';
+import {toast} from 'sonner';
+const date=(d:Date)=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const amount=(n:number,c:string)=>new Intl.NumberFormat('es-PE',{style:'currency',currency:c}).format(n);
+const button='inline-flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-2.5 text-sm disabled:opacity-50';
+export default function ReportsPage(){
+ const {user}=useAuthStore();const now=new Date();const [from,setFrom]=useState(date(new Date(now.getFullYear(),now.getMonth()-5,1)));const [to,setTo]=useState(date(now));
+ const [applied,setApplied]=useState({from,to});const [currency,setCurrency]=useState('PEN');const [kind,setKind]=useState('orders');const [data,setData]=useState<any>(null);const [loading,setLoading]=useState(true);const [error,setError]=useState('');const [exporting,setExporting]=useState(false);const [search,setSearch]=useState('');const [page,setPage]=useState(0);
+ useEffect(()=>{let alive=true;if(!user?.id)return;setLoading(true);setError('');const end=new Date(applied.to+'T00:00:00');end.setDate(end.getDate()+1);
+ Promise.all([supabase.rpc('account_analytics',{p_from:new Date(applied.from+'T00:00:00').toISOString(),p_to:end.toISOString(),p_report:true}),supabase.rpc('account_report_breakdowns',{p_from:new Date(applied.from+'T00:00:00').toISOString(),p_to:end.toISOString()})]).then(([base,extra])=>({data:base.data?{...base.data,...extra.data}:null,error:base.error||extra.error})).then(({data,error})=>{if(!alive)return;if(error)setError(error.code==='42501'?'Tu cargo no tiene permiso para consultar reportes.':'No pudimos cargar el reporte. Intenta nuevamente.');else setData(data);setLoading(false);}).catch(()=>{if(alive){setError('No pudimos conectar. Vuelve a aplicar los filtros.');setLoading(false);}});return()=>{alive=false;};},[user?.id,applied]);
+ const p=data?.permissions||{};const commission=p.view_commissions||p.approve_commissions;const people=p.view_users||p.view_network;
+ const labels:Record<string,string>={pending:'Pendiente',paid:'Pagado',approved:'Aprobado',rejected:'Rechazado',cancelled:'Cancelado',expired:'Vencido',active:'Activo',processing:'En preparación',shipped:'Enviado',delivered:'Entregado',refunded:'Reembolsado',direct:'Directa',binary:'Binaria',level:'Por nivel',rank:'Por rango'};
+ const reports=[{id:'orders',name:data?.scope.orders==='global'?'Ventas por mes':'Mis compras por mes',description:'Importes pagados y cantidad de pedidos.',show:true},{id:'order_status',name:'Estados de pedidos',description:'Seguimiento de pedidos y sus importes.',show:true},{id:'payments',name:'Métodos de pago',description:'Cobros confirmados por medio de pago.',show:true},{id:'products',name:data?.scope.orders==='global'?'Productos vendidos':'Productos comprados',description:'Unidades e importes de pedidos pagados.',show:true},{id:'commissions',name:'Comisiones por mes',description:'Evolución de comisiones aprobadas y pagadas.',show:commission},{id:'commission_status',name:'Estados de comisiones',description:'Pendientes, aprobadas y pagadas.',show:commission},{id:'commission_types',name:'Tipos de comisión',description:'Importes aprobados por origen.',show:commission},{id:'people',name:data?.scope.people==='global'?'Nuevos usuarios':'Nuevos referidos',description:'Registros durante el período.',show:people},{id:'ranks',name:'Distribución por rango',description:'Rango actual de los nuevos registros.',show:people},{id:'memberships',name:data?.permissions.configure_system?'Membresías':'Mis membresías',description:'Períodos iniciados y estado de su vigencia.',show:true}].filter(r=>r.show);
+ const title=reports.find(r=>r.id===kind)?.name||'Reporte';const monetary=!['people','ranks','memberships'].includes(kind);
+ const heads=kind==='orders'?['Mes','Moneda','Pedidos','Importe pagado']:kind==='commissions'?['Mes','Moneda','Comisiones aprobadas']:kind==='people'?['Mes','Personas']:kind==='memberships'?['Plan','Estado','Suscripciones']:kind==='ranks'?['Rango','Personas']:[kind==='products'?'Producto':kind==='payments'?'Método':'Estado o tipo','Moneda',kind==='products'?'Unidades':'Cantidad','Importe'];
+ let rows:(string|number)[][]=[];const cursor=new Date(applied.from+'T12:00:00');cursor.setDate(1);const last=new Date(applied.to+'T12:00:00');
+ if(['orders','commissions','people'].includes(kind))while(cursor<=last&&rows.length<13){const key=date(cursor).slice(0,7);const m=data?.monthly?.find((r:any)=>r.month===key&&r.currency===currency);const count=data?.registrations?.find((r:any)=>r.month===key)?.count||0;rows.push(kind==='orders'?[key,currency,m?.orders||0,m?.sales||0]:kind==='commissions'?[key,currency,m?.earned||0]:[key,count]);cursor.setMonth(cursor.getMonth()+1);}
+ else rows=(data?.[kind]||[]).filter((r:any)=>!monetary||r.currency===currency).map((r:any)=>kind==='memberships'?[r.label,labels[r.status]||r.status,r.count]:kind==='ranks'?[r.label,r.count]:[labels[r.label]||r.label,r.currency,r.count,r.amount]);
+ rows=rows.filter(r=>!search||r.some(v=>String(v).toLocaleLowerCase().includes(search.toLocaleLowerCase())));
+ const pages=Math.max(1,Math.ceil(rows.length/12));const visibleRows=rows.slice(Math.min(page,pages-1)*12,(Math.min(page,pages-1)+1)*12);
+ const total=rows.reduce((n,r)=>n+Number(r[r.length-1]),0);const canExport=p.export_data&&!loading&&!error&&data;
+ const download=async(format:'csv'|'pdf')=>{if(!canExport)return;setExporting(true);try{const name=`reporte-${kind}-${applied.from}-${applied.to}`;
+ if(format==='csv'){const csv='\uFEFF'+[heads,...rows].map(r=>r.map(v=>'"'+(typeof v==='string'&&/^[=+@-]/.test(v)?"'"+v:String(v)).replace(/"/g,'""')+'"').join(';')).join('\r\n');const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download=name+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+ else{const [{jsPDF},{default:autoTable}]=await Promise.all([import('jspdf'),import('jspdf-autotable')]);const pdf=new jsPDF();pdf.setFontSize(18);pdf.text(title,14,20);pdf.setFontSize(10);pdf.text(`Período: ${applied.from} a ${applied.to}${!monetary?'':` · ${currency}`}`,14,29);autoTable(pdf,{startY:36,head:[heads],body:rows,theme:'grid',headStyles:{fillColor:[35,35,35]},styles:{fontSize:10},didDrawPage:()=>{pdf.setFontSize(9);pdf.text(`Generado: ${new Date().toLocaleDateString('es-PE')} · Página ${pdf.getNumberOfPages()}`,14,287);}});pdf.save(name+'.pdf');}
+ }catch{toast.error('No se pudo exportar. Inténtalo nuevamente.');}finally{setExporting(false);}};
+ return <div className="max-w-7xl space-y-6"><header><h1 className="text-2xl font-bold">Reportes</h1><p className="mt-2 text-sm text-muted-foreground">Consulta un período y descarga sus resultados.</p></header><div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-3" aria-label="Tipos de reporte">{reports.map(r=><button key={r.id} onClick={()=>{setKind(r.id);setSearch('');setPage(0);}} aria-pressed={kind===r.id} className={`rounded-xl border p-4 text-left ${kind===r.id?'border-primary bg-primary/5':'border-border bg-card hover:bg-muted'}`}><span className="block font-medium">{r.name}</span><span className="block mt-2 text-sm text-muted-foreground">{r.description}</span></button>)}</div><form className="rounded-xl border border-border bg-card p-5 grid sm:grid-cols-2 xl:grid-cols-5 gap-4 items-end" onSubmit={e=>{e.preventDefault();const days=(new Date(to).getTime()-new Date(from).getTime())/86400000;if(!from||!to||days<0||days>365){toast.error('Selecciona fechas válidas, con un máximo de un año.');return;}setApplied({from,to});}}>
+ <label className="space-y-2 text-sm"><span className="block">Informe</span><Select value={kind} onValueChange={v=>{setKind(v);setSearch('');setPage(0);}}><SelectTrigger><SelectValue/></SelectTrigger><SelectContent>{reports.map(r=><SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>)}</SelectContent></Select></label>
+ <label className="space-y-2 text-sm"><span className="block">Desde</span><input required type="date" value={from} max={to} onChange={e=>setFrom(e.target.value)} className="w-full rounded-lg border border-border bg-background px-3 py-2"/></label><label className="space-y-2 text-sm"><span className="block">Hasta</span><input required type="date" min={from} max={date(now)} value={to} onChange={e=>setTo(e.target.value)} className="w-full rounded-lg border border-border bg-background px-3 py-2"/></label>
+ <label className="space-y-2 text-sm"><span className="block">Moneda</span><Select disabled={!monetary} value={currency} onValueChange={setCurrency}><SelectTrigger><SelectValue/></SelectTrigger><SelectContent>{Array.from(new Set(['PEN','USD',...(data?.money||[]).map((m:any)=>m.currency)])).map(c=><SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent></Select></label><button disabled={loading} className={`${button} bg-primary text-primary-foreground`}>Aplicar filtros</button></form>
+ {error?<p role="alert">{error}</p>:!data?<div className="min-h-64" role="status"><span className="sr-only">Cargando reporte…</span></div>:<section className="rounded-xl border border-border bg-card p-5 sm:p-6" aria-busy={loading}><div className="flex flex-wrap justify-between gap-4 mb-6"><div><h2 className="text-lg font-semibold">{title}</h2><p className="mt-2 text-sm text-muted-foreground">{applied.from} — {applied.to} · {monetary?currency:'Todas las monedas'}</p></div>{p.export_data&&<div className="flex flex-wrap gap-2"><button disabled={!canExport||exporting} onClick={()=>download('pdf')} className={button}><Download size={16}/>PDF</button><button disabled={!canExport||exporting} onClick={()=>download('csv')} className={button}><Download size={16}/>CSV / Excel</button></div>}</div><div className="flex flex-wrap justify-between gap-4 mb-5"><label className="text-sm space-y-2"><span className="block">Buscar en los resultados</span><input value={search} onChange={e=>{setSearch(e.target.value);setPage(0);}} placeholder="Escribe para filtrar…" className="rounded-lg border border-border bg-background px-3 py-2.5 w-full sm:w-72"/></label><div className="text-right"><p className="text-sm text-muted-foreground">Total del reporte</p><p className="mt-2 text-2xl font-semibold">{monetary?amount(total,currency):total}</p></div></div><div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr className="border-b border-border">{heads.map(h=><th key={h} className="px-4 py-3 text-left whitespace-nowrap">{h}</th>)}</tr></thead><tbody>{visibleRows.map((r,i)=><tr key={i} className="border-b border-border">{r.map((v,j)=><td key={j} className="px-4 py-4 tabular-nums whitespace-nowrap">{j===r.length-1&&monetary?amount(Number(v),currency):v}</td>)}</tr>)}{!rows.length&&<tr><td colSpan={heads.length} className="p-8 text-center text-muted-foreground">No hay resultados con estos filtros.</td></tr>}</tbody></table></div><div className="mt-5 flex flex-wrap items-center justify-between gap-3 text-sm"><span>{rows.length} resultados</span><div className="flex items-center gap-3"><button disabled={page===0} className={button} onClick={()=>setPage(n=>Math.max(0,n-1))}>Anterior</button><span>{Math.min(page,pages-1)+1} / {pages}</span><button disabled={page>=pages-1} className={button} onClick={()=>setPage(n=>n+1)}>Siguiente</button></div></div><p className="mt-5 text-sm text-muted-foreground">{kind==='order_status'?'Importes de pedidos registrados por estado; no equivalen a cobros confirmados.':kind==='commission_status'?'Importes por estado, incluidos los pendientes.':kind==='memberships'?'Membresías cuyo período comenzó en las fechas elegidas. El estado de vigencia se consulta a hoy.':kind==='ranks'?'Rango actual de las personas registradas en el período.':['products','payments'].includes(kind)?'Solo pedidos pagados, excluyendo cancelados y reembolsados.':kind==='orders'?'El importe incluye pedidos pagados y excluye cancelaciones y reembolsos. La cantidad incluye todos los estados.':kind==='commissions'?'Incluye comisiones aprobadas y pagadas; no incluye pendientes.':'Registros creados durante las fechas seleccionadas.'} Los resultados respetan los permisos de tu cuenta.</p><p className="mt-2 text-xs text-muted-foreground">El archivo CSV se puede abrir en Excel. Las exportaciones utilizan el período aplicado.</p></section>}</div>;
 }

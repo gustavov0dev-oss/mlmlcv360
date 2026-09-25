@@ -1,3 +1,4 @@
+import {planAccent} from '@/lib/planAppearance';
 import { useSearchParams, useNavigate } from '@/lib/router';
 import { CircleCheck as CheckCircle, ArrowRight, Sparkles, X, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -8,7 +9,7 @@ import { toast } from 'sonner';
 import { useState } from 'react';
 
 export default function PlanesPage() {
-  const { plans, showUsd, currencySymbol, exchangeRate } = useConfig();
+  const { company, plans, showUsd, currencySymbol, exchangeRate } = useConfig();
   const currency = showUsd ? 'USD' : 'PEN';
   const { user, fetchProfile } = useAuthStore();
   const database = useDatabase();
@@ -37,6 +38,7 @@ export default function PlanesPage() {
 
   const featureRows = sortedPlans[0]?.features || [];
 
+  if(company.system_plans_enabled==='false')return <main className="mx-auto max-w-3xl px-5 py-28"><h1 className="text-2xl font-semibold">Puedes continuar sin una membresía</h1><p className="mt-3 text-muted-foreground">El registro y la tienda siguen disponibles.</p><button className="mt-6 text-primary" onClick={()=>navigate('/tienda')}>Ir a la tienda</button></main>;
   return (
     <>
       {/* HERO */}
@@ -90,6 +92,7 @@ export default function PlanesPage() {
               return (
                 <div
                   key={plan.id}
+                  style={{borderColor:planAccent(plan.color)}}
                   className={cn(
                     'pt-6 flex flex-col h-full',
                     plan.is_popular ? 'border-t-2 border-primary' : 'border-t border-border/50',

@@ -1,0 +1,10 @@
+const fs=require('fs'),ts=require('typescript'),assert=require('assert/strict');
+const mod={exports:{}};new Function('exports',ts.transpileModule(fs.readFileSync('src/lib/planTerms.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText)(mod.exports);
+const {planTerms}=mod.exports;const now=Date.parse('2026-09-23T12:00:00Z');
+const trial={is_free:true,price:0,trial_days:14};const sub={status:'active',gateway:'free',current_period_start:'2026-09-12T12:00:00Z',current_period_end:'2126-08-19T12:00:00Z'};
+let t=planTerms(sub,trial,now);assert.equal(new Date(t.end).toISOString(),'2026-09-26T12:00:00.000Z');assert.equal(t.remaining,3);assert.equal(t.active,true);
+t=planTerms({...sub,current_period_start:'2026-07-01T12:00:00Z'},trial,now);assert.equal(t.status,'Vencido');assert.equal(t.active,false);
+t=planTerms({...sub,gateway:'paypal',current_period_end:'2026-10-12T12:00:00Z'},{price:799,trial_days:2},now);assert.equal(new Date(t.end).toISOString(),'2026-10-12T12:00:00.000Z');
+t=planTerms({...sub,current_period_end:'2026-09-20T12:00:00Z'},trial,now);assert.equal(t.status,'Vencido');
+t=planTerms(null,trial,now);assert.equal(t.status,'Sin membresía');assert.equal(t.active,false);
+console.log('Trial duration, legacy repair, paid-period preservation, expiry and missing subscription passed.');

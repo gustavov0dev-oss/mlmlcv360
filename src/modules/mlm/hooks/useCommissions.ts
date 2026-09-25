@@ -39,7 +39,7 @@ export function useCommissions(options: UseCommissionsOptions = {}): UseCommissi
     try {
       const [commData, profileData] = await Promise.all([
         userId && !isAdmin ? repo.getCommissions(userId) : repo.getAllCommissions(),
-        repo.getAllProfiles(),
+        isAdmin ? repo.getAllProfiles() : Promise.resolve([]),
       ]);
       setCommissions(commData);
       setUsers(profileData);

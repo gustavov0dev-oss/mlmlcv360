@@ -20,6 +20,7 @@ Deno.serve(async req=>{
    const r=await fetch(Deno.env.get('SUPABASE_URL')+'/functions/v1/subscription-billing',{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({action:'cancel'})});
    return json(await r.json(),r.status);
   }
+  if(b.action==='free_plan'||b.plan_slug){const setting=await db.from('system_config').select('value').eq('key','system_plans_enabled').maybeSingle();if(setting.error)throw new Error('No se pudo verificar la disponibilidad de membresías.');if(setting.data?.value==='false')throw new Error('No se ofrecen nuevas membresías. Puedes continuar usando tu cuenta y la tienda.');}
   if(b.action==='free_plan') {
    const current=await checked(db.from('subscriptions').select('current_period_end').eq('user_id',user.id).maybeSingle());
    if(current?.current_period_end && new Date(current.current_period_end)>new Date()) throw new Error('Tus beneficios pagados siguen vigentes. Cancela la renovación en Mi Plan; pasarás al plan gratuito al terminar el período.');

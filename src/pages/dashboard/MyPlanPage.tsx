@@ -1,375 +1,42 @@
-import { PaymentCurrency } from '@/components/payments/PaymentMethods';
-import { LoadingRegion } from '@/components/ui/loading-region';
-import { useState, useEffect } from 'react';
-import { useDatabase } from '@/lib/backend';
-import { useAuthStore } from '@/store/authStore';
-import { useConfig, formatPrice } from '@/store/configStore';
-import { toast } from 'sonner';
-import { cn } from '@/lib/utils';
-import {
-  CreditCard, CircleCheck as CheckCircle, X, Loader as Loader2,
-  TriangleAlert as AlertTriangle, RefreshCw, ArrowRight,
-  Crown, Zap, Lock,
-} from 'lucide-react';
-import { useNavigate, useSearchParams } from '@/lib/router';
-
-type Tab = 'current' | 'change';
-type Currency = 'PEN' | 'USD';
-
-export default function MyPlanPage() {
-  const database = useDatabase();
-  const { user, fetchProfile } = useAuthStore();
-  const { plans, showUsd, setShowUsd, currencySymbol, exchangeRate } = useConfig();
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-
-  // Tabs
-  const [tab, setTab] = useState<Tab>(() => {
-    return searchParams.get('tab') === 'change' ? 'change' : 'current';
-  });
-
-  // Handle URL params: tab=change&plan=pro
-  useEffect(() => {
-    const tabParam = searchParams.get('tab');
-    const planParam = searchParams.get('plan');
-    if (tabParam === 'change') {
-      setTab('change');
-      if (planParam) setTargetPlanSlug(planParam);
-      window.history.replaceState({}, '', '/dashboard/mi-plan');
-    }
-  }, [searchParams]);
-
-  // Plan/subscription state
-  const [loading, setLoading] = useState(true);
-  const [subscription, setSubscription] = useState<any>(null);
-  const [pendingContract,setPendingContract]=useState<any>(null);
-  const [working, setWorking] = useState(false);
-  const [showCancel, setShowCancel] = useState(false);
-
-  // Payment state (for "Cambiar Plan" tab)
-  const currency: Currency = showUsd ? 'USD' : 'PEN';
-  const setCurrency = (value: Currency) => setShowUsd(value === 'USD');
-  const [targetPlanSlug, setTargetPlanSlug] = useState('');
-  const payLoading = false;
-
-  const activePlans = [...plans].filter(p => p.is_active).sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
-  const currentPlanSlug = subscription?.plan_slug || (user as any)?.plan || 'free';
-  const currentPlan = activePlans.find(p => p.slug === currentPlanSlug);
-  const isFree = !currentPlan || currentPlan.is_free || Number(currentPlan.price) === 0;
-
-  // Load subscription
-  useEffect(() => {
-    if (!user) return;
-    database.select<any>('billing_contracts',{filter:{user_id:user.id,status:['pending','active','suspended']},order:{column:'created_at',ascending:false},limit:1,maybeSingle:true}).then(({data})=>setPendingContract(data));
-    database.select('subscriptions', {
-      filter: { user_id: user.id },
-      order: { column: 'created_at', ascending: false },
-      limit: 1,
-      maybeSingle: true,
-    }).then(({ data }) => { setSubscription(data); setLoading(false); });
-  }, [user]);
-
-  const isExpired = subscription?.status === 'expired' ||
-    (subscription?.current_period_end && new Date(subscription.current_period_end) < new Date());
-  const isActive = subscription?.status === 'active' && !isExpired;
-  const daysLeft = subscription?.current_period_end
-    ? Math.max(0, Math.ceil((new Date(subscription.current_period_end).getTime() - Date.now()) / 86400000))
-    : null;
-
-  const cancelPlan = async () => {
-    setWorking(true);
-    const { data, error } = await database.invoke<any>('subscription-billing', {body:{action:'cancel',contract_id:subscription?.contract_id||pendingContract?.id}});
-    if(error || !data?.success) toast.error(data?.error || 'No se pudo cancelar.');
-    else { if(user) await fetchProfile(user.id); setSubscription((p:any)=>p?{...p,cancel_at_period_end:true,auto_renew:false}:null); setPendingContract(null); setShowCancel(false); toast.success(data.message || 'Renovación cancelada. Tus beneficios siguen vigentes hasta finalizar el período pagado.'); }
-    setWorking(false);
-  };
-  const handleActivateFree = async (planSlug: string) => {
-    setWorking(true);
-    const { data, error } = await database.invoke<any>('process-payment', {body:{action:'free_plan',plan_slug:planSlug}});
-    if(error || !data?.success) toast.error(data?.error || 'No se pudo activar el plan.');
-    else { if(user) await fetchProfile(user.id); setTab('current'); toast.success('Plan gratuito activado.'); }
-    setWorking(false);
-  };
-
-  const targetPlan = activePlans.find(p => p.slug === targetPlanSlug);
-  const targetIsFree = targetPlan?.is_free || Number(targetPlan?.price ?? 1) === 0;
-
-  const handlePay = async () => {
-    if (!targetPlan || !user) return;
-    if (targetIsFree) { await handleActivateFree(targetPlanSlug); return; }
-    navigate(`/pago?plan=${encodeURIComponent(targetPlanSlug)}&currency=${currency}`);
-  };
-
-  if (loading) {
-    return <LoadingRegion className="min-h-[calc(100dvh-8rem)]" />;
-  }
-
-  return (
-    <div className="space-y-6 max-w-4xl">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Mi Plan</h1>
-        <p className="text-muted-foreground text-sm mt-1">Administra tu suscripción y beneficios.</p>
-      </div>
-
-      {pendingContract&&pendingContract.id!==subscription?.contract_id&&<div className="rounded-xl bg-muted/40 p-4 space-y-3"><p className="text-sm">Tienes una autorización mensual pendiente. Tu plan actual sigue igual hasta confirmar el pago.</p><div className="flex gap-4 text-sm"><button className="text-primary" onClick={()=>navigate(`/pago?subscription=${pendingContract.id}`)}>Continuar autorización</button><button disabled={working} onClick={async()=>{setWorking(true);const {data,error}=await database.invoke<any>('subscription-billing',{body:{action:'cancel',contract_id:pendingContract.id}});if(error||!data?.success)toast.error(data?.error||'No se pudo cancelar.');else{setPendingContract(null);toast.success('Autorización descartada.');}setWorking(false);}}>Descartar autorización</button></div></div>}
-      {/* Tabs */}
-      <div className="flex gap-1 bg-muted rounded-xl p-1 w-fit">
-        {([['current', 'Plan Actual'], ['change', 'Cambiar Plan']] as [Tab, string][]).map(([t, label]) => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={cn(
-              'px-5 py-2 rounded-lg text-sm font-medium transition-all',
-              tab === t ? "text-primary font-semibold" : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
-
-      {/* ── Tab: Plan Actual ── */}
-      {tab === 'current' && (
-        <div className="space-y-5">
-          {/* Current plan card */}
-          <div className="bg-card border border-primary/30 rounded-xl p-6">
-            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-4">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <Crown className="w-6 h-6 text-primary" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold text-foreground">{currentPlan?.name || 'Plan Gratuito'}</h2>
-                  <span className={cn(
-                    'inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full mt-1',
-                    isFree ? 'bg-green-500/10 text-green-600' :
-                    isActive ? 'bg-primary/10 text-primary' :
-                    'bg-red-500/10 text-red-500'
-                  )}>
-                    {isFree ? 'Gratuito · Activo' : isActive ? 'Activo' : 'Vencido / Cancelado'}
-                  </span>
-                </div>
-              </div>
-              <div className="flex flex-col gap-2 min-w-[140px]">
-                {(subscription?.auto_renew || pendingContract?.status==='active' || pendingContract?.status==='suspended') && !subscription?.cancel_at_period_end && (
-                  <button
-                    onClick={() => setShowCancel(true)}
-                    className="px-4 py-2.5 border border-border rounded-xl text-sm font-medium text-muted-foreground hover:bg-red-500/5 hover:text-red-500 hover:border-red-500/30 transition-colors flex items-center gap-2"
-                  >
-                    <X className="w-3.5 h-3.5" /> Cancelar renovación
-                  </button>
-                )}
-                {subscription && !subscription.auto_renew && <p className="text-xs text-muted-foreground max-w-[220px]">{subscription.cancel_at_period_end?'Renovación cancelada.':'Este plan no se renueva automáticamente.'} {subscription.current_period_end?`Conservas tus beneficios hasta ${new Date(subscription.current_period_end).toLocaleDateString('es-PE')}.`:''}</p>}
-                {!isFree && !isActive && (
-                  <button
-                    onClick={() => { setTargetPlanSlug(currentPlanSlug); setTab('change'); }}
-                    className="px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 transition-colors flex items-center gap-2"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5" /> Renovar
-                  </button>
-                )}
-                <button
-                  onClick={() => setTab('change')}
-                  className="px-4 py-2.5 border border-border rounded-xl text-sm font-medium text-foreground hover:bg-muted transition-colors flex items-center justify-center gap-2"
-                >
-                  Cambiar plan <ArrowRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </div>
-
-            <div className="text-3xl font-bold text-foreground mb-4">
-              {isFree ? 'Gratis' : formatPrice(currentPlan?.price ?? 0, currency, currencySymbol, exchangeRate)}
-              {!isFree && <span className="text-base font-normal text-muted-foreground">/mes</span>}
-            </div>
-
-            {/* Subscription info grid */}
-            {subscription && (
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-border">
-                {[
-                  { label: 'Estado', value: subscription.status === 'active' ? 'Activo' : subscription.status === 'pending' ? 'Pendiente' : subscription.status === 'cancelled' ? 'Cancelado' : 'Vencido' },
-                  { label: 'Renovación', value: subscription.cancel_at_period_end ? 'Cancelada · conservas tus beneficios' : subscription.auto_renew ? 'Automática cada mes' : 'Manual' },
-                  { label: 'Inicio', value: subscription.current_period_start ? new Date(subscription.current_period_start).toLocaleDateString('es-PE') : '—' },
-                  { label: subscription.auto_renew ? 'Próxima renovación' : 'Beneficios hasta', value: subscription.current_period_end ? new Date(subscription.current_period_end).toLocaleDateString('es-PE') : '—' },
-                ].map(({ label, value }) => (
-                  <div key={label} className="bg-muted/50 rounded-xl p-3">
-                    <div className="text-xs text-muted-foreground mb-0.5">{label}</div>
-                    <div className="text-sm font-semibold text-foreground capitalize">{value}</div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Warnings */}
-            {!isFree && daysLeft !== null && daysLeft <= 7 && !subscription?.auto_renew && daysLeft > 0 && (
-              <div className="mt-4 flex items-start gap-2.5 bg-amber-500/10 border border-amber-500/20 rounded-xl p-3.5">
-                <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-amber-700 dark:text-amber-300">
-                  Tu plan vence en <strong>{daysLeft} día{daysLeft !== 1 ? 's' : ''}</strong>.{' '}
-                  <button className="underline font-medium" onClick={() => { setTargetPlanSlug(currentPlanSlug); setTab('change'); }}>
-                    Renovar ahora
-                  </button>
-                </p>
-              </div>
-            )}
-            {!isFree && isExpired && (
-              <div className="mt-4 flex items-start gap-2.5 bg-red-500/10 border border-red-500/20 rounded-xl p-3.5">
-                <AlertTriangle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-red-700 dark:text-red-300">
-                  Tu suscripción ha vencido.{' '}
-                  <button className="underline font-medium" onClick={() => { setTargetPlanSlug(currentPlanSlug); setTab('change'); }}>
-                    Renovar plan
-                  </button>{' '}para recuperar el acceso.
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Current plan features */}
-          {(currentPlan?.features?.length ?? 0) > 0 && (
-            <div className="bg-card border border-border rounded-xl p-5">
-              <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
-                <Zap className="w-4 h-4 text-primary" /> Lo que incluye tu plan
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {(currentPlan?.features ?? []).map((f: string) => (
-                  <div key={f} className="flex items-center gap-2 text-sm text-foreground">
-                    <CheckCircle className="w-3.5 h-3.5 text-green-500 flex-shrink-0" /> {f}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* ── Tab: Cambiar Plan ── */}
-      {tab === 'change' && (
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-
-          {/* Left: Plan + Gateway selection */}
-          <div className="lg:col-span-3 space-y-5">
-
-            <PaymentCurrency value={currency} onChange={value=>setCurrency(value as Currency)}/>
-            {/* Plan selector */}
-            <div className="bg-card border border-border rounded-xl p-5">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Elige tu nuevo plan</p>
-              <div className="space-y-2">
-                {activePlans.map(p => {
-                  const pFree = p.is_free || Number(p.price) === 0;
-                  const isCurrent = p.slug === currentPlanSlug;
-                  return (
-                    <button
-                      key={p.id}
-                      onClick={() => setTargetPlanSlug(p.slug)}
-                      disabled={isCurrent}
-                      className={cn(
-                        'w-full flex items-center justify-between p-4 rounded-xl border transition-all text-left',
-                        isCurrent && 'opacity-50 cursor-not-allowed border-green-500/30 bg-green-500/5',
-                        !isCurrent && targetPlanSlug === p.slug && 'border-primary bg-primary/5',
-                        !isCurrent && targetPlanSlug !== p.slug && 'border-border hover:border-primary/40'
-                      )}
-                    >
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-foreground">{p.name}</span>
-                          {isCurrent && <span className="text-xs bg-green-500/10 text-green-600 px-2 py-0.5 rounded-full font-medium">Actual</span>}
-                          {p.badge && !isCurrent && <span className="text-xs bg-amber-500/10 text-amber-600 px-2 py-0.5 rounded-full font-medium">{p.badge}</span>}
-                        </div>
-                        {p.description && <p className="text-xs text-muted-foreground mt-0.5">{p.description}</p>}
-                      </div>
-                      <div className="text-right flex-shrink-0 ml-3">
-                        <div className={cn('text-lg font-bold', !isCurrent && targetPlanSlug === p.slug ? 'text-primary' : 'text-foreground')}>
-                          {pFree ? 'Gratis' : formatPrice(p.price, currency, currencySymbol, exchangeRate)}
-                        </div>
-                        {!pFree && <div className="text-xs text-muted-foreground">/mes</div>}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-          </div>
-
-          {/* Right: Summary + CTA */}
-          <div className="lg:col-span-2">
-            <div className="bg-card border border-border rounded-xl p-5 sticky top-24">
-              <h3 className="text-sm font-bold text-foreground mb-4">Resumen</h3>
-
-              {!targetPlan ? (
-                <div className="text-center py-8">
-                  <CreditCard className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
-                  <p className="text-sm text-muted-foreground">Selecciona un plan para continuar</p>
-                </div>
-              ) : (
-                <>
-                  <div className="bg-muted/50 rounded-xl p-4 mb-4">
-                    <div className="text-sm font-bold text-foreground mb-1">{targetPlan.name}</div>
-                    {targetPlan.description && <p className="text-xs text-muted-foreground mb-2">{targetPlan.description}</p>}
-                    <div className="text-2xl font-bold text-foreground">
-                      {targetIsFree ? 'Gratis' : formatPrice(targetPlan.price, currency, currencySymbol, exchangeRate)}
-                      {!targetIsFree && <span className="text-sm font-normal text-muted-foreground">/mes</span>}
-                    </div>
-                  </div>
-
-                  {!targetIsFree && <p className="text-sm text-muted-foreground mb-4">Elige tu método en el siguiente paso. Verás el importe mensual y las condiciones antes de confirmar.</p>}
-
-                  <button
-                    onClick={handlePay}
-                    disabled={payLoading || working}
-                    className={cn(
-                      'w-full font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 text-sm',
-                      working
-                        ? 'bg-muted text-muted-foreground cursor-not-allowed'
-                        : 'bg-primary hover:bg-primary/90 text-white'
-                    )}
-                  >
-                    {(payLoading || working) ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <>
-                        <Lock className="w-4 h-4" />
-                        {targetIsFree ? 'Activar plan gratuito' : 'Continuar'}
-                      </>
-                    )}
-                  </button>
-
-                  <div className="flex items-center justify-center gap-2 mt-3 text-xs text-muted-foreground">
-                    <Lock className="w-3 h-3" /> Pago seguro · SSL 256-bit
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Cancel modal */}
-      {showCancel && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 app-modal-overlay">
-          <div className="bg-card border border-border rounded-xl w-full max-w-sm p-6 shadow-2xl">
-            <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4">
-              <X className="w-6 h-6 text-red-500" />
-            </div>
-            <h3 className="text-base font-bold text-foreground text-center mb-2">Cancelar plan</h3>
-            <p className="text-sm text-muted-foreground text-center mb-2">
-              Detendremos las próximas renovaciones de <strong className="text-foreground">{currentPlan?.name}</strong>. Tus beneficios seguirán disponibles hasta el <strong>{subscription?.current_period_end ? new Date(subscription.current_period_end).toLocaleDateString('es-PE') : 'final del período pagado'}</strong>. Después pasarás al plan gratuito.
-            </p>
-            <p className="text-xs text-center text-amber-600 mb-5">Esta acción no genera reembolso automático.</p>
-            <div className="flex gap-3">
-              <button onClick={() => setShowCancel(false)} className="flex-1 border border-border rounded-xl py-2.5 text-sm font-medium hover:bg-muted transition-colors">
-                Mantener plan
-              </button>
-              <button onClick={cancelPlan} disabled={working}
-                className="flex-1 bg-red-600 text-white rounded-xl py-2.5 text-sm font-semibold hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
-                {working ? <Loader2 className="w-4 h-4 animate-spin" /> : <X className="w-4 h-4" />}
-                Cancelar plan
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
+import {useEffect,useState} from 'react';
+import {useDatabase} from '@/lib/backend';
+import {useAuthStore} from '@/store/authStore';
+import {useConfig,formatPrice} from '@/store/configStore';
+import {useNavigate,useSearchParams} from '@/lib/router';
+import {planTerms} from '@/lib/planTerms';
+import {PaymentCurrency} from '@/components/payments/PaymentMethods';
+import {LoadingRegion} from '@/components/ui/loading-region';
+import {CalendarDays,Check,ArrowRight,CreditCard,Clock,ShieldCheck} from 'lucide-react';
+import {toast} from 'sonner';
+const panel='rounded-xl border border-border bg-card p-5 sm:p-6';
+const secondary='inline-flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-2.5 text-sm font-medium hover:bg-muted disabled:opacity-50';
+const primary='inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground disabled:opacity-50';
+const displayDate=(v:number)=>Number.isFinite(v)?new Date(v).toLocaleDateString('es-PE',{day:'numeric',month:'long',year:'numeric'}):'No registrada';
+export default function MyPlanPage(){
+ const database=useDatabase();const {user,fetchProfile}=useAuthStore();const {company,plans,loading:configLoading,showUsd,setShowUsd,currencySymbol,exchangeRate}=useConfig();const navigate=useNavigate();const [params]=useSearchParams();
+ const [tab,setTab]=useState(params.get('tab')==='change'?'plans':'current');const [sub,setSub]=useState<any>(null);const [contracts,setContracts]=useState<any[]>([]);const [loading,setLoading]=useState(true);const [error,setError]=useState(false);const [reload,setReload]=useState(0);const [busy,setBusy]=useState(false);const [cancel,setCancel]=useState(false);
+ useEffect(()=>{if(!user?.id)return;let alive=true;setLoading(true);setError(false);Promise.all([database.select<any>('subscriptions',{filter:{user_id:user.id},limit:1,maybeSingle:true}),database.select<any>('billing_contracts',{filter:{user_id:user.id,status:['pending','active','suspended']},order:{column:'created_at',ascending:false}})]).then(([s,c])=>{if(!alive)return;if(s.error||c.error)setError(true);else{setSub(s.data);setContracts(Array.isArray(c.data)?c.data:[]);}setLoading(false);}).catch(()=>{if(alive){setError(true);setLoading(false);}});return()=>{alive=false;};},[user?.id,reload]);
+ const offered=company.system_plans_enabled!=='false';const plan=plans.find(p=>p.slug===(sub?.plan_slug||user?.plan));const terms=planTerms(sub,plan);const currency=showUsd?'USD':'PEN';const pending=contracts.find(c=>c.status==='pending');const recurring=contracts.find(c=>c.id===sub?.contract_id)||contracts.find(c=>c.status==='active'||c.status==='suspended');const choices=plans.filter(p=>p.is_active).sort((a,b)=>a.sort_order-b.sort_order);
+ const mutate=async(action:()=>Promise<any>,message:string)=>{if(busy)return;setBusy(true);try{const {data,error}=await action();if(error||!data?.success)throw new Error(data?.error||error?.message||'No se pudo completar la acción.');toast.success(message);if(user)await fetchProfile(user.id);setCancel(false);setReload(n=>n+1);}catch(e:any){toast.error(e.message);}finally{setBusy(false);}};
+ const discard=()=>pending&&mutate(()=>database.invoke('subscription-billing',{body:{action:'cancel',contract_id:pending.id}}),'Autorización descartada.');
+ const choose=(p:any)=>{if(!offered||busy)return;if(pending){navigate(`/pago?subscription=${pending.id}`);return;}if(p.is_free||Number(p.price)===0)mutate(()=>database.invoke('process-payment',{body:{action:'free_plan',plan_slug:p.slug}}),'Plan activado.');else navigate(`/pago?plan=${encodeURIComponent(p.slug)}&currency=${currency}`);};
+ if(loading||configLoading)return <LoadingRegion className="min-h-[60vh]"/>;
+ if(error)return <div className={panel} role="alert"><p>No pudimos consultar tu membresía.</p><button className={`${secondary} mt-4`} onClick={()=>setReload(n=>n+1)}>Reintentar</button></div>;
+ const progress=Number.isFinite(terms.end)&&Number.isFinite(terms.start)?Math.max(0,Math.min(100,(Date.now()-terms.start)/(terms.end-terms.start)*100)):0;
+ return <div className="max-w-6xl space-y-6"><header className="flex flex-wrap justify-between items-start gap-4"><div><h1 className="text-2xl font-bold">Mi plan</h1><p className="mt-2 text-sm text-muted-foreground">Tu membresía, vigencia y próximos pagos.</p></div>{tab==='current'&&offered&&<button className={secondary} onClick={()=>setTab('plans')}>Ver planes<ArrowRight size={16}/></button>}</header>
+ {offered&&<nav className="flex gap-6 border-b border-border" aria-label="Membresía">{[['current','Mi membresía'],['plans','Planes disponibles']].map(([id,label])=><button key={id} aria-current={tab===id?'page':undefined} onClick={()=>setTab(id)} className={`pb-3 text-sm font-medium border-b-2 ${tab===id?'text-primary border-primary':'text-muted-foreground border-transparent'}`}>{label}</button>)}</nav>}
+ {!offered&&<div className={panel}><p className="font-medium">No se ofrecen nuevas membresías</p><p className="mt-2 text-sm text-muted-foreground">Tu cuenta y la tienda siguen disponibles. Puedes consultar tu membresía y gestionar una renovación existente.</p></div>}
+ {pending&&<section className={panel}><div className="flex flex-col sm:flex-row justify-between gap-5"><div><h2 className="font-semibold flex items-center gap-2"><Clock size={18} className="text-primary"/>Autorización por completar</h2><p className="mt-2 text-sm text-muted-foreground">{plans.find(p=>p.slug===pending.plan_slug)?.name||pending.plan_slug} · {pending.currency} {Number(pending.amount).toFixed(2)} / mes · {pending.gateway}</p><p className="mt-2 text-sm text-muted-foreground">La autorización pendiente no activa ni modifica tu membresía.</p></div><div className="flex flex-wrap items-center gap-3 shrink-0">{offered&&<button className={primary} onClick={()=>navigate(`/pago?subscription=${pending.id}`)}>Continuar</button>}<button disabled={busy} className={secondary} onClick={discard}>Descartar</button></div></div></section>}
+ {(tab==='current'||!offered)?<>
+ <div className="grid lg:grid-cols-3 gap-5"><section className={`${panel} lg:col-span-2 space-y-6`}><div className="flex items-start justify-between gap-4"><div><p className="text-sm text-muted-foreground">Membresía contratada</p><h2 className="mt-2 text-2xl font-semibold">{sub?(plan?.name||sub.plan_slug):'Sin membresía activa'}</h2>{plan?.description&&<p className="mt-2 text-sm text-muted-foreground">{plan.description}</p>}</div><span className={`shrink-0 rounded-full px-3 py-1 text-sm ${terms.active?'bg-primary/10 text-primary':'bg-muted text-foreground'}`}>{terms.status}</span></div>
+ {sub?<><div className="grid sm:grid-cols-2 gap-5 border-y border-border py-5"><div><p className="text-sm text-muted-foreground flex items-center gap-2"><CalendarDays size={16}/>Inicio del período</p><p className="mt-2 font-medium">{displayDate(terms.start)}</p></div><div><p className="text-sm text-muted-foreground">{terms.expired?'Finalizó el':'Vence el'}</p><p className="mt-2 font-medium">{Number.isFinite(terms.end)?displayDate(terms.end):terms.free&&terms.days===0?'Sin fecha de vencimiento configurada':'Fecha no registrada'}</p></div></div>
+ {Number.isFinite(terms.end)&&<div><div className="flex justify-between gap-3 text-sm mb-3"><span>{terms.free&&terms.days>0?`Prueba de ${terms.days} días`:'Vigencia del período'}</span><span className="font-medium">{terms.expired?'Período finalizado':`${terms.remaining} días restantes`}</span></div><div className="h-2 rounded-full bg-muted overflow-hidden"><div className="h-full bg-primary" style={{width:`${progress}%`}}/></div></div>}
+ {terms.expired&&<p className="text-sm text-muted-foreground">Los beneficios de esta membresía ya vencieron.{offered?' Elige un plan disponible para volver a activarlos.':''}</p>}
+ </>:<p className="text-sm text-muted-foreground">Puedes usar tu cuenta y comprar en la tienda.{offered?' Explora los planes si deseas activar sus beneficios.':''}</p>}
+ </section><section className={`${panel} flex flex-col gap-5`}><h2 className="font-semibold flex items-center gap-2"><CreditCard size={18} className="text-primary"/>Pagos y renovación</h2><div><p className="text-sm text-muted-foreground">Importe del período</p><p className="mt-2 text-2xl font-semibold">{sub?terms.free?'Gratis':`${sub.currency||'PEN'} ${Number(sub.amount||0).toFixed(2)}`:'—'}</p></div><dl className="space-y-4 text-sm"><div><dt className="text-muted-foreground">Renovación</dt><dd className="mt-1 font-medium">{!sub?'No aplica':terms.free?'No automática':sub.cancel_at_period_end?'Cancelada':sub.auto_renew?'Automática mensual':'Pago único'}</dd></div><div><dt className="text-muted-foreground">Método</dt><dd className="mt-1 font-medium">{terms.free?'Sin cobro':sub?.gateway||'No registrado'}</dd></div></dl>
+ {recurring&&!sub?.cancel_at_period_end&&<button className={`${secondary} mt-auto`} onClick={()=>setCancel(true)}>Cancelar renovación</button>}{offered&&terms.expired&&<button className={`${primary} mt-auto`} onClick={()=>setTab('plans')}>Elegir plan<ArrowRight size={16}/></button>}</section></div>
+ {cancel&&<section className={panel} role="alert"><h2 className="font-semibold">¿Cancelar las próximas renovaciones?</h2><p className="mt-2 text-sm text-muted-foreground">No se cobrarán nuevos períodos. {terms.active&&Number.isFinite(terms.end)?`Conservas los beneficios hasta el ${displayDate(terms.end)}.`:''} Esta acción no genera un reembolso.</p><div className="flex flex-wrap justify-end gap-3 border-t border-border pt-4 mt-5"><button className={secondary} onClick={()=>setCancel(false)}>Mantener renovación</button><button disabled={busy} className={primary} onClick={()=>mutate(()=>database.invoke('subscription-billing',{body:{action:'cancel',contract_id:recurring?.id}}),'Renovación cancelada.')}>Confirmar cancelación</button></div></section>}
+ {plan&&<section className={panel}><h2 className="font-semibold flex items-center gap-2"><ShieldCheck size={18} className="text-primary"/>Beneficios de {plan.name}</h2><p className="mt-2 text-sm text-muted-foreground">{terms.active?'Disponibles durante la vigencia de tu membresía.':'Se habilitan con una membresía vigente.'}</p><ul className="grid sm:grid-cols-2 gap-x-8 gap-y-4 mt-5">{plan.features.map((feature,i)=><li key={i} className="flex gap-3 text-sm"><Check size={17} className="shrink-0 text-primary"/>{feature}</li>)}</ul></section>}
+ </>:<><div className="flex flex-wrap justify-between items-center gap-4"><p className="text-sm text-muted-foreground">Compara las condiciones antes de elegir.</p><PaymentCurrency value={currency} onChange={v=>setShowUsd(v==='USD')}/></div><div className="grid md:grid-cols-2 xl:grid-cols-3 gap-5">{choices.map(p=>{const current=p.slug===sub?.plan_slug&&terms.active;const free=p.is_free||Number(p.price)===0;return <section key={p.id} className={`${panel} flex flex-col gap-5`} style={p.color?.startsWith('#')?{borderTopColor:p.color,borderTopWidth:3}:undefined}><div className="flex justify-between gap-3"><h2 className="text-xl font-semibold">{p.name}</h2>{(current||p.badge)&&<span className="text-sm text-primary">{current?'Tu plan':p.badge}</span>}</div><p className="text-sm text-muted-foreground">{p.description}</p><div><p className="text-3xl font-semibold">{free?'Gratis':formatPrice(p.price,currency,currencySymbol,exchangeRate)}</p><p className="mt-2 text-sm text-muted-foreground">{free?(p.trial_days>0?`${p.trial_days} días de acceso`:'Sin duración limitada'):'Un mes de acceso'}{!free&&p.trial_days>0?` · ${p.trial_days} días de prueba según las condiciones del plan`:''}</p></div><ul className="space-y-3 border-t border-border pt-5">{p.features.map((f,i)=><li key={i} className="flex gap-2 text-sm"><Check size={16} className="shrink-0 text-primary"/>{f}</li>)}</ul><button disabled={busy||current} className={`${current?secondary:primary} mt-auto`} onClick={()=>choose(p)}>{current?'Plan actual':pending?'Revisar autorización':free?'Activar plan':'Elegir plan'}{!current&&<ArrowRight size={16}/>}</button></section>;})}</div>{!choices.length&&<p className={panel}>No hay planes disponibles en este momento.</p>}</>}
+ </div>;
 }

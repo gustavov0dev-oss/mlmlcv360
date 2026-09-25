@@ -423,7 +423,7 @@ export default function CouponsAdminPage() {
             </div>
 
             {/* Footer */}
-            <div className="flex gap-3 px-5 py-4 border-t border-border flex-shrink-0">
+            <div className="flex gap-3 px-5 py-4 border-t border-border flex-shrink-0 form-actions">
               <button onClick={() => setShowForm(false)}
                 className="flex-1 border border-border rounded-xl py-2.5 text-sm font-semibold text-foreground hover:bg-muted transition-colors">
                 Cancelar

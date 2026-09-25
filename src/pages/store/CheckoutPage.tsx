@@ -125,7 +125,7 @@ export default function CheckoutPage() {
   const selectedGateway = selectedGatewayIdx >= 0 ? (gateways[selectedGatewayIdx] ?? null) : null;
   const paymentMethod = selectedGateway?.slug || selectedGateway?.id || '';
   const [couponCode, setCouponCode] = useState('');
-  const { coupon, setCoupon, validating: validatingCoupon } = useCartCoupon(subtotal);
+  const { coupon, setCoupon, validating: validatingCoupon } = useCartCoupon(subtotal,items.some(i=>!!i.pack));
   const [couponError, setCouponError] = useState('');
   const [notes, setNotes] = useState('');
   const [placing, setPlacing] = useState(false);
@@ -202,6 +202,7 @@ export default function CheckoutPage() {
   const isPeru = addr.country === 'PE';
 
   const applyCoupon = async () => {
+    if(items.some(i=>i.pack)){setCouponError('Los packs no admiten cupones adicionales.');return;}
     if (!couponCode.trim()) return;
     const { data } = await database.select<Coupon>('coupons', {
       filter: [
@@ -269,6 +270,7 @@ export default function CheckoutPage() {
       p_user_id: user.id,
       p_items: items.map(i => ({
         product_id: i.product.id,
+        pack_selection: i.pack?.selection,
         variant_id: i.variant?.id || '',
         quantity: i.quantity,
         image_url: i.variant?.images?.[0]?.url || i.product.images?.[0]?.url || '',
@@ -290,7 +292,7 @@ export default function CheckoutPage() {
     if(existing){
       const result=await database.select<any>('orders',{filter:{id:existing.orderId,user_id:user.id},single:true});
       if(result.error){toast.error('No pudimos consultar tu pago anterior. Inténtalo de nuevo.');setPlacing(false);return;}
-      if(result.data?.payment_status==='pending')data={success:true,order_id:result.data.id,order_number:result.data.order_number,total:result.data.total};
+      if(result.data?.payment_status==='pending'&&!['cancelled','refunded'].includes(result.data.status))data={success:true,order_id:result.data.id,order_number:result.data.order_number,total:result.data.total};
       else if(result.data?.payment_status==='paid'){toast.info('Este pedido ya está pagado. Puedes verlo en Mis pedidos.');setPlacing(false);return;}
     }
     if(!data){const result=await database.rpc<any>('place_order',payload);data=result.data;error=result.error;}
@@ -762,7 +764,7 @@ export default function CheckoutPage() {
             </div>
 
             {/* Coupon */}
-            {!coupon ? (
+            {items.some(i=>i.pack)?<p className="text-xs text-muted-foreground">Los packs no admiten cupones adicionales.</p>:!coupon ? (
               <div className="space-y-1.5 pt-4 border-t border-border/20">
                 <label className="text-xs font-bold text-foreground">Cupón de descuento</label>
                 <div className="flex gap-2">

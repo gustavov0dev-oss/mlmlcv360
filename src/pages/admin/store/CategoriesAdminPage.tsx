@@ -300,7 +300,7 @@ export default function CategoriesAdminPage() {
                 </div>
               </div>
             </div>
-            <div className="flex gap-3 pt-2">
+            <div className="flex gap-3 pt-2 form-actions">
               <button onClick={() => setShowForm(false)} className="flex-1 border border-border rounded-xl py-2.5 text-sm font-semibold hover:bg-muted">Cancelar</button>
               <button onClick={save} disabled={saving || uploading}
                 className="flex-1 bg-primary text-primary-foreground rounded-xl py-2.5 text-sm font-bold hover:bg-primary/90 disabled:opacity-50 flex items-center justify-center gap-2">

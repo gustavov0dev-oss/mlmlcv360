@@ -154,7 +154,7 @@ function RegionFormModal({ item, onSave, onClose, saving }: {
             </div>
           </div>
 
-          <div className="flex gap-3 p-6 border-t border-border flex-shrink-0">
+          <div className="flex gap-3 p-6 border-t border-border flex-shrink-0 form-actions">
             <button type="button" onClick={onClose}
               className="flex-1 border border-border rounded-xl py-2.5 text-sm font-medium hover:bg-muted transition-colors text-foreground">
               Cancelar

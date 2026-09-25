@@ -88,6 +88,7 @@ function FreeShippingIndicator({ subtotal, threshold, currencySymbol, className 
 }
 
 export default function CartPage() {
+  useEffect(()=>{void import('./CheckoutPage').catch(()=>{});},[]);
   const database = useDatabase();
   const {user}=useAuthStore();
   const [pendingOrder,setPendingOrder]=useState<string|null>(null);
@@ -95,7 +96,7 @@ export default function CartPage() {
   useEffect(()=>{
     let active=true;setPendingOrder(null);
     const snapshot=checkoutSnapshots().filter(s=>s.userId===user?.id&&s.items.length===items.length&&s.items.every(p=>items.some(i=>i.id===p.id&&i.quantity===p.quantity))).at(-1);
-    if(snapshot)database.select<any>('orders',{filter:{id:snapshot.orderId,user_id:user?.id},single:true}).then(({data})=>{if(active&&data?.payment_status==='pending')setPendingOrder(snapshot.orderId);});
+    if(snapshot)database.select<any>('orders',{filter:{id:snapshot.orderId,user_id:user?.id},single:true}).then(({data})=>{if(active&&data?.payment_status==='pending'&&!['cancelled','refunded'].includes(data.status))setPendingOrder(snapshot.orderId);});
     return()=>{active=false;};
   },[user?.id,items,database]);
   const { company,showUsd,exchangeRate } = useConfig();
@@ -103,7 +104,7 @@ export default function CartPage() {
   const navigate = useNavigate();
   useEffect(()=>{void refreshStock();},[refreshStock]);
   const [couponCode, setCouponCode] = useState('');
-  const { coupon, setCoupon } = useCartCoupon(subtotal);
+  const { coupon, setCoupon } = useCartCoupon(subtotal,items.some(i=>!!i.pack));
   const [couponError, setCouponError] = useState('');
   const [checkingCoupon, setCheckingCoupon] = useState(false);
   const [availableCoupons, setAvailableCoupons] = useState<Coupon[]>([]);
@@ -131,6 +132,7 @@ export default function CartPage() {
   }, [items.length, subtotal]);
 
   const applyCoupon = async (codeOverride?: string | React.MouseEvent) => {
+    if(items.some(i=>i.pack)){setCouponError('Los packs no admiten cupones adicionales.');return;}
     const code = (typeof codeOverride === 'string' ? codeOverride : null) || couponCode;
     if (!code.trim()) return;
     setCheckingCoupon(true);
@@ -221,15 +223,16 @@ export default function CartPage() {
               const img = item.variant?.images?.[0]?.url || item.product.images?.[0]?.url;
               return (
                 <div key={item.id} className="flex items-center gap-3 sm:gap-4 py-4">
-                  <button onClick={() => navigate(`/tienda/${item.product.slug}`)}
+                  <button onClick={() => navigate(item.pack?'/packs':`/tienda/${item.product.slug}`)}
                     className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden bg-muted flex-shrink-0">
                     {img ? <img src={img} alt={item.product.name} className="w-full h-full object-cover" /> :
                       <div className="w-full h-full flex items-center justify-center"><Package className="w-6 h-6 text-muted-foreground/40" /></div>}
                   </button>
                   <div className="flex-1 min-w-0">
-                    <button onClick={() => navigate(`/tienda/${item.product.slug}`)} className="text-left">
+                    <button onClick={() => navigate(item.pack?'/packs':`/tienda/${item.product.slug}`)} className="text-left">
                       <p className="text-sm font-bold text-foreground line-clamp-2">{item.product.name}</p>
                     </button>
+                    {item.pack&&<div className="text-xs text-muted-foreground mt-1"><p className="text-primary">Pack MLM · {item.pack.points} puntos</p>{item.pack.lines.map((l:any,index:number)=><p key={index}>{l.name}{l.variant_name?` · ${l.variant_name}`:''} × {l.quantity}</p>)}</div>}
                     {item.variant && <p className="text-xs text-muted-foreground mt-0.5">{item.variant.name}</p>}
                     <p className="text-sm font-bold text-primary mt-1">{fmt(item.price)}</p>
                   </div>
@@ -238,12 +241,12 @@ export default function CartPage() {
                       <Trash2 className="w-4 h-4" />
                     </button>
                     <div className="flex items-center gap-1">
-                      <button onClick={() => updateQty(item.id, item.quantity - 1)}
+                      <button disabled={!!item.pack} onClick={() => updateQty(item.id, item.quantity - 1)}
                         className="w-6 h-6 flex items-center justify-center text-muted-foreground">
                         <Minus className="w-3 h-3" />
                       </button>
                       <span className="w-6 text-center text-xs font-bold text-foreground">{item.quantity}</span>
-                      <button onClick={() => updateQty(item.id, item.quantity + 1)}
+                      <button disabled={!!item.pack} onClick={() => updateQty(item.id, item.quantity + 1)}
                         className="w-6 h-6 flex items-center justify-center text-muted-foreground">
                         <Plus className="w-3 h-3" />
                       </button>
@@ -262,8 +265,9 @@ export default function CartPage() {
           <div className="lg:sticky lg:top-24 space-y-5">
             <h2 className="text-base font-bold text-foreground">Resumen del pedido</h2>
 
+            {items.some(i=>i.pack)&&<p className="text-xs text-muted-foreground">Los packs no admiten cupones adicionales.</p>}
             {/* Smart coupons */}
-            {availableCoupons.length > 0 && !coupon && (
+            {!items.some(i=>i.pack) && availableCoupons.length > 0 && !coupon && (
               <div className="space-y-2">
                 <p className="text-xs font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
                   <Tag className="w-3.5 h-3.5" /> Cupones disponibles
@@ -281,7 +285,7 @@ export default function CartPage() {
             )}
 
             {/* Coupon input */}
-            <div>
+            {!items.some(i=>i.pack)&&<div>
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
@@ -303,33 +307,33 @@ export default function CartPage() {
                   <button onClick={() => { setCoupon(null); setCouponCode(''); }} className="ml-auto text-muted-foreground"><X className="w-3 h-3" /></button>
                 </div>
               )}
-            </div>
+            </div>}
 
             {/* Breakdown */}
             <div className="space-y-2 text-sm border-t border-border/20 pt-4">
-              <div className="flex justify-between text-muted-foreground">
+              <div className="flex justify-between gap-4 text-muted-foreground">
                 <span>Subtotal ({itemCount} art.)</span>
-                <span>{fmt(subtotal)}</span>
+                <span className="shrink-0 tabular-nums">{fmt(subtotal)}</span>
               </div>
               {discount > 0 && (
-                <div className="flex justify-between text-green-600 font-semibold">
+                <div className="flex justify-between gap-4 text-green-600 font-semibold">
                   <span>Descuento</span>
                   <span>-{fmt(discount)}</span>
                 </div>
               )}
-              <div className="flex justify-between text-muted-foreground">
+              <div className="grid grid-cols-2 items-start gap-4 text-muted-foreground">
                 <span>Envío estimado</span>
-                <span className={shippingCost === 0 ? 'text-green-500 font-semibold' : ''}>
+                <span className="text-right text-sm text-muted-foreground">
                   Se calcula al continuar
                 </span>
               </div>
-              <div className="flex justify-between text-muted-foreground text-xs">
+              <div className="flex justify-between gap-4 text-muted-foreground text-xs">
                 <span>IGV incluido (18%)</span>
-                <span>{fmt(igv)}</span>
+                <span className="shrink-0 tabular-nums">{fmt(igv)}</span>
               </div>
-              <div className="flex justify-between font-bold text-foreground text-base border-t border-border/20 pt-3">
+              <div className="flex justify-between gap-4 font-bold text-foreground text-base border-t border-border/20 pt-3">
                 <span>Subtotal a pagar</span>
-                <span>{fmt(total)}</span>
+                <span className="shrink-0 tabular-nums">{fmt(total)}</span>
               </div>
             </div>
 

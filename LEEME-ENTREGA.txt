@@ -1,0 +1,29 @@
+Proyecto MLM — entrega del código actual
+Commit: 1c5d9ce9a8231ee8e1e7e6c884c3bf72af36d816
+26 commits por delante de origin/main al preparar esta entrega.
+
+EJECUTAR LOCALMENTE
+1. Instala Node.js y npm si no los tienes.
+2. Abre una terminal en esta carpeta y ejecuta: npm ci
+3. Copia .env.example a .env y configura la URL y clave pública anon de tu proyecto Supabase.
+4. Ejecuta: npm run dev
+5. Abre la dirección que indique Vite.
+
+VALIDAR Y COMPILAR
+npm run typecheck
+npm run build
+
+SUBIR A GITHUB
+Copia el contenido de esta carpeta dentro de tu clon del repositorio existente.
+Incluye las carpetas ocultas .openai y los archivos .gitignore y .env.example.
+Revisa git diff, crea un commit y haz push desde ese clon.
+Este ZIP es una instantánea del código; no contiene el historial .git.
+No subas .env, node_modules ni dist.
+
+ESTADO
+La gestión de red con consentimiento está implementada.
+La migración y las pruebas SQL se validaron en la sesión anterior; typecheck y build pasaron.
+La publicación en Sites sigue pendiente por acceso inconsistente del conector.
+Se conserva el proyecto existente en .openai/hosting.json.
+No vuelvas a ejecutar las migraciones ya aplicadas en la base existente.
+Esta entrega contiene código y migraciones, no una copia de los datos ni del almacenamiento de Supabase.

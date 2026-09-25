@@ -1,3 +1,5 @@
+import { VideoThumbnail } from '@/components/store/VideoThumbnail';
+import { videoSource } from '@/lib/productMedia';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useProductReviews } from '@/hooks/useProductReviews';
 import { supabase } from '@/lib/backend/client';
@@ -17,7 +19,7 @@ import {
   ShoppingCart, Star, ChevronLeft, ChevronRight, Plus, Minus,
   Truck, Shield, RotateCcw, Heart, Share2, Package, Tag, MessageSquare,
   Layers, Upload, ThumbsUp, Flag, CircleCheck as CheckCircle,
-  Play, Eye, Lock, Zap, Info, ExternalLink, Image as ImageIcon,
+  Eye, Lock, Zap, Info, ExternalLink, Image as ImageIcon,
   SlidersHorizontal, X, CornerDownRight, MessageCircle, Send,
   BadgeCheck,
 } from 'lucide-react';
@@ -260,8 +262,9 @@ function SwipeGallery({
               onMouseLeave={() => setZoomPos(p => ({ ...p, active: false }))}
             >
               {m.isVideo ? (
-                <video src={m.url} controls poster={m.thumbnail}
-                  className="w-full h-full object-cover" />
+                videoSource(m.url)?.kind === 'youtube' || videoSource(m.url)?.kind === 'vimeo'
+                  ? <iframe src={videoSource(m.url)!.embed} title={m.alt || 'Video del producto'} className="w-full h-full" allow="fullscreen; picture-in-picture" allowFullScreen />
+                  : <video src={m.url} controls poster={m.thumbnail} className="w-full h-full object-contain" />
               ) : (
                 <img
                   src={m.url}
@@ -306,7 +309,7 @@ function SwipeGallery({
                 active === i ? 'border-primary' : 'border-border hover:border-muted-foreground/40'
               )}>
               {m.isVideo
-                ? <div className="w-full h-full bg-muted flex items-center justify-center"><Play className="w-3.5 h-3.5 text-muted-foreground" /></div>
+                ? <VideoThumbnail url={m.url} thumbnail={m.thumbnail} />
                 : <img src={m.url} alt="" className="w-full h-full object-cover" loading="lazy" />}
             </button>
           ))}
@@ -913,7 +916,7 @@ export default function ProductDetailPage() {
   const lowStock = !!(product?.track_stock && stock > 0 && stock <= 10);
 
   const allMedia: MediaItem[] = useMemo(() => [
-    ...(product?.images || []).map(i => ({ url: i.url, alt: i.alt, isVideo: false })),
+    ...(product?.images || []).map(i => ({ url: i.url, alt: i.alt, isVideo: !!videoSource(i.url) })),
     ...(product?.videos || []).map(v => ({ url: v.url, alt: 'Video', isVideo: true, thumbnail: v.thumbnail })),
   ], [product]);
 

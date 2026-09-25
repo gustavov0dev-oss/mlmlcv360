@@ -1,3 +1,5 @@
+import type {MlmPack} from '@/lib/mlmPacks';
+import MlmPacksPage from './MlmPacksPage';
 import { PaymentCurrency } from '@/components/payments/PaymentMethods';
 import { LoadingRegion, StableRegion } from '@/components/ui/loading-region';
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
@@ -130,6 +132,7 @@ export default function StorePage() {
   const { company, showUsd, setShowUsd, currencySymbol } = useConfig();
   const { user } = useAuthStore();
 
+  const [packs,setPacks]=useState<MlmPack[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<ProductCategory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -157,7 +160,7 @@ export default function StorePage() {
     setLoading(true);
     setLoadError(false);
     try {
-      const [{ data: prods }, { data: cats }] = await Promise.all([
+      const [{ data: prods }, { data: cats }, packResult] = await Promise.all([
         database.select<Product>('products', {
           select: '*, category:product_categories(id,name,slug), variants:product_variants(id,name,sku,price,compare_price,stock,attributes,images,status,sort_order,attribute_type,color_name)',
           filter: { status: 'active' },
@@ -166,9 +169,13 @@ export default function StorePage() {
         database.select<ProductCategory>('product_categories', {
           filter: { status: 'active' }, order: { column: 'sort_order' },
         }),
+        database.select<MlmPack>('mlm_packs',{select:'*,products:mlm_pack_products(*,product:products(*),variant:product_variants(*))',filter:{active:true},order:{column:'sort_order'}}),
       ]);
+      if(packResult.error)throw packResult.error;
+      setPacks((packResult.data||[]) as MlmPack[]);
       setProducts((prods || []) as Product[]);
       setCategories((cats || []) as ProductCategory[]);
+      setLoading(false); // Optional account and sales data must not block the catalog.
 
       if (user) {
         const { data: wl } = await database.select('wishlists', { select: 'product_id', filter: { user_id: user.id } });
@@ -194,7 +201,7 @@ export default function StorePage() {
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [user?.id]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
   useEffect(() => { setPage(1); }, [catFilter, search, sort, priceMin, priceMax]);
@@ -391,6 +398,7 @@ export default function StorePage() {
               <h1 className="text-lg sm:text-xl font-bold text-foreground tracking-tight">
                 Compra y genera <span className="text-gradient-animated">comisiones</span>
               </h1>
+
             </div>
           </div>
 
@@ -458,6 +466,7 @@ export default function StorePage() {
             </div>
           ) : loading ? <LoadingRegion className="min-h-[100vh]" /> : (
             <>
+              <MlmPacksPage embedded initialPacks={packs} />
               {showPromoRails && !loading && featured.length > 0 && (
                 <section className="mb-10">
                   <div className="flex items-center gap-2 mb-4">

@@ -348,7 +348,7 @@ export default function SocialLinksAdminPage() {
             </div>
 
             {/* Actions */}
-            <div className="flex gap-2 justify-end pt-1">
+            <div className="flex gap-2 justify-end pt-1 form-actions">
               <Button variant="outline" onClick={closeForm} disabled={saving}>Cancelar</Button>
               <Button onClick={handleSave} disabled={saving} className="min-w-[110px]">
                 {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}

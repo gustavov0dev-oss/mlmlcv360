@@ -223,7 +223,7 @@ export default function DashboardHeader() {
       );
     }
     // Filter nav items by query
-    navItems.forEach(item => {
+    navItems.filter(item => item.href !== '/dashboard/mi-plan' || company.system_plans_enabled !== 'false').forEach(item => {
       if (item.label.toLowerCase().includes(qLower) || item.keywords.some(k => k.includes(qLower))) {
         found.push({ type: 'nav', id: `nav-${item.href}`, title: item.label, subtitle: 'Navegar', href: item.href });
       }
@@ -280,7 +280,7 @@ export default function DashboardHeader() {
     } catch { /* silent */ }
     setResults(found.slice(0, 8));
     setLoadingSearch(false);
-  }, [database, user?.role]);
+  }, [database, user?.role, company.system_plans_enabled]);
 
   useEffect(() => {
     const t = setTimeout(() => performSearch(query), 300);

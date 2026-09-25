@@ -458,7 +458,7 @@ export default function LegalPagesAdminPage() {
               </div>
             </div>
 
-            <div className="shrink-0 px-5 py-4 border-t border-border/50 flex items-center justify-end gap-3">
+            <div className="shrink-0 px-5 py-4 border-t border-border/50 flex items-center justify-end gap-3 form-actions">
               <Button variant="ghost" size="sm" onClick={closeEditor}>Cancelar</Button>
               <Button size="sm" onClick={handleSave} disabled={saving}>
                 {saving ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Save className="h-4 w-4 mr-1.5" />}

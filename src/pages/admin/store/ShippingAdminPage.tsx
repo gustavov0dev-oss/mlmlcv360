@@ -173,7 +173,7 @@ export default function ShippingAdminPage() {
                 <option value="active">Activa</option><option value="inactive">Inactiva</option>
               </select>
             </div>
-            <div className="flex gap-3">
+            <div className="flex gap-3 form-actions">
               <button onClick={() => setEditZone(null)} className="flex-1 border border-border rounded-xl py-2.5 text-sm font-semibold hover:bg-muted">Cancelar</button>
               <button onClick={saveZone} disabled={saving} className="flex-1 bg-primary text-primary-foreground rounded-xl py-2.5 text-sm font-bold hover:bg-primary/90 disabled:opacity-50 flex items-center justify-center gap-2">
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Guardar
@@ -235,7 +235,7 @@ export default function ShippingAdminPage() {
                   placeholder="3" min="0" className="w-full px-3 py-3 bg-muted border border-border rounded-xl text-sm outline-none focus:border-primary" />
               </div>
             </div>
-            <div className="flex gap-3">
+            <div className="flex gap-3 form-actions">
               <button onClick={() => setEditMethod(null)} className="flex-1 border border-border rounded-xl py-2.5 text-sm font-semibold hover:bg-muted">Cancelar</button>
               <button onClick={saveMethod} disabled={saving} className="flex-1 bg-primary text-primary-foreground rounded-xl py-2.5 text-sm font-bold hover:bg-primary/90 disabled:opacity-50 flex items-center justify-center gap-2">
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Guardar

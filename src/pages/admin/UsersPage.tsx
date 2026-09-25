@@ -408,7 +408,7 @@ function UserModal({
 
         {/* Footer */}
         {mode !== 'view' && (
-          <div className="flex items-center gap-3 px-6 py-4 border-t border-border flex-shrink-0">
+          <div className="flex items-center gap-3 px-6 py-4 border-t border-border flex-shrink-0 form-actions">
             <button onClick={onClose} className="flex-1 border border-border rounded-xl py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors">
               Cancelar
             </button>

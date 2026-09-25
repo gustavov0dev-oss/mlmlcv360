@@ -1,3 +1,5 @@
+import { videoSource } from '@/lib/productMedia';
+import { VideoThumbnail } from '@/components/store/VideoThumbnail';
 import { useState, useEffect, useCallback } from "react";
 import { useDatabase, useStorage } from "@/lib/backend";
 import { useAuthStore } from "@/store/authStore";
@@ -14,7 +16,6 @@ import {
   X,
   Package,
   Upload,
-  Video,
   Image,
   Link,
   GripVertical,
@@ -135,6 +136,8 @@ export default function ProductFormPage() {
     compare_price: "",
     cost_price: "",
     points: "0",
+    earning_type: "",
+    earning_value: "0",
     currency: "PEN",
     status: "draft",
     sku: "",
@@ -199,6 +202,8 @@ export default function ProductFormPage() {
           compare_price: p.compare_price ? String(p.compare_price) : "",
           cost_price: p.cost_price ? String(p.cost_price) : "",
           points: String(p.points ?? 0),
+          earning_type:p.earning_type||"",
+          earning_value:String(p.earning_value||0),
           currency: p.currency,
           status: p.status,
           sku: p.sku || generateSKU(),
@@ -218,7 +223,7 @@ export default function ProductFormPage() {
         const imgs = (p.images || []).map((i: any) => ({
           url: i.url,
           alt: i.alt,
-          type: "image" as const,
+          type: videoSource(i.url) ? "video" as const : "image" as const,
         }));
         const vids = (p.videos || []).map((v: any) => ({
           url: v.url,
@@ -318,6 +323,8 @@ export default function ProductFormPage() {
       compare_price: form.compare_price ? parseFloat(form.compare_price) : null,
       cost_price: form.cost_price ? parseFloat(form.cost_price) : null,
       points: Number(form.points || 0),
+      earning_type:form.earning_type||null,
+      earning_value:Number(form.earning_value||0),
       currency: form.currency,
       status: form.status,
       sku: form.sku || null,
@@ -654,7 +661,7 @@ export default function ProductFormPage() {
               </div>
               <div>
                 <label className="block text-xs font-bold text-foreground mb-1.5">
-                 Puntos
+                 Puntos MLM
                 </label>
                 <input
                   type="number"
@@ -909,7 +916,10 @@ export default function ProductFormPage() {
               <button
                 onClick={() => {
                   if (!urlInput.trim()) return;
-                  const isVideo = /\.(mp4|webm|mov|avi)$/i.test(urlInput);
+                  let parsed: URL;
+                  try { parsed = new URL(urlInput.trim()); if (!['https:', 'http:'].includes(parsed.protocol)) throw new Error(); }
+                  catch { toast.error('Ingresa una URL válida con https://'); return; }
+                  const isVideo = !!videoSource(urlInput);
                   setMedia((prev) => [
                     ...prev,
                     {
@@ -961,16 +971,11 @@ export default function ProductFormPage() {
                     }}
                     className={cn(
                       "relative group rounded-xl overflow-hidden border border-border aspect-square bg-muted cursor-grab active:cursor-grabbing",
-                      i === 0 && "ring-1 ring-primary ring-offset-2",
+                      i === media.findIndex(item => item.type !== "video") && "ring-1 ring-primary ring-offset-2",
                     )}
                   >
                     {m.type === "video" ? (
-                      <div className="w-full h-full flex flex-col items-center justify-center gap-1">
-                        <Video className="w-8 h-8 text-muted-foreground" />
-                        <span className="text-[10px] text-muted-foreground px-2 text-center line-clamp-2">
-                          {m.url.split("/").pop()?.slice(0, 20)}
-                        </span>
-                      </div>
+                      <VideoThumbnail url={m.url} thumbnail={m.thumbnail} />
                     ) : (
                       <img
                         src={m.url}
@@ -981,7 +986,7 @@ export default function ProductFormPage() {
                         }}
                       />
                     )}
-                    {i === 0 && (
+                    {i === media.findIndex(item => item.type !== "video") && (
                       <span className="absolute top-1.5 left-1.5 bg-primary text-primary-foreground text-[9px] font-bold px-1.5 py-0.5 rounded-full">
                         PORTADA
                       </span>
@@ -1009,9 +1014,11 @@ export default function ProductFormPage() {
                         ),
                       )
                     }
+                    aria-label="Descripción del medio"
                     placeholder="Nombre / descripción de la imagen"
                     className="w-full px-2 py-1.5 bg-muted border border-border rounded-lg text-[10px] text-foreground outline-none focus:border-primary"
                   />
+                  {m.type === 'video' && <label className="text-xs text-muted-foreground">Miniatura personalizada (opcional)<input type="url" value={m.thumbnail || ''} placeholder="https://…/miniatura.jpg" className="mt-1 w-full px-2 py-2 bg-background border border-border rounded-lg" onChange={e => setMedia(prev => prev.map((x, j) => j === i ? { ...x, thumbnail: e.target.value } : x))} /></label>}
                 </div>
               ))}
             </div>
@@ -1426,6 +1433,7 @@ export default function ProductFormPage() {
       {/* ── COMMISSIONS TAB ── */}
       {tab === "commissions" && (
         <div className="bg-card border border-border rounded-xl p-5 space-y-3">
+          <div className="grid sm:grid-cols-2 gap-4 mb-5"><label className="text-sm">Método de ganancia (patrocinador directo)<select className="w-full mt-2 border border-border bg-background rounded-xl p-3" value={form.earning_type} onChange={e=>setForm(p=>({...p,earning_type:e.target.value}))}><option value="">Usar configuración por niveles</option><option value="price_percentage">Precio (%)</option><option value="points_percentage">Puntos (%)</option><option value="fixed">Fijo</option></select></label>{form.earning_type&&<label className="text-sm">{form.earning_type==='fixed'?'Importe fijo (PEN)':'Porcentaje'}<input className="w-full mt-2 border border-border bg-background rounded-xl p-3" type="number" min="0" max={form.earning_type==='fixed'?undefined:100} value={form.earning_value} onChange={e=>setForm(p=>({...p,earning_value:e.target.value}))}/></label>}<p className="sm:col-span-2 text-xs text-muted-foreground">Los puntos se acumulan por separado; no se convierten en dinero. Las reglas específicas por nivel tienen prioridad.</p></div>
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-sm font-bold text-foreground">
@@ -1469,8 +1477,8 @@ export default function ProductFormPage() {
                     }
                     className="px-3 py-2 bg-muted border border-border rounded-xl text-xs text-foreground outline-none"
                   >
-                    <option value="percentage">%</option>
-                    <option value="fixed">S/</option>
+                    <option value="percentage">Precio (%)</option><option value="points_percentage">Puntos (%)</option>
+                    <option value="fixed">Fijo</option>
                   </select>
                   <input
                     type="number"

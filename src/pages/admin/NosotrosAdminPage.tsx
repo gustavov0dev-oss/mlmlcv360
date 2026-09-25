@@ -691,7 +691,7 @@ function FounderFormModal({ founder, onSave, onClose, saving }: {
             <p className="text-sm text-foreground">{form.is_active ? 'Activo — visible en la pagina' : 'Inactivo — oculto'}</p>
           </div>
         </div>
-        <div className="flex gap-3 p-6 border-t border-border shrink-0">
+        <div className="flex gap-3 p-6 border-t border-border shrink-0 form-actions">
           <button onClick={onClose} className="flex-1 border border-border rounded-xl py-2.5 text-sm font-medium hover:bg-muted transition-colors">Cancelar</button>
           <button onClick={() => { if (!form.name.trim()) { toast.error('El nombre es requerido'); return; } onSave({ ...(founder?.id ? { id: founder.id } : {}), ...form }); }}
             disabled={saving} className="flex-1 bg-primary text-primary-foreground rounded-xl py-2.5 text-sm font-semibold hover:bg-primary/90 disabled:opacity-50 flex items-center justify-center gap-2 transition-colors">
@@ -758,7 +758,7 @@ function TimelineFormModal({ item, onSave, onClose, saving }: {
             <p className="text-sm text-foreground">{form.is_active ? 'Activo — visible' : 'Inactivo — oculto'}</p>
           </div>
         </div>
-        <div className="flex gap-3 p-6 border-t border-border shrink-0">
+        <div className="flex gap-3 p-6 border-t border-border shrink-0 form-actions">
           <button onClick={onClose} className="flex-1 border border-border rounded-xl py-2.5 text-sm font-medium hover:bg-muted transition-colors">Cancelar</button>
           <button onClick={() => { if (!form.year.trim() || !form.title.trim()) { toast.error('Año y titulo son requeridos'); return; } onSave({ ...(item?.id ? { id: item.id } : {}), ...form }); }}
             disabled={saving} className="flex-1 bg-primary text-primary-foreground rounded-xl py-2.5 text-sm font-semibold hover:bg-primary/90 disabled:opacity-50 flex items-center justify-center gap-2 transition-colors">
@@ -817,7 +817,7 @@ function InfraFormModal({ item, onSave, onClose, saving }: {
             <p className="text-sm text-foreground">{form.is_active ? 'Activo — visible' : 'Inactivo — oculto'}</p>
           </div>
         </div>
-        <div className="flex gap-3 p-6 border-t border-border shrink-0">
+        <div className="flex gap-3 p-6 border-t border-border shrink-0 form-actions">
           <button onClick={onClose} className="flex-1 border border-border rounded-xl py-2.5 text-sm font-medium hover:bg-muted transition-colors">Cancelar</button>
           <button onClick={() => { if (!form.title.trim()) { toast.error('El titulo es requerido'); return; } onSave({ ...(item?.id ? { id: item.id } : {}), ...form }); }}
             disabled={saving} className="flex-1 bg-primary text-primary-foreground rounded-xl py-2.5 text-sm font-semibold hover:bg-primary/90 disabled:opacity-50 flex items-center justify-center gap-2 transition-colors">
@@ -876,7 +876,7 @@ function ValueFormModal({ item, onSave, onClose, saving }: {
             <p className="text-sm text-foreground">{form.is_active ? 'Activo — visible' : 'Inactivo — oculto'}</p>
           </div>
         </div>
-        <div className="flex gap-3 p-6 border-t border-border shrink-0">
+        <div className="flex gap-3 p-6 border-t border-border shrink-0 form-actions">
           <button onClick={onClose} className="flex-1 border border-border rounded-xl py-2.5 text-sm font-medium hover:bg-muted transition-colors">Cancelar</button>
           <button onClick={() => { if (!form.label.trim()) { toast.error('La etiqueta es requerida'); return; } onSave({ ...(item?.id ? { id: item.id } : {}), ...form }); }}
             disabled={saving} className="flex-1 bg-primary text-primary-foreground rounded-xl py-2.5 text-sm font-semibold hover:bg-primary/90 disabled:opacity-50 flex items-center justify-center gap-2 transition-colors">
@@ -900,7 +900,7 @@ function AboutTextEditor({ fields, values, onChange, onSave, loading, saving }: 
         {field.multiline ? <textarea id={field.key} value={values[field.key] ?? ''} onChange={event => onChange(field.key, event.target.value)} rows={field.key.endsWith('description') ? 4 : 2} className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors resize-y" /> : <input id={field.key} value={values[field.key] ?? ''} onChange={event => onChange(field.key, event.target.value)} className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors" />}
         {field.hint && <p className="text-xs text-muted-foreground mt-1.5">{field.hint}</p>}
       </div>)}
-      <div className="flex justify-end pt-2 border-t border-border"><button onClick={onSave} disabled={saving} className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-semibold hover:bg-primary/90 disabled:opacity-50 transition-colors">{saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}Guardar textos</button></div>
+      <div className="flex justify-end pt-2 border-t border-border form-actions"><button onClick={onSave} disabled={saving} className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-semibold hover:bg-primary/90 disabled:opacity-50 transition-colors">{saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}Guardar textos</button></div>
     </fieldset>}
   </StableRegion>;
 }

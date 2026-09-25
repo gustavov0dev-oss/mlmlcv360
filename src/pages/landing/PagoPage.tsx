@@ -10,7 +10,7 @@ import { continuePayment } from '@/lib/payments/checkout';
 import { ArrowLeft, CheckCircle, ShieldCheck, Info } from 'lucide-react';
 
 export default function PagoPage() {
- const db=useDatabase();const [params]=useSearchParams();const {user,fetchProfile}=useAuthStore();const {exchangeRate,showUsd,setShowUsd}=useConfig();
+ const db=useDatabase();const [params]=useSearchParams();const {user,fetchProfile}=useAuthStore();const {company,exchangeRate,showUsd,setShowUsd}=useConfig();
  const [methods,setMethods]=useState<any[]>([]);const [selected,setSelected]=useState(params.get('method')||'');
  const [session,setSession]=useState<any>(null);const [contract,setContract]=useState<any>(null);const [plan,setPlan]=useState<any>(null);
  const [payerEmail,setPayerEmail]=useState(user?.email||'');
@@ -53,6 +53,7 @@ export default function PagoPage() {
  }catch(e:any){setError(e.message)}finally{setBusy(false)}};
  let accounts:any[]=[];try{accounts=JSON.parse(method?.credentials?.accounts||'[]')}catch{}
  const button='inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-primary text-white font-semibold text-sm hover:bg-primary/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary disabled:opacity-50';
+ if(planSlug&&!sessionId&&!contractId&&company.system_plans_enabled==='false')return <main className="mx-auto max-w-3xl px-5 py-28"><h1 className="text-2xl font-semibold">No se ofrecen nuevas membresías</h1><p className="mt-3 text-muted-foreground">Puedes seguir usando tu cuenta y comprar en la tienda.</p><Link className="mt-5 inline-block text-primary" to="/tienda">Ir a la tienda</Link></main>;
  return <main className="max-w-3xl mx-auto w-full px-5 pt-28 md:pt-32 pb-16">
   <Link to={back} className="inline-flex items-center gap-2 text-sm text-muted-foreground mb-7"><ArrowLeft className="w-4 h-4"/>{!user?'Planes':isOrder?'Mis pedidos':'Mi plan'}</Link>
   <h1 className="text-2xl font-bold mb-2">{returning?paid?'Pago confirmado':'Estado de tu pago':isOrder?'Completa tu pedido':'Tu membresía'}</h1>

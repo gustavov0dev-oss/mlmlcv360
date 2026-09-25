@@ -395,7 +395,7 @@ export default function FaqAdminPage() {
             </div>
 
             {/* Actions */}
-            <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-4 border-t border-border">
+            <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-4 border-t border-border form-actions">
               <Button variant="outline" onClick={resetForm} disabled={saving}>
                 Cancelar
               </Button>

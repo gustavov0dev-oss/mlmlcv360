@@ -388,7 +388,7 @@ export default function RolesAdminPage() {
                   value={selectedRole.color}
                   onChange={c => setSelectedRole(p => p ? { ...p, color: c } : p)} />
               </div>
-              <div className="mt-2 pt-4 border-t border-border flex justify-end">
+              <div className="mt-2 pt-4 border-t border-border flex justify-end form-actions">
                 <button
                   onClick={saveRole}
                   disabled={saving}

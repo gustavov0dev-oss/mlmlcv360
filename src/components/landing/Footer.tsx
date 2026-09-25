@@ -131,7 +131,7 @@ export default function Footer() {
                 <h4 className="text-xs font-semibold text-foreground uppercase tracking-wider mb-4">Plataforma</h4>
                 <ul className="space-y-2.5">
                   {[
-                    { href: '/planes', label: 'Planes' },
+                    ...(company.system_plans_enabled!=='false'?[{href:'/planes',label:'Planes'}]:[]),
                     { href: '/tienda', label: 'Tienda' },
                     { href: '/nosotros', label: 'Nosotros' },
                     { href: '/oportunidad', label: 'Oportunidad' },

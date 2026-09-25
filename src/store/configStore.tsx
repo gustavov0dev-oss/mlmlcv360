@@ -32,6 +32,7 @@ export interface Rank {
   bonus: number;
   min_affiliates: number;
   min_volume: number;
+  auto_qualify?: boolean;
   sort_order: number;
   is_active: boolean;
 }

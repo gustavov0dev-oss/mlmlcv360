@@ -1,3 +1,4 @@
+import { MaintenanceView } from '@/components/MaintenanceView';
 import { LoadingRegion } from '@/components/ui/loading-region';
 import { ReactNode, useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { Toaster } from 'sonner';
@@ -13,7 +14,6 @@ import WhatsAppButton from '@/components/WhatsAppButton';
 import { CartProvider } from '@/store/cartStore';
 import { useSeo } from '@/hooks/useSeo';
 import { usePwa } from '@/hooks/usePwa';
-import Logo from '@/components/Logo';
 
 const LandingPage = lazy(() => import('@/pages/landing/LandingPage'));
 const NosotrosPage = lazy(() => import('@/pages/landing/NosotrosPage'));
@@ -36,7 +36,7 @@ const CartPage = lazy(() => import('@/pages/store/CartPage'));
 const CheckoutPage = lazy(() => import('@/pages/store/CheckoutPage'));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 
-const LANDING_PATHS = ['/', '/nosotros', '/precios', '/empresa', '/oportunidad', '/contacto', '/planes', '/blog', '/pago', '/login', '/registro', '/reset-password', '/tienda', '/carrito', '/checkout', '/pedidos', '/favoritos', '/tienda/comparar', '/libro-reclamaciones', '/legal'];
+const LANDING_PATHS = ['/', '/nosotros', '/precios', '/empresa', '/oportunidad', '/contacto', '/planes', '/blog', '/pago', '/login', '/registro', '/reset-password', '/tienda', '/packs', '/carrito', '/checkout', '/pedidos', '/favoritos', '/tienda/comparar', '/libro-reclamaciones', '/legal'];
 const ADMIN_BYPASS_ROLES = ['super_admin', 'admin'];
 
 function useCountdown(targetIso: string) {
@@ -56,22 +56,9 @@ function useCountdown(targetIso: string) {
   return remaining;
 }
 
-function formatCountdown(ms: number) {
-  const total = Math.floor(ms / 1000);
-  const d = Math.floor(total / 86400);
-  const h = Math.floor((total % 86400) / 3600);
-  const m = Math.floor((total % 3600) / 60);
-  const s = total % 60;
-  return { d, h, m, s };
-}
-
 function MaintenancePage() {
   const { company, refresh } = useConfig();
   const database = useDatabase();
-  const name = company.company_name || 'MLM 360';
-  const msg = company.maintenance_message || 'Estamos realizando mejoras en nuestra plataforma. Volveremos pronto con una experiencia renovada.';
-  const title = company.maintenance_title || 'Volveremos pronto';
-  const themeColor = company.pwa_theme_color || '#C79B3B';
   const showCountdown = company.maintenance_countdown_enabled === 'true';
   const countdownDate = company.maintenance_countdown_date || '';
   const remaining = useCountdown(countdownDate);
@@ -92,77 +79,8 @@ function MaintenancePage() {
       .catch(() => {});
   }, [showCountdown, countdownDate, remaining, database, refresh]);
 
-  return (
-    <div className="min-h-[100dvh] w-full overflow-y-auto bg-background flex flex-col items-center justify-center px-4 py-10 relative">
-      {/* Faded grid mesh background */}
-      <div
-        className="fixed inset-0 -z-10 pointer-events-none"
-        style={{
-          backgroundImage: `linear-gradient(to right, ${themeColor}22 1px, transparent 1px), linear-gradient(to bottom, ${themeColor}22 1px, transparent 1px)`,
-          backgroundSize: '56px 56px',
-          maskImage: 'radial-gradient(ellipse 80% 70% at 50% 50%, black 30%, transparent 100%)',
-          WebkitMaskImage: 'radial-gradient(ellipse 80% 70% at 50% 50%, black 30%, transparent 100%)',
-        }}
-      />
-      {/* Soft glow accents */}
-      <div className="fixed inset-0 -z-10 opacity-[0.07] pointer-events-none overflow-hidden">
-        <div className="absolute -top-32 -left-32 w-[30rem] h-[30rem] rounded-full blur-3xl" style={{ background: themeColor }} />
-        <div className="absolute -bottom-40 -right-32 w-[34rem] h-[34rem] rounded-full blur-3xl" style={{ background: themeColor }} />
-      </div>
-
-      {/* Logo */}
-      <div className="flex justify-center mb-8 sm:mb-10 shrink-0">
-        <Logo
-          value={company.logo_value || ''}
-          fallbackText={name}
-          imgClass="max-w-[160px] sm:max-w-[196px] w-full h-auto object-contain"
-        />
-      </div>
-
-      {/* Main content centered */}
-      <div className="flex flex-col items-center justify-center text-center w-full max-w-xl mx-auto">
-        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-foreground mb-3 sm:mb-4">
-          {title}
-        </h1>
-        <p className="text-muted-foreground text-sm sm:text-base lg:text-lg leading-relaxed max-w-md mx-auto mb-8 sm:mb-10">
-          {msg}
-        </p>
-
-        {/* Countdown timer */}
-        {showCountdown && remaining !== null && remaining > 0 && (() => {
-          const { d, h, m, s } = formatCountdown(remaining);
-          const units = [
-            { v: d, l: 'Días' },
-            { v: h, l: 'Horas' },
-            { v: m, l: 'Min' },
-            { v: s, l: 'Seg' },
-          ];
-          return (
-            <div className="flex justify-center gap-3 sm:gap-4">
-              {units.map((u, i) => (
-                <div key={i} className="flex flex-col items-center gap-2">
-                  <div
-                    className="relative w-[17vw] max-w-[80px] aspect-square rounded-2xl flex items-center justify-center text-2xl sm:text-3xl font-bold tabular-nums select-none overflow-hidden"
-                    style={{
-                      background: 'hsl(var(--muted))',
-                      border: '1px solid hsl(var(--border))',
-                      color: 'hsl(var(--foreground))',
-                    }}
-                  >
-                    <span className="absolute inset-x-0 top-1/2 -translate-y-px h-px bg-current opacity-10 pointer-events-none" />
-                    <span className="relative z-10">{String(u.v).padStart(2, '0')}</span>
-                  </div>
-                  <span className="text-[9px] sm:text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">{u.l}</span>
-                </div>
-              ))}
-            </div>
-          );
-        })()}
-      </div>
-    </div>
-  );
+  return <div className="min-h-[100dvh] flex items-center bg-background"><MaintenanceView config={company} /></div>;
 }
-
 
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
@@ -287,6 +205,7 @@ function AppRoutes() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/registro" element={<RegisterPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/packs" element={<SiteLayout><StorePage /></SiteLayout>} />
           <Route path="/tienda" element={<SiteLayout><StorePage /></SiteLayout>} />
           <Route path="/tienda/comparar" element={<SiteLayout><ProtectedRoute><PedidosPage initialTab="comparar" /></ProtectedRoute></SiteLayout>} />
           <Route path="/tienda/*" element={<SiteLayout><ProductDetailPage /></SiteLayout>} />

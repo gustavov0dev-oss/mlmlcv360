@@ -66,6 +66,7 @@ const superAdminNav: NavItem[] = [
       { label: 'Mi Red', href: '/dashboard/red', icon: GitBranch },
       { label: 'Comisiones MLM', href: '/dashboard/comisiones', icon: DollarSign },
       { label: 'Rangos', href: '/dashboard/rangos', icon: Award },
+      { label: 'Reglas de comisión', href: '/dashboard/admin/comisiones-mlm', icon: DollarSign },
     ],
   },
   {
@@ -75,7 +76,6 @@ const superAdminNav: NavItem[] = [
       { label: 'Pedidos', href: '/dashboard/admin/pedidos', icon: ShoppingCart },
       { label: 'Cupones', href: '/dashboard/admin/cupones', icon: Tag },
       { label: 'Envíos', href: '/dashboard/admin/envios', icon: Truck },
-      { label: 'Comisiones Tienda', href: '/dashboard/admin/comisiones-mlm', icon: DollarSign },
       { label: 'Reseñas', href: '/dashboard/admin/resenas', icon: MessageSquare },
     ],
   },
@@ -110,6 +110,7 @@ const adminNav: NavItem[] = [
       { label: 'Mi Red', href: '/dashboard/red', icon: GitBranch },
       { label: 'Comisiones MLM', href: '/dashboard/comisiones', icon: DollarSign },
       { label: 'Rangos', href: '/dashboard/rangos', icon: Award },
+      { label: 'Reglas de comisión', href: '/dashboard/admin/comisiones-mlm', icon: DollarSign },
     ],
   },
   {
@@ -393,7 +394,7 @@ export default function Sidebar() {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const role = (user as any)?.role || 'user';
-  const navItems = getNavForRole(role);
+  const navItems = getNavForRole(role).filter(item => item.href !== '/dashboard/mi-plan' || company.system_plans_enabled !== 'false');
   const name = company.company_name || 'MLM360';
 
   // Role label + color state - fetch from custom_roles table

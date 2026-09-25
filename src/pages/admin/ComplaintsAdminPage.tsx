@@ -289,7 +289,7 @@ function DetailPanel({
                 rows={4}
                 className="resize-y bg-card"
               />
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center justify-between gap-3 form-actions">
                 <p className="text-xs text-muted-foreground/60 leading-relaxed flex-1">
                   Sé claro, explica qué hiciste y cómo se resolvió. El cliente verá esto en su consulta.
                 </p>

@@ -1,168 +1,24 @@
-import { LoadingRegion } from '@/components/ui/loading-region';
-import { useState, useEffect, useCallback } from 'react';
-import { useDatabase } from '@/lib/backend';
-
-import { toast } from 'sonner';
-import type { MlmCommissionConfig } from '@/lib/storeTypes';
-import { Save, Loader as Loader2, Info } from 'lucide-react';
-
-const RANKS = ['bronze','silver','gold','platinum','diamond','crown'] as const;
-const RANK_LABELS: Record<string, string> = { bronze:'Bronce', silver:'Plata', gold:'Oro', platinum:'Platino', diamond:'Diamante', crown:'Corona' };
-const RANK_COLORS: Record<string, string> = { bronze:'#b45309', silver:'#64748b', gold:'#ca8a04', platinum:'#94a3b8', diamond:'#22d3ee', crown:'#f59e0b' };
-const MAX_LEVELS: Record<string, number> = { bronze:3, silver:4, gold:5, platinum:6, diamond:8, crown:10 };
-
-type Matrix = Record<string, Record<number, { type: string; value: string }>>;
-
-export default function MlmCommissionsAdminPage() {
-  const [matrix, setMatrix] = useState<Matrix>({});
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [freeShipThreshold, setFreeShipThreshold] = useState('150');
-  const [igvRate, setIgvRate] = useState('0.18');
-
-  const database = useDatabase();
-
-  const load = useCallback(async () => {
-    setLoading(true);
-    const [{ data }, { data: cfg }] = await Promise.all([
-      database.select<MlmCommissionConfig>('mlm_commissions_config', { filter: { status: 'active' }, order: [{ column: 'rank' }, { column: 'level' }] }),
-      database.select<{ key: string; value: string }>('system_config', { select: 'key,value', filter: [{ column: 'key', operator: 'in', value: ['free_shipping_threshold','igv_rate'] }] }),
-    ]);
-    const m: Matrix = {};
-    RANKS.forEach(r => { m[r] = {}; for (let l = 1; l <= MAX_LEVELS[r]; l++) m[r][l] = { type: 'percentage', value: '' }; });
-    ((data as MlmCommissionConfig[]) || []).forEach((row: MlmCommissionConfig) => {
-      if (!m[row.rank]) m[row.rank] = {};
-      m[row.rank][row.level] = { type: row.type, value: String(row.value) };
-    });
-    setMatrix(m);
-    if (cfg) {
-      (cfg as any[]).forEach((r: any) => {
-        if (r.key === 'free_shipping_threshold') setFreeShipThreshold(r.value);
-        if (r.key === 'igv_rate') setIgvRate(r.value);
-      });
-    }
-    setLoading(false);
-  }, [database]);
-
-  useEffect(() => { load(); }, [load]);
-
-  const save = async () => {
-    setSaving(true);
-    // Rebuild all rows
-    const rows: Array<{ rank: string; level: number; type: string; value: number; status: string }> = [];
-    RANKS.forEach(r => {
-      for (let l = 1; l <= MAX_LEVELS[r]; l++) {
-        const cell = matrix[r]?.[l];
-        if (cell?.value && parseFloat(cell.value) > 0) {
-          rows.push({ rank: r, level: l, type: cell.type, value: parseFloat(cell.value), status: 'active' });
-        }
-      }
-    });
-
-    // Upsert all
-    for (const row of rows) {
-      await database.upsert('mlm_commissions_config', { ...row }, 'rank,level');
-    }
-
-    // Save config
-    await database.upsert('system_config', [
-      { key: 'free_shipping_threshold', value: freeShipThreshold, category: 'store', description: 'Monto para envío gratis' },
-      { key: 'igv_rate', value: igvRate, category: 'store', description: 'Tasa IGV' },
-    ], 'key');
-
-    toast.success('Comisiones y configuración guardadas');
-    setSaving(false);
-  };
-
-  const setCell = (rank: string, level: number, field: 'type' | 'value', val: string) => {
-    setMatrix(m => ({
-      ...m,
-      [rank]: { ...m[rank], [level]: { ...m[rank]?.[level], [field]: val } }
-    }));
-  };
-
-  if (loading) return <LoadingRegion className="min-h-[calc(100dvh-8rem)]" />;
-
-  return (
-    <div className="space-y-5 pb-10">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Comisiones MLM</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Define la tasa de comisión por rango y nivel del árbol</p>
-        </div>
-        <button onClick={save} disabled={saving}
-          className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-xl font-bold text-sm hover:bg-primary/90 disabled:opacity-50 transition-colors">
-          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Guardar todo
-        </button>
-      </div>
-
-      <div className="bg-primary/8 border border-primary/20 rounded-xl p-3 flex items-start gap-2">
-        <Info className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-        <p className="text-xs text-primary">
-          Las comisiones se calculan al nivel del rango del <strong>patrocinador</strong> en la posición del árbol. Nivel 1 = comprador directo, Nivel 2 = patrocinador del patrocinador, etc.
-        </p>
-      </div>
-
-      {/* Matrix */}
-      <div className="space-y-4">
-        {RANKS.map(rank => {
-          const maxLvl = MAX_LEVELS[rank];
-          const color = RANK_COLORS[rank];
-          return (
-            <div key={rank} className="bg-card border border-border rounded-xl overflow-hidden">
-              <div className="px-5 py-3 flex items-center gap-2 border-b border-border" style={{ background: color + '10' }}>
-                <div className="w-3 h-3 rounded-full" style={{ background: color }} />
-                <h3 className="text-sm font-bold" style={{ color }}>{RANK_LABELS[rank]}</h3>
-                <span className="text-xs text-muted-foreground ml-1">(hasta nivel {maxLvl})</span>
-              </div>
-              <div className="p-4 overflow-x-auto">
-                <div className="flex flex-wrap gap-3">
-                  {Array.from({ length: maxLvl }).map((_, i) => {
-                    const lvl = i + 1;
-                    const cell = matrix[rank]?.[lvl] || { type: 'percentage', value: '' };
-                    return (
-                      <div key={lvl} className="flex flex-col gap-1.5 min-w-[100px]">
-                        <label className="text-xs font-bold text-foreground">Nivel {lvl}</label>
-                        <div className="flex gap-1">
-                          <select value={cell.type} onChange={e => setCell(rank, lvl, 'type', e.target.value)}
-                            className="px-2 py-2 bg-muted border border-border rounded-lg text-[11px] text-foreground outline-none focus:border-primary flex-shrink-0">
-                            <option value="percentage">%</option>
-                            <option value="fixed">S/</option>
-                          </select>
-                          <input type="number" value={cell.value} onChange={e => setCell(rank, lvl, 'value', e.target.value)}
-                            placeholder="0" step="0.01" min="0"
-                            className="w-16 px-2 py-2 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary text-right" />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Store config */}
-      <div className="bg-card border border-border rounded-xl p-5 space-y-4">
-        <h2 className="text-sm font-bold text-foreground">Configuración de tienda</h2>
-        <div className="grid sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs font-bold text-foreground mb-1.5">Umbral envío gratis (S/)</label>
-            <input type="number" value={freeShipThreshold} onChange={e => setFreeShipThreshold(e.target.value)}
-              placeholder="150" step="1" min="0"
-              className="w-full px-4 py-3 bg-muted border border-border rounded-xl text-sm text-foreground outline-none focus:border-primary" />
-            <p className="text-xs text-muted-foreground mt-1">Pedidos desde este monto = envío gratis</p>
-          </div>
-          <div>
-            <label className="block text-xs font-bold text-foreground mb-1.5">Tasa IGV (ej: 0.18 = 18%)</label>
-            <input type="number" value={igvRate} onChange={e => setIgvRate(e.target.value)}
-              placeholder="0.18" step="0.01" min="0" max="1"
-              className="w-full px-4 py-3 bg-muted border border-border rounded-xl text-sm text-foreground outline-none focus:border-primary" />
-            <p className="text-xs text-muted-foreground mt-1">Aplica a todas las facturas y boletas</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+import {useState,useEffect} from 'react';
+import {useDatabase} from '@/lib/backend';
+import {useConfig} from '@/store/configStore';
+import {LoadingRegion} from '@/components/ui/loading-region';
+import {Select,SelectTrigger,SelectValue,SelectContent,SelectItem} from '@/components/ui/select';
+import {Save,Info,ArrowRight} from 'lucide-react';
+import {toast} from 'sonner';
+type Rule={rank:string;level:number;type:string;value:number;min_purchase_amount:number;status:string};
+export default function MlmCommissionsAdminPage(){
+ const db=useDatabase(); const {ranks}=useConfig();const [rows,setRows]=useState<Rule[]>([]);const [selected,setSelected]=useState('');const [loading,setLoading]=useState(true);const [error,setError]=useState('');const [saving,setSaving]=useState(false);const [dirty,setDirty]=useState(false);const [base,setBase]=useState('100');
+ useEffect(()=>{let alive=true;db.select<Rule>('mlm_commissions_config',{}).then(({data,error})=>{if(!alive)return;if(error)setError(error);else setRows(((data as Rule[])||[]).map(r=>({...r,value:r.status==='active'?r.value:0,min_purchase_amount:r.min_purchase_amount||0})));setLoading(false);});return()=>{alive=false;};},[db]);
+ const choices=[...ranks.map(r=>({slug:r.slug,name:r.name})),...Array.from(new Set(rows.map(r=>r.rank))).filter(slug=>!ranks.some(r=>r.slug===slug)).map(slug=>({slug,name:`${slug} · regla anterior`}))];
+ const rank=selected||choices[0]?.slug||'';
+ const cell=(level:number)=>rows.find(r=>r.rank===rank&&r.level===level)||{rank,level,type:'percentage',value:0,min_purchase_amount:0,status:'inactive'};
+ const update=(level:number,key:string,value:string)=>{setRows(old=>[...old.filter(r=>r.rank!==rank||r.level!==level),{...cell(level),[key]:key==='type'?value:Number(value)}]);setDirty(true);};
+ const save=async()=>{if(rows.some(r=>!Number.isFinite(r.value)||r.value<0||r.min_purchase_amount<0||(r.type==='percentage'&&r.value>100))){toast.error('Revisa los valores. Los porcentajes deben estar entre 0 y 100.');return;}setSaving(true);try{const {error}=await db.rpc('save_mlm_commission_rules',{p_rules:rows});if(error)throw new Error(error);setDirty(false);toast.success('Reglas de comisión guardadas');}catch(e){toast.error(e instanceof Error?e.message:'No se pudieron guardar las reglas');}finally{setSaving(false);}};
+ if(loading)return <LoadingRegion className="min-h-[60vh]"/>;
+ return <div className="space-y-6 pb-8"><header><h1 className="text-2xl font-bold">Reglas de comisión MLM</h1><p className="text-sm text-muted-foreground mt-2">Configura lo que recibe cada patrocinador según su rango y su distancia al comprador.</p></header>
+ {error&&<p role="alert" className="text-destructive">{error}</p>}
+ <section className="bg-card border border-border rounded-xl p-5 sm:p-6"><h2 className="font-semibold flex items-center gap-2"><Info className="w-4 h-4 text-primary"/> Cómo se distribuye una compra</h2><div className="flex flex-wrap items-center gap-3 py-5 text-sm"><span className="rounded-lg bg-muted px-3 py-2">Comprador</span><ArrowRight className="w-4 h-4"/><span className="rounded-lg bg-muted px-3 py-2">Nivel 1 · su patrocinador</span><ArrowRight className="w-4 h-4"/><span className="rounded-lg bg-muted px-3 py-2">Nivel 2 · el siguiente patrocinador</span></div><p className="text-sm text-muted-foreground leading-relaxed">En cada nivel se consulta el rango de quien recibe la comisión. Una regla específica del producto tiene prioridad; en el nivel 1 también puede aplicar su comisión directa. Esta matriz se usa cuando no hay una regla anterior. Los packs usan su configuración propia y no suman las comisiones de sus productos.</p><details className="mt-4 border-t border-border pt-4 text-sm"><summary className="cursor-pointer font-medium">Cuándo se aplican los cambios</summary><p className="text-muted-foreground mt-3">Las reglas quedan registradas al crear el pedido y se acreditan al confirmar el pago. Guardar aquí afecta pedidos nuevos, no recalcula los anteriores. El importe fijo está expresado en soles; el porcentaje se aplica al importe de la línea del producto.</p></details></section>
+ <section className="bg-card border border-border rounded-xl overflow-hidden"><div className="p-5 border-b border-border grid sm:grid-cols-2 gap-5"><label className="space-y-2 text-sm font-medium"><span className="block">Rango del patrocinador</span><Select value={rank} onValueChange={setSelected}><SelectTrigger><SelectValue placeholder="Selecciona un rango"/></SelectTrigger><SelectContent>{choices.map(r=><SelectItem key={r.slug} value={r.slug}>{r.name}</SelectItem>)}</SelectContent></Select></label><label className="space-y-2 text-sm font-medium"><span className="block">Simular importe del producto (S/)</span><input type="number" min="0" value={base} onChange={e=>setBase(e.target.value)} className="w-full border border-border rounded-lg bg-background px-3 h-10"/></label></div>
+ <div className="overflow-x-auto"><table className="w-full text-sm min-w-[650px]"><thead className="bg-muted/40 text-muted-foreground"><tr>{['Nivel','Método','Valor','Compra mínima (S/)','Ejemplo de comisión'].map(x=><th key={x} className="text-left p-4 font-medium">{x}</th>)}</tr></thead><tbody>{Array.from({length:10},(_,i)=>{const r=cell(i+1);const amount=Math.max(0,Number(base)||0);const earned=amount>=r.min_purchase_amount?(r.type==='percentage'?amount*r.value/100:r.value):0;return <tr key={i} className="border-t border-border"><td className="p-4 font-medium">Nivel {i+1}{i===0&&<p className="text-xs text-muted-foreground mt-1">Directo</p>}</td><td className="p-4"><Select value={r.type} onValueChange={v=>update(i+1,'type',v)}><SelectTrigger aria-label={`Método nivel ${i+1}`}><SelectValue/></SelectTrigger><SelectContent><SelectItem value="percentage">Porcentaje (%)</SelectItem><SelectItem value="fixed">Importe fijo (S/)</SelectItem></SelectContent></Select></td><td className="p-4"><input aria-label={`Valor nivel ${i+1}`} type="number" min="0" max={r.type==='percentage'?100:undefined} step="0.01" value={r.value} onChange={e=>update(i+1,'value',e.target.value)} className="w-24 h-10 px-3 bg-background border border-border rounded-lg"/></td><td className="p-4"><input aria-label={`Compra mínima nivel ${i+1}`} type="number" min="0" value={r.min_purchase_amount} onChange={e=>update(i+1,'min_purchase_amount',e.target.value)} className="w-28 h-10 px-3 bg-background border border-border rounded-lg"/></td><td className="p-4 tabular-nums">{r.value>0?`S/ ${earned.toFixed(2)}`:'Sin comisión'}</td></tr>;})}</tbody></table></div><p className="p-5 text-xs text-muted-foreground border-t border-border">Un valor de 0 desactiva la regla de ese nivel. La simulación representa únicamente esta matriz; no incluye reglas particulares de productos o packs.</p></section>
+ <div className="form-actions"><span className="text-sm text-muted-foreground">{dirty?'Tienes cambios sin guardar':'Sin cambios pendientes'}</span><button onClick={save} disabled={saving||!dirty||!!error} className="ml-auto inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-primary text-primary-foreground font-semibold disabled:opacity-50"><Save className="w-4 h-4"/>{saving?'Guardando…':'Guardar reglas'}</button></div></div>;
 }
