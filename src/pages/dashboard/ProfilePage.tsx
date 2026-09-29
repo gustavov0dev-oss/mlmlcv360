@@ -1,3 +1,4 @@
+import { displayDate } from '@/lib/dates';
 import { DefaultReferral } from '@/components/auth/DefaultReferral';
 import { LoadingRegion } from '@/components/ui/loading-region';
 import { useState, useEffect } from 'react';
@@ -178,7 +179,7 @@ export default function ProfilePage() {
                 </span>
               </div>
               <p className="flex items-center gap-1.5 text-xs text-muted-foreground mt-2.5">
-                <Calendar className="w-3.5 h-3.5 flex-shrink-0" /> Miembro desde {new Date(user.created_at).toLocaleDateString('es-PE')}
+                <Calendar className="w-3.5 h-3.5 flex-shrink-0" /> Miembro desde {displayDate(user.created_at)}
               </p>
             </div>
           </div>
@@ -289,7 +290,7 @@ function PersonalInfoSection({ user, form, setForm, onSaved }: {
         </div>
       ) : (
         <p className="text-[11px] text-muted-foreground mt-6 pt-6 border-t border-border">
-          Actualizado el {new Date(user.updated_at || user.created_at).toLocaleDateString('es-PE')}
+          Actualizado el {displayDate(user.updated_at || user.created_at)}
         </p>
       )}
     </div>

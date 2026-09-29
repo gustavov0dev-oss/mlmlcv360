@@ -1,3 +1,4 @@
+import { displayDate, displayDateTime } from '@/lib/dates';
 import { LoadingRegion, StableRegion } from '@/components/ui/loading-region';
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/backend/client';
@@ -39,11 +40,11 @@ const TIPO_LABELS: Record<string, string> = {
 };
 
 function fmtDate(d: string) {
-  try { return new Date(d).toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric' }); }
+  try { return displayDate(d, { day: '2-digit', month: 'long', year: 'numeric' }); }
   catch { return d; }
 }
 function fmtDateTime(d: string) {
-  try { return new Date(d).toLocaleString('es-PE', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }); }
+  try { return displayDateTime(d, { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }); }
   catch { return d; }
 }
 

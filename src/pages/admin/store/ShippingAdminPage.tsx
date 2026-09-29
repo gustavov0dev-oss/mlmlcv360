@@ -1,3 +1,4 @@
+import { StyledSelect } from '@/components/ui/styled-select';
 import { LoadingRegion } from '@/components/ui/loading-region';
 import { useState, useEffect, useCallback } from 'react';
 import { useDatabase } from '@/lib/backend';
@@ -168,10 +169,10 @@ export default function ShippingAdminPage() {
             </div>
             <div>
               <label className="block text-xs font-bold text-foreground mb-1.5">Estado</label>
-              <select value={editZone.status || 'active'} onChange={e => setEditZone(p => ({ ...p, status: e.target.value as any }))}
+              <StyledSelect value={editZone.status || 'active'} onChange={e => setEditZone(p => ({ ...p, status: e.target.value as any }))}
                 className="w-full px-4 py-3 bg-muted border border-border rounded-xl text-sm outline-none focus:border-primary">
                 <option value="active">Activa</option><option value="inactive">Inactiva</option>
-              </select>
+              </StyledSelect>
             </div>
             <div className="flex gap-3 form-actions">
               <button onClick={() => setEditZone(null)} className="flex-1 border border-border rounded-xl py-2.5 text-sm font-semibold hover:bg-muted">Cancelar</button>
@@ -204,12 +205,12 @@ export default function ShippingAdminPage() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-bold text-foreground mb-1.5">Tipo</label>
-                <select value={editMethod.type || 'flat'} onChange={e => setEditMethod(p => ({ ...p, type: e.target.value as any }))}
+                <StyledSelect value={editMethod.type || 'flat'} onChange={e => setEditMethod(p => ({ ...p, type: e.target.value as any }))}
                   className="w-full px-3 py-3 bg-muted border border-border rounded-xl text-sm outline-none focus:border-primary">
                   <option value="flat">Tarifa fija</option>
                   <option value="free_threshold">Gratis sobre monto</option>
                   <option value="weight">Por peso</option>
-                </select>
+                </StyledSelect>
               </div>
               <div>
                 <label className="block text-xs font-bold text-foreground mb-1.5">Precio (S/)</label>

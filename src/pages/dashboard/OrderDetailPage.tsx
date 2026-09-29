@@ -1,3 +1,4 @@
+import { displayDate, displayDateTime } from '@/lib/dates';
 import OrderPacksSummary from '@/components/store/OrderPacksSummary';
 import { OrderProductImage } from '@/components/store/OrderProductImage';
 import { LoadingRegion } from '@/components/ui/loading-region';
@@ -106,7 +107,7 @@ export default function OrderDetailPage() {
         </button>
         <div>
           <h1 className="text-xl font-bold text-foreground">{order.order_number}</h1>
-          <p className="text-xs text-muted-foreground">{new Date(order.created_at).toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+          <p className="text-xs text-muted-foreground">{displayDate(order.created_at, { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
         </div>
         <span className={cn('ml-auto text-xs font-bold px-3 py-1.5 rounded-full', sc.color, sc.bg)}>{sc.label}</span>
       </div>
@@ -153,7 +154,7 @@ export default function OrderDetailPage() {
                 <div className="pb-3">
                   <p className="text-sm font-semibold text-foreground">{t.description || t.status}</p>
                   {t.location && <p className="text-xs text-muted-foreground flex items-center gap-1"><MapPin className="w-3 h-3" />{t.location}</p>}
-                  <p className="text-[11px] text-muted-foreground mt-0.5">{new Date(t.created_at).toLocaleString('es-PE')}</p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">{displayDateTime(t.created_at)}</p>
                 </div>
               </div>
             ))}

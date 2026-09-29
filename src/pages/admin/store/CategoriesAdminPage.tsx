@@ -1,3 +1,4 @@
+import { StyledSelect } from '@/components/ui/styled-select';
 import { LoadingRegion, StableRegion } from '@/components/ui/loading-region';
 import { useState, useEffect, useCallback } from 'react';
 import { useDatabase, useStorage } from '@/lib/backend';
@@ -274,13 +275,13 @@ export default function CategoriesAdminPage() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-bold text-foreground mb-1.5">Categoría padre</label>
-                <select value={form.parent_id || ''} onChange={e => setForm(p => ({ ...p, parent_id: e.target.value || null }))}
+                <StyledSelect value={form.parent_id || ''} onChange={e => setForm(p => ({ ...p, parent_id: e.target.value || null }))}
                   className="w-full px-3 py-3 bg-muted border border-border rounded-xl text-sm text-foreground outline-none focus:border-primary">
                   <option value="">Sin padre (raíz)</option>
                   {rootCategories.filter(c => c.id !== form.id).map(c => (
                     <option key={c.id} value={c.id}>{c.name}</option>
                   ))}
-                </select>
+                </StyledSelect>
               </div>
               <div>
                 <label className="block text-xs font-bold text-foreground mb-1.5">Orden</label>

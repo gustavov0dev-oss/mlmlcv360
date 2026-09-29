@@ -1,3 +1,4 @@
+import { displayDate, displayDateTime } from '@/lib/dates';
 import { LoadingRegion } from '@/components/ui/loading-region';
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/backend/client';
@@ -50,12 +51,12 @@ const STATUS_CONFIG: Record<ComplaintStatus, { label: string; badgeClass: string
 
 function fmt(v?: string | null) {
   if (!v) return '—';
-  try { return new Date(v).toLocaleString('es-PE', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }); }
+  try { return displayDateTime(v, { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }); }
   catch { return v; }
 }
 function fmtDate(v?: string | null) {
   if (!v) return '—';
-  try { return new Date(v).toLocaleDateString('es-PE', { day:'2-digit', month:'long', year:'numeric' }); }
+  try { return displayDate(v, { day:'2-digit', month:'long', year:'numeric' }); }
   catch { return v || '—'; }
 }
 

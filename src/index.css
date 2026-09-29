@@ -1173,6 +1173,20 @@ button:focus-visible {
   outline-offset: 2px;
 }
 
+/* Keep a clear keyboard focus without browser-blue rings on pointer clicks. */
+:is(button, a, [role="button"], [role="combobox"]):focus:not(:focus-visible) {
+  outline: none;
+}
+:is(a, [role="button"], [role="combobox"]):focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 3px;
+}
+svg [role="button"]:focus { outline: none; }
+svg [role="button"]:focus-visible > rect:first-of-type {
+  stroke: hsl(var(--primary));
+  stroke-width: 2px;
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════════
    SECTION DARK — Theme-aware "dark" promotional sections
    In light mode: uses card background (clean/white)

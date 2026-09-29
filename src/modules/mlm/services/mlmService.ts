@@ -1,3 +1,4 @@
+import { dateKey, monthKey, localDate, userTimeZone } from '@/lib/dates';
 import type { Commission, Profile, Rank } from '../repositories/mlmRepository';
 
 // Types for enriched data
@@ -68,12 +69,12 @@ class MLMService {
     return `${prefix} ${amount.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   }
 
-  formatDate(dateStr: string, locale = 'es-PE'): string {
-    return new Date(dateStr).toLocaleDateString(locale);
+  formatDate(dateStr: string, locale = navigator.language): string {
+    return localDate(dateStr).toLocaleDateString(locale, {timeZone:userTimeZone()});
   }
 
-  formatDateTime(dateStr: string, locale = 'es-PE'): string {
-    return new Date(dateStr).toLocaleString(locale);
+  formatDateTime(dateStr: string, locale = navigator.language): string {
+    return localDate(dateStr).toLocaleString(locale, {timeZone:userTimeZone()});
   }
 
   // Commission aggregations
@@ -91,12 +92,13 @@ class MLMService {
     const now = new Date();
     const result: ChartDataPoint[] = [];
     for (let i = monthsBack - 1; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const key = monthKey(-i, now);
+      const d = new Date(key + '-02T12:00:00Z');
       const monthName = d.toLocaleDateString('es-PE', { month: 'short' });
       const capitalized = monthName.charAt(0).toUpperCase() + monthName.slice(1);
       const total = commissions.filter(c => {
-        const cd = new Date(c.created_at);
-        return c.status!=='rejected' && cd.getMonth() === d.getMonth() && cd.getFullYear() === d.getFullYear();
+        const cd = dateKey(c.created_at).slice(0,7);
+        return c.status!=='rejected' && cd === key;
       }).reduce((sum, c) => sum + Number(c.amount), 0);
       result.push({ name: capitalized, comisiones: total });
     }
@@ -235,7 +237,7 @@ class MLMService {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `comisiones_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `comisiones_${dateKey()}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   }

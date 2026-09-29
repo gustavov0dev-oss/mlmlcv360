@@ -102,7 +102,7 @@ export function usePwa() {
     themeMeta.content = themeColor;
 
     // Register service worker for PWA installability
-    if ('serviceWorker' in navigator) {
+    if ('serviceWorker' in navigator && !import.meta.env.DEV) {
       navigator.serviceWorker.register('/sw.js').catch(() => {});
     }
 

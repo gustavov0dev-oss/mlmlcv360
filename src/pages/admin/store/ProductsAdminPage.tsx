@@ -1,3 +1,4 @@
+import { StyledSelect } from '@/components/ui/styled-select';
 import { LoadingRegion, StableRegion } from '@/components/ui/loading-region';
 import { useState, useEffect, useCallback } from 'react';
 import { useDatabase } from '@/lib/backend';
@@ -140,18 +141,18 @@ export default function ProductsAdminPage() {
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar productos..."
             className="w-full pl-10 pr-4 py-2.5 bg-card border border-border rounded-xl text-sm text-foreground outline-none focus:border-primary transition-colors" />
         </div>
-        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
+        <StyledSelect value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
           className="px-4 py-2.5 bg-card border border-border rounded-xl text-sm text-foreground outline-none focus:border-primary">
           <option value="">Todos los estados</option>
           <option value="active">Activos</option>
           <option value="draft">Borradores</option>
           <option value="archived">Archivados</option>
-        </select>
-        <select value={catFilter} onChange={e => setCatFilter(e.target.value)}
+        </StyledSelect>
+        <StyledSelect value={catFilter} onChange={e => setCatFilter(e.target.value)}
           className="px-4 py-2.5 bg-card border border-border rounded-xl text-sm text-foreground outline-none focus:border-primary">
           <option value="">Todas las categorías</option>
           {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-        </select>
+        </StyledSelect>
       </div>
 
       {/* Table */}

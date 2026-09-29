@@ -1,3 +1,5 @@
+import { displayDate } from '@/lib/dates';
+import { useAssignedPlan } from '@/hooks/useAssignedPlan';
 import { LoadingRegion } from '@/components/ui/loading-region';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useDatabase } from '@/lib/backend';
@@ -75,7 +77,7 @@ export default function DashboardHeader() {
   const isDark = useIsDark();
   const { user, signOut } = useAuthStore();
   const { sidebarOpen, setSidebarOpen } = useUIStore();
-  const { company, logoValue, logoSizes, plans, ranks } = useConfig();
+  const { company, logoValue, logoSizes, ranks } = useConfig();
   const database = useDatabase();
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -110,18 +112,8 @@ export default function DashboardHeader() {
   const initials = (user?.full_name || user?.username || 'U')
     .split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase();
 
-  // Legacy English rank names → new Spanish slugs (profiles may store old values)
-  const RANK_LEGACY_MAP: Record<string, string> = {
-    bronze: 'plata', silver: 'plata', gold: 'oro',
-    platinum: 'zafiro', diamond: 'diamante', master: 'master',
-  };
-  const userPlan = user ? plans.find(p => p.slug === user.plan || p.id === user.plan || p.name?.toLowerCase() === user.plan?.toLowerCase()) : null;
-  const userRank = user ? ranks.find(r =>
-    r.slug === user.rank ||
-    r.slug === RANK_LEGACY_MAP[user.rank || ''] ||
-    r.name?.toLowerCase() === user.rank?.toLowerCase() ||
-    r.name?.toLowerCase() === RANK_LEGACY_MAP[user.rank || '']
-  ) : null;
+  const userPlan = useAssignedPlan(user?.id);
+  const userRank = user?.rank ? ranks.find(r => r.slug === user.rank || r.id === user.rank) : null;
 
   // Close search on outside click
   useEffect(() => {
@@ -579,7 +571,7 @@ export default function DashboardHeader() {
                         <p className={cn('text-sm text-foreground', !n.read && 'font-semibold')}>{n.title}</p>
                         <p className="text-xs text-muted-foreground line-clamp-2">{n.message}</p>
                         <p className="text-xs text-muted-foreground mt-0.5">
-                          {new Date(n.created_at).toLocaleDateString('es-PE', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                          {displayDate(n.created_at, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
                         </p>
                       </div>
                       <div className="flex flex-col items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">

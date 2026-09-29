@@ -1,3 +1,5 @@
+import { StyledSelect } from '@/components/ui/styled-select';
+import { displayDate } from '@/lib/dates';
 import { LoadingRegion, StableRegion } from '@/components/ui/loading-region';
 import { useState, useEffect, useCallback } from 'react';
 import { useDatabase, useStorage } from '@/lib/backend';
@@ -25,7 +27,7 @@ interface UserRow {
   avatar_url?: string;
 }
 
-interface PlanOption { slug: string; name: string; }
+interface PlanOption { slug: string; name: string; is_free?: boolean; price?: number; }
 interface RankOption { slug: string; name: string; }
 interface CustomRoleOption { name: string; label: string; color: string; }
 
@@ -98,14 +100,14 @@ function Select({
   value: string; onChange?: (v: string) => void; disabled?: boolean; children: React.ReactNode;
 }) {
   return (
-    <select
+    <StyledSelect
       value={value}
       onChange={e => onChange?.(e.target.value)}
       disabled={disabled}
       className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary hover:border-muted-foreground/50 transition-colors disabled:opacity-60 disabled:cursor-default"
     >
       {children}
-    </select>
+    </StyledSelect>
   );
 }
 
@@ -140,8 +142,8 @@ function UserModal({
   onClose: () => void;
   onSave: (data: Partial<UserRow> & { _newPassword?: string }) => Promise<void>;
 }) {
-  const defaultPlan = plans[0]?.slug || 'free';
-  const defaultRank = ranks[0]?.slug || 'bronze';
+  const defaultPlan = 'default';
+  const defaultRank = '';
 
   const [form, setForm] = useState<Partial<UserRow>>(() =>
     user ?? { username: '', full_name: '', email: '', role: 'user', status: 'active', rank: defaultRank, plan: defaultPlan, phone: '' }
@@ -188,8 +190,9 @@ function UserModal({
 
   const handleSave = async () => {
     setSaving(true);
-    await onSave({ ...form, _newPassword: newPassword });
-    setSaving(false);
+    try { await onSave({ ...form, _newPassword: newPassword }); }
+    catch { toast.error('No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.'); }
+    finally { setSaving(false); }
   };
 
   const title = { create: 'Crear nuevo usuario', edit: 'Editar usuario', view: 'Detalle de usuario' }[mode!];
@@ -213,7 +216,7 @@ function UserModal({
             <div className="flex items-start gap-2.5 bg-primary/10 border border-primary/20 rounded-xl p-3.5">
               <Info className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
               <p className="text-xs text-primary">
-                Se creará la cuenta con contraseña temporal <strong>Temp123456!</strong>. El usuario deberá cambiarla al iniciar sesión.
+                Define una contraseña temporal segura. El usuario deberá cambiarla al iniciar sesión. No se asignará un rango automáticamente.
               </p>
             </div>
           )}
@@ -301,7 +304,7 @@ function UserModal({
             </Field>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Field label="Nombre de usuario" hint={mode === 'create' ? 'Auto-generado desde el nombre' : undefined}>
               <Input
                 value={(form.username as string) || ''}
@@ -323,7 +326,7 @@ function UserModal({
             </Field>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Field label="Teléfono (opcional)">
               <Input
                 type="tel"
@@ -344,7 +347,7 @@ function UserModal({
           </div>
 
           {/* Selects */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Field label="Rol en el sistema">
               <Select value={(form.role as string) || 'user'} onChange={set('role')} disabled={readOnly}>
                 {(customRoles.length > 0 ? customRoles : ROLES.map(r => ({ name: r, label: roleLabels[r] || r, color: '#6B7280' }))).map(r => <option key={r.name} value={r.name}>{r.label}</option>)}
@@ -357,24 +360,28 @@ function UserModal({
             </Field>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Field label="Rango MLM">
               <Select value={(form.rank as string) || defaultRank} onChange={set('rank')} disabled={readOnly}>
+                <option value="">Sin rango asignado</option>
                 {ranks.map(r => <option key={r.slug} value={r.slug}>{r.name}</option>)}
               </Select>
             </Field>
             <Field label="Plan de suscripción">
-              <Select value={(form.plan as string) || defaultPlan} onChange={set('plan')} disabled={readOnly}>
-                {plans.map(p => <option key={p.slug} value={p.slug}>{p.name}</option>)}
+              <Select value={(form.plan as string) || defaultPlan} onChange={set('plan')} disabled={mode !== 'create'}>
+                <option value="default">Según configuración de registro</option>
+                <option value="none">Sin plan: el usuario elige después</option>
+                {(mode === 'create' ? plans.filter(p => p.is_free && Number(p.price) === 0) : plans).map(p => <option key={p.slug} value={p.slug}>{p.name}</option>)}
               </Select>
+              <p className="mt-2 text-xs text-muted-foreground">Los planes de pago se activan al confirmar el pago, no al editar el perfil.</p>
             </Field>
           </div>
 
           {/* Password */}
-          {mode !== 'view' && (
+          {mode === 'create' && (
             <Field
-              label={mode === 'create' ? 'Contraseña (opcional)' : 'Nueva contraseña'}
-              hint={mode === 'edit' ? 'Dejar vacío para no cambiar la contraseña actual' : 'Si no se ingresa se usará Temp123456!'}
+              label="Contraseña temporal"
+              hint="Mínimo 12 caracteres. Compártela con el usuario por un canal seguro."
             >
               <div className="relative">
                 <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -394,7 +401,7 @@ function UserModal({
           {mode === 'view' && user && (
             <div className="grid grid-cols-2 gap-3">
               {[
-                ['Miembro desde', new Date(user.created_at).toLocaleDateString('es-PE', { year: 'numeric', month: 'long', day: 'numeric' })],
+                ['Miembro desde', displayDate(user.created_at, { year: 'numeric', month: 'long', day: 'numeric' })],
                 ['ID del usuario', user.id.slice(0, 18) + '...'],
               ].map(([k, v]) => (
                 <div key={k} className="bg-muted/50 rounded-xl p-3">
@@ -466,7 +473,7 @@ export default function UsersPage() {
   // Load plans + ranks once
   useEffect(() => {
     Promise.all([
-      database.select<PlanOption>('plans', { select: 'slug, name', filter: { is_active: true }, order: { column: 'sort_order' } }),
+      database.select<PlanOption>('plans', { select: 'slug, name, is_free, price', filter: { is_active: true }, order: { column: 'sort_order' } }),
       database.select<RankOption>('ranks', { select: 'slug, name', filter: { is_active: true }, order: { column: 'sort_order' } }),
       database.select<CustomRoleOption>('custom_roles', { select: 'name, label, color', order: { column: 'sort_order' } }),
     ]).then(([p, r, cr]) => {
@@ -502,16 +509,21 @@ export default function UsersPage() {
 
     if (modal.mode === 'create') {
       if (!fields.email || !fields.full_name) { toast.error('Nombre y correo son requeridos'); return; }
+      if (!_newPassword || _newPassword.length < 12) { toast.error('La contraseña temporal debe tener al menos 12 caracteres'); return; }
       const username = (fields.username || fields.full_name)
         .toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
         .replace(/[^a-z0-9_\s]/g, '').trim().replace(/\s+/g, '_');
 
-      const { data: result, error } = await database.rpc('add_referral_direct', {
-        p_sponsor_id: null,
+      const { data: result, error } = await database.rpc('admin_create_account', {
         p_full_name: fields.full_name,
         p_email: fields.email,
         p_username: username,
-        p_position: 'left',
+        p_role: fields.role || 'user',
+        p_status: fields.status || 'active',
+        p_rank: fields.rank || '',
+        p_phone: fields.phone || null,
+        p_membership: fields.plan || 'default',
+        p_password: _newPassword,
       });
 
       if (error || (result && !(result as any).success)) {
@@ -520,18 +532,6 @@ export default function UsersPage() {
       }
 
       const uid = (result as any)?.user_id;
-      if (uid) {
-        // Wait for trigger to create profile row
-        await new Promise(r => setTimeout(r, 700));
-        await database.update('profiles', uid, {
-          role: fields.role || 'user',
-          plan: fields.plan || plans[0]?.slug || 'free',
-          status: fields.status || 'active',
-          rank: fields.rank || ranks[0]?.slug || 'bronze',
-          phone: fields.phone || null,
-          updated_at: new Date().toISOString(),
-        });
-      }
       // Upload avatar if provided
       const avatarFile = (data as any)._createAvatarFile as File | undefined;
       if (avatarFile && uid) {
@@ -544,10 +544,11 @@ export default function UsersPage() {
           }
         } catch { /* best-effort */ }
       }
-      toast.success('Usuario creado. Contraseña temporal: Temp123456!');
+      toast.success('Usuario creado. Deberá cambiar la contraseña temporal al ingresar.');
 
     } else {
-      const { error } = await database.update('profiles', id, { ...fields, updated_at: new Date().toISOString() });
+      const { plan: _plan, _createAvatarFile: _avatar, ...profileFields } = fields;
+      const { error } = await database.update('profiles', id, { ...profileFields, updated_at: new Date().toISOString() });
       if (error) { toast.error(error); return; }
       toast.success('Usuario actualizado correctamente');
     }
@@ -636,30 +637,30 @@ export default function UsersPage() {
             className="w-full pl-9 pr-4 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-primary transition-colors"
           />
         </div>
-        <select
+        <StyledSelect
           value={filterRole}
           onChange={e => { setFilterRole(e.target.value); setPage(1); }}
           className="px-3 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground outline-none focus:border-primary min-w-[120px]"
         >
           <option value="">Todos los roles</option>
           {(customRoles.length > 0 ? customRoles : ROLES.map(r => ({ name: r, label: roleLabels[r] || r, color: '#6B7280' }))).map(r => <option key={r.name} value={r.name}>{r.label}</option>)}
-        </select>
-        <select
+        </StyledSelect>
+        <StyledSelect
           value={filterStatus}
           onChange={e => { setFilterStatus(e.target.value); setPage(1); }}
           className="px-3 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground outline-none focus:border-primary min-w-[120px]"
         >
           <option value="">Todos los estados</option>
           {STATUSES.map(s => <option key={s} value={s}>{statusLabels[s]}</option>)}
-        </select>
-        <select
+        </StyledSelect>
+        <StyledSelect
           value={filterPlan}
           onChange={e => { setFilterPlan(e.target.value); setPage(1); }}
           className="px-3 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground outline-none focus:border-primary min-w-[120px]"
         >
           <option value="">Todos los planes</option>
           {plans.map(p => <option key={p.slug} value={p.slug}>{p.name}</option>)}
-        </select>
+        </StyledSelect>
         <button
           onClick={() => fetchUsers()}
           className={["p-2.5 border border-border rounded-xl hover:bg-muted text-muted-foreground transition-colors", 'dashboard-action'].filter(Boolean).join(' ')}
@@ -725,6 +726,7 @@ export default function UsersPage() {
                   </td>
                   <td className="py-3 px-4">
                     <div className="flex items-center justify-end gap-0.5">
+                      <a href={`/dashboard/red?user=${encodeURIComponent(user.id)}`} title="Ver red MLM" aria-label={`Ver red MLM de ${user.full_name}`} className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground"><Link2 className="w-3.5 h-3.5"/></a>
                       <button
                         onClick={() => setModal({ mode: 'view', user })}
                         className={["p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors", "dashboard-action"].filter(Boolean).join(' ')}

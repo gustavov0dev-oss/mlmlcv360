@@ -1,3 +1,5 @@
+import { StyledSelect } from '@/components/ui/styled-select';
+import { displayDate, displayDateTime } from '@/lib/dates';
 import { useState } from 'react';
 import { useDatabase } from '@/lib/backend';
 import { supabase } from '@/lib/backend/client';
@@ -432,9 +434,9 @@ function RegisterTab({ step, form, errors, submitting, correlativo, steps,
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <Field label="Tipo de documento" required>
-                  <select value={form.tipo_doc} onChange={e => update('tipo_doc', e.target.value)} className={inputCls}>
+                  <StyledSelect value={form.tipo_doc} onChange={e => update('tipo_doc', e.target.value)} className={inputCls}>
                     {TIPO_DOC.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                  </select>
+                  </StyledSelect>
                 </Field>
                 <div className="sm:col-span-2">
                   <Field label="Número de documento" required error={errors.num_doc}>
@@ -463,9 +465,9 @@ function RegisterTab({ step, form, errors, submitting, correlativo, steps,
                     placeholder="Opcional" className={inputCls} />
                 </Field>
                 <Field label="Región" required>
-                  <select value={form.region} onChange={e => update('region', e.target.value)} className={inputCls}>
+                  <StyledSelect value={form.region} onChange={e => update('region', e.target.value)} className={inputCls}>
                     {REGIONES_PERU.map(r => <option key={r}>{r}</option>)}
-                  </select>
+                  </StyledSelect>
                 </Field>
               </div>
             </>
@@ -524,9 +526,9 @@ function RegisterTab({ step, form, errors, submitting, correlativo, steps,
                     placeholder="0.00" className={inputCls} />
                 </Field>
                 <Field label="Moneda">
-                  <select value={form.moneda} onChange={e => update('moneda', e.target.value)} className={inputCls}>
+                  <StyledSelect value={form.moneda} onChange={e => update('moneda', e.target.value)} className={inputCls}>
                     {MONEDAS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                  </select>
+                  </StyledSelect>
                 </Field>
               </div>
 
@@ -731,7 +733,7 @@ function ComplaintResultCard({ result, onClear }: { result: ComplaintResult; onC
 
   const fmtDate = (v?: string | null) => {
     if (!v) return '—';
-    try { return new Date(v).toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric' }); }
+    try { return displayDate(v, { day: '2-digit', month: 'long', year: 'numeric' }); }
     catch { return v; }
   };
 
@@ -808,7 +810,7 @@ function ComplaintResultCard({ result, onClear }: { result: ComplaintResult; onC
           <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">{result.respuesta}</p>
           {result.fecha_respuesta && (
             <p className="text-xs text-muted-foreground/50">
-              Respondido el {new Date(result.fecha_respuesta).toLocaleString('es-PE', { day: '2-digit', month: 'long', year: 'numeric' })}
+              Respondido el {displayDateTime(result.fecha_respuesta, { day: '2-digit', month: 'long', year: 'numeric' })}
             </p>
           )}
         </div>

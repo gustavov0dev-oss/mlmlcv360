@@ -1,10 +1,14 @@
+import { StyledSelect } from '@/components/ui/styled-select';
+import { useAssignedPlan } from '@/hooks/useAssignedPlan';
+import { NetworkRankFilter } from '@/components/NetworkRankFilter';
+import { displayDate } from '@/lib/dates';
 import NetworkRequests,{ExistingNetworkRequest} from '@/components/NetworkRequests';
 import {supabase} from '@/lib/backend/client';
 import {useConfig} from '@/store/configStore';
 import * as Dialog from '@radix-ui/react-dialog';
 import { LoadingRegion } from '@/components/ui/loading-region';
 import {
-  useState, useRef, useEffect, useMemo, WheelEvent,
+  useState, useRef, useEffect, useMemo, useCallback, WheelEvent,
   PointerEvent as RPointerEvent, TouchEvent as RTouchEvent,
 } from 'react';
 import { useAuthStore } from '@/store/authStore';
@@ -26,13 +30,6 @@ type AddMode = 'new' | 'existing' | 'invite';
 // ─── Rank config ─────────────────────────────────────────────────────────────
 const unknownRank = {label:'Sin rango',color:'#9ca3af',bg:'transparent',ring:'hsl(var(--border))',Icon:Medal};
 function useRankStyles(){const {ranks}=useConfig();return Object.fromEntries(ranks.map(r=>[r.slug,{label:r.name,color:r.color?.startsWith('#')?r.color:'#d97706',bg:r.bg_color||'transparent',ring:r.color?.startsWith('#')?r.color:'hsl(var(--border))',Icon:Medal}])) as Record<string,typeof unknownRank>;}
-
-const PLAN_COLORS: Record<string, string> = {
-  free:   '#6b7280',
-  inicio: '#3b82f6',
-  pro:    '#8b5cf6',
-  elite:  '#f59e0b',
-};
 
 // ─── Tree build / layout ──────────────────────────────────────────────────────
 const NODE_W   = 148;
@@ -133,7 +130,7 @@ function Avatar({
   }
   return (
     <div
-      style={{ width: size, height: size, background: rc.bg + '33', border: `2px solid ${rc.ring}33` }}
+      style={{ width: size, height: size, background: `color-mix(in srgb, ${rc.color} 10%, hsl(var(--muted)))`, border: `1px solid color-mix(in srgb, ${rc.color} 25%, hsl(var(--border)))` }}
       className={cn('rounded-full flex items-center justify-center flex-shrink-0 font-bold text-foreground', className)}
     >
       <span style={{ fontSize: size * 0.35 }}>{initials}</span>
@@ -205,10 +202,8 @@ function TreeCanvas({
         if (!pos) return null;
         const nx    = pos.x + ox - NODE_W / 2;
         const ny    = pos.y + oy;
-        const rc    = RANKS[node.rank || ''] || {...unknownRank,label:node.rank || 'Sin rango'};
+        const rc    = RANKS[node.rank || ''] || unknownRank;
         const isSelf = node.id === selfId;
-        const plan  = node.plan || 'free';
-        const planColor = PLAN_COLORS[plan] || PLAN_COLORS.free;
         const initials  = ((node.full_name || node.username || '?').split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase());
 
         return (
@@ -223,11 +218,11 @@ function TreeCanvas({
             aria-label={node.full_name || node.username}
           >
             <rect
-              x={0} y={0} width={NODE_W} height={NODE_H} rx={14}
-              fill={isSelf ? rc.color + '12' : 'hsl(var(--card))'}
-              stroke={isSelf ? rc.color : rc.color + '55'}
-              strokeWidth={isSelf ? 2.5 : 1.5}
-              filter={isSelf ? 'url(#glow)' : 'url(#shadow)'}
+              x={0} y={0} width={NODE_W} height={NODE_H} rx={10}
+              fill={'hsl(var(--card))'}
+              stroke={'hsl(var(--border))'}
+              strokeWidth={1}
+              filter={'url(#shadow)'}
             />
 
             <clipPath id={`clip-${node.id}`}>
@@ -237,8 +232,8 @@ function TreeCanvas({
               <>
                 <circle cx={28} cy={NODE_H / 2} r={21}
                   fill="none"
-                  stroke={rc.color}
-                  strokeWidth={2}
+                  stroke="hsl(var(--border))"
+                  strokeWidth={1}
                 />
                 <image
                   href={node.avatar_url}
@@ -252,12 +247,12 @@ function TreeCanvas({
               <>
                 <circle cx={28} cy={NODE_H / 2} r={21}
                   fill={rc.color + '20'}
-                  stroke={rc.color}
-                  strokeWidth={2}
+                  stroke="hsl(var(--border))"
+                  strokeWidth={1}
                 />
                 <text x={28} y={NODE_H / 2 + 6} textAnchor="middle"
                   fontSize={15} fontWeight="800"
-                  fill={rc.color}
+                  fill={'hsl(var(--foreground))'}
                   style={{ pointerEvents: 'none' }}
                 >
                   {initials}
@@ -273,20 +268,10 @@ function TreeCanvas({
             </text>
 
             <text x={60} y={43} fontSize={10} fontWeight="600"
-              fill={rc.color}
+              fill={'hsl(var(--foreground))'}
               style={{ pointerEvents: 'none' }}
             >
               {rc.label}
-            </text>
-
-            <rect x={60} y={50} width={50} height={14} rx={7}
-              fill={planColor + '1a'}
-            />
-            <text x={85} y={61} textAnchor="middle" fontSize={8.5} fontWeight="700"
-              fill={planColor}
-              style={{ pointerEvents: 'none' }}
-            >
-              {plan.toUpperCase().slice(0, 7)}
             </text>
 
             {(node.children || []).length > 0 && (
@@ -297,7 +282,7 @@ function TreeCanvas({
                   strokeWidth={1}
                 />
                 <text x={8} y={12} textAnchor="middle" fontSize={9} fontWeight="800"
-                  fill={rc.color}
+                  fill={'hsl(var(--foreground))'}
                   style={{ pointerEvents: 'none' }}
                 >
                   {(node.children || []).length}
@@ -306,12 +291,12 @@ function TreeCanvas({
             )}
 
             {isSelf && (
-              <g transform={`translate(${NODE_W / 2 - 16}, -13)`}>
-                <rect x={0} y={0} width={32} height={15} rx={7.5}
-                  fill={rc.color}
+              <g transform={`translate(${NODE_W / 2 - 22}, -22)`}>
+                <rect x={0} y={0} width={44} height={16} rx={5}
+                  fill="hsl(var(--card))" stroke="hsl(var(--border))" strokeWidth={1}
                 />
-                <text x={16} y={11} textAnchor="middle" fontSize={8} fontWeight="900"
-                  fill="white" style={{ pointerEvents: 'none' }}
+                <text x={22} y={11} textAnchor="middle" fontSize={8} fontWeight="700"
+                  fill="hsl(var(--foreground))" style={{ pointerEvents: 'none' }}
                 >TÚ</text>
               </g>
             )}
@@ -322,7 +307,7 @@ function TreeCanvas({
               strokeWidth={1.5}
             />
 
-            {node.binary_position && (
+            {node.depth!==0 && node.binary_position && (
               <g transform={`translate(7, ${NODE_H - 17})`}>
                 <rect x={0} y={0} width={30} height={12} rx={6}
                   fill={node.binary_position === 'left' ? '#3b82f618' : '#f9731618'}
@@ -676,9 +661,10 @@ function NodeDrawer({
     invite_link:     node.invite_link || '',
   });
 
+  const assignedPlan = useAssignedPlan(node.id);
   const isSelf       = user?.id === node.id;
   const inviteLink   = node.referral_code ? `${window.location.origin}/registro?ref=${node.referral_code}` : '';
-  const rc           = RANKS[node.rank || ''] || {...unknownRank,label:node.rank || 'Sin rango'};
+  const rc           = RANKS[node.rank || ''] || unknownRank;
   const sponsorProfile = allProfiles.find(p => p.id === node.sponsor_id);
 
   const copyLink = async () => {
@@ -768,9 +754,9 @@ function NodeDrawer({
                 {isSelf && <span className="text-[10px] bg-primary/15 text-primary px-2 py-0.5 rounded-full font-bold">TÚ</span>}
               </div>
               <div className="flex items-center gap-2 mt-0.5">
-                <span className="text-xs font-semibold" style={{ color: rc.color }}>{rc.label}</span>
+                {RANKS[node.rank||'']&&<span className="text-xs font-semibold" style={{ color:`color-mix(in srgb, ${rc.color} 65%, hsl(var(--foreground)))` }}>{rc.label}</span>}
                 <span className="text-xs text-muted-foreground">·</span>
-                <span className="text-xs text-muted-foreground capitalize">{node.plan}</span>
+                <span className="text-xs text-muted-foreground">{assignedPlan?.name}</span>
                 <span className="w-2 h-2 rounded-full flex-shrink-0"
                   style={{ background: node.status === 'active' ? '#22c55e' : node.status === 'suspended' ? '#ef4444' : '#f59e0b' }}
                 />
@@ -805,13 +791,13 @@ function NodeDrawer({
                 ['Usuario',         node.username ? `@${node.username}` : '—'],
                 ['Correo',          node.email || '—'],
                 ['Rango',           rc.label],
-                ['Plan',            node.plan || '—'],
+                ['Plan',            assignedPlan?.name || 'Sin membresía activa'],
                 ['Estado',          node.status || '—'],
                 ['Posición',        node.binary_position === 'left' ? 'Izquierda' : node.binary_position === 'right' ? 'Derecha' : '—'],
                 ['Patrocinador',    sponsorProfile?.full_name || (node.sponsor_id ? '...' : 'Raíz de red')],
                 ['Referidos dir.',  String((node.children || []).length)],
                 ['Código referido', node.referral_code || '—'],
-                ['En red desde',    node.created_at ? new Date(node.created_at).toLocaleDateString('es-PE') : '—'],
+                ['En red desde',    node.created_at ? displayDate(node.created_at) : '—'],
               ].map(([k, v]) => (
                 <div key={k as string} className="flex items-center justify-between py-2.5 border-b border-border/40 last:border-0">
                   <span className="text-xs text-muted-foreground">{k as string}</span>
@@ -850,17 +836,17 @@ function NodeDrawer({
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-foreground mb-1.5">Rango</label>
-                  <select value={form.rank} onChange={e => setForm(p => ({ ...p, rank: e.target.value as typeof form.rank }))}
+                  <StyledSelect value={form.rank} onChange={e => setForm(p => ({ ...p, rank: e.target.value as typeof form.rank }))}
                     className="w-full px-3 py-3 bg-muted border border-border rounded-xl text-sm text-foreground outline-none focus:border-primary">
                     {Object.entries(RANKS).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
-                  </select>
+                  </StyledSelect>
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-foreground mb-1.5">Estado</label>
-                  <select value={form.status} onChange={e => setForm(p => ({ ...p, status: e.target.value as typeof form.status }))}
+                  <StyledSelect value={form.status} onChange={e => setForm(p => ({ ...p, status: e.target.value as typeof form.status }))}
                     className="w-full px-3 py-3 bg-muted border border-border rounded-xl text-sm text-foreground outline-none focus:border-primary">
                     {(['active','suspended','pending','inactive'] as const).map(s => <option key={s} value={s}>{s}</option>)}
-                  </select>
+                  </StyledSelect>
                 </div>
               </div>
               {isAdmin && (
@@ -1019,11 +1005,11 @@ function NodeDrawer({
 
 // ─── List View ────────────────────────────────────────────────────────────────
 function ListView({
-  tree, onSelect,
-}: { tree: NetProfile; onSelect: (n: NetProfile) => void }) {
+  tree, onSelect, rankFilter,
+}: { tree: NetProfile; rankFilter: string; onSelect: (n: NetProfile) => void }) {
   const RANKS = useRankStyles();
   const [q, setQ] = useState('');
-  const all = flatList(tree);
+  const all = flatList(tree).filter(n=>n.id!==tree.id&&(rankFilter==='all'||n.rank===rankFilter));
   const filtered = q
     ? all.filter(n =>
         `${n.full_name || ''} ${n.username || ''} ${n.email || ''}`.toLowerCase().includes(q.toLowerCase()),
@@ -1044,10 +1030,10 @@ function ListView({
           <X className="w-4 h-4" />
         </button>}
       </div>
-      <p className="text-xs text-muted-foreground">{filtered.length} miembros{q ? ` para "${q}"` : ''}</p>
+      <p className="text-xs text-muted-foreground">{filtered.length} {filtered.length===1?'miembro':'miembros'}{q ? ` para "${q}"` : ''}</p>
       <div className="space-y-2 max-h-[520px] overflow-y-auto pr-1">
         {filtered.map(node => {
-          const rc = RANKS[node.rank || ''] || {...unknownRank,label:node.rank || 'Sin rango'};
+          const rc = RANKS[node.rank || ''] || unknownRank;
           return (
             <button
               key={node.id}
@@ -1068,10 +1054,10 @@ function ListView({
                 <div className="flex items-center gap-2 mt-0.5 text-xs text-muted-foreground flex-wrap">
                   {node.username && <span className="font-mono">@{node.username}</span>}
                   <span>·</span>
-                  <span>Nivel {node.depth || 0}</span>
+                  <span>{!node.depth?'Titular de esta red':node.depth===1?'Referido directo':`Conexión de nivel ${node.depth}`}</span>
                   <span>·</span>
-                  <span>{(node.children || []).length} ref.</span>
-                  {node.binary_position && (
+                  <span>{(node.children || []).length} referidos directos</span>
+                  {node.depth!==0 && node.binary_position && (
                     <span className="font-semibold" style={{ color: node.binary_position === 'left' ? '#3b82f6' : '#f97316' }}>
                       {node.binary_position === 'left' ? 'IZQ' : 'DER'}
                     </span>
@@ -1079,10 +1065,6 @@ function ListView({
                 </div>
               </div>
               <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-                  style={{ background: (PLAN_COLORS[node.plan] || '#6b7280') + '22', color: PLAN_COLORS[node.plan] || '#6b7280' }}>
-                  {(node.plan || 'free').toUpperCase()}
-                </span>
                 <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-primary transition-colors" />
               </div>
             </button>
@@ -1101,24 +1083,43 @@ function ListView({
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function NetworkPage() {
-  const RANKS = useRankStyles();
   const { user } = useAuthStore();
   const [permissions,setPermissions]=useState<Record<string,boolean>|null>(null);
   const [permissionError,setPermissionError]=useState('');
   useEffect(()=>{supabase.rpc('account_capabilities').then(({data,error})=>{if(error)setPermissionError(error.message);else setPermissions(data||{});});},[user?.id]);
   const permitted=(key:string)=>user?.role==='super_admin'||permissions?.[key]===true;
   const isAdmin=permitted('view_full_network');
-  const [focusRoot,setFocusRoot]=useState('');
+  const [focusRoot,setFocusRoot]=useState(() => new URLSearchParams(window.location.search).get('user') || '');
   const [memberSearch,setMemberSearch]=useState('');
   const [memberResults,setMemberResults]=useState<any[]>([]);
-  useEffect(()=>{let alive=true;const t=setTimeout(()=>{if(!isAdmin||memberSearch.trim().length<3){setMemberResults([]);return;}supabase.rpc('search_network_member',{p_query:memberSearch,p_browse:true}).then(({data,error})=>{if(alive){if(error)toast.error(error.message);else setMemberResults(data||[]);}});},250);return()=>{alive=false;clearTimeout(t);};},[memberSearch,isAdmin]);
+  const [memberPage, setMemberPage] = useState(0);
+  const [memberCount, setMemberCount] = useState(0);
+  const [membersLoading, setMembersLoading] = useState(false);
+  const [membersError, setMembersError] = useState('');
 
-  const [viewMode, setViewMode]   = useState<ViewMode>('tree');
+
+  const [viewMode, setViewMode]   = useState<ViewMode>('list');
   const [selected, setSelected]   = useState<NetProfile | null>(null);
   const [addModal, setAddModal]   = useState(false);
   const [addSponsorId, setAddSponsorId] = useState('');
   const [addSponsorName, setAddSponsorName] = useState('');
   const [viewAllNet, setViewAllNet] = useState(false);
+  useEffect(() => {
+    if (!isAdmin || !viewAllNet) return;
+    let alive = true;
+    setMembersLoading(true); setMembersError('');
+    const timer = setTimeout(async () => {
+      let query = supabase.from('profiles').select('id,full_name,username,avatar_url,rank', { count: 'exact' });
+      const term = memberSearch.trim().replace(/[%_,().]/g, '');
+      if (term) query = query.or(`full_name.ilike.%${term}%,username.ilike.%${term}%`);
+      const { data, error, count } = await query.order('full_name').order('id').range(memberPage * 20, memberPage * 20 + 19);
+      if (!alive) return;
+      setMemberResults(data || []); setMemberCount(count || 0);
+      setMembersError(error ? 'No pudimos consultar los usuarios. Verifica el permiso administrativo de lectura.' : '');
+      setMembersLoading(false);
+    }, 250);
+    return () => { alive = false; clearTimeout(timer); };
+  }, [isAdmin, viewAllNet, memberSearch, memberPage]);
   const [rankFilter, setRankFilter] = useState('all');
   const [zoom, setZoom]   = useState(0.9);
   const [pan, setPan]     = useState({ x: 40, y: 40 });
@@ -1147,8 +1148,6 @@ export default function NetworkPage() {
 
   const currentRootId = focusRoot || user?.id || '';
 
-  useEffect(() => { setZoom(0.9); setPan({ x: 40, y: 40 }); }, [currentRootId, viewAllNet, viewMode]);
-
   const tree = useMemo(() => {
     if (!currentRootId || profiles.length === 0) return null;
     const raw = buildTree(profiles, currentRootId);
@@ -1160,6 +1159,23 @@ export default function NetworkPage() {
     }
     return filterRank(raw);
   }, [profiles, currentRootId, rankFilter]);
+
+  const resetView = useCallback(() => {
+    const canvas = canvasRef.current;
+    const svg = canvas?.querySelector('svg');
+    if (!canvas || !svg) return;
+    const width = svg.width.baseVal.value, height = svg.height.baseVal.value;
+    const scale = Math.max(0.2, Math.min(1, (canvas.clientWidth-32)/width, (canvas.clientHeight-32)/height));
+    setZoom(scale);
+    setPan({x:(canvas.clientWidth-width*scale)/2,y:Math.max(16,(canvas.clientHeight-height*scale)/2)});
+  }, []);
+  useEffect(() => {
+    if (viewMode !== 'tree' || viewAllNet || loading) return;
+    const frame = requestAnimationFrame(resetView);
+    const observer = new ResizeObserver(resetView);
+    if (canvasRef.current) observer.observe(canvasRef.current);
+    return () => {cancelAnimationFrame(frame);observer.disconnect();};
+  }, [tree, viewMode, viewAllNet, loading, resetView]);
 
   const onPtrDown = (e: RPointerEvent<HTMLDivElement>) => {
     if ((e.target as Element).closest('[role="button"], button, input')) return;
@@ -1196,7 +1212,6 @@ export default function NetworkPage() {
     setZoom(z => Math.min(3, Math.max(0.2, z - e.deltaY * 0.0012)));
   };
 
-  const resetView = () => { setZoom(0.9); setPan({ x: 40, y: 40 }); };
   const openAdd = (sponsorId: string, name: string) => {
     setAddSponsorId(sponsorId);
     setAddSponsorName(name);
@@ -1217,9 +1232,9 @@ export default function NetworkPage() {
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">Red Genealógica</h1>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">Mi red</h1>
           <p className="text-muted-foreground text-sm mt-0.5">
-            {`Red de ${profiles.find(p=>p.id===currentRootId)?.full_name || myName}.`}
+            {viewAllNet?'Encuentra una persona y consulta su equipo.':`Personas y conexiones de ${profiles.find(p=>p.id===currentRootId)?.full_name || myName}.`}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -1227,16 +1242,17 @@ export default function NetworkPage() {
             <button
               onClick={() => setViewAllNet(v => !v)}
               className={cn(
-                'flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold border transition-all',
+                'flex items-center gap-1.5 px-3.5 py-2 rounded-xl min-h-10 text-sm font-medium border transition-all',
                 viewAllNet
-                  ? 'bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/25'
+                  ? 'bg-muted text-foreground border-border'
                   : 'border-border text-muted-foreground hover:bg-muted',
               )}
             >
               <Eye className="w-3.5 h-3.5" />
-              {viewAllNet ? 'Cerrar búsqueda' : 'Consultar otra red'}
+              {viewAllNet ? 'Volver a la red' : 'Buscar otra red'}
             </button>
           )}
+          {!viewAllNet&&<>
           <button
             onClick={() => openAdd(permitted('assign_existing_user') ? currentRootId : user!.id, permitted('assign_existing_user') ? (profiles.find(p=>p.id===currentRootId)?.full_name || myName) : myName)}
             className="flex items-center gap-1.5 px-3.5 py-2 bg-primary text-primary-foreground rounded-xl text-xs font-bold hover:bg-primary/90 active:scale-95 transition-all shadow-md shadow-primary/25"
@@ -1245,12 +1261,13 @@ export default function NetworkPage() {
           </button>
           <button
             onClick={refresh}
+            aria-label="Actualizar red"
             className="p-2 border border-border rounded-xl hover:bg-muted text-muted-foreground transition-colors"
           >
             <RefreshCw className="w-4 h-4" />
           </button>
           <div className="flex items-center bg-muted rounded-xl p-1 gap-1">
-            {(['tree', 'list'] as const).map(v => (
+            {(['list', 'tree'] as const).map(v => (
               <button
                 key={v}
                 onClick={() => setViewMode(v)}
@@ -1259,41 +1276,28 @@ export default function NetworkPage() {
                   viewMode === v ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground',
                 )}
               >
-                {v === 'tree' ? <><Network className="w-3.5 h-3.5" /> Árbol</> : <><List className="w-3.5 h-3.5" /> Lista</>}
+                {v === 'tree' ? <><Network className="w-3.5 h-3.5" /> Mapa de conexiones</> : <><List className="w-3.5 h-3.5" /> Personas</>}
               </button>
             ))}
           </div>
+          </>}
         </div>
       </div>
 
-      {isAdmin&&viewAllNet&&<section className="space-y-3"><input aria-label="Buscar red por nombre" value={memberSearch} onChange={e=>setMemberSearch(e.target.value)} placeholder="Buscar una persona por nombre o usuario…" className="w-full border border-border bg-background rounded-xl p-3"/>{memberResults.length>0&&<div className="border border-border rounded-xl max-h-64 overflow-auto">{memberResults.map(p=><button key={p.id} className="block w-full text-left p-3 hover:bg-muted" onClick={()=>{setFocusRoot(p.id);setMemberSearch('');setMemberResults([]);setViewAllNet(false);setRankFilter('all');}}>{p.full_name} <span className="text-muted-foreground text-sm">@{p.username}</span></button>)}</div>}</section>}
+      {isAdmin && viewAllNet && <section className="space-y-5 rounded-xl border border-border bg-card p-5 sm:p-6">
+        <div className="flex items-center justify-between"><h2 className="font-semibold">Directorio de usuarios <span className="ml-1 text-xs font-normal text-muted-foreground">{memberCount} {memberCount===1?'usuario':'usuarios'}</span></h2><button aria-label="Cerrar usuarios" onClick={()=>setViewAllNet(false)} className="p-1.5 rounded-lg text-muted-foreground hover:bg-muted"><X size={18}/></button></div>
+        <p className="text-sm text-muted-foreground">Selecciona una persona para consultar su red MLM.</p>
+        <input aria-label="Buscar red por nombre" value={memberSearch} onChange={e=>{setMemberSearch(e.target.value);setMemberPage(0);}} placeholder="Buscar por nombre o usuario…" className="w-full border border-border bg-background rounded-xl p-3"/>
+        {membersError ? <p role="alert">{membersError}</p> : membersLoading ? <p role="status">Cargando usuarios…</p> : <div className="grid sm:grid-cols-2 gap-3">{memberResults.map(p=><button key={p.id} className="group flex items-center gap-3 w-full text-left p-4 border border-border hover:bg-muted rounded-xl transition-colors" onClick={()=>{setFocusRoot(p.id);setViewAllNet(false);setRankFilter('all');}}><Avatar p={p} size={44}/><span className="min-w-0 flex-1"><span className="block truncate text-sm font-medium">{p.full_name}</span><span className="block truncate text-muted-foreground text-xs">@{p.username}</span></span><span className="text-xs text-primary shrink-0 flex items-center gap-1">Ver red<ChevronRight className="size-4"/></span></button>)}{!memberResults.length&&<p className="p-3 text-muted-foreground">No se encontraron usuarios.</p>}</div>}
+        <div className="flex items-center justify-between text-sm"><button disabled={membersLoading||memberPage===0} onClick={()=>setMemberPage(p=>p-1)} className="disabled:opacity-40">Anterior</button><span>Página {memberPage+1} de {Math.max(1,Math.ceil(memberCount/20))}</span><button disabled={membersLoading||(memberPage+1)*20>=memberCount} onClick={()=>setMemberPage(p=>p+1)} className="disabled:opacity-40">Siguiente</button></div>
+      </section>}
+      {!viewAllNet&&<>
       {focusRoot&&<button className="text-sm text-primary" onClick={()=>{setFocusRoot('');setRankFilter('all');}}>← Volver a mi red</button>}
-      <StatsBar tree={tree} profiles={profiles}/>
+      <div className="rounded-xl border border-border bg-card p-4 flex items-center gap-3"><Avatar p={profiles.find(p=>p.id===currentRootId)||user!} size={44}/><div className="flex-1 min-w-0"><p className="font-semibold truncate">{profiles.find(p=>p.id===currentRootId)?.full_name||myName}</p><p className="text-xs text-muted-foreground">{currentRootId===user?.id?'Tu equipo':'Red que estás consultando'} · Selecciona una persona para ver sus detalles</p></div><button className="shrink-0 text-sm text-primary p-2" onClick={()=>setSelected(buildTree(profiles,currentRootId))}>Ver perfil</button></div>
+      <StatsBar tree={profiles.length?buildTree(profiles,currentRootId):null} profiles={profiles}/>
       <NetworkRequests canReview={permitted('move_network_member')} onChanged={refresh}/>
       <div className="flex justify-end"><a href="/dashboard/rangos" className="text-sm text-primary font-medium">Mi progreso de rango →</a></div>
-      <div aria-label="Filtrar por rango" className="flex flex-nowrap gap-2 overflow-x-auto pb-2 [&>button]:shrink-0 [&>button]:whitespace-nowrap">
-        <button
-          onClick={() => setRankFilter('all')}
-          className={cn('px-3.5 py-1.5 rounded-full text-xs font-bold transition-all border',
-            rankFilter === 'all' ? 'bg-foreground text-background border-foreground' : 'border-border text-muted-foreground hover:border-foreground/40')}
-        >
-          Todos
-        </button>
-        {Object.entries(RANKS).map(([k, rc]) => (
-          <button
-            key={k}
-            onClick={() => setRankFilter(rankFilter === k ? 'all' : k)}
-            className={cn('flex items-center gap-1 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all border',
-              rankFilter === k ? 'border-transparent' : 'border-border text-muted-foreground hover:border-muted-foreground/50')}
-            style={rankFilter === k ? {
-              background: rc.color + '22', color: rc.color, borderColor: rc.color + '66',
-            } : {}}
-          >
-            <rc.Icon className="w-3 h-3" />
-            {rc.label}
-          </button>
-        ))}
-      </div>
+      <NetworkRankFilter value={rankFilter} onChange={setRankFilter}/>
 
       {!tree ? (
         <div className="flex flex-col items-center justify-center py-24 gap-5 bg-card border border-border rounded-xl">
@@ -1301,8 +1305,8 @@ export default function NetworkPage() {
             <Network className="w-8 h-8 text-muted-foreground" />
           </div>
           <div className="text-center">
-            <h3 className="text-base font-bold text-foreground">Tu red está vacía</h3>
-            <p className="text-sm text-muted-foreground mt-1 max-w-xs">Agrega tu primer afiliado para comenzar a construir tu red.</p>
+            <h3 className="text-base font-bold text-foreground">{rankFilter==='all'?'Tu red está vacía':'Sin personas con este rango'}</h3>
+            <p className="text-sm text-muted-foreground mt-1 max-w-xs">{rankFilter==='all'?'Agrega tu primer afiliado para comenzar a construir tu red.':'Prueba otro rango o selecciona Todos para volver a ver tu equipo.'}</p>
           </div>
           <button
             onClick={() => openAdd(permitted('assign_existing_user') ? currentRootId : user!.id, permitted('assign_existing_user') ? (profiles.find(p=>p.id===currentRootId)?.full_name || myName) : myName)}
@@ -1377,10 +1381,11 @@ export default function NetworkPage() {
         </div>
       ) : (
         <div className="bg-card border border-border rounded-xl p-4 sm:p-5">
-          <ListView tree={tree} onSelect={setSelected} />
+          <ListView tree={buildTree(profiles,currentRootId)} rankFilter={rankFilter} onSelect={setSelected} />
         </div>
       )}
 
+      </>}
       {addModal && (
         <AddMemberModal
           sponsorId={addSponsorId}

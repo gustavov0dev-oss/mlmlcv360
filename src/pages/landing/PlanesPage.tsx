@@ -25,7 +25,7 @@ export default function PlanesPage() {
     if (!user) { navigate(isFree?'/registro':`/pago?plan=${encodeURIComponent(plan.slug)}`); return; }
     if (isFree) {
       setActivating(plan.slug);
-      const {data,error} = await database.invoke<any>('process-payment', {body:{action:'free_plan', plan_slug:plan.slug}});
+      const {data,error} = await database.rpc<any>('activate_free_membership', {p_plan_slug:plan.slug});
       if(error||!data?.success){toast.error(data?.error||'No se pudo activar el plan');setActivating(null);return;}
       await fetchProfile(user.id);
       toast.success(`Plan ${plan.name} activado`);

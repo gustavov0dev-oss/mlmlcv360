@@ -1,3 +1,4 @@
+import { displayDate } from '@/lib/dates';
 import { supabase } from '@/lib/backend/client';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { PaymentReviews } from '@/components/payments/PaymentReviews';
@@ -140,7 +141,7 @@ export default function OrdersAdminPage() {
                       <td className="px-4 py-3">
                         <button onClick={() => navigate(`/dashboard/admin/pedidos/${o.id}`)}
                           className="font-bold text-primary hover:underline text-left break-words max-w-[155px]">{o.order_number}</button>
-                        <p className="text-xs text-muted-foreground">{new Date(o.created_at).toLocaleDateString('es-PE')}</p>
+                        <p className="text-xs text-muted-foreground">{displayDate(o.created_at)}</p>
                       </td>
                       <td className="px-4 py-3">
                         <p className="font-semibold text-foreground">{addr?.full_name || '—'}</p>

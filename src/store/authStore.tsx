@@ -136,7 +136,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
             if (event === 'SIGNED_IN') {
               const currentPath = window.location.pathname;
-              if (fromOAuth || AUTH_PATHS.includes(currentPath)) {
+              if ((fromOAuth || AUTH_PATHS.includes(currentPath)) && sessionStorage.getItem('cluv-registration-pending')!=='1') {
                 doRedirect(authDestination());
               }
             }

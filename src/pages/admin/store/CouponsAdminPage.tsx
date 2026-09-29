@@ -1,3 +1,4 @@
+import { displayDate, dateKey, dayBoundaryUtc, userTimeZone } from '@/lib/dates';
 import { LoadingRegion, StableRegion } from '@/components/ui/loading-region';
 import { useState, useEffect, useCallback } from 'react';
 import { useDatabase } from '@/lib/backend';
@@ -220,7 +221,7 @@ export default function CouponsAdminPage() {
                     {c.applies_to === 'categories' && <span className="bg-primary/10 text-primary px-2 py-0.5 rounded-full">{(c.category_ids as string[])?.length || 0} categorias</span>}
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">{c.used_count}{c.usage_limit ? `/${c.usage_limit}` : ''}</td>
-                  <td className="px-4 py-3 text-muted-foreground text-xs">{c.expires_at ? new Date(c.expires_at).toLocaleDateString('es-PE') : 'Sin venc.'}</td>
+                  <td className="px-4 py-3 text-muted-foreground text-xs">{c.expires_at ? displayDate(c.expires_at) : 'Sin venc.'}</td>
                   <td className="px-4 py-3">
                     <span className={cn('text-xs font-bold px-2 py-0.5 rounded-full', c.status === 'active' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-muted text-muted-foreground')}>
                       {c.status === 'active' ? 'Activo' : 'Inactivo'}
@@ -345,9 +346,10 @@ export default function CouponsAdminPage() {
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-foreground mb-1.5">Fecha de vencimiento</label>
-                  <input type="date" value={form.expires_at ? form.expires_at.split('T')[0] : ''}
-                    onChange={e => setForm(p => ({ ...p, expires_at: e.target.value ? `${e.target.value}T23:59:59Z` : undefined }))}
+                  <input type="date" value={form.expires_at ? dateKey(form.expires_at) : ''}
+                    onChange={e => setForm(p => ({ ...p, expires_at: e.target.value ? new Date(dayBoundaryUtc(e.target.value,true).getTime()-1).toISOString() : undefined }))}
                     className="w-full px-4 py-3 bg-muted border border-border rounded-xl text-sm outline-none focus:border-primary" />
+                  <p className="text-xs text-muted-foreground mt-1">Hasta el final del día en {userTimeZone()}.</p>
                 </div>
               </div>
 

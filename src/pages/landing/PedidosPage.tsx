@@ -1,3 +1,4 @@
+import { displayDate } from '@/lib/dates';
 import { LoadingRegion, StableRegion } from '@/components/ui/loading-region';
 import { useState, useEffect, useCallback } from 'react';
 import { useDatabase } from '@/lib/backend';
@@ -236,7 +237,7 @@ export default function PedidosPage({ initialTab = 'pedidos' }: { initialTab?: T
                             </span>
                           </div>
                           <p className="text-xs text-muted-foreground mt-1">
-                            {new Date(order.created_at).toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' })}
+                            {displayDate(order.created_at, { day: '2-digit', month: 'short', year: 'numeric' })}
                             {' · '}{itemCount} producto{itemCount !== 1 ? 's' : ''}
                           </p>
                         </div>

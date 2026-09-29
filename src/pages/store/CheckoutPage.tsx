@@ -1,3 +1,4 @@
+import { StyledSelect } from '@/components/ui/styled-select';
 import { checkoutSnapshots, rememberCheckout } from '@/lib/checkoutCart';
 import { PaymentMethods, PaymentCurrency } from '@/components/payments/PaymentMethods';
 import { continuePayment } from '@/lib/payments/checkout';
@@ -499,7 +500,7 @@ export default function CheckoutPage() {
                           <label className={cn(labelClass, 'flex items-center gap-1')}>
                             <Globe className="w-3 h-3" /> País de destino *
                           </label>
-                          <select
+                          <StyledSelect
                             value={addr.country}
                             onChange={e => {
                               const c = COUNTRIES.find(x => x.code === e.target.value) || COUNTRIES[0];
@@ -509,7 +510,7 @@ export default function CheckoutPage() {
                             {COUNTRIES.map(c => (
                               <option key={c.code} value={c.code}>{c.flag} {c.name}</option>
                             ))}
-                          </select>
+                          </StyledSelect>
                         </div>
                       </FieldSection>
 
@@ -533,9 +534,9 @@ export default function CheckoutPage() {
                           {isPeru ? (
                             <div>
                               <label className={labelClass}>Región *</label>
-                              <select value={addr.region} onChange={e => setAddr(p => ({ ...p, region: e.target.value }))} className={inputClass}>
+                              <StyledSelect value={addr.region} onChange={e => setAddr(p => ({ ...p, region: e.target.value }))} className={inputClass}>
                                 {PERU_REGIONS.map(r => <option key={r}>{r}</option>)}
-                              </select>
+                              </StyledSelect>
                             </div>
                           ) : (
                             <div>

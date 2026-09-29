@@ -1,3 +1,5 @@
+import { StyledSelect } from '@/components/ui/styled-select';
+import { displayDate, displayDateTime } from '@/lib/dates';
 import { LoadingRegion, StableRegion } from '@/components/ui/loading-region';
 import { useState, useEffect, useMemo } from 'react';
 import { toast } from 'sonner';
@@ -283,14 +285,14 @@ function CommissionModal({
                 </Field>
               </div>
               <Field label="Moneda">
-                <select
+                <StyledSelect
                   value={form.currency}
                   onChange={e => set('currency')(e.target.value)}
                   className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary transition-colors"
                 >
                   <option value="PEN">PEN</option>
                   <option value="USD">USD</option>
-                </select>
+                </StyledSelect>
               </Field>
             </div>
 
@@ -553,10 +555,10 @@ export default function AdminCommissionsPage() {
         <div className="flex flex-wrap items-center gap-3 bg-primary/5 border border-primary/20 rounded-xl p-3.5">
           <span className="text-sm font-medium text-foreground">{selectedIds.size} seleccionado(s)</span>
           <div className="flex items-center gap-2 ml-auto flex-wrap">
-            <select value={bulkStatus} onChange={e => setBulkStatus(e.target.value as CommStatus)}
+            <StyledSelect value={bulkStatus} onChange={e => setBulkStatus(e.target.value as CommStatus)}
               className="px-3 py-1.5 bg-card border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary">
               {STATUSES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
-            </select>
+            </StyledSelect>
             <button onClick={bulkApply} disabled={bulkWorking}
               className="flex items-center gap-2 px-3 py-1.5 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50">
               {bulkWorking ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
@@ -580,16 +582,16 @@ export default function AdminCommissionsPage() {
             className="w-full pl-9 pr-4 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-primary transition-colors"
           />
         </div>
-        <select value={filterType} onChange={e => setFilterType(e.target.value)}
+        <StyledSelect value={filterType} onChange={e => setFilterType(e.target.value)}
           className="px-3 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreign outline-none focus:border-primary min-w-[130px]">
           <option value="">Todos los tipos</option>
           {TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
-        </select>
-        <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}
+        </StyledSelect>
+        <StyledSelect value={filterStatus} onChange={e => setFilterStatus(e.target.value)}
           className="px-3 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground outline-none focus:border-primary min-w-[130px]">
           <option value="">Todos los estados</option>
           {STATUSES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
-        </select>
+        </StyledSelect>
         <button onClick={refresh} className={["p-2.5 border border-border rounded-xl hover:bg-muted text-muted-foreground transition-colors", 'dashboard-action'].filter(Boolean).join(' ')} title="Actualizar">
           <RefreshCw className="w-4 h-4" />
         </button>
@@ -633,7 +635,7 @@ export default function AdminCommissionsPage() {
                       className="rounded border-border accent-primary cursor-pointer" />
                   </td>
                   <td className="py-3 px-4 text-xs text-muted-foreground whitespace-nowrap">
-                    {new Date(c.created_at).toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: '2-digit' })}
+                    {displayDate(c.created_at, { day: '2-digit', month: '2-digit', year: '2-digit' })}
                   </td>
                   <td className="py-3 px-4">
                     <div className="text-sm font-medium text-foreground leading-none">{c._user_name}</div>
@@ -747,7 +749,7 @@ export default function AdminCommissionsPage() {
                 ['Tipo', (TYPE_LABELS as Record<string, string>)[viewRow.type] || viewRow.type],
                 ['Estado', STATUSES.find(s => s.value === viewRow.status)?.label],
                 ['Monto', `${viewRow.currency === 'PEN' ? 'S/' : '$'} ${Number(viewRow.amount).toFixed(2)}`],
-                ['Fecha', new Date(viewRow.created_at).toLocaleString('es-PE')],
+                ['Fecha', displayDateTime(viewRow.created_at)],
                 ['Descripción', viewRow.description || '—'],
               ].map(([k, v]) => (
                 <div key={String(k)} className="flex justify-between items-start gap-4">

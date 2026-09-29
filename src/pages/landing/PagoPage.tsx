@@ -1,3 +1,4 @@
+import { displayDate } from '@/lib/dates';
 import { GuestPlanCheckout } from '@/components/auth/GuestPlanCheckout';
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from '@/lib/router';
@@ -75,7 +76,7 @@ export default function PagoPage() {
    </>}
    {returning&&record&&<>
     <div className="flex items-center gap-3"><PaymentBrand slug={record.gateway}/><div><p className="font-semibold">{method?.name||record.gateway}</p><p className="text-lg">{record.currency} {Number(record.amount).toFixed(2)}{contract&&<span className="text-sm text-muted-foreground">/mes</span>}</p></div></div>
-    {paid?<div role="status" className="space-y-3"><CheckCircle className="w-7 h-7 text-emerald-500"/><p>{isOrder?'Tu pedido está pagado. Puedes seguir su estado desde Mis pedidos.':`Tu membresía está activa.${contract?.paid_until?' Beneficios hasta el '+new Date(contract.paid_until).toLocaleDateString('es-PE')+'.':''}`}</p><Link to={back} className={button}>{isOrder?'Ver mis pedidos':'Ver mi membresía'}</Link></div>:
+    {paid?<div role="status" className="space-y-3"><CheckCircle className="w-7 h-7 text-emerald-500"/><p>{isOrder?'Tu pedido está pagado. Puedes seguir su estado desde Mis pedidos.':`Tu membresía está activa.${contract?.paid_until?' Beneficios hasta el '+displayDate(contract.paid_until)+'.':''}`}</p><Link to={back} className={button}>{isOrder?'Ver mis pedidos':'Ver mi membresía'}</Link></div>:
      session?.status==='review'?<p role="status">Recibimos tu comprobante. Te avisaremos en las notificaciones cuando termine la revisión.</p>:
      session?.status==='rejected'?<p role="alert">El comprobante fue rechazado. Contacta con soporte para revisar el pago.</p>:
      contract?.status==='cancelled'?<p role="status">La autorización mensual se canceló. No habrá nuevas renovaciones.</p>:

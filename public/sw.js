@@ -27,6 +27,8 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
+  // Development modules and credentials must always come from the current Vite server.
+  if (['localhost', '127.0.0.1', '[::1]'].includes(url.hostname)) return;
 
   // Network-first for navigation requests, fallback to cache
   if (request.mode === 'navigate') {

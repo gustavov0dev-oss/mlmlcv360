@@ -18,6 +18,7 @@ export interface Plan {
   is_free: boolean;
   sort_order: number;
   trial_days: number;
+  free_once_per_user?: boolean;
 }
 
 export interface Rank {

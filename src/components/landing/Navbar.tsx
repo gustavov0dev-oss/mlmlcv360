@@ -1,3 +1,4 @@
+import { useAssignedPlan } from '@/hooks/useAssignedPlan';
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from '@/lib/router';
 import {
@@ -60,7 +61,8 @@ const navLinks = [
 
 function DesktopUserMenu() {
   const { user, signOut } = useAuthStore();
-  const { plans, ranks } = useConfig();
+  const { ranks } = useConfig();
+  const userPlan = useAssignedPlan(user?.id);
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
@@ -79,8 +81,8 @@ function DesktopUserMenu() {
   const initials = (user.full_name || user.email || 'U')
     .split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase();
 
-  const userPlan = plans.find(p => p.slug === user.plan || p.id === user.plan);
-  const userRank = ranks.find(r => r.slug === user.rank || r.name?.toLowerCase() === user.rank?.toLowerCase());
+
+  const userRank = user.rank ? ranks.find(r => r.slug === user.rank || r.name?.toLowerCase() === user.rank?.toLowerCase()) : null;
 
   return (
     <div className="relative" ref={ref}>
@@ -192,7 +194,7 @@ export default function Navbar() {
   const { setTheme } = useThemeStore();
   const isDark = useIsDark();
   const { user, signOut } = useAuthStore();
-  const { company, logoValue, logoSizes, plans, ranks } = useConfig();
+  const { company, logoValue, logoSizes, ranks } = useConfig();
   const { itemCount } = useCart();
   const { mobileNavOpen, setMobileNavOpen } = useUIStore();
   const companyName = company.company_name || 'MLM 360';
@@ -244,7 +246,7 @@ export default function Navbar() {
   const quickActions = isLoggedIn ? loggedInQuickActions : guestQuickActions;
 
   // Get user's plan and rank info
-  const userPlan = user ? plans.find(p => p.slug === user.plan || p.id === user.plan) : null;
+  const userPlan = useAssignedPlan(user?.id);
   const userRank = user ? ranks.find(r => r.slug === user.rank || r.name?.toLowerCase() === user.rank?.toLowerCase()) : null;
 
   return (

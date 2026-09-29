@@ -1,3 +1,4 @@
+import { displayDate } from '@/lib/dates';
 import { supabase } from '@/lib/backend/client';
 import { LoadingRegion, StableRegion } from '@/components/ui/loading-region';
 import { useState, useEffect, useCallback } from 'react';
@@ -229,7 +230,7 @@ export default function ReviewsAdminPage() {
                     </td>
                     {/* Date */}
                     <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
-                      {new Date(r.created_at).toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' })}
+                      {displayDate(r.created_at, { day: '2-digit', month: 'short', year: 'numeric' })}
                     </td>
                     {/* Actions */}
                     <td className="px-4 py-3">
@@ -309,7 +310,7 @@ export default function ReviewsAdminPage() {
                 </div>
               )}
               <div className="flex items-center gap-4 text-xs text-muted-foreground pt-2 border-t border-border">
-                <span>{new Date(preview.created_at).toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric' })}</span>
+                <span>{displayDate(preview.created_at, { day: '2-digit', month: 'long', year: 'numeric' })}</span>
                 {preview.verified_purchase && <span className="text-emerald-600 font-semibold">✓ Compra verificada</span>}
                 <span><ThumbsUp className="w-3 h-3 inline mr-0.5" />{preview.helpful_count ?? 0} útil</span>
               </div>

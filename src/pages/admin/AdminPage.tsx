@@ -1,3 +1,4 @@
+import { StyledSelect } from '@/components/ui/styled-select';
 import RankPointsAdmin from '@/components/RankPointsAdmin';
 import PlanModuleControl from '@/components/admin/PlanModuleControl';
 import {planAccent} from '@/lib/planAppearance';
@@ -310,6 +311,7 @@ function ToggleSwitch({
 
 export default function AdminPage() {
   const { user } = useAuthStore();
+  const { plans: registrationPlans } = useConfig();
   const database = useDatabase();
   const storage = useStorage();
   const [searchParamsAdmin] = useSearchParams();
@@ -657,7 +659,7 @@ export default function AdminPage() {
               <h2 className="text-lg font-semibold text-foreground mb-5">
                 Informacion del Sistema
               </h2>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 [&>div]:min-w-0">
                 {/* Left: Company info + size control */}
                 <div className="space-y-5">
                   <div className="space-y-4">
@@ -725,8 +727,8 @@ export default function AdminPage() {
                       cuadrado de 40px. Mira la vista previa →
                     </p>
                     <div className="space-y-3">
-                      <div className="flex items-center gap-3">
-                        <label className="text-xs font-medium text-foreground w-16 shrink-0">
+                      <div className="grid grid-cols-[minmax(0,1fr)_4rem_1rem] items-center gap-3">
+                        <label className="col-span-3 text-xs font-medium text-foreground">
                           Ancho
                         </label>
                         <input
@@ -735,7 +737,7 @@ export default function AdminPage() {
                           max="96"
                           value={c("logo_size") || "36"}
                           onChange={(e) => setC("logo_size", e.target.value)}
-                          className="flex-1 slider-filled"
+                          className="min-w-0 w-full slider-filled"
                           style={{ ['--fill' as any]: `${((parseInt(c("logo_size") || "36") - 16) / (96 - 16) * 100)}%` }}
                         />
                         <input
@@ -744,14 +746,14 @@ export default function AdminPage() {
                           max="96"
                           value={c("logo_size") || "36"}
                           onChange={(e) => setC("logo_size", e.target.value)}
-                          className="w-20 px-2 py-1.5 bg-muted border border-border rounded text-foreground text-sm text-center"
+                          className="w-16 shrink-0 px-2 py-1.5 bg-muted border border-border rounded text-foreground text-sm text-center"
                         />
                         <span className="text-xs text-muted-foreground w-8">
                           px
                         </span>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <label className="text-xs font-medium text-foreground w-16 shrink-0">
+                      <div className="grid grid-cols-[minmax(0,1fr)_4rem_1rem] items-center gap-3">
+                        <label className="col-span-3 text-xs font-medium text-foreground">
                           Alto max.
                         </label>
                         <input
@@ -760,7 +762,7 @@ export default function AdminPage() {
                           max="96"
                           value={c("logo_height") || c("logo_size") || "36"}
                           onChange={(e) => setC("logo_height", e.target.value)}
-                          className="flex-1 slider-filled"
+                          className="min-w-0 w-full slider-filled"
                           style={{ ['--fill' as any]: `${((parseInt(c("logo_height") || c("logo_size") || "36") - 16) / (96 - 16) * 100)}%` }}
                         />
                         <input
@@ -769,7 +771,7 @@ export default function AdminPage() {
                           max="96"
                           value={c("logo_height") || c("logo_size") || "36"}
                           onChange={(e) => setC("logo_height", e.target.value)}
-                          className="w-20 px-2 py-1.5 bg-muted border border-border rounded text-foreground text-sm text-center"
+                          className="w-16 shrink-0 px-2 py-1.5 bg-muted border border-border rounded text-foreground text-sm text-center"
                         />
                         <span className="text-xs text-muted-foreground w-8">
                           px
@@ -903,7 +905,7 @@ export default function AdminPage() {
                           Navbar / Sidebar (ancho real: {c("logo_size") || 36}
                           px)
                         </p>
-                        <div className="flex items-center justify-center h-40 bg-card border border-border rounded-lg overflow-visible px-3">
+                        <div className="flex items-center justify-center h-24 bg-card border border-border rounded-lg overflow-visible px-3">
                           {/* Recuadro guia punteado = alto MAXIMO de referencia (no fuerza el logo) */}
                           <div
                             className="relative flex items-center justify-center border border-dashed border-primary/40 bg-primary/5 rounded"
@@ -960,7 +962,7 @@ export default function AdminPage() {
                         <p className="text-[10px] text-muted-foreground mb-2">
                           Colapsado (40px)
                         </p>
-                        <div className="flex items-center justify-center h-40 bg-card border border-border rounded-lg overflow-hidden">
+                        <div className="flex items-center justify-center h-24 bg-card border border-border rounded-lg overflow-hidden">
                           <div className="flex items-center justify-center w-10 h-10 bg-primary/10 border border-dashed border-primary/40 rounded-lg overflow-hidden">
                             {c("logo_collapsed_value") ? (
                               c("logo_collapsed_value")
@@ -1180,7 +1182,7 @@ export default function AdminPage() {
             </div>
           )}
 
-          {activeModule === "tienda" && <section className="bg-card border border-border rounded-xl p-5 space-y-5"><div><h2 className="text-lg font-bold">Condiciones de envío</h2><p className="text-sm text-muted-foreground mt-2">Configura el umbral que utiliza la tienda para ofrecer envío gratuito.</p></div><label className="block space-y-2 text-sm"><span className="block">Envío gratis desde (S/)</span><input type="number" min="0" step="0.01" value={c('free_shipping_threshold')} onChange={e=>setC('free_shipping_threshold',e.target.value)} className="w-full max-w-sm px-3 py-3 border border-border rounded-xl bg-background"/></label><div className="form-actions"><button disabled={savingConfig} onClick={()=>saveConfigKeys(['free_shipping_threshold'],'store')} className="px-5 py-3 rounded-xl bg-primary text-primary-foreground font-semibold">Guardar</button></div></section>}
+          {activeModule === "tienda" && <section className="bg-card border border-border rounded-xl p-5 space-y-5"><div><h2 className="text-lg font-bold">Condiciones de envío</h2><p className="text-sm text-muted-foreground mt-2">Promoción global por importe: al alcanzar este monto, el envío del pedido pasa a ser gratuito aunque el método seleccionado tenga costo. Un método configurado como gratuito en Envíos sigue siendo gratis sin llegar a este monto. No necesitas esta promoción si solo quieres usar las tarifas de cada método.</p></div><label className="block space-y-2 text-sm"><span className="block">Envío gratis desde (S/)</span><input type="number" min="0" step="0.01" value={c('free_shipping_threshold')} onChange={e=>setC('free_shipping_threshold',e.target.value)} className="w-full max-w-sm px-3 py-3 border border-border rounded-xl bg-background"/></label><div className="form-actions"><button disabled={savingConfig} onClick={()=>saveConfigKeys(['free_shipping_threshold'],'store')} className="px-5 py-3 rounded-xl bg-primary text-primary-foreground font-semibold">Guardar</button></div></section>}
           {activeModule === "red" && (<div className="space-y-5"><RankPointsAdmin/>              {/* Configuración de red MLM */}
               <div className="bg-card border border-border rounded-xl p-5 space-y-4">
                 <div>
@@ -2161,7 +2163,7 @@ export default function AdminPage() {
                   Configura la selección opcional de membresía y quién invita a los nuevos usuarios.
                 </p>
               </div>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 items-start gap-6">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between p-4 bg-muted rounded-xl border border-border gap-3">
                     <div className="min-w-0">
@@ -2178,7 +2180,8 @@ export default function AdminPage() {
                     />
                   </div>
                   <div className="flex items-center justify-between p-4 bg-muted rounded-xl border border-border gap-3"><div><p className="font-semibold text-sm">Código de referido obligatorio</p><p className="text-sm text-muted-foreground mt-1">Si está desactivado, se usa el referido de la empresa cuando el usuario no ingresa uno.</p></div><ToggleSwitch checked={c("register_referral_required")==="true"} onChange={v=>setC("register_referral_required",String(v))}/></div>
-                </div><div className="p-4 bg-muted rounded-xl border border-border"><label className="block text-sm font-semibold">Referido de la empresa<input value={c("register_default_referral_code")} onChange={e=>setC("register_default_referral_code",e.target.value.toUpperCase().trim())} className="w-full mt-3 p-3 rounded-lg bg-background border border-border"/></label><p className="text-sm text-muted-foreground mt-2">Debe ser un código de referido existente. La membresía siempre es opcional y sus beneficios requieren pago confirmado.</p></div>
+                  <label className="block p-4 bg-muted rounded-xl border border-border text-sm"><span className="font-semibold">Plan gratuito al crear una cuenta</span><StyledSelect value={c('register_default_free_plan')} onChange={e=>setC('register_default_free_plan',e.target.value)} className="w-full mt-3 p-3 rounded-lg bg-background border border-border"><option value="">Ninguno: el usuario elige después</option>{registrationPlans.filter(p=>p.is_active&&p.is_free&&Number(p.price)===0).map(p=><option key={p.id} value={p.slug}>{p.name}</option>)}</StyledSelect><span className="block mt-2 text-xs text-muted-foreground">Solo afecta a nuevos registros, incluido Google. En el registro con correo, el usuario puede elegir otro plan o continuar sin membresía. Configura los planes gratuitos en Planes.</span></label>
+                </div><div className="p-4 bg-muted rounded-xl border border-border"><label className="block text-sm font-semibold">Referido de la empresa<input value={c("register_default_referral_code")} onChange={e=>setC("register_default_referral_code",e.target.value.toUpperCase().trim())} className="w-full mt-3 p-3 rounded-lg bg-background border border-border"/></label><p className="text-sm text-muted-foreground mt-2">Debe ser un código de referido existente. La membresía es opcional. Los planes de pago solo se activan al confirmar el pago.</p></div>
               </div>
               <div className="mt-6 pt-4 border-t border-border flex justify-end form-actions">
                 <button
@@ -2186,6 +2189,7 @@ export default function AdminPage() {
                     saveConfigKeys(
                       [
                         "register_show_plans",
+                        "register_default_free_plan",
                         "register_referral_required",
                         "register_default_referral_code",
                       ],
@@ -2348,6 +2352,7 @@ function PlansManager() {
   return (
     <div className="space-y-4">
       <PlanModuleControl kind="system"/>
+      <p className="text-sm text-muted-foreground rounded-lg border border-border p-4">Puedes marcar un plan como gratuito al editarlo. Para asignarlo a las cuentas nuevas, <a className="text-primary underline underline-offset-4" href="/dashboard/admin?module=registro">configura el plan predeterminado del registro</a>.</p>
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold text-foreground">
@@ -2533,6 +2538,7 @@ function PlanForm({
     is_free: plan?.is_free ?? false,
     sort_order: String(plan?.sort_order ?? "0"),
     trial_days: String(plan?.trial_days ?? "0"),
+    free_once_per_user: plan?.free_once_per_user ?? false,
     features: plan?.features?.length ? [...plan.features] : [""],
     color: plan?.color?.startsWith("#") ? plan.color : "#e9a014",
   });
@@ -2558,6 +2564,7 @@ function PlanForm({
       is_free: form.is_free,
       sort_order: Number(form.sort_order) || 0,
       trial_days: Number(form.trial_days) || 0,
+      free_once_per_user: form.is_free && form.free_once_per_user,
       features: form.features.map(f=>f.trim()).filter(Boolean),
       color: form.color,
     });
@@ -2631,7 +2638,7 @@ function PlanForm({
         </div>
         <div>
           <label className="block text-xs font-medium text-foreground mb-1.5">
-            Días de prueba
+            {form.is_free ? 'Días de acceso gratuito (0 = sin vencimiento)' : 'Días de prueba informados'}
           </label>
           <input
             type="text"
@@ -2656,6 +2663,8 @@ function PlanForm({
           className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground outline-none focus:border-primary"
         />
       </div>
+      {form.is_free && <label className="block rounded-xl border border-border p-4"><span className="text-sm font-medium">Activaciones por usuario</span><StyledSelect className="mt-2" value={form.free_once_per_user?'once':'repeat'} onChange={e=>setForm(p=>({...p,free_once_per_user:e.target.value==='once'}))}><option value="repeat">Puede volver a activarlo</option><option value="once">Una sola vez por usuario</option></StyledSelect><span className="mt-2 block text-xs text-muted-foreground">La duración y el número de activaciones son independientes. Cancelar o dejar vencer el plan no reinicia una oferta de uso único. Se consideran las membresías gratuitas actuales y las activaciones registradas desde esta actualización.</span></label>}
+      {!form.is_free && <p className="text-xs text-muted-foreground">Los cobros actuales son mensuales. Los días de prueba informados no cambian automáticamente el período de cobro de la pasarela.</p>}
       <div className="space-y-3"><label className="block text-sm font-medium" htmlFor="plan-accent">Color del plan</label><div className="flex items-center gap-3"><input id="plan-accent" type="color" value={form.color} onChange={e=>setForm(p=>({...p,color:e.target.value}))} className="h-11 w-14 cursor-pointer rounded-lg border border-border bg-background p-1"/><span className="text-sm text-muted-foreground">Se aplica a los detalles y al borde del plan.</span></div></div>
       <div className="space-y-3"><p className="text-sm font-medium">Beneficios del plan</p>{form.features.map((feature,index)=><div key={index} className="flex items-center gap-2"><input aria-label={`Beneficio ${index+1}`} value={feature} placeholder="Escribe un beneficio" onChange={e=>setForm(p=>({...p,features:p.features.map((f,i)=>i===index?e.target.value:f)}))} className="min-w-0 flex-1 rounded-lg border border-border bg-muted px-3 py-2.5 text-sm"/><button type="button" aria-label={`Quitar beneficio ${index+1}`} className="grid h-10 w-10 shrink-0 place-items-center rounded-lg hover:bg-muted" onClick={()=>setForm(p=>({...p,features:p.features.filter((_,i)=>i!==index)}))}><Trash2 className="h-4 w-4"/></button></div>)}<button type="button" onClick={()=>setForm(p=>({...p,features:[...p.features,'']}))} className="inline-flex items-center gap-2 text-sm text-primary"><Plus className="h-4 w-4"/>Agregar beneficio</button></div>
       <div className="flex items-center gap-6 flex-wrap">

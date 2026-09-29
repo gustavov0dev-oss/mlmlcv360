@@ -22,9 +22,12 @@ type Values=z.infer<typeof schema>;
 export function RegistrationForm({destination='/dashboard', allowPlan=false}:{destination?:string;allowPlan?:boolean}) {
  const backend=useBackend();const db=useDatabase();const navigate=useNavigate();const {company,plans}=useConfig();
  const [busy,setBusy]=useState(false),[visible,setVisible]=useState(false),[error,setError]=useState(''),[plan,setPlan]=useState('');
+ const [success,setSuccess]=useState(false);
  const required=company.register_referral_required==='true';
  const {register,handleSubmit,setError:fieldError,formState:{errors}}=useForm<Values>({resolver:zodResolver(schema),defaultValues:{referral_code:new URLSearchParams(window.location.search).get('ref')||''}});
- const target=plan?`/pago?plan=${encodeURIComponent(plan)}`:destination;
+ const defaultFree=plans.find(p=>p.slug===company.register_default_free_plan&&p.is_active&&p.is_free&&Number(p.price)===0);
+ const chosenFree=plans.find(p=>p.slug===plan&&p.is_active&&p.is_free&&Number(p.price)===0);
+ const target=plan&&plan!=='none'&&!chosenFree?`/pago?plan=${encodeURIComponent(plan)}`:destination;
  const checkEmail=async(email:string)=>{
   const result=await db.rpc<{email_exists:boolean}>('check_user_exists',{p_email:email.trim(),p_username:''});
   if(result.error)throw new Error('No pudimos verificar tu correo. Vuelve a intentarlo.');
@@ -35,18 +38,22 @@ export function RegistrationForm({destination='/dashboard', allowPlan=false}:{de
   if(!await checkEmail(values.email))return;
   if(required&&!values.referral_code){fieldError('referral_code',{message:'Ingresa el código de quien te invitó.'});return;}
   sessionStorage.setItem('cluv-auth-next',target);
-  const result=await backend.auth.signUp(values.email,values.password,{first_name:values.first_name,last_name:values.last_name,full_name:`${values.first_name} ${values.last_name}`,plan:'free',referral_code:values.referral_code||''});
+  sessionStorage.setItem('cluv-registration-pending','1');
+  const result=await backend.auth.signUp(values.email,values.password,{first_name:values.first_name,last_name:values.last_name,full_name:`${values.first_name} ${values.last_name}`,plan:'free',membership_choice:plan||'default',referral_code:values.referral_code||''});
   if(result.error)throw new Error(/already registered/i.test(result.error)?'Correo no disponible.':/password/i.test(result.error)?'La contraseña debe tener al menos 8 caracteres.':'No pudimos crear tu cuenta. Revisa el código de referido e intenta nuevamente.');
-  if(!result.session)throw new Error('Cuenta creada. Inicia sesión para continuar.');
-  navigate(target);
- }catch(e){sessionStorage.removeItem('cluv-auth-next');setError(e instanceof Error?e.message:'No pudimos crear tu cuenta.');}finally{setBusy(false)}};
+  setSuccess(true);
+  await new Promise(resolve=>setTimeout(resolve,1800));
+  sessionStorage.removeItem('cluv-registration-pending');
+  navigate(result.session ? target : '/login');
+ }catch(e){sessionStorage.removeItem('cluv-registration-pending');sessionStorage.removeItem('cluv-auth-next');setError(e instanceof Error?e.message:'No pudimos crear tu cuenta.');}finally{setBusy(false)}};
  const input=authInput;
- return <><GoogleButton disabled={busy} onClick={async()=>{sessionStorage.setItem('cluv-auth-next',target);const {error}=await supabase.auth.signInWithOAuth({provider:'google',options:{redirectTo:window.location.origin+'/login?next='+encodeURIComponent(target)}});if(error)setError('No pudimos conectar con Google. Intenta nuevamente.');}}/><AuthDivider/><form onSubmit={handleSubmit(submit)} className="space-y-3" aria-busy={busy}>
+ if(success)return <div role="status" aria-live="polite" className="text-center py-8 space-y-3"><div className="mx-auto rounded-full bg-emerald-500/10 text-emerald-600 w-14 h-14 flex items-center justify-center text-3xl">✓</div><h2 className="text-xl font-semibold">¡Tu cuenta se creó con éxito!</h2><p className="text-muted-foreground">Te estamos redirigiendo para continuar…</p></div>;
+ return <><GoogleButton disabled={busy} onClick={async()=>{sessionStorage.setItem('cluv-auth-next',target);const {error}=await supabase.auth.signInWithOAuth({provider:'google',options:{redirectTo:window.location.origin+'/login?next='+encodeURIComponent(target)}});if(error)setError('No pudimos conectar con Google. Intenta nuevamente.');}}/>{defaultFree&&<p className="mt-2 text-xs text-muted-foreground">Las cuentas nuevas con Google incluyen {defaultFree.name}. Para elegir otra opción, regístrate con correo.</p>}<AuthDivider/><form onSubmit={handleSubmit(submit)} className="space-y-3" aria-busy={busy}>
   <div className="grid grid-cols-2 gap-3">{(['first_name','last_name'] as const).map(key=><label className="text-sm font-medium" key={key}>{key==='first_name'?'Nombre':'Apellidos'}<input autoComplete={key==='first_name'?'given-name':'family-name'} {...register(key)} className={input} aria-invalid={!!errors[key]}/>{errors[key]&&<span className="block mt-1 text-sm text-red-500">{errors[key]?.message}</span>}</label>)}</div>
   <label className="block text-sm font-medium">Correo electrónico<input type="email" autoComplete="email" {...register('email',{onBlur:e=>{if(z.string().email().safeParse(e.target.value).success)void checkEmail(e.target.value).catch(()=>{});}})} className={input} aria-invalid={!!errors.email}/>{errors.email&&<span role="alert" className="block mt-1 text-sm text-red-500">{errors.email.message}</span>}</label>
   <label className="block text-sm font-medium">Contraseña<div className="relative"><input type={visible?'text':'password'} autoComplete="new-password" placeholder="Al menos 8 caracteres" {...register('password')} className={input+' pr-12'}/><button type="button" aria-label={visible?'Ocultar contraseña':'Mostrar contraseña'} onClick={()=>setVisible(!visible)} className="absolute right-2 top-1.5 p-2 text-muted-foreground">{visible?<EyeOff size={20}/>:<Eye size={20}/>}</button></div>{errors.password&&<span className="block mt-1 text-sm text-red-500">{errors.password.message}</span>}</label>
   <label className="block text-sm font-medium">Código de referido <span className="font-normal text-muted-foreground">{required?'(obligatorio)':'(opcional)'}</span><input {...register('referral_code')} autoCapitalize="characters" className={input}/>{errors.referral_code?<span className="text-sm text-red-500">{errors.referral_code.message}</span>:null}</label>
-  {allowPlan&&company.system_plans_enabled!=='false'&&company.register_show_plans!=='false'&&<label className="block text-sm font-medium">Membresía <span className="text-muted-foreground font-normal">(opcional)</span><Select value={plan||'later'} onValueChange={v=>setPlan(v==='later'?'':v)}><SelectTrigger className="mt-1.5 h-11 rounded-lg bg-background" aria-label="Membresía opcional"><SelectValue/></SelectTrigger><SelectContent>{[<SelectItem key="later" value="later">Elegir después</SelectItem>,...plans.filter(p=>p.is_active&&Number(p.price)>0).map(p=><SelectItem key={p.slug} value={p.slug}>{p.name}</SelectItem>)]}</SelectContent></Select></label>}
+  {allowPlan&&company.system_plans_enabled!=='false'&&company.register_show_plans!=='false'&&<label className="block text-sm font-medium">Membresía <span className="text-muted-foreground font-normal">(opcional)</span><Select value={plan||'default'} onValueChange={v=>setPlan(v==='default'?'':v)}><SelectTrigger className="mt-1.5 h-11 rounded-lg bg-background" aria-label="Membresía opcional"><SelectValue/></SelectTrigger><SelectContent>{[<SelectItem key="default" value="default">{defaultFree?`${defaultFree.name} · incluido al registrarte`:'Elegir después'}</SelectItem>,...(defaultFree?[<SelectItem key="none" value="none">Continuar sin plan</SelectItem>]:[]),...plans.filter(p=>p.is_active).map(p=><SelectItem key={p.slug} value={p.slug}>{p.name}{p.is_free||Number(p.price)===0?' · Gratis':''}</SelectItem>)]}</SelectContent></Select></label>}
   {error&&<p role="alert" className="text-sm text-red-500">{error}</p>}
   <p className="text-sm text-muted-foreground">Al registrarte aceptas los <Link to="/legal/terminos-y-condiciones" className="text-primary underline">términos y condiciones</Link>.</p>
   <button disabled={busy} className={authButton}>{busy?'Creando tu cuenta…':target.startsWith('/pago')?'Crear cuenta y continuar':'Crear mi cuenta'}</button>

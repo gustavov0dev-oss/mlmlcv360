@@ -1,3 +1,4 @@
+import { displayDate } from '@/lib/dates';
 import { LoadingRegion, StableRegion } from '@/components/ui/loading-region';
 import { useState, useEffect } from 'react';
 import { Link, useParams } from '@/lib/router';
@@ -67,7 +68,7 @@ export default function LegalPage() {
           <article>
             {/* Meta */}
             <p className="text-[11px] text-muted-foreground/60 uppercase tracking-wider font-medium mb-3">
-              {new Date(page.updated_at).toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric' })}
+              {displayDate(page.updated_at, { day: '2-digit', month: 'long', year: 'numeric' })}
             </p>
 
             {/* Title */}

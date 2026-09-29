@@ -1,3 +1,4 @@
+import { displayDate } from '@/lib/dates';
 import { LoadingRegion } from '@/components/ui/loading-region';
 import { useState, useEffect, useCallback } from 'react';
 import { useDatabase } from '@/lib/backend';
@@ -101,7 +102,7 @@ export default function OrdersPage() {
                     <span className={cn('text-[11px] font-bold px-2 py-0.5 rounded-full', sc.color, sc.bg)}>{sc.label}</span>
                   </div>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    {new Date(order.created_at).toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' })}
+                    {displayDate(order.created_at, { day: '2-digit', month: 'short', year: 'numeric' })}
                     {' · '}{order.items?.length || 0} producto{(order.items?.length || 0) !== 1 ? 's' : ''}
                   </p>
                   <p className="text-sm font-bold text-foreground mt-0.5">S/ {order.total.toFixed(2)}</p>

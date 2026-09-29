@@ -1,3 +1,4 @@
+import { StyledSelect } from '@/components/ui/styled-select';
 import { videoSource } from '@/lib/productMedia';
 import { VideoThumbnail } from '@/components/store/VideoThumbnail';
 import { useState, useEffect, useCallback } from "react";
@@ -500,7 +501,7 @@ export default function ProductFormPage() {
           </p>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
-          <select
+          <StyledSelect
             value={form.status}
             onChange={(e) => setForm((p) => ({ ...p, status: e.target.value }))}
             className="px-3 py-2 bg-card border border-border rounded-xl text-xs font-semibold text-foreground outline-none"
@@ -508,7 +509,7 @@ export default function ProductFormPage() {
             <option value="draft">Borrador</option>
             <option value="active">Activo</option>
             <option value="archived">Archivado</option>
-          </select>
+          </StyledSelect>
           <button
             onClick={save}
             disabled={saving}
@@ -679,7 +680,7 @@ export default function ProductFormPage() {
                 <label className="block text-xs font-bold text-foreground mb-1.5">
                   Moneda
                 </label>
-                <select
+                <StyledSelect
                   value={form.currency}
                   onChange={(e) =>
                     setForm((p) => ({ ...p, currency: e.target.value }))
@@ -688,7 +689,7 @@ export default function ProductFormPage() {
                 >
                   <option value="PEN">PEN (S/)</option>
                   <option value="USD">USD ($)</option>
-                </select>
+                </StyledSelect>
               </div>
             </div>
 
@@ -800,7 +801,7 @@ export default function ProductFormPage() {
                 <label className="block text-xs font-bold text-foreground mb-1.5">
                   Categoría
                 </label>
-                <select
+                <StyledSelect
                   value={form.category_id}
                   onChange={(e) =>
                     setForm((p) => ({ ...p, category_id: e.target.value }))
@@ -813,7 +814,7 @@ export default function ProductFormPage() {
                       {c.name}
                     </option>
                   ))}
-                </select>
+                </StyledSelect>
               </div>
               <div>
                 <label className="block text-xs font-bold text-foreground mb-1.5">
@@ -1122,7 +1123,7 @@ export default function ProductFormPage() {
                       placeholder="Nombre (ej: Rojo L)"
                       className="flex-1 px-3 py-2 bg-muted border border-border rounded-xl text-sm text-foreground outline-none focus:border-primary"
                     />
-                    <select
+                    <StyledSelect
                       value={v.status}
                       onChange={(e) =>
                         setVariants((p) =>
@@ -1137,7 +1138,7 @@ export default function ProductFormPage() {
                     >
                       <option value="active">Activa</option>
                       <option value="inactive">Inactiva</option>
-                    </select>
+                    </StyledSelect>
                     <button
                       onClick={() =>
                         setVariants((p) => p.filter((_, j) => j !== i))
@@ -1433,7 +1434,7 @@ export default function ProductFormPage() {
       {/* ── COMMISSIONS TAB ── */}
       {tab === "commissions" && (
         <div className="bg-card border border-border rounded-xl p-5 space-y-3">
-          <div className="grid sm:grid-cols-2 gap-4 mb-5"><label className="text-sm">Método de ganancia (patrocinador directo)<select className="w-full mt-2 border border-border bg-background rounded-xl p-3" value={form.earning_type} onChange={e=>setForm(p=>({...p,earning_type:e.target.value}))}><option value="">Usar configuración por niveles</option><option value="price_percentage">Precio (%)</option><option value="points_percentage">Puntos (%)</option><option value="fixed">Fijo</option></select></label>{form.earning_type&&<label className="text-sm">{form.earning_type==='fixed'?'Importe fijo (PEN)':'Porcentaje'}<input className="w-full mt-2 border border-border bg-background rounded-xl p-3" type="number" min="0" max={form.earning_type==='fixed'?undefined:100} value={form.earning_value} onChange={e=>setForm(p=>({...p,earning_value:e.target.value}))}/></label>}<p className="sm:col-span-2 text-xs text-muted-foreground">Los puntos se acumulan por separado; no se convierten en dinero. Las reglas específicas por nivel tienen prioridad.</p></div>
+          <div className="grid sm:grid-cols-2 gap-4 mb-5"><label className="text-sm">Método de ganancia (patrocinador directo)<StyledSelect className="w-full mt-2 border border-border bg-background rounded-xl p-3" value={form.earning_type} onChange={e=>setForm(p=>({...p,earning_type:e.target.value}))}><option value="">Usar configuración por niveles</option><option value="price_percentage">Precio (%)</option><option value="points_percentage">Puntos (%)</option><option value="fixed">Fijo</option></StyledSelect></label>{form.earning_type&&<label className="text-sm">{form.earning_type==='fixed'?'Importe fijo (PEN)':'Porcentaje'}<input className="w-full mt-2 border border-border bg-background rounded-xl p-3" type="number" min="0" max={form.earning_type==='fixed'?undefined:100} value={form.earning_value} onChange={e=>setForm(p=>({...p,earning_value:e.target.value}))}/></label>}<p className="sm:col-span-2 text-xs text-muted-foreground">Los puntos se acumulan por separado; no se convierten en dinero. Las reglas específicas por nivel tienen prioridad.</p></div>
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-sm font-bold text-foreground">
@@ -1466,7 +1467,7 @@ export default function ProductFormPage() {
                   <span className="text-xs font-bold text-muted-foreground w-16 flex-shrink-0">
                     Nivel {c.level}
                   </span>
-                  <select
+                  <StyledSelect
                     value={c.type}
                     onChange={(e) =>
                       setCommissions((p) =>
@@ -1479,7 +1480,7 @@ export default function ProductFormPage() {
                   >
                     <option value="percentage">Precio (%)</option><option value="points_percentage">Puntos (%)</option>
                     <option value="fixed">Fijo</option>
-                  </select>
+                  </StyledSelect>
                   <input
                     type="number"
                     value={c.value}
